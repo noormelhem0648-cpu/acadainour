@@ -23,4 +23,4 @@ export const SUBJECTS_BY_YEAR = {
   ],
 };
 
-export const API_URL = 'http://127.0.0.1:8002';
+export const API_URL = 'https://acadai-backend-avvo.onrender.com';
