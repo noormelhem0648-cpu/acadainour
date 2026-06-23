@@ -2,12 +2,19 @@ import faiss
 import numpy as np
 import os
 import pickle
-from sentence_transformers import SentenceTransformer
+from google import genai
 
-model = SentenceTransformer('all-MiniLM-L6-v2')
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 INDEXES_PATH = "indexes"
 os.makedirs(INDEXES_PATH, exist_ok=True)
+
+def get_embedding(text):
+    response = client.models.embed_content(
+        model="gemini-embedding-exp-03-07",
+        contents=text
+    )
+    return response.embeddings[0].values
 
 def get_index_path(subject_code):
     return os.path.join(INDEXES_PATH, subject_code)
@@ -16,9 +23,19 @@ def add_texts(subject_code, texts):
     path = get_index_path(subject_code)
     os.makedirs(path, exist_ok=True)
     
-    embeddings = model.encode(texts)
-    embeddings = np.array(embeddings).astype('float32')
+    embeddings = []
+    for text in texts:
+        try:
+            emb = get_embedding(text)
+            embeddings.append(emb)
+        except Exception as e:
+            print(f"Error embedding text: {e}")
+            continue
     
+    if not embeddings:
+        return
+    
+    embeddings = np.array(embeddings).astype('float32')
     index = faiss.IndexFlatL2(embeddings.shape[1])
     index.add(embeddings)
     
@@ -40,8 +57,12 @@ def search(subject_code, query, top_k=5):
     with open(texts_file, 'rb') as f:
         texts = pickle.load(f)
     
-    query_vec = model.encode([query])
-    query_vec = np.array(query_vec).astype('float32')
+    try:
+        query_vec = get_embedding(query)
+        query_vec = np.array([query_vec]).astype('float32')
+    except Exception as e:
+        print(f"Error embedding query: {e}")
+        return []
     
     _, indices = index.search(query_vec, top_k)
     
