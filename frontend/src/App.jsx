@@ -1,19 +1,23 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import SubjectsPage from './pages/SubjectsPage';
-// استدعي بقية الصفحات هنا إذا كانت موجودة (مثل DeptPage أو ChatPage)
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Layout from './components/Layout';
+import HomePage from './pages/HomePage';         // المستوى 1: السنوات الدراسية
+import DeptPage from './pages/DeptPage';         // المستوى 2: تخصصات الأقسام
+import SubjectsPage from './pages/SubjectsPage'; // المستوى 3: قائمة المواد والملفات
+import ChatPage from './pages/ChatPage';         // المستوى 4: الشات الذكي المدعم بـ Markdown
 
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-[#F6F1E9] text-[#1F1F1F]">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/subjects" element={<SubjectsPage />} />
-          {/* أضيفي بقية المسارات هنا بنفس الطريقة */}
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<HomePage />} />
+          <Route path="departments" element={<DeptPage />} />
+          <Route path="subjects" element={<SubjectsPage />} />
+          <Route path="chat" element={<ChatPage />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </Router>
   );
 }

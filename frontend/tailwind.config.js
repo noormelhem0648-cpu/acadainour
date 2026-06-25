@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class', // التبديل عبر كلاس class في الـ html
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -7,15 +8,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#F6F1E9', // الخلفية العاجية القديمة
-        primary: {
-          gold: '#A08F5A', // اللون الذهبي القديم
-          dark: '#1F1F1F', // اللون الأسود القديم للخط الكوفي
+        roseAccent: {
+          DEFAULT: '#E1989A',
+          hover: '#D4A5A5',
+          light: '#FDF6F6',
         },
-      },
-      fontFamily: {
-        kufi: ['Noto Kufi Arabic', 'sans-serif'], // الخط الكوفي
-      },
+        darkBg: '#121212',
+        darkCard: '#1E1E1E'
+      }
     },
   },
   plugins: [],
