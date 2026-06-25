@@ -1,38 +1,20 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Layout from './components/Layout';
-import AuthPage from './pages/AuthPage';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
-import DeptPage from './pages/DeptPage';
-import SubjectsPage from './pages/SubjectsPage'; //  صحيح مئة بالمئة!
-import ChatPage from './pages/ChatPage';
+import SubjectsPage from './pages/SubjectsPage';
+// استدعي بقية الصفحات هنا إذا كانت موجودة (مثل DeptPage أو ChatPage)
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* مسار المصادقة (خارج الهيكل العام للموقع) */}
-        <Route path="/auth" element={<AuthPage />} />
-
-        {/* المسارات الأساسية للتطبيق محتواة داخل المكون العام Layout */}
-        <Route path="/" element={<Layout />}>
-          {/* المستوى 1: الرئيسية واختيار السنة الدراسية */}
-          <Route index element={<HomePage />} />
-          
-          {/* المستوى 2: اختيار التخصص / القسم */}
-          <Route path="year/:yearId" element={<DeptPage />} />
-          
-          {/* المستوى 3: اختيار المادة الدراسية */}
+    <Router>
+      <div className="min-h-screen bg-[#F6F1E9] text-[#1F1F1F]">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
           <Route path="/subjects" element={<SubjectsPage />} />
-          
-          {/* المستوى 4: صفحة الشات التفاعلية المخصصة للمادة */}
-          <Route path="year/:yearId/dept/:deptId/chat/:subjectCode" element={<ChatPage />} />
-        </Route>
-
-        {/* إعادة توجيه أي مسار خاطئ للرئيسية */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+          {/* أضيفي بقية المسارات هنا بنفس الطريقة */}
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

@@ -1,13 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700&display=swap');
+
 body {
+  background-color: #F6F1E9 !important;
+  font-family: 'Noto Kufi Arabic', sans-serif !important;
+  color: #1F1F1F;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  padding: 0;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* توحيد ستايل الأزرار والمربعات الذهبية في كل الصفحات */
+.academic-card {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+}
+
+.academic-card:hover {
+  border-color: #A08F5A;
+  transform: translateY(-2px);
+}
+
+.text-gold {
+  color: #A08F5A;
+}
+
+.bg-gold {
+  background-color: #A08F5A;
 }

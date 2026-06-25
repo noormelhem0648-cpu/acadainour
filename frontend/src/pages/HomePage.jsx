@@ -1,54 +1,48 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 
-const YEARS = [
-  { id: '1', name: 'السنة الأولى', desc: 'AEL 101, 103, 105, 109, 110' },
-  { id: '2', name: 'السنة الثانية', desc: 'AEL 209, 211' },
-  { id: '3', name: 'السنة الثالثة', desc: 'AEL 301, 302, 307, 308, 330' },
-  { id: '4', name: 'السنة الرابعة', desc: 'AEL 416, 422' },
-];
-
-function HomePage() {
-  const navigate = useNavigate();
+const HomePage = () => {
+  const levels = [
+    { id: 'I', name: 'السنة الأولى', enName: 'First Year', desc: 'AEL 101, 103, 105, 109, 110' },
+    { id: 'II', name: 'السنة الثانية', enName: 'Second Year', desc: 'AEL 209, 211' },
+    { id: 'III', name: 'السنة الثالثة', enName: 'Third Year', desc: 'AEL 301, 302, 307, 308, 330' },
+    { id: 'IV', name: 'السنة الرابعة', enName: 'Fourth Year', desc: 'AEL 416, 422' },
+  ];
 
   return (
-    <div className="flex flex-col items-center justify-center flex-1 py-10 animate-fade-in">
-      <div className="text-center max-w-2xl mb-12">
-        <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl mb-4">
-          أهلاً بك في <span className="text-[#E1989A]">Smart Student Assistant N</span>
-        </h2>
-        <p className="text-gray-500 dark:text-gray-400 text-base md:text-lg">
-          المساعد الأكاديمي الذكي المخصص لطلاب قسم اللغة الإنجليزية التطبيقية بجامعة اليرموك. اختر سنتك الدراسية للبدء.
-        </p>
+    <div className="min-h-screen bg-[#F6F1E9] font-sans flex flex-col items-center justify-center p-6 text-[#1F1F1F]">
+      {/* الهيدر العلوي الأنيق */}
+      <div className="border border-[#A08F5A] px-4 py-1 rounded text-sm mb-8 text-[#A08F5A] font-medium tracking-wide">
+        جامعة اليرموك • قسم اللغة الإنجليزية • تطبيق أكاديمية نور
       </div>
 
-      {/* شبكة البطاقات (Cards Grid) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-4xl px-4">
-        {YEARS.map((year) => (
-          <button
-            key={year.id}
-            onClick={() => navigate(`/year/${year.id}`)}
-            className="group flex flex-col justify-between text-right p-6 bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-2xl shadow-sm hover:shadow-md hover:border-[#E1989A] dark:hover:border-[#E1989A] transition-all duration-200 cursor-pointer"
+      {/* العنوان الرئيسي بالخط الكوفي المنسق */}
+      <h1 className="text-4xl font-bold mb-2 text-center">
+        مساعدك <span className="text-[#A08F5A]">الأكاديمي الذكي</span>
+      </h1>
+      <p className="text-gray-600 text-center max-w-md mb-12 text-sm leading-relaxed">
+        اختر سنتك الدراسية للوصول إلى مواد تخصصك والتفاعل مع المساعد الذكي
+      </p>
+
+      {/* شبكة المربعات الذهبية الأربعة */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl w-full">
+        {levels.map((level) => (
+          <div 
+            key={level.id} 
+            className="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col items-center justify-center group"
           >
-            <div className="w-full">
-              <span className="inline-block p-2 bg-pink-50 dark:bg-neutral-800 text-[#E1989A] rounded-xl font-bold text-xs mb-4 group-hover:bg-[#E1989A] group-hover:text-white transition-all">
-                Level {year.id}
-              </span>
-              <h3 className="text-xl font-bold mb-2 group-hover:text-[#E1989A] transition-colors">
-                {year.name}
-              </h3>
-              <p className="text-sm text-gray-400 dark:text-gray-500">
-                {year.desc}
-              </p>
-            </div>
-            <div className="w-full mt-6 text-[#E1989A] text-sm font-medium flex items-center justify-end gap-1 group-hover:translate-x-[-4px] transition-transform">
-              عرض الأقسام <span>←</span>
-            </div>
-          </button>
+            <span className="text-3xl font-serif font-bold text-[#A08F5A] mb-2 group-hover:scale-110 transition-transform">
+              {level.id}
+            </span>
+            <h2 className="text-xl font-bold mb-1">{level.name}</h2>
+            <span className="text-xs text-gray-400 font-mono mb-3 uppercase tracking-wider">{level.enName}</span>
+            <p className="text-xs text-[#A08F5A] bg-[#F6F1E9] px-3 py-1 rounded-full font-medium">
+              {level.desc}
+            </p>
+          </div>
         ))}
       </div>
     </div>
   );
-}
+};
 
 export default HomePage;
