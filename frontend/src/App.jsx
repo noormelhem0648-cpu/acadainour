@@ -4,7 +4,7 @@ import Layout from './components/Layout';
 import AuthPage from './pages/AuthPage';
 import HomePage from './pages/HomePage';
 import DeptPage from './pages/DeptPage';
-import SubjPage from './pages/SubjPage';
+import SubjectsPage from './pages/SubjectsPage'; //  صحيح مئة بالمئة!
 import ChatPage from './pages/ChatPage';
 
 function App() {
