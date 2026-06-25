@@ -23,7 +23,7 @@ function App() {
           <Route path="year/:yearId" element={<DeptPage />} />
           
           {/* المستوى 3: اختيار المادة الدراسية */}
-          <Route path="year/:yearId/dept/:deptId" element={<SubjPage />} />
+          <Route path="/subjects" element={<SubjectsPage />} />
           
           {/* المستوى 4: صفحة الشات التفاعلية المخصصة للمادة */}
           <Route path="year/:yearId/dept/:deptId/chat/:subjectCode" element={<ChatPage />} />
