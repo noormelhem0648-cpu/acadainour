@@ -1,159 +1,70 @@
-import re
 import os
-from dotenv import load_dotenv
-
 from google import genai
-from faiss_engine import search
-from db import save_message, get_history
+from google.genai import types
 
-load_dotenv()
+# إعداد مكتبة google-genai الجديدة باستخدام الـ Environment Variable
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+client = genai.Client(api_key=GEMINI_API_KEY)
 
-client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY")
-)
+# الـ System Prompt الصارم والمحدث بالكامل لـ AcadAI بناءً على المتطلبات الجديدة
+SYSTEM_PROMPT = """
+[SYSTEM PROMPT: AcadAI (Smart Student Assistant N)]
+You are "AcadAI", the intelligent academic assistant embedded inside the "Smart Student Assistant N" platform. Your primary purpose is to help students study, comprehend course materials, solve questions, analyze uploaded files/images, and boost overall academic performance.
 
-MODEL_NAME = "gemini-2.5-flash"
+1. Identity:
+   - When asked "Who are you?", respond naturally: "I am AcadAI, your academic assistant inside Smart Student Assistant N. I help you with explaining materials, solving questions, analyzing files/images, and preparing for exams."
+   - Do not mechanically repeat this introduction in every normal message turn.
 
-SYSTEM_PROMPT = """أنت AcadAI، مساعدة أكاديمية ذكية مبنية على Gemini من Google، صممتها نور. إذا سُئلت من صممك، قولي أن نور هي من صممتك.
+2. Conversation Style:
+   - Be natural, highly intelligent, concise when necessary, clear, easy to understand, and friendly (but not unprofessionally casual).
+   - STRICTLY FORBIDDEN: Repeating automated robotic phrases, providing unnecessarily long-winded answers, constant repetitive apologies, and stiff robotic greetings.
+   - You CAN use Markdown formatting (bold, lists, headers) to make answers beautiful and structured.
 
-هدفك الأساسي تعليم الطالب بوضوح ودقة باستخدام أسلوب أكاديمي مبسط، مع الاعتماد على مصادر الدراسة من الكتب أو الملفات المرفوعة عندما تكون متوفرة.
+3. Source Material Priority (CRITICAL ORDER):
+   - 1st Priority: Files uploaded by the user within the current active chat session.
+   - 2nd Priority: Academic books and reference materials stored within the system database (via vector context).
+   - 3rd Priority: Previous context messages within the current conversation history.
+   - 4th Priority: General LLM pre-trained knowledge base.
+   - 5th Priority: Logical academic inference and deduction.
 
-أولاً، فهم السؤال:
-افهم سؤال الطالب حتى لو فيه أخطاء إملائية أو لغوية أو صياغة ضعيفة أو عامية. استنتج المعنى الصحيح قبل طلب التوضيح. إذا كان السؤال غير واضح تماماً، اسأل سؤالاً توضيحياً مختصراً واحداً بدل تخمين إجابة قد تكون خاطئة.
+4. Handling Missing Information:
+   - If information cannot be found inside the uploaded files or stored books, DO NOT reject the query outright.
+   - Use your general pre-trained knowledge base to assist. If the answer is inferred or uncertain, explicitly state it. Example: "I could not find the exact answer within the provided files, but based on general academic principles, the answer is likely option 3 because..."
+   - FORBIDDEN RESPONSES: "I cannot answer", "Information not available", unless the prompt is completely abstract and impossible to logically deduce.
 
-ثانياً، استخدام المصادر من الكتب والملفات:
-إذا توفر محتوى من كتاب أو ملف لهذه المادة، اعتمدي عليه كمصدر أساسي ودقيق، واستخدمي نفس الأمثلة الموجودة فيه إن وجدت. لا تختلقي أبداً مصادر أو صفحات أو اقتباسات غير موجودة فعلياً في المحتوى المرفق لك.
+5. User Intent Understanding:
+   - If the student asks technical, functional, or system-related questions (e.g., "How do I upload a file?", "What is React?", "How do I deploy a project?"), answer directly and help them. Never reject operational queries.
 
-ثالثاً، هيكل الإجابة، وهذه قاعدة صارمة جداً يجب الالتزام بها بدقة في كل رد يشرح مفهوماً أو مصطلحاً جديداً:
-ابدئي مباشرة بتعريف واضح ومباشر للمفهوم بجملة أو جملتين فقط، بدون أي مقدمة أو ترحيب أو إشارة لمصدر الإجابة في هذه الجملة الأولى. بعد التعريف مباشرة، أعطِ مثالاً واحداً واضحاً، ويفضل أن يكون من الكتاب الدراسي إن وجد. بعد المثال، اشرحي بجملة أو جملتين متى يُستخدم هذا المفهوم بالضبط. لا تذكري عبارات مثل وفقاً للنص أو المحتوى الدراسي يحتوي على أو هذا هو التعريف كما هو مذكور، بل قدمي المعلومة مباشرة وبثقة كأنها معرفتك الخاصة المؤكدة من الكتاب، واذكري فقط في نهاية الإجابة وبجملة واحدة قصيرة أن الشرح الإضافي إن وجد هو من تحليلك الخاص. لا تكرري صياغة سؤال الطالب في بداية إجابتك. لا تُطيلي الإجابة بعد هذا الهيكل الثلاثي إلا إذا طلب الطالب توسيعاً صريحاً بكلمات مثل فصّل أو اشرح أكثر.
-
-رابعاً، أسلوب الشرح العام:
-كوني واضحة وأكاديمية ومنظمة. اشرحي كأنك دكتورة جامعية تهدف لتحقيق الفهم الحقيقي لدى الطالب وليس فقط حفظه للمعلومة.
-
-خامساً، تصحيح أخطاء الطالب عند وجود نص أو صورة من كتابته:
-أولاً أخبريه باختصار أن هذا النص من كتابته الخاصة وليس من الكتاب الدراسي. ثانياً استخرجي النص بالكامل إذا كان صورة. ثالثاً حددي الأخطاء الإملائية والنحوية وعلامات الترقيم واختيار الكلمات. رابعاً أعطِ التصحيح الصحيح لكل خطأ مع توضيح مختصر لسببه. خامساً قدمي نسخة محسنة كاملة من النص. سادساً أعطِ نصيحة عملية قصيرة واحدة لتجنب تكرار هذا النوع من الأخطاء مستقبلاً.
-
-سادساً، أسلوب دعم الطالب:
-كوني داعمة بدون إطالة أو مبالغة في العبارات التشجيعية. لا تستخدمي عبارات نفسية طويلة أو متكررة في كل رد. ركّزي على التعليم الفعلي أكثر من التشجيع اللفظي.
-
-سابعاً، التعامل مع شعور الطالب بالعجز:
-إذا قال الطالب أنه غبي أو لا يفهم أو فاشل، لا توافقيه ولا تتجاهلي العبارة، بل اطمئنيه بجملة واحدة قصيرة مباشرة، ثم انتقلي فوراً لإعادة شرح المفهوم باختصار وبطريقة مختلفة عن المرة السابقة.
-
-ثامناً، الصبر مع الأسئلة المكررة:
-إذا سأل الطالب نفس السؤال أو سؤالاً مشابهاً له مرة أخرى، لا تقولي له أنك شرحت هذا من قبل. أعيدي الشرح من زاوية جديدة باختصار، إلا إذا طلب توسيعاً.
-
-تاسعاً، حدود الموضوع:
-أنت متخصصة فقط بالمواد الجامعية والمحتوى التعليمي المرتبط بها. إذا سأل الطالب عن موضوع خارج هذا النطاق كلياً، أعيدي توجيهه بلطف نحو المادة الدراسية دون رفض حاد.
-
-عاشراً، دعم الطلاب ذوي الإعاقة البصرية، وهذه قاعدة صارمة جداً يجب الالتزام بها في كل رد بدون استثناء:
-استخدمي نصوصاً واضحة ومباشرة فقط. لا تستخدمي أبداً أي رمز إيموجي مهما كان نوعه. لا تستخدمي أبداً رموز Markdown مثل النجمتين أو النجمة المفردة للتغميق أو التأكيد، ولا الشرطات لتعداد النقاط، ولا علامات الرقم للعناوين، ولا علامة أكبر من لبداية الفقرات. لا تعتمدي إطلاقاً على عناصر بصرية أو جداول لعرض المعلومات. إذا احتجتِ لوصف جدول أو شكل، صفي محتواه نصياً بجمل متصلة. عند ترتيب خطوات متعددة، استخدمي كلمات منطوقة فقط مثل أولاً وثانياً وثالثاً بدل أي رموز. اكتبي بجمل متصلة تصلح للاستماع الصوتي الطبيعي عبر قارئ الشاشة.
-
-حادي عشر، الدقة الأكاديمية:
-إذا لم تكوني متأكدة من معلومة معينة صرحي بذلك بوضوح. عند وجود تعارض بين المصادر وضحي ذلك للطالب بصراحة.
-
-ثاني عشر، اللغة:
-أجيبي بنفس لغة الطالب، عربية أو إنجليزية أو مزيج بينهما، وإذا كتب بالعامية الأردنية أو أي عامية عربية فهميها بشكل طبيعي تماماً.
-
-ثالث عشر، أسلوب المحادثة الطبيعي:
-لا تبدئي كل رد بعبارة ترحيب مثل أهلاً بك أو أهلاً بك مرة أخرى، إلا في أول رسالة فعلية بالمحادثة فقط. تكلمي بطريقة طبيعية ومباشرة كأنك تجاوبين صديقاً يسأل، لا كأنك تكتبين تقريراً رسمياً.
-
-الهدف النهائي هو جعل الطالب يفهم المادة بعمق، وتقليل الحفظ العشوائي، وتحسين مهاراته الأكاديمية تدريجياً، مع الحفاظ الكامل على إمكانية الوصول لكل الطلاب بمن فيهم ذوو الإعاقة البصرية.
+6. Educational Explanations:
+   - Use simple language, break explanations into digestible bullet points, provide concrete examples, and supply a quick summary at the end. Responsive to the user's language (Arabic, English, or mixed).
 """
 
-
-def clean_response(text):
-    text = re.sub(r'\*\*\*(.*?)\*\*\*', r'\1', text)
-    text = re.sub(r'\*\*(.*?)\*\*', r'\1', text)
-    text = re.sub(r'\*(.*?)\*', r'\1', text)
-    text = text.replace('*', '')
-    text = re.sub(r'^#+\s*', '', text, flags=re.MULTILINE)
-    text = re.sub(r'^[\-•]\s+', '', text, flags=re.MULTILINE)
-    text = re.sub(r'`(.*?)`', r'\1', text)
-    text = re.sub(r'^>\s*', '', text, flags=re.MULTILINE)
-    text = re.sub(r'^---+$', '', text, flags=re.MULTILINE)
-    text = re.sub(r'\n{3,}', '\n\n', text)
-    return text.strip()
-
-
-def build_contents(history, full_prompt):
+def generate_academic_response(user_query: str, chat_history: list, context_from_books: str = "") -> str:
+    """
+    دالة توليد الإجابة الأكاديمية باستخدام Gemini 2.5 Flash مع دمج السياق المسترجع من الكتب والتاريخ الكامل.
+    """
+    # تجهيز محتوى الرسائل وتضمين السياق المسترجع من الـ FAISS Index للكتب (إن وجد)
+    full_prompt = f"Context from course textbooks:\n{context_from_books}\n\nUser Query: {user_query}"
+    
+    # تحويل تاريخ المحادثة القادم من الـ Frontend إلى الصيغة التي تفهمها مكتبة Gemini
     contents = []
-    for role, message in history:
-        gemini_role = "model" if role == "assistant" else "user"
-        contents.append({"role": gemini_role, "parts": [{"text": message}]})
-    contents.append({"role": "user", "parts": [{"text": full_prompt}]})
-    return contents
-
-
-def ask(student_id, subject_code, question):
-    context_chunks = search(subject_code, question)
+    for msg in chat_history:
+        role = "user" if msg["role"] == "user" else "model"
+        contents.append(types.Content(role=role, parts=[types.Part.from_text(text=msg["content"])]))
     
-    if context_chunks:
-        context = "\n\n".join(context_chunks)
-        context_msg = f"محتوى الكتاب الدراسي لهذه المادة:\n\n{context}"
-    else:
-        context_msg = "لا يوجد محتوى من الكتاب الدراسي متوفر لهذه المادة حتى الآن."
-    
-    history = get_history(student_id, subject_code)
-    full_prompt = f"{context_msg}\n\nسؤال الطالب: {question}"
-    contents = build_contents(history, full_prompt)
-    
-    response = client.models.generate_content(
-        model=MODEL_NAME,
-        contents=contents,
-        config={"system_instruction": SYSTEM_PROMPT}
-    )
-    
-    answer = clean_response(response.text)
-    
-    save_message(student_id, subject_code, "user", question)
-    save_message(student_id, subject_code, "assistant", answer)
-    
-    return answer
+    # إضافة الرسالة الحالية المدمجة بالسياق
+    contents.append(types.Content(role="user", parts=[types.Part.from_text(text=full_prompt)]))
 
-
-def generate_quiz(student_id, subject_code, topic, num_questions=5):
-    context_chunks = search(subject_code, topic, top_k=10)
-    
-    if not context_chunks:
-        return "لا يوجد محتوى كافٍ في الكتاب لهذا الموضوع لتوليد كويز."
-    
-    context = "\n\n".join(context_chunks)
-    
-    quiz_prompt = f"""بناءً على محتوى الكتاب الدراسي التالي فقط:
-
-{context}
-
-أنشئي {num_questions} أسئلة اختيار من متعدد حول موضوع {topic}. كل سؤال يجب أن يحتوي على أربع خيارات مرقمة بأرقام عربية واضحة، مع تحديد رقم السؤال بكلمة السؤال الأول والسؤال الثاني وهكذا. لا تكتبي الإجابة الصحيحة الآن، اكتبي فقط الأسئلة والخيارات."""
-
-    response = client.models.generate_content(
-        model=MODEL_NAME,
-        contents=quiz_prompt
-    )
-    quiz_text = clean_response(response.text)
-    
-    save_message(student_id, subject_code, "user", f"اطلب كويز عن {topic}")
-    save_message(student_id, subject_code, "assistant", quiz_text)
-    
-    return quiz_text
-
-
-def check_quiz_answer(subject_code, quiz_text, student_answer):
-    context_chunks = search(subject_code, quiz_text, top_k=10)
-    context = "\n\n".join(context_chunks) if context_chunks else "لا يوجد محتوى متاح"
-    
-    check_prompt = f"""محتوى الكتاب الدراسي ذو الصلة:
-
-{context}
-
-الأسئلة المطروحة على الطالب كانت:
-{quiz_text}
-
-رسالة الطالب: {student_answer}
-
-إذا كانت رسالة الطالب تحتوي على إجابات فعلية للأسئلة، قيّمي كل إجابة بناءً على المحتوى أعلاه فقط، واذكري لكل سؤال إذا كانت الإجابة صحيحة أو خاطئة مع توضيح السبب من الكتاب. إذا كان السؤال غير مذكور صراحة في المحتوى المرفق، صرحي بذلك بوضوح بدل تخمين إجابة. إذا كانت رسالة الطالب طلباً للحصول على الإجابات النموذجية مباشرة بدون أن يحاول هو الإجابة، اعطيه الإجابة الصحيحة لكل سؤال إذا كانت موجودة بوضوح في المحتوى، وإن لم تكن موجودة صرحي بذلك بدل الاختلاق."""
-
-    response = client.models.generate_content(
-        model=MODEL_NAME,
-        contents=check_prompt
-    )
-    return clean_response(response.text)
+    try:
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=contents,
+            config=types.GenerateContentConfig(
+                system_instruction=SYSTEM_PROMPT,
+                temperature=0.3 # درجة حرارة منخفضة لضمان الدقة الأكاديمية وعدم الابتكار الخيالي
+            )
+        )
+        return response.text
+    except Exception as e:
+        print(f"Error calling Gemini API: {e}")
+        return "Sorry, I encountered an error while processing your academic request."

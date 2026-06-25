@@ -1,42 +1,44 @@
 import sqlite3
-import os
 
-DB_PATH = "acadai.db"
+DATABASE_NAME = "acadai_system.db"
+
+def get_db_connection():
+    conn = sqlite3.connect(DATABASE_NAME)
+    conn.row_factory = sqlite3.Row
+    return conn
 
 def init_db():
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS conversations (
+    """تهيئة قاعدة البيانات وإنشاء الجداول الأساسية للمشروع"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # 1. إنشاء جدول المستخدمين (الطلاب)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            student_id TEXT,
-            subject TEXT,
-            role TEXT,
-            message TEXT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            email TEXT UNIQUE NOT NULL,
+            hashed_password TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+    
+    # 2. إنشاء أو التأكد من وجود جدول المحادثات المرتبط بمعرف الطالب وكود المادة
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS chat_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER,
+            subject_code TEXT NOT NULL,
+            role TEXT NOT NULL,
+            content TEXT NOT NULL,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(student_id) REFERENCES users(id)
+        )
+    ''')
+    
     conn.commit()
     conn.close()
+    print("Database tables initialized successfully.")
 
-def save_message(student_id, subject, role, message):
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute('''
-        INSERT INTO conversations (student_id, subject, role, message)
-        VALUES (?, ?, ?, ?)
-    ''', (student_id, subject, role, message))
-    conn.commit()
-    conn.close()
-
-def get_history(student_id, subject, limit=10):
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute('''
-        SELECT role, message FROM conversations
-        WHERE student_id=? AND subject=?
-        ORDER BY timestamp DESC LIMIT ?
-    ''', (student_id, subject, limit))
-    rows = c.fetchall()
-    conn.close()
-    return list(reversed(rows))
+# استدعاء الدالة عند تشغيل الملف لإنشاء الجداول فوراً
+if __name__ == "__main__":
+    init_db()

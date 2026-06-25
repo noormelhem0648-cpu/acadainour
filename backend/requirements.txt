@@ -1,8 +1,6 @@
 fastapi
 uvicorn
 google-genai
-faiss-cpu
-pypdf2
-python-multipart
-python-dotenv
-numpy
+pydantic
+python-jose[cryptography]
+passlib[bcrypt]

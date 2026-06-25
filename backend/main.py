@@ -1,80 +1,34 @@
-from fastapi import FastAPI, UploadFile, File, Form
-from fastapi.middleware.cors import CORSMiddleware
-from db import init_db, get_history
-from ai_engine import ask, generate_quiz, check_quiz_answer
-from faiss_engine import add_texts
-import PyPDF2
-import io
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import List, Dict
+# استيراد الدالة المحدثة من ai_engine
+from ai_engine import generate_academic_response 
 
-app = FastAPI()
+app = FastAPI(title="Smart Student Assistant N Backend")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-init_db()
-
-
-@app.get("/")
-def root():
-    return {"message": "AcadAI Backend Running!"}
-
+# تعريف الـ Schema الجديدة لاستقبال البيانات من الـ Frontend المحدث
+class ChatRequest(BaseModel):
+    subject_code: str
+    history: List[Dict[str, str]] # يستقبل مصفوفة تحتوي على [{"role": "user", "content": "..."}, ...]
 
 @app.post("/ask")
-def ask_question(
-    student_id: str = Form(...),
-    subject_code: str = Form(...),
-    question: str = Form(...)
-):
-    answer = ask(student_id, subject_code, question)
-    return {"answer": answer}
-
-
-@app.post("/upload-pdf")
-def upload_pdf(
-    subject_code: str = Form(...),
-    file: UploadFile = File(...)
-):
-    content = file.file.read()
-    pdf = PyPDF2.PdfReader(io.BytesIO(content))
+async def ask_assistant(request: ChatRequest):
+    if not request.history:
+        raise HTTPException(status_code=400, detail="Chat history cannot be empty.")
     
-    texts = []
-    for page in pdf.pages:
-        text = page.extract_text()
-        if text:
-            chunks = [text[i:i+500] for i in range(0, len(text), 500)]
-            texts.extend(chunks)
+    # 1. استخراج آخر سؤال قام الطالب بكتابته
+    last_user_message = request.history[-1]["content"]
     
-    add_texts(subject_code, texts)
+    # 2. (خطوة اختيارية تبعاً لكودك الحالي): هنا يتم استدعاء الـ FAISS Index للبحث في كتب المادة
+    # context_from_books = search_faiss_books(request.subject_code, last_user_message)
+    context_from_books = "" # متغير مؤقت لحين ربط محرك الـ FAISS الخاص بكِ
     
-    return {"message": f"PDF uploaded successfully for {subject_code}"}
-
-
-@app.get("/history/{student_id}/{subject_code}")
-def get_chat_history(student_id: str, subject_code: str):
-    history = get_history(student_id, subject_code)
-    return {"history": history}
-
-
-@app.post("/quiz")
-def create_quiz(
-    student_id: str = Form(...),
-    subject_code: str = Form(...),
-    topic: str = Form(...),
-    num_questions: int = Form(5)
-):
-    quiz = generate_quiz(student_id, subject_code, topic, num_questions)
-    return {"quiz": quiz}
-
-
-@app.post("/quiz/check")
-def check_answer(
-    subject_code: str = Form(...),
-    quiz_text: str = Form(...),
-    student_answer: str = Form(...)
-):
-    result = check_quiz_answer(subject_code, quiz_text, student_answer)
-    return {"result": result}
+    # 3. إرسال السؤال، التاريخ الكامل، وسياق الكتب إلى Gemini
+    ai_answer = generate_academic_response(
+        user_query=last_user_message,
+        chat_history=request.history[:-1], # نمرر التاريخ السابق فقط بدون السؤال الأخير لأنه مدمج بالفكرة
+        context_from_books=context_from_books
+    )
+    
+    # 4. إرجاع الإجابة المنسقة للـ Frontend ليتم عرضها عبر الـ Markdown
+    return {"answer": ai_answer}
