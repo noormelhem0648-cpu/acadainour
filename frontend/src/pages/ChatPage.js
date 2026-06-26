@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import ReactMarkdown from 'react-markdown';
-// تم الاستغناء عن API_URL القديم واستبداله بالرابط المباشر
+import React, { useState, useRef, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 
-// Detect if text is predominantly Arabic/RTL
+const API_URL = "https://acadai-backend-avvo.onrender.com";
+
 function isRTL(text) {
   const rtlChars = /[\u0591-\u07FF\u200F\u202B\u202E\uFB1D-\uFDFD\uFE70-\uFEFC]/;
   return rtlChars.test(text);
@@ -15,11 +15,11 @@ export default function ChatPage({ darkMode, setDarkMode }) {
 
   const [messages, setMessages] = useState([
     {
-      role: 'assistant',
-      content: `Hello! I'm AcadAI, your assistant for **${subjectCode}**. Ask me anything about the course materials, and I'll answer from the textbook first. If it's not in the book, I'll let you know and help anyway! 📖`,
+      role: "assistant",
+      content: "Hello! I am AcadAI, your assistant for **" + subjectCode + "**. Ask me anything about the course materials, and I will answer from the textbook first.",
     },
   ]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [attachedFile, setAttachedFile] = useState(null);
   const [attachedImage, setAttachedImage] = useState(null);
@@ -31,7 +31,7 @@ export default function ChatPage({ darkMode, setDarkMode }) {
   const textareaRef = useRef(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const handleImageSelect = (e) => {
@@ -53,78 +53,53 @@ export default function ChatPage({ darkMode, setDarkMode }) {
     setAttachedFile(null);
     setAttachedImage(null);
     setImagePreview(null);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-    if (imageInputRef.current) imageInputRef.current.value = '';
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (imageInputRef.current) imageInputRef.current.value = "";
   };
 
   const sendMessage = async () => {
     if (!input.trim() && !attachedImage && !attachedFile) return;
-
-    const userMessage = input.trim() || (attachedImage ? '📷 Image attached' : '📎 File attached');
-
-    const newMessages = [...messages, { role: 'user', content: userMessage }];
+    const userMessage = input.trim() || (attachedImage ? "Image attached" : "File attached");
+    const newMessages = [...messages, { role: "user", content: userMessage }];
     setMessages(newMessages);
-    setInput('');
+    setInput("");
     setLoading(true);
 
     try {
       let answer;
-
       if (attachedImage || attachedFile) {
-        // Use multipart form for file/image uploads
         const formData = new FormData();
-        formData.append('subject_code', subjectCode);
-        formData.append('message', userMessage);
-        formData.append('history', JSON.stringify(
-          messages.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', content: m.content }))
-        ));
-
-        if (attachedImage) {
-          formData.append('file', attachedImage);
-        } else if (attachedFile) {
-          formData.append('file', attachedFile);
-        }
-
-        // التعديل هنا: استخدام رابط الـ backend الجديد للرفع
-        const res = await fetch('https://acadai-backend-avvo.onrender.com/upload-and-ask', {
-          method: 'POST',
-          body: formData,
-        });
+        formData.append("subject_code", subjectCode);
+        formData.append("message", userMessage);
+        formData.append("history", JSON.stringify(messages.map(m => ({ role: m.role === "assistant" ? "model" : "user", content: m.content }))));
+        if (attachedImage) { formData.append("file", attachedImage); }
+        else if (attachedFile) { formData.append("file", attachedFile); }
+        const res = await fetch(API_URL + "/upload-and-ask", { method: "POST", body: formData });
         const data = await res.json();
         answer = data.answer;
       } else {
-        // Regular text message
-        // التعديل هنا: استخدام رابط الـ backend الجديد للأسئلة العادية
-        const res = await fetch('https://acadai-backend-avvo.onrender.com/ask', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const res = await fetch(API_URL + "/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             subject_code: subjectCode,
             message: userMessage,
-            history: messages.map(m => ({
-              role: m.role === 'assistant' ? 'model' : 'user',
-              content: m.content,
-            })),
+            history: messages.map(m => ({ role: m.role === "assistant" ? "model" : "user", content: m.content })),
           }),
         });
         const data = await res.json();
         answer = data.answer;
       }
-
-      setMessages([...newMessages, { role: 'assistant', content: answer }]);
+      setMessages([...newMessages, { role: "assistant", content: answer }]);
       clearAttachments();
     } catch (err) {
-      setMessages([
-        ...newMessages,
-        { role: 'assistant', content: 'Sorry, there was a connection error. Please check the backend and try again.' },
-      ]);
+      setMessages([...newMessages, { role: "assistant", content: "Sorry, there was a connection error. Please try again." }]);
     }
-
     setLoading(false);
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
@@ -133,33 +108,27 @@ export default function ChatPage({ darkMode, setDarkMode }) {
   return (
     <div className="page chat-page">
       <header className="header">
-        <button className="back-btn" onClick={() => navigate(-1)}>← Back</button>
+        <button className="back-btn" onClick={() => navigate(-1)}>Back</button>
         <span className="app-name">{subjectCode}</span>
         <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
-          {darkMode ? '☀️' : '🌙'}
+          {darkMode ? "Light" : "Dark"}
         </button>
       </header>
 
-      {/* Messages */}
       <div className="messages-container">
         {messages.map((msg, idx) => {
           const rtl = isRTL(msg.content);
           return (
             <div
               key={idx}
-              className={`message ${msg.role === 'user' ? 'user-message' : 'assistant-message'}`}
-              dir={rtl ? 'rtl' : 'ltr'}
-              style={{ textAlign: rtl ? 'right' : 'left' }}
+              className={"message " + (msg.role === "user" ? "user-message" : "assistant-message")}
+              dir={rtl ? "rtl" : "ltr"}
+              style={{ textAlign: rtl ? "right" : "left" }}
             >
-              {msg.role === 'assistant' ? (
-                <ReactMarkdown>{msg.content}</ReactMarkdown>
-              ) : (
-                <p>{msg.content}</p>
-              )}
+              {msg.role === "assistant" ? (<ReactMarkdown>{msg.content}</ReactMarkdown>) : (<p>{msg.content}</p>)}
             </div>
           );
         })}
-
         {loading && (
           <div className="message assistant-message loading-message">
             <span className="dot" /><span className="dot" /><span className="dot" />
@@ -168,44 +137,19 @@ export default function ChatPage({ darkMode, setDarkMode }) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Attachment preview */}
       {(attachedImage || attachedFile) && (
         <div className="attachment-preview">
           {imagePreview && <img src={imagePreview} alt="preview" className="img-preview" />}
-          {attachedFile && <span className="file-name">📎 {attachedFile.name}</span>}
-          <button className="remove-attach" onClick={clearAttachments}>✕</button>
+          {attachedFile && <span className="file-name">{attachedFile.name}</span>}
+          <button className="remove-attach" onClick={clearAttachments}>X</button>
         </div>
       )}
 
-      {/* Input area */}
       <div className="input-area">
-        <input
-          type="file"
-          accept="image/*"
-          ref={imageInputRef}
-          style={{ display: 'none' }}
-          onChange={handleImageSelect}
-        />
-        <input
-          type="file"
-          accept=".pdf,.docx,.txt,.pptx,.xlsx,.csv"
-          ref={fileInputRef}
-          style={{ display: 'none' }}
-          onChange={handleFileSelect}
-        />
-
-        <button
-          className="attach-btn"
-          title="Attach image"
-          onClick={() => imageInputRef.current?.click()}
-        >🖼️</button>
-
-        <button
-          className="attach-btn"
-          title="Attach file"
-          onClick={() => fileInputRef.current?.click()}
-        >📎</button>
-
+        <input type="file" accept="image/*" ref={imageInputRef} style={{ display: "none" }} onChange={handleImageSelect} />
+        <input type="file" accept=".pdf,.docx,.txt,.pptx,.xlsx,.csv" ref={fileInputRef} style={{ display: "none" }} onChange={handleFileSelect} />
+        <button className="attach-btn" title="Attach image" onClick={() => imageInputRef.current?.click()}>IMG</button>
+        <button className="attach-btn" title="Attach file" onClick={() => fileInputRef.current?.click()}>FILE</button>
         <textarea
           ref={textareaRef}
           className="message-input"
@@ -214,15 +158,10 @@ export default function ChatPage({ darkMode, setDarkMode }) {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           rows={1}
-          dir={isRTL(input) ? 'rtl' : 'ltr'}
+          dir={isRTL(input) ? "rtl" : "ltr"}
         />
-
-        <button
-          className="send-btn"
-          onClick={sendMessage}
-          disabled={loading || (!input.trim() && !attachedImage && !attachedFile)}
-        >
-          {loading ? '...' : '➤'}
+        <button className="send-btn" onClick={sendMessage} disabled={loading || (!input.trim() && !attachedImage && !attachedFile)}>
+          {loading ? "..." : "Send"}
         </button>
       </div>
     </div>

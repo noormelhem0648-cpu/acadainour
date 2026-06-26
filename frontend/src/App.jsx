@@ -1,19 +1,32 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Layout from './components/Layout';
-import HomePage from './pages/HomePage';
-import SubjectsPage from './pages/SubjectsPage';
-import ChatPage from './pages/ChatPage';
+﻿import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import HomePage from "./pages/HomePage";
+import YearsPage from "./pages/YearsPage";
+import SubjectsPage from "./pages/SubjectsPage";
+import ChatPage from "./pages/ChatPage";
 
 function App() {
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem("theme") === "dark");
+
+  useEffect(() => {
+    if (darkMode) {
+      document.body.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.body.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  }, [darkMode]);
+
+  const themeProps = { darkMode, setDarkMode };
+
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<HomePage />} />
-          <Route path="subjects" element={<SubjectsPage />} />
-          <Route path="chat" element={<ChatPage />} />
-        </Route>
+        <Route path="/" element={<HomePage {...themeProps} />} />
+        <Route path="/years" element={<YearsPage {...themeProps} />} />
+        <Route path="/subjects/:year" element={<SubjectsPage {...themeProps} />} />
+        <Route path="/chat/:subjectCode" element={<ChatPage {...themeProps} />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
