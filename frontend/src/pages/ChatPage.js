@@ -9,6 +9,34 @@ function isRTL(text) {
   return rtlChars.test(text);
 }
 
+function speakText(text) {
+  if (!("speechSynthesis" in window)) {
+    alert("Read Aloud is not supported in this browser.");
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const clean = text.replace(/[*#_`>\[\]()]/g, "");
+  const utter = new SpeechSynthesisUtterance(clean);
+  const rtlChars = /[\u0591-\u07FF\u200F\u202B\u202E\uFB1D-\uFDFD\uFE70-\uFEFC]/;
+  utter.lang = rtlChars.test(clean) ? "ar-SA" : "en-US";
+  utter.rate = 1;
+  window.speechSynthesis.speak(utter);
+}
+
+function stopSpeaking() {
+  if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+}
+
+function downloadTxt(text) {
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "AcadAI-answer.txt";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function formatTime(date) {
   return new Date(date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
@@ -144,6 +172,21 @@ export default function ChatPage({ darkMode, setDarkMode }) {
                 {msg.role === "assistant" && (
                   <button className="msg-action-btn" onClick={() => copyMessage(msg.content, idx)}>
                     {copiedIdx === idx ? "Copied!" : "Copy"}
+                  </button>
+                )}
+                {msg.role === "assistant" && (
+                  <button className="msg-action-btn" onClick={() => downloadTxt(msg.content)}>
+                    Download
+                  </button>
+                )}
+                {msg.role === "assistant" && (
+                  <button className="msg-action-btn" onClick={() => speakText(msg.content)}>
+                    Read
+                  </button>
+                )}
+                {msg.role === "assistant" && (
+                  <button className="msg-action-btn" onClick={stopSpeaking}>
+                    Stop
                   </button>
                 )}
               </div>
