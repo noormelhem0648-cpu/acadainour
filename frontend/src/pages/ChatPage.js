@@ -9,6 +9,10 @@ function isRTL(text) {
   return rtlChars.test(text);
 }
 
+function formatTime(date) {
+  return new Date(date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
 export default function ChatPage({ darkMode, setDarkMode }) {
   const navigate = useNavigate();
   const { subjectCode } = useParams();
@@ -17,6 +21,7 @@ export default function ChatPage({ darkMode, setDarkMode }) {
     {
       role: "assistant",
       content: "Hello! I am AcadAI, your assistant for **" + subjectCode + "**. Ask me anything about the course materials, and I will answer from the textbook first.",
+      time: Date.now(),
     },
   ]);
   const [input, setInput] = useState("");
@@ -24,6 +29,7 @@ export default function ChatPage({ darkMode, setDarkMode }) {
   const [attachedFile, setAttachedFile] = useState(null);
   const [attachedImage, setAttachedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [copiedIdx, setCopiedIdx] = useState(null);
 
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -33,6 +39,13 @@ export default function ChatPage({ darkMode, setDarkMode }) {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const copyMessage = (text, idx) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedIdx(idx);
+      setTimeout(() => setCopiedIdx(null), 2000);
+    });
+  };
 
   const handleImageSelect = (e) => {
     const file = e.target.files[0];
@@ -60,7 +73,7 @@ export default function ChatPage({ darkMode, setDarkMode }) {
   const sendMessage = async () => {
     if (!input.trim() && !attachedImage && !attachedFile) return;
     const userMessage = input.trim() || (attachedImage ? "Image attached" : "File attached");
-    const newMessages = [...messages, { role: "user", content: userMessage }];
+    const newMessages = [...messages, { role: "user", content: userMessage, time: Date.now() }];
     setMessages(newMessages);
     setInput("");
     setLoading(true);
@@ -90,10 +103,10 @@ export default function ChatPage({ darkMode, setDarkMode }) {
         const data = await res.json();
         answer = data.answer;
       }
-      setMessages([...newMessages, { role: "assistant", content: answer }]);
+      setMessages([...newMessages, { role: "assistant", content: answer, time: Date.now() }]);
       clearAttachments();
     } catch (err) {
-      setMessages([...newMessages, { role: "assistant", content: "Sorry, there was a connection error. Please try again." }]);
+      setMessages([...newMessages, { role: "assistant", content: "Sorry, there was a connection error. Please try again.", time: Date.now() }]);
     }
     setLoading(false);
   };
@@ -126,6 +139,14 @@ export default function ChatPage({ darkMode, setDarkMode }) {
               style={{ textAlign: rtl ? "right" : "left" }}
             >
               {msg.role === "assistant" ? (<ReactMarkdown>{msg.content}</ReactMarkdown>) : (<p>{msg.content}</p>)}
+              <div className="msg-footer">
+                <span className="msg-time">{formatTime(msg.time)}</span>
+                {msg.role === "assistant" && (
+                  <button className="msg-action-btn" onClick={() => copyMessage(msg.content, idx)}>
+                    {copiedIdx === idx ? "Copied!" : "Copy"}
+                  </button>
+                )}
+              </div>
             </div>
           );
         })}
