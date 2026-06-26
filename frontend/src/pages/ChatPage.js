@@ -139,6 +139,11 @@ export default function ChatPage({ darkMode, setDarkMode }) {
     setLoading(false);
   };
 
+  const quickAsk = (text) => {
+    setInput(text);
+    setTimeout(() => sendMessage(), 50);
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -196,6 +201,14 @@ export default function ChatPage({ darkMode, setDarkMode }) {
         {loading && (
           <div className="message assistant-message loading-message">
             <span className="dot" /><span className="dot" /><span className="dot" />
+          </div>
+        )}
+        {!loading && messages.length > 0 && messages[messages.length - 1].role === "assistant" && (
+          <div className="followups">
+            <button className="followup-btn" onClick={() => quickAsk("Explain this in a simpler way")}>Explain simpler</button>
+            <button className="followup-btn" onClick={() => quickAsk("Give me an example")}>Give example</button>
+            <button className="followup-btn" onClick={() => quickAsk("Summarize this")}>Summarize</button>
+            <button className="followup-btn" onClick={() => quickAsk("اشرح بالعربي")}>بالعربي</button>
           </div>
         )}
         <div ref={messagesEndRef} />

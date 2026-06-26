@@ -437,3 +437,27 @@ body {
   border-color: var(--accent);
   color: var(--accent);
 }
+/* === Follow-up Buttons === */
+.followups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px 8px;
+  align-self: flex-start;
+  max-width: 100%;
+}
+.followup-btn {
+  background: var(--accent-light);
+  border: 1px solid var(--accent);
+  color: var(--accent-dark);
+  padding: 6px 14px;
+  border-radius: 16px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+.followup-btn:hover {
+  background: var(--accent);
+  color: #fff;
+}
