@@ -1,6 +1,5 @@
-fastapi
-uvicorn
-google-genai
-pydantic
-python-jose[cryptography]
-passlib[bcrypt]
+fastapi==0.111.0
+uvicorn==0.30.1
+python-multipart==0.0.9
+google-genai==0.8.0
+faiss-cpu==1.12.0

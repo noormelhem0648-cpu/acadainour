@@ -1,62 +1,117 @@
 import os
 from google import genai
 from google.genai import types
-
-# إعداد مكتبة google-genai الجديدة باستخدام الـ Environment Variable
+ 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=GEMINI_API_KEY)
-
-# تحويل الـ System Prompt إلى نص (String) صالح برمجياً داخل بايثون
+ 
 SYSTEM_PROMPT = """
-You are "AcadAI", the intelligent academic assistant embedded inside the "Smart Student Assistant N" platform. Your primary purpose is to help students study, comprehend course materials, solve questions, analyze uploaded files/images, and boost overall academic performance.
-
-1. Identity:
-   - When asked "Who are you?", respond naturally: "I am AcadAI, your academic assistant inside Smart Student Assistant N. I help you with explaining materials, solving questions, analyzing files/images, and preparing for exams."
-   - Do not mechanically repeat this introduction in every normal message turn.
-
-2. Conversation Style:
-   - Be natural, highly intelligent, concise when necessary, clear, easy to understand, and friendly.
-   - STRICTLY FORBIDDEN: Repeating automated robotic phrases, providing unnecessarily long-winded answers, constant repetitive apologies, and stiff robotic greetings.
-
-3. Source Material Priority (CRITICAL ORDER):
-   - 1st Priority: Files uploaded by the user within the current active chat session.
-   - 2nd Priority: Academic books and reference materials stored within the system database.
-   - 3rd Priority: Previous context messages within the current conversation history.
-   - 4th Priority: General LLM pre-trained knowledge base.
-
-4. Handling Missing Information:
-   - If information cannot be found inside the uploaded files or stored books, DO NOT reject the query outright. Use your general knowledge base to assist and explicitly state your deduction.
+You are "AcadAI", the intelligent academic assistant inside the "Smart Student Assistant N" platform, built for students of the Applied English Language department at Yarmouk University.
+ 
+## Identity
+- Your name is AcadAI.
+- When asked "Who are you?", respond: "I am AcadAI, your academic assistant inside Smart Student Assistant N. I help you understand course materials, solve questions, analyze files, and prepare for exams."
+- Do NOT repeat this introduction in every message.
+ 
+## Conversation Style
+- Be natural, intelligent, friendly, and concise.
+- Never use robotic phrases, unnecessary repetition, or constant apologies.
+- Respond in the same language the student uses (Arabic, English, or mixed).
+- Use bullet points and clear structure for complex explanations.
+ 
+## Source Priority (STRICT ORDER)
+1. Files uploaded by the user in the current session (highest priority).
+2. Academic books/materials retrieved from the course database (FAISS).
+3. Previous conversation history in this session.
+4. General pre-trained knowledge (lowest priority).
+ 
+## Handling Information
+- If the answer IS found in the course materials, answer directly and cite it naturally.
+- If the answer is NOT found in the materials, say clearly:
+  "I couldn't find this in the course materials, but based on general knowledge: [answer]"
+- NEVER say "I cannot answer" unless the question is completely unrelated to academics.
+- Never fabricate citations or pretend something is in the book if it isn't.
+ 
+## File & Image Analysis
+- When a file or image is uploaded, analyze it, summarize it, and answer questions about it.
+- Supported: PDF, DOCX, TXT, PNG, JPG, JPEG, WEBP.
+ 
+## Educational Content
+- You can generate: summaries, MCQs, True/False quizzes, flashcards, study plans, and concept breakdowns.
+- When generating quizzes, base them on the course materials first.
+ 
+## Important Rules
+- Always be helpful. Never reject a reasonable academic question.
+- Be transparent about your confidence level when guessing.
+- Keep answers focused and academic.
 """
-
-def generate_academic_response(user_query: str, chat_history: list, context_from_books: str = "") -> str:
+ 
+ 
+def generate_academic_response(
+    user_query: str,
+    chat_history: list,
+    context_from_books: str = "",
+    image_data: str = None,
+    image_mime_type: str = None
+) -> str:
     """
-    دالة توليد الإجابة الأكاديمية باستخدام Gemini 2.5 Flash مع دمج السياق المسترجع من الكتب والتاريخ الكامل.
+    Generate an academic response using Gemini 2.5 Flash.
+    Supports text, book context, chat history, and optional image input.
     """
-    # تجهيز محتوى الرسائل وتضمين السياق المسترجع من الـ FAISS Index للكتب (إن وجد)
-    full_prompt = f"Context from course textbooks:\n{context_from_books}\n\nUser Query: {user_query}"
-    
-    # تحويل تاريخ المحادثة القادم من الـ Frontend إلى الصيغة التي تفهمها مكتبة Gemini
+ 
+    # Build the prompt with book context
+    if context_from_books and context_from_books.strip():
+        full_prompt = (
+            f"The following is relevant content retrieved from the course textbook:\n\n"
+            f"{context_from_books}\n\n"
+            f"---\n"
+            f"Student's question: {user_query}"
+        )
+    else:
+        full_prompt = f"Student's question: {user_query}"
+ 
+    # Build conversation history
     contents = []
     for msg in chat_history:
-        # تجنب إضافة الرسالة الحالية الممررة مسبقاً بالتاريخ لتفادي التكرار
-        if msg.get("content") == user_query:
+        # Skip if it's the same as current query (avoid duplication)
+        if msg.get("content", "").strip() == user_query.strip():
             continue
         role = "user" if msg["role"] == "user" else "model"
-        contents.append(types.Content(role=role, parts=[types.Part.from_text(text=msg["content"])]))
-    
-    # إضافة الرسالة الحالية المدمجة بالسياق في نهاية المصفوفة
-    contents.append(types.Content(role="user", parts=[types.Part.from_text(text=full_prompt)]))
-
+        contents.append(
+            types.Content(
+                role=role,
+                parts=[types.Part.from_text(text=msg["content"])]
+            )
+        )
+ 
+    # Build current message parts
+    current_parts = []
+ 
+    # Add image if provided
+    if image_data and image_mime_type:
+        import base64
+        image_bytes = base64.b64decode(image_data)
+        current_parts.append(
+            types.Part.from_bytes(data=image_bytes, mime_type=image_mime_type)
+        )
+ 
+    # Add text prompt
+    current_parts.append(types.Part.from_text(text=full_prompt))
+ 
+    contents.append(types.Content(role="user", parts=current_parts))
+ 
     try:
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model="gemini-2.5-flash",
             contents=contents,
             config=types.GenerateContentConfig(
                 system_instruction=SYSTEM_PROMPT,
-                temperature=0.3 # درجة حرارة منخفضة لضمان الدقة الأكاديمية وعدم الابتكار الخيالي
-            )
+                temperature=0.3,
+            ),
         )
         return response.text
+ 
     except Exception as e:
-        print(f"Error calling Gemini API: {e}")
-        return "Sorry, I encountered an error while processing your academic request."
+        print(f"[AI Engine Error] {e}")
+        return "Sorry, I encountered an error while processing your request. Please try again."
+ 

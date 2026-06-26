@@ -1,8 +1,0 @@
-node_modules/
-.env
-__pycache__/
-*.pyc
-acadai.db
-indexes/
-frontend/build/
-backend/subjects/

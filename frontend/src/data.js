@@ -1,4 +1,6 @@
-export const SUBJECTS_BY_YEAR = {
+export const API_URL = process.env.REACT_APP_API_URL || 'https://acadai-backend-avvo.onrender.com';
+
+export const SUBJECTS = {
   1: [
     { code: 'AEL101', name: 'AEL 101' },
     { code: 'AEL103', name: 'AEL 103' },
@@ -22,5 +24,3 @@ export const SUBJECTS_BY_YEAR = {
     { code: 'AEL422', name: 'AEL 422' },
   ],
 };
-
-export const API_URL = 'https://acadai-backend-avvo.onrender.com';
