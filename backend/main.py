@@ -58,7 +58,9 @@ async def ask_assistant(request: ChatRequest):
     try:
         # 1. Search course books via FAISS
         book_chunks = search(request.subject_code, request.message, top_k=5)
-        context_from_books = "\n\n".join(book_chunks) if book_chunks else ""
+        
+        # التعديل هنا: جعل الـ context فارغ حالياً بناءً على طلبك
+        context_from_books = "" # للآن فارغ
 
         # 2. Generate AI response
         answer = generate_academic_response(
@@ -114,7 +116,9 @@ async def upload_and_ask(
         extra_context = f"\n[Note: Student uploaded a file named '{file.filename}' — type: {mime_type}]"
 
     book_chunks = search(subject_code, message, top_k=5)
-    context_from_books = "\n\n".join(book_chunks) if book_chunks else ""
+    
+    # التعديل هنا أيضاً: جعل الـ context فارغ حالياً بناءً على طلبك
+    context_from_books = "" # للآن فارغ
 
     answer = generate_academic_response(
         user_query=message + extra_context,

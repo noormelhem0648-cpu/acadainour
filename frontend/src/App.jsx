@@ -5,6 +5,7 @@ import YearsPage from './pages/YearsPage';
 import SubjectsPage from './pages/SubjectsPage';
 import ChatPage from './pages/ChatPage';
 import './App.css';
+// تم حذف سطر import DeptPage من هنا
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => {

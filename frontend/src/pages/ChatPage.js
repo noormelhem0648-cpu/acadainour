@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
-import { API_URL } from '../data';
+// تم الاستغناء عن API_URL القديم واستبداله بالرابط المباشر
 
 // Detect if text is predominantly Arabic/RTL
 function isRTL(text) {
@@ -85,7 +85,8 @@ export default function ChatPage({ darkMode, setDarkMode }) {
           formData.append('file', attachedFile);
         }
 
-        const res = await fetch(`${API_URL}/upload-and-ask`, {
+        // التعديل هنا: استخدام رابط الـ backend الجديد للرفع
+        const res = await fetch('https://acadai-backend-avvo.onrender.com/upload-and-ask', {
           method: 'POST',
           body: formData,
         });
@@ -93,7 +94,8 @@ export default function ChatPage({ darkMode, setDarkMode }) {
         answer = data.answer;
       } else {
         // Regular text message
-        const res = await fetch(`${API_URL}/ask`, {
+        // التعديل هنا: استخدام رابط الـ backend الجديد للأسئلة العادية
+        const res = await fetch('https://acadai-backend-avvo.onrender.com/ask', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
