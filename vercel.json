@@ -1,7 +1,5 @@
 {
-  "buildCommand": "cd frontend && npm run build",
-  "outputDirectory": "frontend/build",
-  "env": {
-    "REACT_APP_API_URL": "https://acadai-backend-avvo.onrender.com"
-  }
+  "buildCommand": "npm run build",
+  "outputDirectory": "build",
+  "rootDirectory": "frontend"
 }
