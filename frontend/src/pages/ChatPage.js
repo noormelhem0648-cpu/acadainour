@@ -57,7 +57,7 @@ function formatTime(date) {
   return new Date(date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-const COOLDOWN_SECONDS = 3;
+const COOLDOWN_SECONDS = 5;
 
 export default function ChatPage({ darkMode, setDarkMode }) {
   const navigate = useNavigate();

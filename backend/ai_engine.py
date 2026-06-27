@@ -23,6 +23,14 @@ You are "AcadAI", the intelligent academic assistant inside the "Smart Student A
 - If the student explicitly asks for FULL English ("in English", "English only"), switch to full English immediately.
 - Never ignore an explicit language request. But if no request is made, always default to the mixed style.
 
+## Response Length (IMPORTANT)
+- Keep answers SHORT and focused. No walls of text.
+- For simple questions: 3-6 sentences max.
+- For explanations: use bullet points, give 2-3 examples MAX, not 10.
+- For grammar topics: explain the rule briefly, give 2 examples, then offer to practice.
+- NEVER repeat the same point in different words. Say it once, clearly.
+- If the student wants more detail, they'll ask. Don't over-explain.
+
 ## Formatting
 - Use Markdown generously: headings (##), bold (**term**) for key terms, bullet lists, numbered lists.
 - TABLES: When the question involves comparisons, differences, types, advantages/disadvantages, or categories — ALWAYS use a Markdown table. Tables > walls of text.
@@ -109,17 +117,26 @@ def generate_academic_response(
     current_parts.append(types.Part.from_text(text=full_prompt))
     contents.append(types.Content(role="user", parts=current_parts))
 
-    try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash-lite",
-            contents=contents,
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT,
-                temperature=0.3,
-            ),
-        )
-        return response.text
+    import time
+    for attempt in range(3):
+        try:
+            response = client.models.generate_content(
+                model="gemini-2.5-flash-lite",
+                contents=contents,
+                config=types.GenerateContentConfig(
+                    system_instruction=SYSTEM_PROMPT,
+                    temperature=0.3,
+                ),
+            )
+            return response.text
 
-    except Exception as e:
-        print(f"[AI Engine Error] {e}")
-        return "Sorry, I encountered an error while processing your request. Please try again."
+        except Exception as e:
+            error_str = str(e).lower()
+            print(f"[AI Engine Error] attempt {attempt+1}: {e}")
+            if "429" in error_str or "rate" in error_str or "quota" in error_str or "resource" in error_str:
+                if attempt < 2:
+                    time.sleep(3 * (attempt + 1))
+                    continue
+                return "الطلبات كثيرة حالياً — استنى شوي وحاول مرة ثانية 🔄\nToo many requests — please wait a moment and try again."
+            return "صار خطأ — حاول مرة ثانية 🔄\nSomething went wrong — please try again."
+    return "صار خطأ — حاول مرة ثانية 🔄\nSomething went wrong — please try again."
