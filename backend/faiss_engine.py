@@ -3,8 +3,7 @@ import numpy as np
 import os
 import pickle
 from google import genai
-
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+from ai_engine import _get_client
 
 INDEXES_PATH = "indexes"
 os.makedirs(INDEXES_PATH, exist_ok=True)
@@ -12,7 +11,7 @@ os.makedirs(INDEXES_PATH, exist_ok=True)
 
 def get_embedding(text: str) -> list:
     """Get embedding vector for a text using Gemini Embeddings."""
-    response = client.models.embed_content(
+    response = _get_client().models.embed_content(
         model="gemini-embedding-exp-03-07",
         contents=text
     )

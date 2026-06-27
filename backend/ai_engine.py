@@ -1,9 +1,34 @@
 import os
+import time
 from google import genai
 from google.genai import types
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-client = genai.Client(api_key=GEMINI_API_KEY)
+# Load all API keys: GEMINI_API_KEY, GEMINI_API_KEY_2, GEMINI_API_KEY_3, ...
+def _load_api_keys():
+    keys = []
+    main_key = os.getenv("GEMINI_API_KEY")
+    if main_key:
+        keys.append(main_key)
+    for i in range(2, 10):
+        key = os.getenv(f"GEMINI_API_KEY_{i}")
+        if key:
+            keys.append(key)
+    return keys
+
+API_KEYS = _load_api_keys()
+_clients = [genai.Client(api_key=k) for k in API_KEYS]
+_current_key_idx = 0
+
+def _get_client():
+    global _current_key_idx
+    if not _clients:
+        raise RuntimeError("No GEMINI_API_KEY configured")
+    return _clients[_current_key_idx % len(_clients)]
+
+def _rotate_key():
+    global _current_key_idx
+    _current_key_idx += 1
+    print(f"[AI Engine] Rotated to API key #{(_current_key_idx % len(_clients)) + 1}/{len(_clients)}")
 
 SYSTEM_PROMPT = """
 You are "AcadAI", the intelligent academic assistant inside the "Smart Student Assistant N" platform, built for students of the Applied English Language department at Yarmouk University.
@@ -68,6 +93,10 @@ You are "AcadAI", the intelligent academic assistant inside the "Smart Student A
 """
 
 
+def _is_rate_limit_error(error_str):
+    return any(kw in error_str for kw in ["429", "rate", "quota", "resource_exhausted", "resource has been exhausted"])
+
+
 def generate_academic_response(
     user_query: str,
     chat_history: list,
@@ -75,12 +104,6 @@ def generate_academic_response(
     image_data: str = None,
     image_mime_type: str = None
 ) -> str:
-    """
-    Generate an academic response using Gemini 2.5 Flash.
-    Supports text, book context, chat history, and optional image input.
-    """
-
-    # Build the prompt with book context
     if context_from_books and context_from_books.strip():
         full_prompt = (
             f"The following is relevant content retrieved from the course textbook:\n\n"
@@ -91,7 +114,7 @@ def generate_academic_response(
     else:
         full_prompt = f"Student's question: {user_query}"
 
-    # Build conversation history (keep last 10 exchanges for context)
+    # Build conversation history (keep last 20 messages for context)
     contents = []
     recent_history = chat_history[-20:] if len(chat_history) > 20 else chat_history
     for msg in recent_history:
@@ -103,9 +126,7 @@ def generate_academic_response(
             )
         )
 
-    # Build current message parts
     current_parts = []
-
     if image_data and image_mime_type:
         import base64
         image_bytes = base64.b64decode(image_data)
@@ -116,8 +137,10 @@ def generate_academic_response(
     current_parts.append(types.Part.from_text(text=full_prompt))
     contents.append(types.Content(role="user", parts=current_parts))
 
-    import time
-    for attempt in range(3):
+    # Try each API key, rotate on rate limit
+    total_attempts = len(_clients) * 2
+    for attempt in range(total_attempts):
+        client = _get_client()
         try:
             response = client.models.generate_content(
                 model="gemini-2.5-flash-lite",
@@ -131,11 +154,28 @@ def generate_academic_response(
 
         except Exception as e:
             error_str = str(e).lower()
-            print(f"[AI Engine Error] attempt {attempt+1}: {e}")
-            if "429" in error_str or "rate" in error_str or "quota" in error_str or "resource" in error_str:
-                if attempt < 2:
-                    time.sleep(3 * (attempt + 1))
+            print(f"[AI Engine Error] key #{(_current_key_idx % len(_clients)) + 1}, attempt {attempt+1}: {e}")
+
+            if _is_rate_limit_error(error_str):
+                if len(_clients) > 1:
+                    _rotate_key()
+                    time.sleep(1)
                     continue
-                return "الطلبات كثيرة حالياً — استنى شوي وحاول مرة ثانية 🔄\nToo many requests — please wait a moment and try again."
+                else:
+                    if attempt < 2:
+                        time.sleep(3 * (attempt + 1))
+                        continue
+                    return (
+                        "⏳ **خلص حد الطلبات اليومي المجاني.**\n\n"
+                        "الحد بيتجدد تلقائياً — جرب بعد ساعة أو بكرا الصبح.\n\n"
+                        "⏳ **Daily free quota reached.**\n\n"
+                        "It resets automatically — try again in an hour or tomorrow morning."
+                    )
             return "صار خطأ — حاول مرة ثانية 🔄\nSomething went wrong — please try again."
-    return "صار خطأ — حاول مرة ثانية 🔄\nSomething went wrong — please try again."
+
+    return (
+        "⏳ **خلص حد الطلبات اليومي على كل الـ API keys.**\n\n"
+        "جرب بعد ساعة أو بكرا الصبح.\n\n"
+        "⏳ **All API keys have reached their daily limit.**\n\n"
+        "Try again in an hour or tomorrow morning."
+    )
