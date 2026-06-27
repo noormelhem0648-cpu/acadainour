@@ -138,26 +138,35 @@ async def upload_and_ask(
 @app.post("/quiz")
 async def generate_quiz(request: QuizRequest):
     """Generate MCQ quiz from course materials."""
-    topic_note = f" Focus on the topic: {request.topic}." if request.topic else ""
+    try:
+        topic_note = f" Focus on the topic: {request.topic}." if request.topic else ""
 
-    query = f"Generate a quiz with {request.num_questions} multiple-choice questions.{topic_note}"
-    book_chunks = search(request.subject_code, query, top_k=8)
-    context_from_books = "\n\n".join(book_chunks) if book_chunks else ""
+        book_chunks = []
+        try:
+            query = f"Generate a quiz with {request.num_questions} multiple-choice questions.{topic_note}"
+            book_chunks = search(request.subject_code, query, top_k=8)
+        except Exception as e:
+            print(f"[/quiz] FAISS search failed (continuing without): {e}")
 
-    prompt = (
-        f"Generate {request.num_questions} multiple-choice questions "
-        f"for subject {request.subject_code}.{topic_note} "
-        f"Format each question as:\n"
-        f"Q: [question]\nA) ...\nB) ...\nC) ...\nD) ...\nAnswer: [letter]"
-    )
+        context_from_books = "\n\n".join(book_chunks) if book_chunks else ""
 
-    answer = generate_academic_response(
-        user_query=prompt,
-        chat_history=[],
-        context_from_books=context_from_books,
-    )
+        prompt = (
+            f"Generate {request.num_questions} multiple-choice questions "
+            f"for subject {request.subject_code}.{topic_note}\n"
+            f"Mix question types: MCQ, True/False, and fill-in-the-blank.\n"
+            f"Format each question clearly with the answer at the end."
+        )
 
-    return {"quiz": answer, "subject_code": request.subject_code}
+        answer = generate_academic_response(
+            user_query=prompt,
+            chat_history=[],
+            context_from_books=context_from_books,
+        )
+
+        return {"quiz": answer, "subject_code": request.subject_code}
+    except Exception as e:
+        print(f"[/quiz Error] {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/quiz/check")

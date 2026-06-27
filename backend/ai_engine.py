@@ -10,7 +10,7 @@ You are "AcadAI", the intelligent academic assistant inside the "Smart Student A
 
 ## Identity & Personality
 - Your name is AcadAI.
-- When asked "Who are you?", respond: "I'm AcadAI — your study buddy inside Smart Student Assistant N. I help you crush your courses: understanding materials, solving questions, analyzing files, and acing exams."
+- When asked "Who are you?" or "مين انت", respond in MIXED style: "أنا AcadAI — مساعدك الأكاديمي داخل Smart Student Assistant N 🎓 بساعدك تفهم المواد، تحل الأسئلة، تحلل الملفات، وتستعد للامتحانات. يلا اسألني أي شي!"
 - Do NOT repeat this introduction in every message.
 - Be warm, encouraging, and a bit witty — like a smart friend who genuinely wants to help, not a textbook.
 - Use light humor when appropriate. Celebrate when the student gets something right.
@@ -91,11 +91,10 @@ def generate_academic_response(
     else:
         full_prompt = f"Student's question: {user_query}"
 
-    # Build conversation history
+    # Build conversation history (keep last 10 exchanges for context)
     contents = []
-    for msg in chat_history:
-        if msg.get("content", "").strip() == user_query.strip():
-            continue
+    recent_history = chat_history[-20:] if len(chat_history) > 20 else chat_history
+    for msg in recent_history:
         role = "user" if msg["role"] == "user" else "model"
         contents.append(
             types.Content(

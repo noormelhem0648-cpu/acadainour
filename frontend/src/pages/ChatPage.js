@@ -5,33 +5,44 @@ import ReactMarkdown from "react-markdown";
 const API_URL = "https://acadai-backend-avvo.onrender.com";
 
 function isRTL(text) {
-  const rtlChars = /[֑-߿‏‫‮יִ-﷽ﹰ-ﻼ]/;
-  return rtlChars.test(text);
+  return /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/.test(text);
 }
+
+let speakCancelled = false;
 
 function speakText(text, onEnd) {
   if (!("speechSynthesis" in window)) {
     alert("Read Aloud is not supported in this browser.");
     return;
   }
-  window.speechSynthesis.cancel();
+  stopSpeaking();
+  speakCancelled = false;
 
-  const clean = text.replace(/[*#_`>\[\]()]/g, "");
-  const rtlPattern = /[֑-߿‏‫‮יִ-﷽ﹰ-ﻼ]/;
+  const clean = text
+    .replace(/[*#_`>\[\]()|]/g, "")
+    .replace(/\n+/g, ". ")
+    .replace(/\s+/g, " ")
+    .trim();
 
-  // Split into segments by language for better mixed-language TTS
-  const segments = clean.split(/([^a-zA-Z0-9\s.,;:!?'"()-]+)/g).filter(s => s.trim());
+  const arabicRe = /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/;
+
+  // Split into sentences for better mixed-language handling
+  const sentences = clean.split(/(?<=[.!?؟،])\s+/).filter(s => s.trim());
+  if (sentences.length === 0) {
+    if (onEnd) onEnd();
+    return;
+  }
 
   let i = 0;
   const speakNext = () => {
-    if (i >= segments.length) {
+    if (speakCancelled || i >= sentences.length) {
       if (onEnd) onEnd();
       return;
     }
-    const seg = segments[i++];
-    const utter = new SpeechSynthesisUtterance(seg);
-    utter.lang = rtlPattern.test(seg) ? "ar-SA" : "en-US";
-    utter.rate = 0.95;
+    const sentence = sentences[i++];
+    const utter = new SpeechSynthesisUtterance(sentence);
+    utter.lang = arabicRe.test(sentence) ? "ar-SA" : "en-US";
+    utter.rate = 0.9;
     utter.onend = speakNext;
     utter.onerror = speakNext;
     window.speechSynthesis.speak(utter);
@@ -40,6 +51,7 @@ function speakText(text, onEnd) {
 }
 
 function stopSpeaking() {
+  speakCancelled = true;
   if ("speechSynthesis" in window) window.speechSynthesis.cancel();
 }
 
@@ -66,7 +78,7 @@ export default function ChatPage({ darkMode, setDarkMode }) {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      content: "أهلاً! أنا **AcadAI** — مساعدك الأكاديمي لمادة **" + subjectCode + "** 🎓\nاسألني أي سؤال عن المادة وراح أجاوبك من الكتاب أولاً، وإذا ما لقيت بقلك من معرفتي العامة.\n\nHi! I'm **AcadAI** — your study buddy for **" + subjectCode + "**. Ask me anything!",
+      content: "أهلاً! أنا **AcadAI** — مساعدك الأكاديمي لمادة **" + subjectCode + "** 🎓\nاسألني أي سؤال عن المادة وراح أجاوبك من الكتاب أولاً.\n\nHi! I'm **AcadAI** — your study buddy for **" + subjectCode + "**. Ask me anything!",
       time: Date.now(),
     },
   ]);
@@ -162,11 +174,16 @@ export default function ChatPage({ darkMode, setDarkMode }) {
 
     try {
       let answer;
+      const history = newMessages.slice(0, -1).map(m => ({
+        role: m.role === "assistant" ? "model" : "user",
+        content: m.content
+      }));
+
       if (attachedImage || attachedFile) {
         const formData = new FormData();
         formData.append("subject_code", subjectCode);
         formData.append("message", userMessage);
-        formData.append("history", JSON.stringify(messages.map(m => ({ role: m.role === "assistant" ? "model" : "user", content: m.content }))));
+        formData.append("history", JSON.stringify(history));
         if (attachedImage) { formData.append("file", attachedImage); }
         else if (attachedFile) { formData.append("file", attachedFile); }
         const res = await fetch(API_URL + "/upload-and-ask", { method: "POST", body: formData });
@@ -179,7 +196,7 @@ export default function ChatPage({ darkMode, setDarkMode }) {
           body: JSON.stringify({
             subject_code: subjectCode,
             message: userMessage,
-            history: messages.map(m => ({ role: m.role === "assistant" ? "model" : "user", content: m.content })),
+            history: history,
           }),
         });
         const data = await res.json();
@@ -189,14 +206,17 @@ export default function ChatPage({ darkMode, setDarkMode }) {
       clearAttachments();
       startCooldown();
     } catch (err) {
-      setMessages([...newMessages, { role: "assistant", content: "عذراً، حصل خطأ بالاتصال. حاول مرة ثانية. 🔄\nSorry, connection error. Please try again.", time: Date.now() }]);
+      setMessages([...newMessages, {
+        role: "assistant",
+        content: "عذراً، حصل خطأ بالاتصال. حاول مرة ثانية. 🔄\nSorry, connection error. Please try again.",
+        time: Date.now()
+      }]);
     }
     setLoading(false);
   };
 
   const generateQuiz = async () => {
     if (cooldown > 0 || loading) return;
-    const userMessage = "Generate a quiz for me on this subject";
     const newMessages = [...messages, { role: "user", content: "📝 Generate a quiz!", time: Date.now() }];
     setMessages(newMessages);
     setLoading(true);
@@ -211,10 +231,15 @@ export default function ChatPage({ darkMode, setDarkMode }) {
         }),
       });
       const data = await res.json();
-      setMessages([...newMessages, { role: "assistant", content: data.quiz, time: Date.now() }]);
+      const quizContent = data.quiz || data.detail || "Could not generate quiz. Try again.";
+      setMessages([...newMessages, { role: "assistant", content: quizContent, time: Date.now() }]);
       startCooldown();
     } catch (err) {
-      setMessages([...newMessages, { role: "assistant", content: "Sorry, couldn't generate the quiz. Please try again.", time: Date.now() }]);
+      setMessages([...newMessages, {
+        role: "assistant",
+        content: "ما قدرت أعمل الكويز. حاول مرة ثانية 🔄\nCouldn't generate the quiz. Please try again.",
+        time: Date.now()
+      }]);
     }
     setLoading(false);
   };
@@ -287,7 +312,7 @@ export default function ChatPage({ darkMode, setDarkMode }) {
             <button className="followup-btn" onClick={() => quickAsk("Explain this in a simpler way")}>Explain simpler</button>
             <button className="followup-btn" onClick={() => quickAsk("Give me an example")}>Give example</button>
             <button className="followup-btn" onClick={() => quickAsk("Summarize this")}>Summarize</button>
-            <button className="followup-btn" onClick={() => quickAsk("اشرح بالعربي")}>بالعربي</button>
+            <button className="followup-btn" onClick={() => quickAsk("اشرح بالعربي")}>{"بالعربي"}</button>
             <button className="followup-btn" onClick={() => quickAsk("Make a table comparing the key concepts")}>Table</button>
           </div>
         )}
