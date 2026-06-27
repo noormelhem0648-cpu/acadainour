@@ -69,7 +69,7 @@ function formatTime(date) {
   return new Date(date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-const COOLDOWN_SECONDS = 5;
+const COOLDOWN_SECONDS = 0;
 
 export default function ChatPage({ darkMode, setDarkMode }) {
   const navigate = useNavigate();
@@ -163,8 +163,27 @@ export default function ChatPage({ darkMode, setDarkMode }) {
     if (imageInputRef.current) imageInputRef.current.value = "";
   };
 
+  const callAPI = async (userMessage, msgHistory) => {
+    const history = msgHistory.map(m => ({
+      role: m.role === "assistant" ? "model" : "user",
+      content: m.content
+    }));
+
+    const res = await fetch(API_URL + "/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        subject_code: subjectCode,
+        message: userMessage,
+        history: history,
+      }),
+    });
+    const data = await res.json();
+    return data.answer;
+  };
+
   const sendMessage = async () => {
-    if (cooldown > 0 || loading) return;
+    if (loading) return;
     if (!input.trim() && !attachedImage && !attachedFile) return;
     const userMessage = input.trim() || (attachedImage ? "Image attached" : "File attached");
     const newMessages = [...messages, { role: "user", content: userMessage, time: Date.now() }];
@@ -174,42 +193,56 @@ export default function ChatPage({ darkMode, setDarkMode }) {
 
     try {
       let answer;
-      const history = newMessages.slice(0, -1).map(m => ({
-        role: m.role === "assistant" ? "model" : "user",
-        content: m.content
-      }));
+      const historyMsgs = newMessages.slice(0, -1);
 
       if (attachedImage || attachedFile) {
         const formData = new FormData();
         formData.append("subject_code", subjectCode);
         formData.append("message", userMessage);
-        formData.append("history", JSON.stringify(history));
+        formData.append("history", JSON.stringify(historyMsgs.map(m => ({ role: m.role === "assistant" ? "model" : "user", content: m.content }))));
         if (attachedImage) { formData.append("file", attachedImage); }
         else if (attachedFile) { formData.append("file", attachedFile); }
         const res = await fetch(API_URL + "/upload-and-ask", { method: "POST", body: formData });
         const data = await res.json();
         answer = data.answer;
       } else {
-        const res = await fetch(API_URL + "/ask", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            subject_code: subjectCode,
-            message: userMessage,
-            history: history,
-          }),
-        });
-        const data = await res.json();
-        answer = data.answer;
+        answer = await callAPI(userMessage, historyMsgs);
       }
       setMessages([...newMessages, { role: "assistant", content: answer, time: Date.now() }]);
       clearAttachments();
-      startCooldown();
     } catch (err) {
       setMessages([...newMessages, {
         role: "assistant",
         content: "عذراً، حصل خطأ بالاتصال. حاول مرة ثانية. 🔄\nSorry, connection error. Please try again.",
-        time: Date.now()
+        time: Date.now(),
+        isError: true
+      }]);
+    }
+    setLoading(false);
+  };
+
+  const retryLastMessage = async () => {
+    if (loading) return;
+    const lastUserIdx = [...messages].reverse().findIndex(m => m.role === "user");
+    if (lastUserIdx === -1) return;
+    const idx = messages.length - 1 - lastUserIdx;
+    const userMessage = messages[idx].content;
+    const historyBefore = messages.slice(0, idx);
+
+    // Remove the error message(s) after the user message
+    const newMessages = [...messages.slice(0, idx + 1)];
+    setMessages(newMessages);
+    setLoading(true);
+
+    try {
+      const answer = await callAPI(userMessage, historyBefore);
+      setMessages([...newMessages, { role: "assistant", content: answer, time: Date.now() }]);
+    } catch (err) {
+      setMessages([...newMessages, {
+        role: "assistant",
+        content: "عذراً، حصل خطأ بالاتصال. حاول مرة ثانية. 🔄\nSorry, connection error. Please try again.",
+        time: Date.now(),
+        isError: true
       }]);
     }
     setLoading(false);
@@ -284,18 +317,26 @@ export default function ChatPage({ darkMode, setDarkMode }) {
                 <span className="msg-time">{formatTime(msg.time)}</span>
                 {msg.role === "assistant" && (
                   <>
-                    <button className="msg-action-btn" onClick={() => copyMessage(msg.content, idx)}>
-                      {copiedIdx === idx ? "Copied!" : "Copy"}
-                    </button>
-                    <button className="msg-action-btn" onClick={() => downloadTxt(msg.content)}>
-                      Download
-                    </button>
-                    <button
-                      className={"msg-action-btn" + (speakingIdx === idx ? " speaking-active" : "")}
-                      onClick={() => handleSpeak(msg.content, idx)}
-                    >
-                      {speakingIdx === idx ? "Stop" : "Read"}
-                    </button>
+                    {msg.isError ? (
+                      <button className="msg-action-btn retry-btn" onClick={retryLastMessage}>
+                        Retry
+                      </button>
+                    ) : (
+                      <>
+                        <button className="msg-action-btn" onClick={() => copyMessage(msg.content, idx)}>
+                          {copiedIdx === idx ? "Copied!" : "Copy"}
+                        </button>
+                        <button className="msg-action-btn" onClick={() => downloadTxt(msg.content)}>
+                          Download
+                        </button>
+                        <button
+                          className={"msg-action-btn" + (speakingIdx === idx ? " speaking-active" : "")}
+                          onClick={() => handleSpeak(msg.content, idx)}
+                        >
+                          {speakingIdx === idx ? "Stop" : "Read"}
+                        </button>
+                      </>
+                    )}
                   </>
                 )}
               </div>
@@ -345,9 +386,9 @@ export default function ChatPage({ darkMode, setDarkMode }) {
         <button
           className="send-btn"
           onClick={sendMessage}
-          disabled={loading || cooldown > 0 || (!input.trim() && !attachedImage && !attachedFile)}
+          disabled={loading || (!input.trim() && !attachedImage && !attachedFile)}
         >
-          {loading ? "..." : cooldown > 0 ? cooldown + "s" : "Send"}
+          {loading ? "..." : "Send"}
         </button>
       </div>
     </div>

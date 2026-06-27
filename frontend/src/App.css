@@ -484,6 +484,18 @@ body {
 }
 
 /* ── Speaking Active State ────────────────────────────────── */
+/* ── Retry Button ─────────────────────────────────────────── */
+.msg-action-btn.retry-btn {
+  border-color: var(--accent);
+  color: #fff;
+  background: var(--accent);
+  padding: 4px 14px;
+  font-weight: 600;
+}
+.msg-action-btn.retry-btn:hover {
+  background: var(--accent-dark);
+}
+
 .msg-action-btn.speaking-active {
   border-color: var(--accent);
   color: var(--accent);
