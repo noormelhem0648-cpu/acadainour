@@ -1,26 +1,42 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 
 const API_URL = "https://acadai-backend-avvo.onrender.com";
 
 function isRTL(text) {
-  const rtlChars = /[\u0591-\u07FF\u200F\u202B\u202E\uFB1D-\uFDFD\uFE70-\uFEFC]/;
+  const rtlChars = /[֑-߿‏‫‮יִ-﷽ﹰ-ﻼ]/;
   return rtlChars.test(text);
 }
 
-function speakText(text) {
+function speakText(text, onEnd) {
   if (!("speechSynthesis" in window)) {
     alert("Read Aloud is not supported in this browser.");
     return;
   }
   window.speechSynthesis.cancel();
+
   const clean = text.replace(/[*#_`>\[\]()]/g, "");
-  const utter = new SpeechSynthesisUtterance(clean);
-  const rtlChars = /[\u0591-\u07FF\u200F\u202B\u202E\uFB1D-\uFDFD\uFE70-\uFEFC]/;
-  utter.lang = rtlChars.test(clean) ? "ar-SA" : "en-US";
-  utter.rate = 1;
-  window.speechSynthesis.speak(utter);
+  const rtlPattern = /[֑-߿‏‫‮יִ-﷽ﹰ-ﻼ]/;
+
+  // Split into segments by language for better mixed-language TTS
+  const segments = clean.split(/([^a-zA-Z0-9\s.,;:!?'"()-]+)/g).filter(s => s.trim());
+
+  let i = 0;
+  const speakNext = () => {
+    if (i >= segments.length) {
+      if (onEnd) onEnd();
+      return;
+    }
+    const seg = segments[i++];
+    const utter = new SpeechSynthesisUtterance(seg);
+    utter.lang = rtlPattern.test(seg) ? "ar-SA" : "en-US";
+    utter.rate = 0.95;
+    utter.onend = speakNext;
+    utter.onerror = speakNext;
+    window.speechSynthesis.speak(utter);
+  };
+  speakNext();
 }
 
 function stopSpeaking() {
@@ -41,6 +57,8 @@ function formatTime(date) {
   return new Date(date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+const COOLDOWN_SECONDS = 3;
+
 export default function ChatPage({ darkMode, setDarkMode }) {
   const navigate = useNavigate();
   const { subjectCode } = useParams();
@@ -48,7 +66,7 @@ export default function ChatPage({ darkMode, setDarkMode }) {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      content: "Hello! I am AcadAI, your assistant for **" + subjectCode + "**. Ask me anything about the course materials, and I will answer from the textbook first.",
+      content: "أهلاً! أنا **AcadAI** — مساعدك الأكاديمي لمادة **" + subjectCode + "** 🎓\nاسألني أي سؤال عن المادة وراح أجاوبك من الكتاب أولاً، وإذا ما لقيت بقلك من معرفتي العامة.\n\nHi! I'm **AcadAI** — your study buddy for **" + subjectCode + "**. Ask me anything!",
       time: Date.now(),
     },
   ]);
@@ -58,21 +76,56 @@ export default function ChatPage({ darkMode, setDarkMode }) {
   const [attachedImage, setAttachedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [copiedIdx, setCopiedIdx] = useState(null);
+  const [speakingIdx, setSpeakingIdx] = useState(null);
+  const [cooldown, setCooldown] = useState(0);
 
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const imageInputRef = useRef(null);
   const textareaRef = useRef(null);
+  const cooldownRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    return () => {
+      if (cooldownRef.current) clearInterval(cooldownRef.current);
+      stopSpeaking();
+    };
+  }, []);
+
+  const startCooldown = useCallback(() => {
+    setCooldown(COOLDOWN_SECONDS);
+    if (cooldownRef.current) clearInterval(cooldownRef.current);
+    cooldownRef.current = setInterval(() => {
+      setCooldown(prev => {
+        if (prev <= 1) {
+          clearInterval(cooldownRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
 
   const copyMessage = (text, idx) => {
     navigator.clipboard.writeText(text).then(() => {
       setCopiedIdx(idx);
       setTimeout(() => setCopiedIdx(null), 2000);
     });
+  };
+
+  const handleSpeak = (text, idx) => {
+    if (speakingIdx === idx) {
+      stopSpeaking();
+      setSpeakingIdx(null);
+      return;
+    }
+    stopSpeaking();
+    setSpeakingIdx(idx);
+    speakText(text, () => setSpeakingIdx(null));
   };
 
   const handleImageSelect = (e) => {
@@ -99,6 +152,7 @@ export default function ChatPage({ darkMode, setDarkMode }) {
   };
 
   const sendMessage = async () => {
+    if (cooldown > 0 || loading) return;
     if (!input.trim() && !attachedImage && !attachedFile) return;
     const userMessage = input.trim() || (attachedImage ? "Image attached" : "File attached");
     const newMessages = [...messages, { role: "user", content: userMessage, time: Date.now() }];
@@ -133,8 +187,34 @@ export default function ChatPage({ darkMode, setDarkMode }) {
       }
       setMessages([...newMessages, { role: "assistant", content: answer, time: Date.now() }]);
       clearAttachments();
+      startCooldown();
     } catch (err) {
-      setMessages([...newMessages, { role: "assistant", content: "Sorry, there was a connection error. Please try again.", time: Date.now() }]);
+      setMessages([...newMessages, { role: "assistant", content: "عذراً، حصل خطأ بالاتصال. حاول مرة ثانية. 🔄\nSorry, connection error. Please try again.", time: Date.now() }]);
+    }
+    setLoading(false);
+  };
+
+  const generateQuiz = async () => {
+    if (cooldown > 0 || loading) return;
+    const userMessage = "Generate a quiz for me on this subject";
+    const newMessages = [...messages, { role: "user", content: "📝 Generate a quiz!", time: Date.now() }];
+    setMessages(newMessages);
+    setLoading(true);
+
+    try {
+      const res = await fetch(API_URL + "/quiz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subject_code: subjectCode,
+          num_questions: 5,
+        }),
+      });
+      const data = await res.json();
+      setMessages([...newMessages, { role: "assistant", content: data.quiz, time: Date.now() }]);
+      startCooldown();
+    } catch (err) {
+      setMessages([...newMessages, { role: "assistant", content: "Sorry, couldn't generate the quiz. Please try again.", time: Date.now() }]);
     }
     setLoading(false);
   };
@@ -156,6 +236,9 @@ export default function ChatPage({ darkMode, setDarkMode }) {
       <header className="header">
         <button className="back-btn" onClick={() => navigate(-1)}>Back</button>
         <span className="app-name">{subjectCode}</span>
+        <button className="quiz-header-btn" onClick={generateQuiz} disabled={loading || cooldown > 0}>
+          Quiz
+        </button>
         <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
           {darkMode ? "Light" : "Dark"}
         </button>
@@ -175,24 +258,20 @@ export default function ChatPage({ darkMode, setDarkMode }) {
               <div className="msg-footer">
                 <span className="msg-time">{formatTime(msg.time)}</span>
                 {msg.role === "assistant" && (
-                  <button className="msg-action-btn" onClick={() => copyMessage(msg.content, idx)}>
-                    {copiedIdx === idx ? "Copied!" : "Copy"}
-                  </button>
-                )}
-                {msg.role === "assistant" && (
-                  <button className="msg-action-btn" onClick={() => downloadTxt(msg.content)}>
-                    Download
-                  </button>
-                )}
-                {msg.role === "assistant" && (
-                  <button className="msg-action-btn" onClick={() => speakText(msg.content)}>
-                    Read
-                  </button>
-                )}
-                {msg.role === "assistant" && (
-                  <button className="msg-action-btn" onClick={stopSpeaking}>
-                    Stop
-                  </button>
+                  <>
+                    <button className="msg-action-btn" onClick={() => copyMessage(msg.content, idx)}>
+                      {copiedIdx === idx ? "Copied!" : "Copy"}
+                    </button>
+                    <button className="msg-action-btn" onClick={() => downloadTxt(msg.content)}>
+                      Download
+                    </button>
+                    <button
+                      className={"msg-action-btn" + (speakingIdx === idx ? " speaking-active" : "")}
+                      onClick={() => handleSpeak(msg.content, idx)}
+                    >
+                      {speakingIdx === idx ? "Stop" : "Read"}
+                    </button>
+                  </>
                 )}
               </div>
             </div>
@@ -209,6 +288,7 @@ export default function ChatPage({ darkMode, setDarkMode }) {
             <button className="followup-btn" onClick={() => quickAsk("Give me an example")}>Give example</button>
             <button className="followup-btn" onClick={() => quickAsk("Summarize this")}>Summarize</button>
             <button className="followup-btn" onClick={() => quickAsk("اشرح بالعربي")}>بالعربي</button>
+            <button className="followup-btn" onClick={() => quickAsk("Make a table comparing the key concepts")}>Table</button>
           </div>
         )}
         <div ref={messagesEndRef} />
@@ -237,8 +317,12 @@ export default function ChatPage({ darkMode, setDarkMode }) {
           rows={1}
           dir={isRTL(input) ? "rtl" : "ltr"}
         />
-        <button className="send-btn" onClick={sendMessage} disabled={loading || (!input.trim() && !attachedImage && !attachedFile)}>
-          {loading ? "..." : "Send"}
+        <button
+          className="send-btn"
+          onClick={sendMessage}
+          disabled={loading || cooldown > 0 || (!input.trim() && !attachedImage && !attachedFile)}
+        >
+          {loading ? "..." : cooldown > 0 ? cooldown + "s" : "Send"}
         </button>
       </div>
     </div>

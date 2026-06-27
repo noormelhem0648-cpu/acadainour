@@ -461,3 +461,53 @@ body {
   background: var(--accent);
   color: #fff;
 }
+
+/* ── Quiz Header Button ───────────────────────────────────── */
+.quiz-header-btn {
+  background: var(--accent-light);
+  border: 1.5px solid var(--accent);
+  color: var(--accent-dark);
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+.quiz-header-btn:hover:not(:disabled) {
+  background: var(--accent);
+  color: #fff;
+}
+.quiz-header-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Speaking Active State ────────────────────────────────── */
+.msg-action-btn.speaking-active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
+}
+
+/* ── Markdown Tables ──────────────────────────────────────── */
+.assistant-message table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+  font-size: 0.88rem;
+}
+.assistant-message th,
+.assistant-message td {
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  text-align: left;
+}
+.assistant-message th {
+  background: var(--accent-light);
+  font-weight: 700;
+  color: var(--text);
+}
+.assistant-message tr:nth-child(even) {
+  background: var(--bg-secondary);
+}
