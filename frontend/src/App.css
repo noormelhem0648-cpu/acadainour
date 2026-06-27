@@ -496,12 +496,6 @@ body {
   background: var(--accent-dark);
 }
 
-.msg-action-btn.speaking-active {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: var(--accent-light);
-}
-
 /* ── Markdown Tables ──────────────────────────────────────── */
 .assistant-message table {
   width: 100%;

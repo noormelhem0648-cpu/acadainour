@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 
@@ -6,53 +6,6 @@ const API_URL = "https://acadai-backend-avvo.onrender.com";
 
 function isRTL(text) {
   return /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/.test(text);
-}
-
-let speakCancelled = false;
-
-function speakText(text, onEnd) {
-  if (!("speechSynthesis" in window)) {
-    alert("Read Aloud is not supported in this browser.");
-    return;
-  }
-  stopSpeaking();
-  speakCancelled = false;
-
-  const clean = text
-    .replace(/[*#_`>\[\]()|]/g, "")
-    .replace(/\n+/g, ". ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  const arabicRe = /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/;
-
-  // Split into sentences for better mixed-language handling
-  const sentences = clean.split(/(?<=[.!?؟،])\s+/).filter(s => s.trim());
-  if (sentences.length === 0) {
-    if (onEnd) onEnd();
-    return;
-  }
-
-  let i = 0;
-  const speakNext = () => {
-    if (speakCancelled || i >= sentences.length) {
-      if (onEnd) onEnd();
-      return;
-    }
-    const sentence = sentences[i++];
-    const utter = new SpeechSynthesisUtterance(sentence);
-    utter.lang = arabicRe.test(sentence) ? "ar-SA" : "en-US";
-    utter.rate = 0.9;
-    utter.onend = speakNext;
-    utter.onerror = speakNext;
-    window.speechSynthesis.speak(utter);
-  };
-  speakNext();
-}
-
-function stopSpeaking() {
-  speakCancelled = true;
-  if ("speechSynthesis" in window) window.speechSynthesis.cancel();
 }
 
 function downloadTxt(text) {
@@ -68,8 +21,6 @@ function downloadTxt(text) {
 function formatTime(date) {
   return new Date(date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
-
-const COOLDOWN_SECONDS = 0;
 
 export default function ChatPage({ darkMode, setDarkMode }) {
   const navigate = useNavigate();
@@ -88,56 +39,21 @@ export default function ChatPage({ darkMode, setDarkMode }) {
   const [attachedImage, setAttachedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [copiedIdx, setCopiedIdx] = useState(null);
-  const [speakingIdx, setSpeakingIdx] = useState(null);
-  const [cooldown, setCooldown] = useState(0);
 
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const imageInputRef = useRef(null);
   const textareaRef = useRef(null);
-  const cooldownRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  useEffect(() => {
-    return () => {
-      if (cooldownRef.current) clearInterval(cooldownRef.current);
-      stopSpeaking();
-    };
-  }, []);
-
-  const startCooldown = useCallback(() => {
-    setCooldown(COOLDOWN_SECONDS);
-    if (cooldownRef.current) clearInterval(cooldownRef.current);
-    cooldownRef.current = setInterval(() => {
-      setCooldown(prev => {
-        if (prev <= 1) {
-          clearInterval(cooldownRef.current);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }, []);
 
   const copyMessage = (text, idx) => {
     navigator.clipboard.writeText(text).then(() => {
       setCopiedIdx(idx);
       setTimeout(() => setCopiedIdx(null), 2000);
     });
-  };
-
-  const handleSpeak = (text, idx) => {
-    if (speakingIdx === idx) {
-      stopSpeaking();
-      setSpeakingIdx(null);
-      return;
-    }
-    stopSpeaking();
-    setSpeakingIdx(idx);
-    speakText(text, () => setSpeakingIdx(null));
   };
 
   const handleImageSelect = (e) => {
@@ -168,7 +84,6 @@ export default function ChatPage({ darkMode, setDarkMode }) {
       role: m.role === "assistant" ? "model" : "user",
       content: m.content
     }));
-
     const res = await fetch(API_URL + "/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -229,7 +144,6 @@ export default function ChatPage({ darkMode, setDarkMode }) {
     const userMessage = messages[idx].content;
     const historyBefore = messages.slice(0, idx);
 
-    // Remove the error message(s) after the user message
     const newMessages = [...messages.slice(0, idx + 1)];
     setMessages(newMessages);
     setLoading(true);
@@ -249,7 +163,7 @@ export default function ChatPage({ darkMode, setDarkMode }) {
   };
 
   const generateQuiz = async () => {
-    if (cooldown > 0 || loading) return;
+    if (loading) return;
     const newMessages = [...messages, { role: "user", content: "📝 Generate a quiz!", time: Date.now() }];
     setMessages(newMessages);
     setLoading(true);
@@ -266,12 +180,12 @@ export default function ChatPage({ darkMode, setDarkMode }) {
       const data = await res.json();
       const quizContent = data.quiz || data.detail || "Could not generate quiz. Try again.";
       setMessages([...newMessages, { role: "assistant", content: quizContent, time: Date.now() }]);
-      startCooldown();
     } catch (err) {
       setMessages([...newMessages, {
         role: "assistant",
         content: "ما قدرت أعمل الكويز. حاول مرة ثانية 🔄\nCouldn't generate the quiz. Please try again.",
-        time: Date.now()
+        time: Date.now(),
+        isError: true
       }]);
     }
     setLoading(false);
@@ -294,7 +208,7 @@ export default function ChatPage({ darkMode, setDarkMode }) {
       <header className="header">
         <button className="back-btn" onClick={() => navigate(-1)}>Back</button>
         <span className="app-name">{subjectCode}</span>
-        <button className="quiz-header-btn" onClick={generateQuiz} disabled={loading || cooldown > 0}>
+        <button className="quiz-header-btn" onClick={generateQuiz} disabled={loading}>
           Quiz
         </button>
         <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
@@ -328,12 +242,6 @@ export default function ChatPage({ darkMode, setDarkMode }) {
                         </button>
                         <button className="msg-action-btn" onClick={() => downloadTxt(msg.content)}>
                           Download
-                        </button>
-                        <button
-                          className={"msg-action-btn" + (speakingIdx === idx ? " speaking-active" : "")}
-                          onClick={() => handleSpeak(msg.content, idx)}
-                        >
-                          {speakingIdx === idx ? "Stop" : "Read"}
                         </button>
                       </>
                     )}
