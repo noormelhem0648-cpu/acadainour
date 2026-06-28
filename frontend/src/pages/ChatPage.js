@@ -70,7 +70,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
   const [quizType, setQuizType] = useState("mix");
   const [examTopic, setExamTopic] = useState("");
   const [examDifficulty, setExamDifficulty] = useState("medium");
-  const [examUnit, setExamUnit] = useState("all");
+  const [examUnits, setExamUnits] = useState("");
   const [likedMsgs, setLikedMsgs] = useState({});
   const [showHistory, setShowHistory] = useState(false);
   const [savedChats, setSavedChats] = useState([]);
@@ -364,7 +364,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
       medium: "Make the questions at a university level, requiring understanding of concepts and application.",
       hard: "Make the questions challenging, requiring deep analysis, critical thinking, and advanced knowledge.",
     };
-    const unitText = examUnit !== "all" ? ` Focus ONLY on Unit ${examUnit} content.` : " Cover all units.";
+    const unitText = examUnits.trim() ? ` Focus ONLY on these units/chapters: ${examUnits.trim()}.` : " Cover all available material.";
     const topicText = examTopic ? ` Special focus on: "${examTopic}".` : "";
 
     const examPrompt = `Generate a FULL EXAM for subject ${subjectCode}.${unitText}${topicText}
@@ -379,7 +379,7 @@ The exam must include ALL of these sections:
 Total: 18 questions. Put all answers at the very end under "## Answer Key".
 Add the total mark for each section.`;
 
-    addMessage("user", `📄 Exam (${diffLabels[examDifficulty]})${examUnit !== "all" ? " — Unit " + examUnit : ""}${examTopic ? ": " + examTopic : ""}`);
+    addMessage("user", `📄 Exam (${diffLabels[examDifficulty]})${examUnits.trim() ? " — " + examUnits.trim() : ""}${examTopic ? ": " + examTopic : ""}`);
     setLoading(true);
 
     try {
@@ -586,23 +586,11 @@ Add the total mark for each section.`;
               ))}
             </div>
 
-            <label className="modal-label">الوحدة — Unit</label>
-            <div className="quiz-type-selector five-cols">
-              {[
-                { key: "all", label: "📚", desc: "الكل" },
-                { key: "1", label: "1", desc: "Unit 1" },
-                { key: "2", label: "2", desc: "Unit 2" },
-                { key: "3", label: "3", desc: "Unit 3" },
-                { key: "4", label: "4", desc: "Unit 4" },
-              ].map(u => (
-                <button key={u.key} className={"quiz-type-btn" + (examUnit === u.key ? " active" : "")} onClick={() => setExamUnit(u.key)}>
-                  <span className="quiz-type-icon">{u.label}</span>
-                  <span className="quiz-type-desc">{u.desc}</span>
-                </button>
-              ))}
-            </div>
+            <label className="modal-label">الوحدات — Units/Chapters</label>
+            <input type="text" className="quiz-topic-input" placeholder="e.g. Unit 1, 3, 5 or Phonetics, Morphology... (اتركه فاضي = الكل)" value={examUnits} onChange={e => setExamUnits(e.target.value)} />
 
-            <input type="text" className="quiz-topic-input" placeholder="موضوع محدد (اختياري)..." value={examTopic} onChange={e => setExamTopic(e.target.value)} onKeyDown={e => { if (e.key === "Enter") generateExam(); }} autoFocus />
+            <label className="modal-label">موضوع محدد (اختياري)</label>
+            <input type="text" className="quiz-topic-input" placeholder="e.g. Past Simple, Vowels..." value={examTopic} onChange={e => setExamTopic(e.target.value)} onKeyDown={e => { if (e.key === "Enter") generateExam(); }} />
             <div className="quiz-modal-actions">
               <button className="quiz-modal-btn primary" onClick={generateExam}>📄 Generate Exam</button>
               <button className="quiz-modal-btn cancel" onClick={() => setShowExamModal(false)}>Cancel</button>
