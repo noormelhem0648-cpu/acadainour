@@ -517,3 +517,92 @@ body {
 .assistant-message tr:nth-child(even) {
   background: var(--bg-secondary);
 }
+
+/* ── Quiz Modal ───────────────────────────────────────────── */
+.quiz-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+.quiz-modal {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: var(--shadow);
+}
+.quiz-modal h3 {
+  font-size: 1.2rem;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.quiz-modal p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+.quiz-topic-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-secondary);
+  color: var(--text);
+  font-size: 0.93rem;
+  outline: none;
+  font-family: inherit;
+  margin-bottom: 16px;
+  transition: border-color 0.15s;
+}
+.quiz-topic-input:focus {
+  border-color: var(--accent);
+}
+.quiz-topic-input::placeholder {
+  color: var(--text-muted);
+}
+.quiz-modal-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.quiz-modal-btn {
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid var(--border);
+  transition: all 0.15s;
+}
+.quiz-modal-btn.primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  flex: 1;
+}
+.quiz-modal-btn.primary:hover {
+  background: var(--accent-dark);
+}
+.quiz-modal-btn.secondary {
+  background: var(--accent-light);
+  color: var(--accent-dark);
+  border-color: var(--accent);
+}
+.quiz-modal-btn.secondary:hover {
+  background: var(--accent);
+  color: #fff;
+}
+.quiz-modal-btn.cancel {
+  background: none;
+  color: var(--text-muted);
+}
+.quiz-modal-btn.cancel:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}

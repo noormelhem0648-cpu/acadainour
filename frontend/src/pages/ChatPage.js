@@ -39,6 +39,8 @@ export default function ChatPage({ darkMode, setDarkMode }) {
   const [attachedImage, setAttachedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [copiedIdx, setCopiedIdx] = useState(null);
+  const [showQuizModal, setShowQuizModal] = useState(false);
+  const [quizTopic, setQuizTopic] = useState("");
 
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -211,33 +213,40 @@ export default function ChatPage({ darkMode, setDarkMode }) {
     setLoading(false);
   };
 
-  const generateQuiz = async () => {
+  const generateQuiz = async (topic) => {
     if (loading) return;
-    const newMessages = [...messages, { role: "user", content: "📝 Generate a quiz!", time: Date.now() }];
-    setMessages(newMessages);
+    setShowQuizModal(false);
+    const topicText = topic ? ` about "${topic}"` : "";
+    const quizPrompt = `Generate a quiz with 5 mixed questions (MCQ, True/False, fill-in-the-blank)${topicText}. Number each question. Put the answers at the end.`;
+
+    setMessages(prev => {
+      const updated = [...prev, { role: "user", content: `📝 Quiz${topic ? ": " + topic : ""}`, time: Date.now() }];
+      messagesRef.current = updated;
+      return updated;
+    });
     setLoading(true);
 
     try {
-      const res = await fetch(API_URL + "/quiz", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          subject_code: subjectCode,
-          num_questions: 5,
-        }),
+      const answer = await callAPI(quizPrompt, messagesRef.current.slice(0, -1));
+      setMessages(prev => {
+        const updated = [...prev, { role: "assistant", content: answer, time: Date.now() }];
+        messagesRef.current = updated;
+        return updated;
       });
-      const data = await res.json();
-      const quizContent = data.quiz || data.detail || "Could not generate quiz. Try again.";
-      setMessages([...newMessages, { role: "assistant", content: quizContent, time: Date.now() }]);
     } catch (err) {
-      setMessages([...newMessages, {
-        role: "assistant",
-        content: "ما قدرت أعمل الكويز. حاول مرة ثانية 🔄\nCouldn't generate the quiz. Please try again.",
-        time: Date.now(),
-        isError: true
-      }]);
+      setMessages(prev => {
+        const updated = [...prev, {
+          role: "assistant",
+          content: "ما قدرت أعمل الكويز. حاول مرة ثانية 🔄\nCouldn't generate the quiz. Please try again.",
+          time: Date.now(),
+          isError: true
+        }];
+        messagesRef.current = updated;
+        return updated;
+      });
     }
     setLoading(false);
+    setQuizTopic("");
   };
 
   const quickAsk = (text) => {
@@ -257,7 +266,7 @@ export default function ChatPage({ darkMode, setDarkMode }) {
       <header className="header">
         <button className="back-btn" onClick={() => navigate(-1)}>Back</button>
         <span className="app-name">{subjectCode}</span>
-        <button className="quiz-header-btn" onClick={generateQuiz} disabled={loading}>
+        <button className="quiz-header-btn" onClick={() => setShowQuizModal(true)} disabled={loading}>
           Quiz
         </button>
         <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
@@ -348,6 +357,35 @@ export default function ChatPage({ darkMode, setDarkMode }) {
           {loading ? "..." : "Send"}
         </button>
       </div>
+
+      {showQuizModal && (
+        <div className="quiz-modal-overlay" onClick={() => setShowQuizModal(false)}>
+          <div className="quiz-modal" onClick={e => e.stopPropagation()}>
+            <h3>📝 Quiz</h3>
+            <p>اكتب الموضوع اللي بدك كويز عنه</p>
+            <input
+              type="text"
+              className="quiz-topic-input"
+              placeholder="مثال: Past Simple, Morphology..."
+              value={quizTopic}
+              onChange={e => setQuizTopic(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter") generateQuiz(quizTopic); }}
+              autoFocus
+            />
+            <div className="quiz-modal-actions">
+              <button className="quiz-modal-btn primary" onClick={() => generateQuiz(quizTopic)}>
+                Generate
+              </button>
+              <button className="quiz-modal-btn secondary" onClick={() => generateQuiz("")}>
+                Random Quiz
+              </button>
+              <button className="quiz-modal-btn cancel" onClick={() => setShowQuizModal(false)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
