@@ -9,7 +9,7 @@ def _load_api_keys():
     main_key = os.getenv("GEMINI_API_KEY")
     if main_key:
         keys.append(main_key)
-    for i in range(1, 10):
+    for i in range(1, 20):
         for fmt in [f"GEMINI_API_KEY_{i}", f"GEMINI_API_KEY{i}"]:
             key = os.getenv(fmt)
             if key and key not in keys:
