@@ -6,8 +6,13 @@ DATABASE_URL = os.getenv("DATABASE_URL", "")
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-engine = create_engine(DATABASE_URL, pool_pre_ping=True, pool_size=5)
-SessionLocal = sessionmaker(bind=engine)
+if DATABASE_URL:
+    engine = create_engine(DATABASE_URL, pool_pre_ping=True, pool_size=5)
+    SessionLocal = sessionmaker(bind=engine)
+else:
+    print("[DB] WARNING: No DATABASE_URL set. Database features disabled.")
+    engine = None
+    SessionLocal = None
 Base = declarative_base()
 
 
@@ -57,11 +62,16 @@ class Restriction(Base):
 
 
 def init_db():
-    Base.metadata.create_all(bind=engine)
-    print("[DB] Tables created successfully.")
+    if engine:
+        Base.metadata.create_all(bind=engine)
+        print("[DB] Tables created successfully.")
+    else:
+        print("[DB] Skipped — no DATABASE_URL.")
 
 
 def get_db():
+    if not SessionLocal:
+        raise Exception("Database not configured")
     db = SessionLocal()
     try:
         yield db
