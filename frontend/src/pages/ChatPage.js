@@ -66,6 +66,7 @@ export default function ChatPage({ darkMode, setDarkMode }) {
   const [copiedIdx, setCopiedIdx] = useState(null);
   const [showQuizModal, setShowQuizModal] = useState(false);
   const [quizTopic, setQuizTopic] = useState("");
+  const [quizType, setQuizType] = useState("mix");
   const [likedMsgs, setLikedMsgs] = useState({});
 
   const messagesEndRef = useRef(null);
@@ -254,12 +255,22 @@ export default function ChatPage({ darkMode, setDarkMode }) {
     setLoading(false);
   };
 
-  const generateQuiz = async (topic) => {
+  const QUIZ_TYPES = {
+    mix: "Generate a quiz with 7 questions using a MIX of: multiple choice (ضع دائرة), True/False, fill-in-the-blank (املأ الفراغ), and 1-2 short answer questions (أسئلة قصيرة).",
+    mcq: "Generate a quiz with 7 multiple choice questions (ضع دائرة حول الإجابة الصحيحة). Each question should have 4 options (a, b, c, d).",
+    fillblank: "Generate a quiz with 7 fill-in-the-blank questions (املأ الفراغ). Each sentence should have one blank (_______) for the student to complete.",
+    short: "Generate a quiz with 5 short answer questions (أسئلة مقالية قصيرة). Each question requires a 1-3 sentence answer.",
+  };
+
+  const generateQuiz = async (topic, type) => {
     if (loading) return;
     setShowQuizModal(false);
-    const topicText = topic ? ` about "${topic}"` : "";
-    const quizPrompt = `Generate a quiz with 5 mixed questions (MCQ, True/False, fill-in-the-blank)${topicText}. Number each question. Put the answers at the end.`;
-    addMessage("user", `📝 Quiz${topic ? ": " + topic : ""}`);
+    const topicText = topic ? ` Focus on the topic: "${topic}".` : "";
+    const typePrompt = QUIZ_TYPES[type || "mix"];
+    const quizPrompt = `${typePrompt}${topicText} Number each question. Put all answers at the end under "## Answers" section.`;
+
+    const typeLabels = { mix: "Mix", mcq: "MCQ", fillblank: "Fill Blank", short: "Short Answer" };
+    addMessage("user", `📝 Quiz (${typeLabels[type || "mix"]})${topic ? ": " + topic : ""}`);
     setLoading(true);
 
     try {
@@ -427,22 +438,39 @@ export default function ChatPage({ darkMode, setDarkMode }) {
         <div className="quiz-modal-overlay" onClick={() => setShowQuizModal(false)} role="dialog" aria-modal="true" aria-label="Quiz options">
           <div className="quiz-modal" onClick={e => e.stopPropagation()}>
             <h3>📝 Quiz Generator</h3>
-            <p>اكتب الموضوع اللي بدك كويز عنه — Write the topic you want</p>
+            <p>اختار نوع الأسئلة والموضوع</p>
+            <div className="quiz-type-selector">
+              {[
+                { key: "mix", label: "🎯 Mix", desc: "ميكس" },
+                { key: "mcq", label: "⭕ MCQ", desc: "ضع دائرة" },
+                { key: "fillblank", label: "✏️ Fill", desc: "املأ الفراغ" },
+                { key: "short", label: "📝 Short", desc: "أسئلة قصيرة" },
+              ].map(t => (
+                <button
+                  key={t.key}
+                  className={"quiz-type-btn" + (quizType === t.key ? " active" : "")}
+                  onClick={() => setQuizType(t.key)}
+                >
+                  <span className="quiz-type-icon">{t.label}</span>
+                  <span className="quiz-type-desc">{t.desc}</span>
+                </button>
+              ))}
+            </div>
             <input
               type="text"
               className="quiz-topic-input"
-              placeholder="e.g. Past Simple, Morphology, Phonetics..."
+              placeholder="الموضوع (اختياري) — e.g. Past Simple, Morphology..."
               value={quizTopic}
               onChange={e => setQuizTopic(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter") generateQuiz(quizTopic); }}
+              onKeyDown={e => { if (e.key === "Enter") generateQuiz(quizTopic, quizType); }}
               autoFocus
               aria-label="Quiz topic"
             />
             <div className="quiz-modal-actions">
-              <button className="quiz-modal-btn primary" onClick={() => generateQuiz(quizTopic)}>
+              <button className="quiz-modal-btn primary" onClick={() => generateQuiz(quizTopic, quizType)}>
                 🎯 Generate
               </button>
-              <button className="quiz-modal-btn secondary" onClick={() => generateQuiz("")}>
+              <button className="quiz-modal-btn secondary" onClick={() => generateQuiz("", quizType)}>
                 🎲 Random
               </button>
               <button className="quiz-modal-btn cancel" onClick={() => setShowQuizModal(false)}>

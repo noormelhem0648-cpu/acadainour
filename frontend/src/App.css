@@ -538,6 +538,46 @@ body {
 }
 .quiz-modal h3 { font-size: 1.2rem; margin-bottom: 6px; color: var(--text); }
 .quiz-modal p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px; }
+/* ── Quiz Type Selector ────────────────────────────────────── */
+.quiz-type-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.quiz-type-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 8px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.quiz-type-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+.quiz-type-btn.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+.quiz-type-btn.active .quiz-type-desc {
+  color: rgba(255,255,255,0.85);
+}
+.quiz-type-icon {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.quiz-type-desc {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
 .quiz-topic-input {
   width: 100%;
   padding: 11px 14px;
