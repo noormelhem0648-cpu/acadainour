@@ -65,9 +65,15 @@ export default function ChatPage({ darkMode, setDarkMode }) {
   const [imagePreview, setImagePreview] = useState(null);
   const [copiedIdx, setCopiedIdx] = useState(null);
   const [showQuizModal, setShowQuizModal] = useState(false);
+  const [showExamModal, setShowExamModal] = useState(false);
   const [quizTopic, setQuizTopic] = useState("");
   const [quizType, setQuizType] = useState("mix");
+  const [examTopic, setExamTopic] = useState("");
+  const [examDifficulty, setExamDifficulty] = useState("medium");
+  const [examUnit, setExamUnit] = useState("all");
   const [likedMsgs, setLikedMsgs] = useState({});
+  const [showHistory, setShowHistory] = useState(false);
+  const [savedChats, setSavedChats] = useState([]);
 
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -91,6 +97,69 @@ export default function ChatPage({ darkMode, setDarkMode }) {
     interval = setInterval(ping, 4 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
+
+  // Load saved chats from localStorage
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(`acadai_chats_${subjectCode}`) || "[]");
+      setSavedChats(saved);
+    } catch (e) {}
+  }, [subjectCode]);
+
+  // Auto-save current chat
+  useEffect(() => {
+    if (messages.length <= 1) return;
+    const chatId = messages[0]?.chatId || Date.now();
+    if (!messages[0].chatId) {
+      setMessages(prev => {
+        const updated = [{ ...prev[0], chatId }, ...prev.slice(1)];
+        messagesRef.current = updated;
+        return updated;
+      });
+    }
+    try {
+      const saved = JSON.parse(localStorage.getItem(`acadai_chats_${subjectCode}`) || "[]");
+      const existing = saved.findIndex(c => c.id === chatId);
+      const chatData = {
+        id: chatId,
+        title: messages.find(m => m.role === "user")?.content?.slice(0, 40) || "New Chat",
+        time: Date.now(),
+        messages: messages,
+      };
+      if (existing >= 0) saved[existing] = chatData;
+      else saved.unshift(chatData);
+      const trimmed = saved.slice(0, 20);
+      localStorage.setItem(`acadai_chats_${subjectCode}`, JSON.stringify(trimmed));
+      setSavedChats(trimmed);
+    } catch (e) {}
+  }, [messages, subjectCode]);
+
+  const startNewChat = () => {
+    setMessages([{
+      role: "assistant",
+      content: "أهلاً! أنا **AcadAI** — مساعدك الأكاديمي لمادة **" + subjectCode + "** 🎓\nاسألني أي سؤال عن المادة وراح أجاوبك من الكتاب أولاً.\n\nHi! I'm **AcadAI** — your study buddy for **" + subjectCode + "**. Ask me anything!",
+      time: Date.now(),
+      chatId: Date.now(),
+    }]);
+    setLikedMsgs({});
+    setShowHistory(false);
+  };
+
+  const loadChat = (chat) => {
+    setMessages(chat.messages);
+    messagesRef.current = chat.messages;
+    setLikedMsgs({});
+    setShowHistory(false);
+  };
+
+  const deleteChat = (chatId) => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(`acadai_chats_${subjectCode}`) || "[]");
+      const filtered = saved.filter(c => c.id !== chatId);
+      localStorage.setItem(`acadai_chats_${subjectCode}`, JSON.stringify(filtered));
+      setSavedChats(filtered);
+    } catch (e) {}
+  };
 
   // Loading step animation
   useEffect(() => {
@@ -283,6 +352,43 @@ export default function ChatPage({ darkMode, setDarkMode }) {
     setQuizTopic("");
   };
 
+  const generateExam = async () => {
+    if (loading) return;
+    setShowExamModal(false);
+    const diffLabels = { easy: "Easy (سهل)", medium: "Medium (متوسط)", hard: "Hard (صعب)" };
+    const diffPrompts = {
+      easy: "Make the questions simple and straightforward, suitable for beginners. Use basic vocabulary and simple sentence structures.",
+      medium: "Make the questions at a university level, requiring understanding of concepts and application.",
+      hard: "Make the questions challenging, requiring deep analysis, critical thinking, and advanced knowledge.",
+    };
+    const unitText = examUnit !== "all" ? ` Focus ONLY on Unit ${examUnit} content.` : " Cover all units.";
+    const topicText = examTopic ? ` Special focus on: "${examTopic}".` : "";
+
+    const examPrompt = `Generate a FULL EXAM for subject ${subjectCode}.${unitText}${topicText}
+Difficulty: ${diffLabels[examDifficulty]}. ${diffPrompts[examDifficulty]}
+
+The exam must include ALL of these sections:
+## Section A: Multiple Choice (ضع دائرة) — 5 questions with 4 options each
+## Section B: True/False (صح أم خطأ) — 5 questions
+## Section C: Fill in the Blank (املأ الفراغ) — 5 questions
+## Section D: Short Answer (أجب بإيجاز) — 3 questions
+
+Total: 18 questions. Put all answers at the very end under "## Answer Key".
+Add the total mark for each section.`;
+
+    addMessage("user", `📄 Exam (${diffLabels[examDifficulty]})${examUnit !== "all" ? " — Unit " + examUnit : ""}${examTopic ? ": " + examTopic : ""}`);
+    setLoading(true);
+
+    try {
+      const answer = await callAPI(examPrompt, messagesRef.current.slice(0, -1));
+      addMessage("assistant", answer);
+    } catch (err) {
+      addMessage("assistant", "ما قدرت أعمل الامتحان. حاول مرة ثانية 🔄", { isError: true });
+    }
+    setLoading(false);
+    setExamTopic("");
+  };
+
   const sendPrompt = async (prompt, displayText) => {
     if (loading) return;
     addMessage("user", displayText || prompt);
@@ -310,9 +416,10 @@ export default function ChatPage({ darkMode, setDarkMode }) {
       <header className="header" role="banner">
         <button className="back-btn" onClick={() => navigate(-1)} aria-label="Go back">Back</button>
         <span className="app-name">{subjectCode}</span>
-        <button className="quiz-header-btn" onClick={() => setShowQuizModal(true)} disabled={loading} aria-label="Generate quiz">
-          Quiz
-        </button>
+        <button className="header-action-btn" onClick={startNewChat} aria-label="New chat">➕</button>
+        <button className="header-action-btn" onClick={() => setShowHistory(!showHistory)} aria-label="Chat history">💬</button>
+        <button className="quiz-header-btn" onClick={() => setShowQuizModal(true)} disabled={loading}>Quiz</button>
+        <button className="quiz-header-btn" onClick={() => setShowExamModal(true)} disabled={loading}>Exam</button>
         <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)} aria-label="Toggle dark mode">
           {darkMode ? "☀️" : "🌙"}
         </button>
@@ -433,6 +540,72 @@ export default function ChatPage({ darkMode, setDarkMode }) {
           {loading ? "⏳" : "➤"}
         </button>
       </div>
+
+      {showHistory && (
+        <div className="history-sidebar">
+          <div className="history-header">
+            <h3>💬 المحادثات السابقة</h3>
+            <button className="history-close" onClick={() => setShowHistory(false)}>✕</button>
+          </div>
+          <div className="history-list">
+            {savedChats.length === 0 && <p className="history-empty">لا توجد محادثات محفوظة</p>}
+            {savedChats.map(chat => (
+              <div key={chat.id} className="history-item">
+                <button className="history-item-btn" onClick={() => loadChat(chat)}>
+                  <span className="history-title">{chat.title}</span>
+                  <span className="history-time">{new Date(chat.time).toLocaleDateString()}</span>
+                </button>
+                <button className="history-delete" onClick={() => deleteChat(chat.id)} aria-label="Delete chat">🗑️</button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {showExamModal && (
+        <div className="quiz-modal-overlay" onClick={() => setShowExamModal(false)} role="dialog" aria-modal="true">
+          <div className="quiz-modal" onClick={e => e.stopPropagation()}>
+            <h3>📄 Exam Generator</h3>
+            <p>اختار المستوى والوحدة وحدد الموضوع</p>
+
+            <label className="modal-label">المستوى — Difficulty</label>
+            <div className="quiz-type-selector three-cols">
+              {[
+                { key: "easy", label: "🟢", desc: "سهل" },
+                { key: "medium", label: "🟡", desc: "متوسط" },
+                { key: "hard", label: "🔴", desc: "صعب" },
+              ].map(d => (
+                <button key={d.key} className={"quiz-type-btn" + (examDifficulty === d.key ? " active" : "")} onClick={() => setExamDifficulty(d.key)}>
+                  <span className="quiz-type-icon">{d.label}</span>
+                  <span className="quiz-type-desc">{d.desc}</span>
+                </button>
+              ))}
+            </div>
+
+            <label className="modal-label">الوحدة — Unit</label>
+            <div className="quiz-type-selector five-cols">
+              {[
+                { key: "all", label: "📚", desc: "الكل" },
+                { key: "1", label: "1", desc: "Unit 1" },
+                { key: "2", label: "2", desc: "Unit 2" },
+                { key: "3", label: "3", desc: "Unit 3" },
+                { key: "4", label: "4", desc: "Unit 4" },
+              ].map(u => (
+                <button key={u.key} className={"quiz-type-btn" + (examUnit === u.key ? " active" : "")} onClick={() => setExamUnit(u.key)}>
+                  <span className="quiz-type-icon">{u.label}</span>
+                  <span className="quiz-type-desc">{u.desc}</span>
+                </button>
+              ))}
+            </div>
+
+            <input type="text" className="quiz-topic-input" placeholder="موضوع محدد (اختياري)..." value={examTopic} onChange={e => setExamTopic(e.target.value)} onKeyDown={e => { if (e.key === "Enter") generateExam(); }} autoFocus />
+            <div className="quiz-modal-actions">
+              <button className="quiz-modal-btn primary" onClick={generateExam}>📄 Generate Exam</button>
+              <button className="quiz-modal-btn cancel" onClick={() => setShowExamModal(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showQuizModal && (
         <div className="quiz-modal-overlay" onClick={() => setShowQuizModal(false)} role="dialog" aria-modal="true" aria-label="Quiz options">
