@@ -46,7 +46,7 @@ const LOADING_STEPS = [
   "توليد الإجابة..."
 ];
 
-export default function ChatPage({ darkMode, setDarkMode }) {
+export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout }) {
   const navigate = useNavigate();
   const { subjectCode } = useParams();
 
@@ -210,30 +210,32 @@ export default function ChatPage({ darkMode, setDarkMode }) {
     if (imageInputRef.current) imageInputRef.current.value = "";
   };
 
-  const callAPI = useCallback(async (userMessage, msgHistory) => {
+  const callAPI = useCallback(async (userMessage, msgHistory, convoId) => {
     const history = msgHistory.map(m => ({
       role: m.role === "assistant" ? "model" : "user",
       content: m.content
     }));
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
         const res = await fetch(API_URL + "/ask", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ subject_code: subjectCode, message: userMessage, history }),
+          headers,
+          body: JSON.stringify({ subject_code: subjectCode, message: userMessage, history, conversation_id: convoId || null }),
         });
         if (res.status === 404 && attempt === 0) {
           await new Promise(r => setTimeout(r, 3000));
           continue;
         }
         const data = await res.json();
-        return data.answer || data.detail || "No response received.";
+        return { answer: data.answer || data.detail || "No response received.", conversation_id: data.conversation_id };
       } catch (err) {
         if (attempt === 0) { await new Promise(r => setTimeout(r, 3000)); continue; }
         throw err;
       }
     }
-  }, [subjectCode]);
+  }, [subjectCode, token]);
 
   const addMessage = (role, content, extra = {}) => {
     setMessages(prev => {
@@ -267,7 +269,8 @@ export default function ChatPage({ darkMode, setDarkMode }) {
         const data = await res.json();
         answer = data.answer || data.detail || "No response.";
       } else {
-        answer = await callAPI(userMessage, historyMsgs);
+        const result = await callAPI(userMessage, historyMsgs);
+        answer = result.answer;
       }
       addMessage("assistant", answer);
       clearAttachments();
@@ -292,7 +295,7 @@ export default function ChatPage({ darkMode, setDarkMode }) {
     setLoading(true);
 
     try {
-      const answer = await callAPI(userMessage, historyBefore);
+      const { answer } = await callAPI(userMessage, historyBefore);
       addMessage("assistant", answer);
     } catch (err) {
       addMessage("assistant", "عذراً، حصل خطأ. حاول مرة ثانية. 🔄", { isError: true });
@@ -316,7 +319,7 @@ export default function ChatPage({ darkMode, setDarkMode }) {
     setLoading(true);
 
     try {
-      const answer = await callAPI(userMessage, historyBefore);
+      const { answer } = await callAPI(userMessage, historyBefore);
       addMessage("assistant", answer);
     } catch (err) {
       addMessage("assistant", "عذراً، حصل خطأ بالاتصال. حاول مرة ثانية. 🔄", { isError: true });
@@ -343,7 +346,7 @@ export default function ChatPage({ darkMode, setDarkMode }) {
     setLoading(true);
 
     try {
-      const answer = await callAPI(quizPrompt, messagesRef.current.slice(0, -1));
+      const { answer } = await callAPI(quizPrompt, messagesRef.current.slice(0, -1));
       addMessage("assistant", answer);
     } catch (err) {
       addMessage("assistant", "ما قدرت أعمل الكويز. حاول مرة ثانية 🔄", { isError: true });
@@ -380,7 +383,7 @@ Add the total mark for each section.`;
     setLoading(true);
 
     try {
-      const answer = await callAPI(examPrompt, messagesRef.current.slice(0, -1));
+      const { answer } = await callAPI(examPrompt, messagesRef.current.slice(0, -1));
       addMessage("assistant", answer);
     } catch (err) {
       addMessage("assistant", "ما قدرت أعمل الامتحان. حاول مرة ثانية 🔄", { isError: true });
@@ -394,7 +397,7 @@ Add the total mark for each section.`;
     addMessage("user", displayText || prompt);
     setLoading(true);
     try {
-      const answer = await callAPI(prompt, messagesRef.current.slice(0, -1));
+      const { answer } = await callAPI(prompt, messagesRef.current.slice(0, -1));
       addMessage("assistant", answer);
     } catch (err) {
       addMessage("assistant", "صار خطأ — حاول مرة ثانية 🔄", { isError: true });
@@ -423,6 +426,7 @@ Add the total mark for each section.`;
         <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)} aria-label="Toggle dark mode">
           {darkMode ? "☀️" : "🌙"}
         </button>
+        {onLogout && <button className="header-action-btn" onClick={onLogout} aria-label="Logout" title="Logout">🚪</button>}
       </header>
 
       <div className="messages-container" role="log" aria-label="Chat messages" aria-live="polite">
