@@ -367,17 +367,21 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
     const unitText = examUnits.trim() ? ` Focus ONLY on these units/chapters: ${examUnits.trim()}.` : " Cover all available material.";
     const topicText = examTopic ? ` Special focus on: "${examTopic}".` : "";
 
-    const examPrompt = `Generate a FULL EXAM for subject ${subjectCode}.${unitText}${topicText}
-Difficulty: ${diffLabels[examDifficulty]}. ${diffPrompts[examDifficulty]}
+    const examPrompt = `IMPORTANT: This is a practice exam generation request. Generate the FULL exam with ALL questions and answers.
 
-The exam must include ALL of these sections:
-## Section A: Multiple Choice (ضع دائرة) — 5 questions with 4 options each
-## Section B: True/False (صح أم خطأ) — 5 questions
-## Section C: Fill in the Blank (املأ الفراغ) — 5 questions
-## Section D: Short Answer (أجب بإيجاز) — 3 questions
+Generate a FULL PRACTICE EXAM for subject ${subjectCode}.${unitText}${topicText}
+Difficulty level: ${diffLabels[examDifficulty]}. ${diffPrompts[examDifficulty]}
 
-Total: 18 questions. Put all answers at the very end under "## Answer Key".
-Add the total mark for each section.`;
+Structure the exam EXACTLY like this:
+
+## Section A: Multiple Choice — ضع دائرة (5 questions, 4 options each, 10 marks)
+## Section B: True or False — صح أم خطأ (5 questions, 5 marks)
+## Section C: Fill in the Blank — املأ الفراغ (5 questions, 10 marks)
+## Section D: Short Answer — أجب بإيجاز (3 questions, 15 marks)
+
+Total: 40 marks, 18 questions.
+At the very end, add: ## Answer Key — with all correct answers.
+Use the mixed Arabic+English style for the exam.`;
 
     addMessage("user", `📄 Exam (${diffLabels[examDifficulty]})${examUnits.trim() ? " — " + examUnits.trim() : ""}${examTopic ? ": " + examTopic : ""}`);
     setLoading(true);
