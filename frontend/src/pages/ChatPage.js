@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 
@@ -44,10 +44,28 @@ export default function ChatPage({ darkMode, setDarkMode }) {
   const fileInputRef = useRef(null);
   const imageInputRef = useRef(null);
   const textareaRef = useRef(null);
+  const messagesRef = useRef(messages);
+  const [backendReady, setBackendReady] = useState(false);
+
+  useEffect(() => { messagesRef.current = messages; }, [messages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Ping backend on page load to wake it up from Render cold start
+  useEffect(() => {
+    let interval;
+    const ping = () => {
+      fetch(API_URL + "/").then(r => {
+        if (r.ok) setBackendReady(true);
+      }).catch(() => {});
+    };
+    ping();
+    // Keep pinging every 4 minutes to prevent Render from sleeping
+    interval = setInterval(ping, 4 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const copyMessage = (text, idx) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -79,36 +97,59 @@ export default function ChatPage({ darkMode, setDarkMode }) {
     if (imageInputRef.current) imageInputRef.current.value = "";
   };
 
-  const callAPI = async (userMessage, msgHistory) => {
+  const callAPI = useCallback(async (userMessage, msgHistory) => {
     const history = msgHistory.map(m => ({
       role: m.role === "assistant" ? "model" : "user",
       content: m.content
     }));
-    const res = await fetch(API_URL + "/ask", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        subject_code: subjectCode,
-        message: userMessage,
-        history: history,
-      }),
-    });
-    const data = await res.json();
-    return data.answer;
-  };
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const res = await fetch(API_URL + "/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            subject_code: subjectCode,
+            message: userMessage,
+            history: history,
+          }),
+        });
+        if (res.status === 404) {
+          // Backend might be waking up, wait and retry
+          if (attempt === 0) {
+            await new Promise(r => setTimeout(r, 3000));
+            continue;
+          }
+        }
+        const data = await res.json();
+        return data.answer || data.detail || "No response received.";
+      } catch (err) {
+        if (attempt === 0) {
+          await new Promise(r => setTimeout(r, 3000));
+          continue;
+        }
+        throw err;
+      }
+    }
+  }, [subjectCode]);
 
   const sendMessage = async () => {
     if (loading) return;
     if (!input.trim() && !attachedImage && !attachedFile) return;
     const userMessage = input.trim() || (attachedImage ? "Image attached" : "File attached");
-    const newMessages = [...messages, { role: "user", content: userMessage, time: Date.now() }];
-    setMessages(newMessages);
+
+    setMessages(prev => {
+      const updated = [...prev, { role: "user", content: userMessage, time: Date.now() }];
+      messagesRef.current = updated;
+      return updated;
+    });
     setInput("");
     setLoading(true);
 
     try {
       let answer;
-      const historyMsgs = newMessages.slice(0, -1);
+      const currentMsgs = messagesRef.current;
+      const historyMsgs = currentMsgs.slice(0, -1);
 
       if (attachedImage || attachedFile) {
         const formData = new FormData();
@@ -119,19 +160,27 @@ export default function ChatPage({ darkMode, setDarkMode }) {
         else if (attachedFile) { formData.append("file", attachedFile); }
         const res = await fetch(API_URL + "/upload-and-ask", { method: "POST", body: formData });
         const data = await res.json();
-        answer = data.answer;
+        answer = data.answer || data.detail || "No response.";
       } else {
         answer = await callAPI(userMessage, historyMsgs);
       }
-      setMessages([...newMessages, { role: "assistant", content: answer, time: Date.now() }]);
+      setMessages(prev => {
+        const updated = [...prev, { role: "assistant", content: answer, time: Date.now() }];
+        messagesRef.current = updated;
+        return updated;
+      });
       clearAttachments();
     } catch (err) {
-      setMessages([...newMessages, {
-        role: "assistant",
-        content: "عذراً، حصل خطأ بالاتصال. حاول مرة ثانية. 🔄\nSorry, connection error. Please try again.",
-        time: Date.now(),
-        isError: true
-      }]);
+      setMessages(prev => {
+        const updated = [...prev, {
+          role: "assistant",
+          content: "عذراً، حصل خطأ بالاتصال. حاول مرة ثانية. 🔄\nSorry, connection error. Please try again.",
+          time: Date.now(),
+          isError: true
+        }];
+        messagesRef.current = updated;
+        return updated;
+      });
     }
     setLoading(false);
   };
