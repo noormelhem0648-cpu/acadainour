@@ -133,6 +133,18 @@ def make_instructor(email: str, secret: str, db: Session = Depends(get_db)):
     db.commit()
     return {"ok": True, "message": f"{user.name} is now an instructor."}
 
+@app.get("/auth/remove-instructor")
+def remove_instructor(email: str, secret: str, db: Session = Depends(get_db)):
+    admin_secret = os.getenv("ADMIN_SECRET", "")
+    if not admin_secret or secret != admin_secret:
+        raise HTTPException(status_code=403, detail="Invalid secret.")
+    user = db.query(User).filter(User.email == email.lower().strip()).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    user.role = "student"
+    db.commit()
+    return {"ok": True, "message": f"{user.name} is now a student."}
+
 
 # ── API Key Contribution ────────────────────────────────────
 
