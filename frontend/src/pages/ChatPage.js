@@ -533,6 +533,8 @@ Use the mixed Arabic+English style for the exam.`;
                       </button>
                       {openDropdown === idx && (
                         <div className="msg-dropdown">
+                          {/* ── Actions ── */}
+                          <div className="dd-section-label">Actions</div>
                           <div className="msg-dropdown-section">
                             <button className="dd-item" onClick={() => { copyMessage(msg.content, idx); setOpenDropdown(null); }}>
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -559,27 +561,26 @@ Use the mixed Arabic+English style for the exam.`;
                               Download PDF
                             </button>
                           </div>
-                          {idx === messages.filter(m => m.role === "assistant").length - 1 + messages.filter(m=>m.role==="user").length && !loading && (
-                            <>
-                              <div className="dd-divider" />
-                              <div className="msg-dropdown-section">
-                                {[
-                                  ["Simpler", "Explain this in a simpler way", "🔽 Explain simpler"],
-                                  ["Example", "Give me a practical example", "💡 Example"],
-                                  ["Summary", "Give me a short summary of the above in 3 bullet points", "📋 Summary"],
-                                  ["بالعربي", "اشرح بالعربي بالكامل", "🇸🇦 بالعربي"],
-                                  ["Table", "Make a comparison table for the key concepts", "📊 Table"],
-                                  ["Flashcards", "Convert the above into flashcards. Each card should have a Question on one side and Answer on the other. Format: **Q:** ... **A:** ...", "🃏 Flashcards"],
-                                  ["Beginner", "Explain this at a beginner level, assume I know nothing", "🟢 Beginner"],
-                                  ["Advanced", "Explain this at an advanced academic level with technical terminology", "🔴 Advanced"],
-                                ].map(([label, prompt, display]) => (
-                                  <button key={label} className="dd-item" onClick={() => { sendPrompt(prompt, display); setOpenDropdown(null); }}>
-                                    {label}
-                                  </button>
-                                ))}
-                              </div>
-                            </>
-                          )}
+
+                          {/* ── Follow-ups grid ── */}
+                          <div className="dd-divider" />
+                          <div className="dd-section-label">اشرح لي بطريقة ثانية</div>
+                          <div className="dd-followup-grid">
+                            {[
+                              ["🔽 أبسط", "Explain this in a simpler way", "🔽 Explain simpler"],
+                              ["💡 مثال", "Give me a practical example", "💡 Example"],
+                              ["📋 ملخص", "Give me a short summary of the above in 3 bullet points", "📋 Summary"],
+                              ["🇸🇦 عربي", "اشرح بالعربي بالكامل", "🇸🇦 بالعربي"],
+                              ["📊 جدول", "Make a comparison table for the key concepts", "📊 Table"],
+                              ["🃏 Flashcards", "Convert the above into flashcards. Each card: **Q:** ... **A:** ...", "🃏 Flashcards"],
+                              ["🟢 مبتدئ", "Explain this at a beginner level, assume I know nothing", "🟢 Beginner"],
+                              ["🔴 متقدم", "Explain this at an advanced academic level with technical terminology", "🔴 Advanced"],
+                            ].map(([label, prompt, display]) => (
+                              <button key={label} className="dd-followup-pill" onClick={() => { sendPrompt(prompt, display); setOpenDropdown(null); }}>
+                                {label}
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
