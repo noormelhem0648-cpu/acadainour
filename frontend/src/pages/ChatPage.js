@@ -49,6 +49,14 @@ const LOADING_STEPS = [
 export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout }) {
   const navigate = useNavigate();
   const { subjectCode } = useParams();
+  const [blocked, setBlocked] = useState(null); // null=loading, false=ok, string=reason
+
+  useEffect(() => {
+    fetch(`${API_URL}/restrictions/check/${subjectCode}`)
+      .then(r => r.json())
+      .then(d => setBlocked(d.blocked ? (d.reason || "كويز أو امتحان") : false))
+      .catch(() => setBlocked(false));
+  }, [subjectCode]);
 
   const [messages, setMessages] = useState([
     {
@@ -427,6 +435,24 @@ Use the mixed Arabic+English style for the exam.`;
   };
 
   const lastAssistantMsg = messages.length > 0 && messages[messages.length - 1].role === "assistant" && !messages[messages.length - 1].isError;
+
+  if (blocked === null) return (
+    <div className="page chat-page" style={{display:"flex",alignItems:"center",justifyContent:"center"}}>
+      <div style={{color:"var(--text-muted)"}}>جاري التحقق...</div>
+    </div>
+  );
+
+  if (blocked !== false) return (
+    <div className="page chat-page" style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:16,textAlign:"center",padding:32}}>
+      <div style={{fontSize:"3rem"}}>🔒</div>
+      <h2 style={{margin:0,color:"var(--text)"}}>هاي المادة محجوبة حالياً</h2>
+      <p style={{color:"var(--text-muted)",margin:0,maxWidth:340}}>
+        📋 السبب: <strong>{blocked}</strong><br/><br/>
+        الدكتور أوقف استخدام AcadAI لهاي المادة مؤقتاً. راجعه للمزيد.
+      </p>
+      <button className="back-btn" style={{marginTop:8}} onClick={() => navigate(-1)}>← رجوع</button>
+    </div>
+  );
 
   return (
     <div className="page chat-page" role="main" aria-label="AcadAI Chat">

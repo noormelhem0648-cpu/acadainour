@@ -5,6 +5,7 @@ import YearsPage from "./pages/YearsPage";
 import SubjectsPage from "./pages/SubjectsPage";
 import ChatPage from "./pages/ChatPage";
 import AuthPage from "./pages/AuthPage";
+import InstructorPage from "./pages/InstructorPage";
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("theme") === "dark");
@@ -48,6 +49,7 @@ function App() {
         <Route path="/years" element={<YearsPage {...themeProps} />} />
         <Route path="/subjects/:year" element={<SubjectsPage {...themeProps} />} />
         <Route path="/chat/:subjectCode" element={<ChatPage {...themeProps} />} />
+        <Route path="/instructor" element={user?.role === "instructor" ? <InstructorPage {...themeProps} /> : <Navigate to="/" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from ai_engine import generate_academic_response
 from faiss_engine import search
-from db import init_db, get_db, User, Conversation, Message
+from db import init_db, get_db, User, Conversation, Message, Restriction
 from auth import (
     hash_password, verify_password, create_access_token,
     get_current_user, require_user, require_instructor
@@ -59,6 +59,10 @@ class QuizCheckRequest(BaseModel):
     correct_answer: str
     student_answer: str
 
+class RestrictionRequest(BaseModel):
+    subject_code: str
+    reason: Optional[str] = ""
+
 
 # ── Auth Endpoints ──────────────────────────────────────────
 
@@ -94,6 +98,19 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
 @app.get("/auth/me")
 def get_me(user: User = Depends(require_user)):
     return {"id": user.id, "name": user.name, "email": user.email, "role": user.role}
+
+@app.post("/auth/make-instructor")
+def make_instructor(email: str, secret: str, db: Session = Depends(get_db)):
+    """Promote a user to instructor. Requires ADMIN_SECRET env var."""
+    admin_secret = os.getenv("ADMIN_SECRET", "")
+    if not admin_secret or secret != admin_secret:
+        raise HTTPException(status_code=403, detail="Invalid secret.")
+    user = db.query(User).filter(User.email == email.lower().strip()).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    user.role = "instructor"
+    db.commit()
+    return {"ok": True, "message": f"{user.name} is now an instructor."}
 
 
 # ── Conversation Endpoints ──────────────────────────────────
@@ -139,10 +156,95 @@ def delete_conversation(convo_id: int, user: User = Depends(require_user), db: S
 def root():
     return {"status": "Smart Student Assistant N backend is running ✓"}
 
+def _is_subject_blocked(subject_code: str, db: Session) -> Optional[Restriction]:
+    """Return active restriction for a subject, or None."""
+    import datetime
+    now = datetime.datetime.utcnow()
+    return db.query(Restriction).filter(
+        Restriction.subject_code == subject_code.upper(),
+        Restriction.start_time <= now,
+        Restriction.end_time >= now,
+    ).first()
+
+
+@app.get("/restrictions/check/{subject_code}")
+def check_restriction(subject_code: str, db: Session = Depends(get_db)):
+    r = _is_subject_blocked(subject_code, db)
+    if r:
+        return {"blocked": True, "reason": r.reason or ""}
+    return {"blocked": False}
+
+
+@app.get("/restrictions")
+def list_restrictions(user: User = Depends(require_instructor), db: Session = Depends(get_db)):
+    import datetime
+    now = datetime.datetime.utcnow()
+    rows = db.query(Restriction).filter(Restriction.instructor_id == user.id).order_by(Restriction.start_time.desc()).all()
+    return [
+        {
+            "id": r.id,
+            "subject_code": r.subject_code,
+            "reason": r.reason,
+            "start_time": str(r.start_time),
+            "end_time": str(r.end_time),
+            "active": r.start_time <= now <= r.end_time,
+        }
+        for r in rows
+    ]
+
+
+@app.post("/restrictions")
+def create_restriction(req: RestrictionRequest, user: User = Depends(require_instructor), db: Session = Depends(get_db)):
+    import datetime
+    now = datetime.datetime.utcnow()
+    # If already blocked by this instructor, update end_time to "forever-ish"
+    existing = db.query(Restriction).filter(
+        Restriction.instructor_id == user.id,
+        Restriction.subject_code == req.subject_code.upper(),
+        Restriction.end_time >= now,
+    ).first()
+    if existing:
+        existing.end_time = now + datetime.timedelta(days=365)
+        existing.reason = req.reason or existing.reason
+        db.commit()
+        return {"ok": True, "id": existing.id}
+    r = Restriction(
+        instructor_id=user.id,
+        subject_code=req.subject_code.upper(),
+        reason=req.reason or "",
+        start_time=now,
+        end_time=now + datetime.timedelta(days=365),
+    )
+    db.add(r)
+    db.commit()
+    db.refresh(r)
+    return {"ok": True, "id": r.id}
+
+
+@app.delete("/restrictions/{restriction_id}")
+def delete_restriction(restriction_id: int, user: User = Depends(require_instructor), db: Session = Depends(get_db)):
+    r = db.query(Restriction).filter(Restriction.id == restriction_id, Restriction.instructor_id == user.id).first()
+    if not r:
+        raise HTTPException(status_code=404, detail="Restriction not found.")
+    db.delete(r)
+    db.commit()
+    return {"ok": True}
+
+
 @app.post("/ask")
 async def ask_assistant(request: ChatRequest, user: Optional[User] = Depends(get_current_user), db: Session = Depends(get_db)):
     if not request.message.strip():
         raise HTTPException(status_code=400, detail="Message cannot be empty.")
+
+    restriction = _is_subject_blocked(request.subject_code, db)
+    if restriction:
+        reason = restriction.reason or "لا يوجد سبب محدد"
+        return {
+            "answer": f"🔒 **هاي المادة محجوبة حالياً من قِبَل الدكتور.**\n\n📋 السبب: {reason}\n\nراجع دكتورك للمزيد من المعلومات.",
+            "subject_code": request.subject_code,
+            "blocked": True,
+            "conversation_id": None,
+        }
 
     try:
         book_chunks = search(request.subject_code, request.message, top_k=5)
