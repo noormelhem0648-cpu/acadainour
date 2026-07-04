@@ -142,8 +142,12 @@ def generate_academic_response(
     current_parts.append(types.Part.from_text(text=full_prompt))
     contents.append(types.Content(role="user", parts=current_parts))
 
-    total_attempts = len(_clients) * 2
-    for attempt in range(total_attempts):
+    # Try every key at least once, then do a second round with short backoff
+    num_keys = max(len(_clients), 1)
+    max_attempts = num_keys * 3
+    rate_limit_hits = 0
+
+    for attempt in range(max_attempts):
         client = _get_client()
         try:
             response = client.models.generate_content(
@@ -158,28 +162,32 @@ def generate_academic_response(
 
         except Exception as e:
             error_str = str(e).lower()
-            print(f"[AI Engine Error] key #{(_current_key_idx % len(_clients)) + 1}, attempt {attempt+1}: {e}")
+            print(f"[AI Engine Error] key #{(_current_key_idx % num_keys) + 1}, attempt {attempt + 1}: {e}")
 
             if _is_rate_limit_error(error_str):
-                if len(_clients) > 1:
+                rate_limit_hits += 1
+                if num_keys > 1:
                     _rotate_key()
-                    time.sleep(1)
+                    # No sleep on first pass through all keys; tiny sleep on second pass
+                    if rate_limit_hits > num_keys:
+                        time.sleep(0.5)
                     continue
                 else:
+                    # Single key — short wait then retry twice more
                     if attempt < 2:
-                        time.sleep(3 * (attempt + 1))
+                        time.sleep(2)
                         continue
-                    return (
-                        "⏳ **خلص حد الطلبات اليومي المجاني.**\n\n"
-                        "الحد بيتجدد تلقائياً — جرب بعد ساعة أو بكرا الصبح.\n\n"
-                        "⏳ **Daily free quota reached.**\n\n"
-                        "It resets automatically — try again in an hour or tomorrow morning."
-                    )
-            return "صار خطأ — حاول مرة ثانية 🔄\nSomething went wrong — please try again."
+                    break
+            else:
+                # Non-rate-limit error: rotate key and retry immediately
+                if num_keys > 1:
+                    _rotate_key()
+                    continue
+                break
 
     return (
-        "⏳ **خلص حد الطلبات اليومي على كل الـ API keys.**\n\n"
-        "جرب بعد ساعة أو بكرا الصبح.\n\n"
-        "⏳ **All API keys have reached their daily limit.**\n\n"
-        "Try again in an hour or tomorrow morning."
+        "⏳ **وصلنا للحد المجاني على كل الـ API keys.**\n\n"
+        "جرب بعد شوي — الحد بيتجدد تلقائياً.\n\n"
+        "⏳ **All API keys have reached their free-tier limit.**\n\n"
+        "Try again in a few minutes — it resets automatically."
     )

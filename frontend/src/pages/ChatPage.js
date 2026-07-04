@@ -217,21 +217,21 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
     }));
     const headers = { "Content-Type": "application/json" };
     if (token) headers["Authorization"] = `Bearer ${token}`;
-    for (let attempt = 0; attempt < 2; attempt++) {
+    for (let attempt = 0; attempt < 3; attempt++) {
       try {
         const res = await fetch(API_URL + "/ask", {
           method: "POST",
           headers,
           body: JSON.stringify({ subject_code: subjectCode, message: userMessage, history, conversation_id: convoId || null }),
         });
-        if (res.status === 404 && attempt === 0) {
-          await new Promise(r => setTimeout(r, 3000));
+        if (res.status === 404 && attempt < 2) {
+          await new Promise(r => setTimeout(r, 800));
           continue;
         }
         const data = await res.json();
         return { answer: data.answer || data.detail || "No response received.", conversation_id: data.conversation_id };
       } catch (err) {
-        if (attempt === 0) { await new Promise(r => setTimeout(r, 3000)); continue; }
+        if (attempt < 2) { await new Promise(r => setTimeout(r, 500)); continue; }
         throw err;
       }
     }
