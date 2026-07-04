@@ -120,7 +120,7 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
 def get_me(user: User = Depends(require_user)):
     return {"id": user.id, "name": user.name, "email": user.email, "role": user.role}
 
-@app.post("/auth/make-instructor")
+@app.get("/auth/make-instructor")
 def make_instructor(email: str, secret: str, db: Session = Depends(get_db)):
     """Promote a user to instructor. Requires ADMIN_SECRET env var."""
     admin_secret = os.getenv("ADMIN_SECRET", "")
