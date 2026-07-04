@@ -45,7 +45,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<HomePage {...themeProps} />} />
+        <Route path="/" element={user?.role === "instructor" ? <Navigate to="/instructor" replace /> : <HomePage {...themeProps} />} />
         <Route path="/years" element={<YearsPage {...themeProps} />} />
         <Route path="/subjects/:year" element={<SubjectsPage {...themeProps} />} />
         <Route path="/chat/:subjectCode" element={<ChatPage {...themeProps} />} />

@@ -4,10 +4,6 @@ import { useNavigate } from "react-router-dom";
 export default function HomePage({ darkMode, setDarkMode, user, onLogout }) {
   const navigate = useNavigate();
 
-  if (user?.role === "instructor") {
-    navigate("/instructor", { replace: true });
-    return null;
-  }
 
   return (
     <div className="page home-page">
