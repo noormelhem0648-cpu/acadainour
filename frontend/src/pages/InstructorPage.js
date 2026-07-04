@@ -81,7 +81,7 @@ export default function InstructorPage({ darkMode, setDarkMode, user, token, onL
         {/* Block Form */}
         <div className="inst-card">
           <h2 className="inst-card-title">🔒 حجب مادة</h2>
-          <p className="inst-card-desc">لما تحجب مادة، الطلاب ما يقدرون يستخدمون AcadAI فيها لحد ما ترفع الحجب.</p>
+          <p className="inst-card-desc">لما تحجب مادة، الطلاب ما يقدرون يستخدمون Noura AI فيها لحد ما ترفع الحجب.</p>
           <div className="inst-form">
             <input
               className="inst-input"

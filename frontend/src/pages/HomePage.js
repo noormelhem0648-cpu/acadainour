@@ -12,7 +12,7 @@ export default function HomePage({ darkMode, setDarkMode, user, onLogout }) {
   return (
     <div className="page home-page">
       <header className="header">
-        <span className="app-name">Smart Student Assistant N</span>
+        <span className="app-name">Noura AI</span>
         <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
           {darkMode ? "Light" : "Dark"}
         </button>

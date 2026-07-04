@@ -15,7 +15,7 @@ from auth import (
     get_current_user, require_user, require_instructor
 )
 
-app = FastAPI(title="Smart Student Assistant N — Backend")
+app = FastAPI(title="Noura AI — Backend")
 
 app.add_middleware(
     CORSMiddleware,
@@ -209,7 +209,7 @@ def delete_conversation(convo_id: int, user: User = Depends(require_user), db: S
 
 @app.get("/")
 def root():
-    return {"status": "Smart Student Assistant N backend is running ✓"}
+    return {"status": "Noura AI backend is running ✓"}
 
 def _is_subject_blocked(subject_code: str, db: Session) -> Optional[Restriction]:
     """Return active restriction for a subject, or None."""

@@ -47,7 +47,7 @@ export default function AuthPage({ onLogin }) {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <h1 className="auth-logo">AcadAI</h1>
+        <h1 className="auth-logo">Noura AI</h1>
         <p className="auth-subtitle">Smart Student Assistant</p>
 
         <div className="auth-tabs">

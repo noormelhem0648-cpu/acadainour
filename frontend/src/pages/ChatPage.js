@@ -13,7 +13,7 @@ function downloadTxt(text) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "AcadAI-answer.txt";
+  a.download = "Noura AI-answer.txt";
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -26,7 +26,7 @@ function downloadPdf(text) {
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
     .replace(/## (.*?)(<br>)/g, "<h3>$1</h3>");
   w.document.write(`
-    <html><head><meta charset="utf-8"><title>AcadAI Answer</title>
+    <html><head><meta charset="utf-8"><title>Noura AI Answer</title>
     <style>body{font-family:Segoe UI,sans-serif;padding:40px;line-height:1.8;direction:auto}
     h3{color:#c9858a}strong{color:#a96368}table{border-collapse:collapse;width:100%}
     td,th{border:1px solid #ddd;padding:8px}th{background:#f5e8e9}</style></head>
@@ -61,7 +61,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      content: "أهلاً! أنا **AcadAI** — مساعدك الأكاديمي لمادة **" + subjectCode + "** 🎓\nاسألني أي سؤال عن المادة وراح أجاوبك من الكتاب أولاً.\n\nHi! I'm **AcadAI** — your study buddy for **" + subjectCode + "**. Ask me anything!",
+      content: "أهلاً! أنا **Noura AI** — مساعدك الأكاديمي لمادة **" + subjectCode + "** 🎓\nاسألني أي سؤال عن المادة وراح أجاوبك من الكتاب أولاً.\n\nHi! I'm **Noura AI** — your study buddy for **" + subjectCode + "**. Ask me anything!",
       time: Date.now(),
     },
   ]);
@@ -165,7 +165,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
   const startNewChat = () => {
     setMessages([{
       role: "assistant",
-      content: "أهلاً! أنا **AcadAI** — مساعدك الأكاديمي لمادة **" + subjectCode + "** 🎓\nاسألني أي سؤال عن المادة وراح أجاوبك من الكتاب أولاً.\n\nHi! I'm **AcadAI** — your study buddy for **" + subjectCode + "**. Ask me anything!",
+      content: "أهلاً! أنا **Noura AI** — مساعدك الأكاديمي لمادة **" + subjectCode + "** 🎓\nاسألني أي سؤال عن المادة وراح أجاوبك من الكتاب أولاً.\n\nHi! I'm **Noura AI** — your study buddy for **" + subjectCode + "**. Ask me anything!",
       time: Date.now(),
       chatId: Date.now(),
     }]);
@@ -473,14 +473,14 @@ Use the mixed Arabic+English style for the exam.`;
       <h2 style={{margin:0,color:"var(--text)"}}>هاي المادة محجوبة حالياً</h2>
       <p style={{color:"var(--text-muted)",margin:0,maxWidth:340}}>
         📋 السبب: <strong>{blocked}</strong><br/><br/>
-        الدكتور أوقف استخدام AcadAI لهاي المادة مؤقتاً. راجعه للمزيد.
+        الدكتور أوقف استخدام Noura AI لهاي المادة مؤقتاً. راجعه للمزيد.
       </p>
       <button className="back-btn" style={{marginTop:8}} onClick={() => navigate(-1)}>← رجوع</button>
     </div>
   );
 
   return (
-    <div className="page chat-page" role="main" aria-label="AcadAI Chat">
+    <div className="page chat-page" role="main" aria-label="Noura AI Chat">
       <header className="header" role="banner">
         <button className="back-btn" onClick={() => navigate(-1)} aria-label="Go back">Back</button>
         <span className="app-name">{subjectCode}</span>

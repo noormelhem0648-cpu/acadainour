@@ -15,7 +15,7 @@ export default function YearsPage({ darkMode, setDarkMode }) {
     <div className="page">
       <header className="header">
         <button className="back-btn" onClick={() => navigate("/")}>Back</button>
-        <span className="app-name">Smart Student Assistant N</span>
+        <span className="app-name">Noura AI</span>
         <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
           {darkMode ? "Light" : "Dark"}
         </button>
