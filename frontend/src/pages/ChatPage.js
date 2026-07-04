@@ -567,14 +567,14 @@ Use the mixed Arabic+English style for the exam.`;
                           <div className="dd-section-label">اشرح لي بطريقة ثانية</div>
                           <div className="dd-followup-grid">
                             {[
-                              ["🔽 أبسط", "Explain this in a simpler way", "🔽 Explain simpler"],
-                              ["💡 مثال", "Give me a practical example", "💡 Example"],
-                              ["📋 ملخص", "Give me a short summary of the above in 3 bullet points", "📋 Summary"],
-                              ["🇸🇦 عربي", "اشرح بالعربي بالكامل", "🇸🇦 بالعربي"],
-                              ["📊 جدول", "Make a comparison table for the key concepts", "📊 Table"],
-                              ["🃏 Flashcards", "Convert the above into flashcards. Each card: **Q:** ... **A:** ...", "🃏 Flashcards"],
-                              ["🟢 مبتدئ", "Explain this at a beginner level, assume I know nothing", "🟢 Beginner"],
-                              ["🔴 متقدم", "Explain this at an advanced academic level with technical terminology", "🔴 Advanced"],
+                              ["🔽 أبسط", "اشرح نفس الموضوع من ردك السابق بطريقة أبسط وأوضح، كأنك تشرح لشخص ما يعرف شي.", "🔽 أبسط"],
+                              ["💡 مثال", "أعطني مثالاً عملياً على ما شرحته في ردك السابق.", "💡 مثال عملي"],
+                              ["📋 ملخص", "لخّص ردك السابق في 3 نقاط رئيسية فقط.", "📋 ملخص"],
+                              ["🇸🇦 عربي", "اشرح نفس موضوع ردك السابق بالعربي الفصيح بالكامل.", "🇸🇦 بالعربي"],
+                              ["📊 جدول", "حوّل المعلومات من ردك السابق إلى جدول مقارنة Markdown.", "📊 جدول"],
+                              ["🃏 Flashcards", "حوّل ردك السابق إلى flashcards للمراجعة. كل بطاقة: **Q:** ... **A:** ...", "🃏 Flashcards"],
+                              ["🟢 مبتدئ", "اشرح نفس موضوع ردك السابق لمستوى مبتدئ تماماً، افترض إني ما أعرف شي عنه.", "🟢 مستوى مبتدئ"],
+                              ["🔴 متقدم", "اشرح نفس موضوع ردك السابق بمستوى أكاديمي متقدم مع المصطلحات التقنية.", "🔴 مستوى متقدم"],
                             ].map(([label, prompt, display]) => (
                               <button key={label} className="dd-followup-pill" onClick={() => { sendPrompt(prompt, display); setOpenDropdown(null); }}>
                                 {label}
