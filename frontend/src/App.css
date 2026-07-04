@@ -72,12 +72,16 @@ body {
 }
 
 .app-name {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.25rem;
+  font-weight: 800;
   color: var(--accent);
   flex: 1;
   text-align: center;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .back-btn {
@@ -662,7 +666,7 @@ body {
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 600px) {
   .header { padding: 10px 12px; gap: 6px; }
-  .app-name { font-size: 0.85rem; }
+  .app-name { font-size: 1rem; }
   .main-content { padding: 28px 12px 20px; }
   .card-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
   .message { max-width: 92%; font-size: 0.87rem; padding: 12px 14px; }
