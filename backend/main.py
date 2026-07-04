@@ -7,9 +7,9 @@ from pydantic import BaseModel
 from typing import List, Dict, Optional
 from sqlalchemy.orm import Session
 
-from ai_engine import generate_academic_response
+from ai_engine import generate_academic_response, _add_keys
 from faiss_engine import search
-from db import init_db, get_db, User, Conversation, Message, Restriction
+from db import init_db, get_db, User, Conversation, Message, Restriction, ContributedKey
 from auth import (
     hash_password, verify_password, create_access_token,
     get_current_user, require_user, require_instructor
@@ -25,9 +25,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def _load_db_keys():
+    """Pull all active contributed keys from DB into the AI engine."""
+    if not SessionLocal:
+        return
+    try:
+        from db import SessionLocal as SL
+        db = SL()
+        keys = [row.api_key for row in db.query(ContributedKey).filter(ContributedKey.active == True).all()]
+        db.close()
+        if keys:
+            _add_keys(keys)
+            print(f"[Startup] Loaded {len(keys)} contributed key(s) from DB.")
+    except Exception as e:
+        print(f"[Startup] Could not load DB keys: {e}")
+
+from db import SessionLocal
+
 @app.on_event("startup")
 def startup():
     init_db()
+    _load_db_keys()
 
 
 # ── Request Models ──────────────────────────────────────────
@@ -62,6 +80,9 @@ class QuizCheckRequest(BaseModel):
 class RestrictionRequest(BaseModel):
     subject_code: str
     reason: Optional[str] = ""
+
+class KeyContributeRequest(BaseModel):
+    api_key: str
 
 
 # ── Auth Endpoints ──────────────────────────────────────────
@@ -111,6 +132,40 @@ def make_instructor(email: str, secret: str, db: Session = Depends(get_db)):
     user.role = "instructor"
     db.commit()
     return {"ok": True, "message": f"{user.name} is now an instructor."}
+
+
+# ── API Key Contribution ────────────────────────────────────
+
+@app.post("/keys/contribute")
+def contribute_key(req: KeyContributeRequest, user: User = Depends(require_user), db: Session = Depends(get_db)):
+    key = req.api_key.strip()
+    if not key.startswith("AIza") or len(key) < 30:
+        raise HTTPException(status_code=400, detail="مفتاح غير صالح. تأكد أنه من Google AI Studio.")
+    existing = db.query(ContributedKey).filter(ContributedKey.api_key == key).first()
+    if existing:
+        raise HTTPException(status_code=409, detail="هذا المفتاح مضاف مسبقاً.")
+    ck = ContributedKey(user_id=user.id, api_key=key, active=True)
+    db.add(ck)
+    db.commit()
+    _add_keys([key])
+    return {"ok": True, "message": "تم إضافة مفتاحك للنظام. شكراً! 🎉"}
+
+@app.get("/keys/my")
+def my_key(user: User = Depends(require_user), db: Session = Depends(get_db)):
+    ck = db.query(ContributedKey).filter(ContributedKey.user_id == user.id, ContributedKey.active == True).first()
+    return {"has_key": ck is not None}
+
+@app.delete("/keys/my")
+def remove_my_key(user: User = Depends(require_user), db: Session = Depends(get_db)):
+    db.query(ContributedKey).filter(ContributedKey.user_id == user.id).delete()
+    db.commit()
+    return {"ok": True}
+
+@app.get("/keys/stats")
+def key_stats(db: Session = Depends(get_db)):
+    from ai_engine import _clients
+    total_contributed = db.query(ContributedKey).filter(ContributedKey.active == True).count()
+    return {"total_active_keys": len(_clients), "contributed": total_contributed}
 
 
 # ── Conversation Endpoints ──────────────────────────────────

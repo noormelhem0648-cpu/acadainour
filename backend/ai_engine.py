@@ -3,8 +3,12 @@ import time
 from google import genai
 from google.genai import types
 
-# Load all API keys: GEMINI_API_KEY, GEMINI_API_KEY1, GEMINI_API_KEY_2, etc.
-def _load_api_keys():
+_known_keys: set = set()
+_clients: list = []
+_current_key_idx = 0
+
+
+def _load_env_keys():
     keys = []
     main_key = os.getenv("GEMINI_API_KEY")
     if main_key:
@@ -16,9 +20,25 @@ def _load_api_keys():
                 keys.append(key)
     return keys
 
-API_KEYS = _load_api_keys()
-_clients = [genai.Client(api_key=k) for k in API_KEYS]
-_current_key_idx = 0
+
+def _add_keys(new_keys: list[str]):
+    """Add new API keys to the rotation pool (no duplicates, no restart needed)."""
+    global _clients, _known_keys
+    added = 0
+    for k in new_keys:
+        if k and k not in _known_keys:
+            try:
+                _clients.append(genai.Client(api_key=k))
+                _known_keys.add(k)
+                added += 1
+            except Exception as e:
+                print(f"[AI Engine] Failed to add key: {e}")
+    if added:
+        print(f"[AI Engine] Added {added} key(s). Total: {len(_clients)}")
+
+
+# Init from env on import
+_add_keys(_load_env_keys())
 
 def _get_client():
     global _current_key_idx

@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, ForeignKey, func
+from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, Boolean, ForeignKey, func
 from sqlalchemy.orm import sessionmaker, declarative_base, relationship
 
 DATABASE_URL = os.getenv("DATABASE_URL", "")
@@ -49,6 +49,15 @@ class Message(Base):
     content = Column(Text, nullable=False)
     created_at = Column(DateTime, server_default=func.now())
     conversation = relationship("Conversation", back_populates="messages")
+
+
+class ContributedKey(Base):
+    __tablename__ = "contributed_keys"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    api_key = Column(String(200), unique=True, nullable=False)
+    active = Column(Boolean, default=True)
+    added_at = Column(DateTime, server_default=func.now())
 
 
 class Restriction(Base):

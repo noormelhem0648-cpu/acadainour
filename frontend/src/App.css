@@ -700,6 +700,10 @@ body {
   border-color: var(--accent);
   transform: scale(1.05);
 }
+.key-btn.key-active {
+  border-color: #4caf50;
+  color: #4caf50;
+}
 
 /* ── History Sidebar ──────────────────────────────────────── */
 .history-sidebar {
