@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useId } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 
@@ -72,6 +72,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
   const [examDifficulty, setExamDifficulty] = useState("medium");
   const [examUnits, setExamUnits] = useState("");
   const [likedMsgs, setLikedMsgs] = useState({});
+  const [openDropdown, setOpenDropdown] = useState(null);
   const [showHistory, setShowHistory] = useState(false);
   const [savedChats, setSavedChats] = useState([]);
 
@@ -83,6 +84,15 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
   const loadingInterval = useRef(null);
 
   useEffect(() => { messagesRef.current = messages; }, [messages]);
+
+  useEffect(() => {
+    if (openDropdown === null) return;
+    const close = (e) => {
+      if (!e.target.closest(".msg-dropdown-wrap")) setOpenDropdown(null);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [openDropdown]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -449,46 +459,73 @@ Use the mixed Arabic+English style for the exam.`;
               <div className="msg-footer">
                 <span className="msg-time">{formatTime(msg.time)}</span>
                 {msg.role === "assistant" && (
-                  <div className="msg-actions">
-                    {msg.isError ? (
-                      <button className="msg-icon-btn retry-btn" onClick={retryLastMessage} aria-label="Retry">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
-                        <span>Retry</span>
+                  msg.isError ? (
+                    <button className="msg-icon-btn retry-btn" onClick={retryLastMessage} aria-label="Retry">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+                      Retry
+                    </button>
+                  ) : (
+                    <div className="msg-dropdown-wrap">
+                      <button
+                        className="msg-dots-btn"
+                        onClick={() => setOpenDropdown(openDropdown === idx ? null : idx)}
+                        aria-label="Message options"
+                      >
+                        <span /><span /><span />
                       </button>
-                    ) : (
-                      <>
-                        <button className="msg-icon-btn" onClick={() => copyMessage(msg.content, idx)} aria-label="Copy message" title="Copy">
-                          {copiedIdx === idx
-                            ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                            : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                          }
-                        </button>
-                        <button className="msg-icon-btn" onClick={() => downloadTxt(msg.content)} aria-label="Download TXT" title="Download TXT">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        </button>
-                        <button className="msg-icon-btn" onClick={() => downloadPdf(msg.content)} aria-label="Download PDF" title="Download PDF">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                        </button>
-                        <button className="msg-icon-btn" onClick={() => regenerateMessage(idx)} aria-label="Regenerate" title="Regenerate">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
-                        </button>
-                        <button
-                          className={"msg-icon-btn" + (likedMsgs[idx] === "like" ? " liked" : "")}
-                          onClick={() => handleLike(idx, "like")}
-                          aria-label="Like" title="Good response"
-                        >
-                          <svg viewBox="0 0 24 24" fill={likedMsgs[idx] === "like" ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
-                        </button>
-                        <button
-                          className={"msg-icon-btn" + (likedMsgs[idx] === "dislike" ? " disliked" : "")}
-                          onClick={() => handleLike(idx, "dislike")}
-                          aria-label="Dislike" title="Bad response"
-                        >
-                          <svg viewBox="0 0 24 24" fill={likedMsgs[idx] === "dislike" ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
-                        </button>
-                      </>
-                    )}
-                  </div>
+                      {openDropdown === idx && (
+                        <div className="msg-dropdown">
+                          <div className="msg-dropdown-section">
+                            <button className="dd-item" onClick={() => { copyMessage(msg.content, idx); setOpenDropdown(null); }}>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                              {copiedIdx === idx ? "Copied ✓" : "Copy"}
+                            </button>
+                            <button className="dd-item" onClick={() => { regenerateMessage(idx); setOpenDropdown(null); }}>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+                              Regenerate
+                            </button>
+                            <button className="dd-item" onClick={() => { handleLike(idx, "like"); setOpenDropdown(null); }}>
+                              <svg viewBox="0 0 24 24" fill={likedMsgs[idx]==="like"?"currentColor":"none"} stroke="currentColor" strokeWidth="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                              Good response
+                            </button>
+                            <button className="dd-item" onClick={() => { handleLike(idx, "dislike"); setOpenDropdown(null); }}>
+                              <svg viewBox="0 0 24 24" fill={likedMsgs[idx]==="dislike"?"currentColor":"none"} stroke="currentColor" strokeWidth="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
+                              Bad response
+                            </button>
+                            <button className="dd-item" onClick={() => { downloadTxt(msg.content); setOpenDropdown(null); }}>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                              Download TXT
+                            </button>
+                            <button className="dd-item" onClick={() => { downloadPdf(msg.content); setOpenDropdown(null); }}>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                              Download PDF
+                            </button>
+                          </div>
+                          {idx === messages.filter(m => m.role === "assistant").length - 1 + messages.filter(m=>m.role==="user").length && !loading && (
+                            <>
+                              <div className="dd-divider" />
+                              <div className="msg-dropdown-section">
+                                {[
+                                  ["Simpler", "Explain this in a simpler way", "🔽 Explain simpler"],
+                                  ["Example", "Give me a practical example", "💡 Example"],
+                                  ["Summary", "Give me a short summary of the above in 3 bullet points", "📋 Summary"],
+                                  ["بالعربي", "اشرح بالعربي بالكامل", "🇸🇦 بالعربي"],
+                                  ["Table", "Make a comparison table for the key concepts", "📊 Table"],
+                                  ["Flashcards", "Convert the above into flashcards. Each card should have a Question on one side and Answer on the other. Format: **Q:** ... **A:** ...", "🃏 Flashcards"],
+                                  ["Beginner", "Explain this at a beginner level, assume I know nothing", "🟢 Beginner"],
+                                  ["Advanced", "Explain this at an advanced academic level with technical terminology", "🔴 Advanced"],
+                                ].map(([label, prompt, display]) => (
+                                  <button key={label} className="dd-item" onClick={() => { sendPrompt(prompt, display); setOpenDropdown(null); }}>
+                                    {label}
+                                  </button>
+                                ))}
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )
                 )}
               </div>
             </div>
@@ -502,18 +539,6 @@ Use the mixed Arabic+English style for the exam.`;
               </div>
               <span className="loading-step">{LOADING_STEPS[loadingStep]}</span>
             </div>
-          </div>
-        )}
-        {!loading && lastAssistantMsg && (
-          <div className="followups" role="group" aria-label="Quick actions">
-            <button className="followup-btn" onClick={() => sendPrompt("Explain this in a simpler way", "🔽 Explain simpler")}>Simpler</button>
-            <button className="followup-btn" onClick={() => sendPrompt("Give me a practical example", "💡 Example")}>Example</button>
-            <button className="followup-btn" onClick={() => sendPrompt("Give me a short summary of the above in 3 bullet points", "📋 Summary")}>Summary</button>
-            <button className="followup-btn" onClick={() => sendPrompt("اشرح بالعربي بالكامل", "🇸🇦 بالعربي")}>{"بالعربي"}</button>
-            <button className="followup-btn" onClick={() => sendPrompt("Make a comparison table for the key concepts", "📊 Table")}>Table</button>
-            <button className="followup-btn" onClick={() => sendPrompt("Convert the above into flashcards. Each card should have a Question on one side and Answer on the other. Format: **Q:** ... **A:** ...", "🃏 Flashcards")}>Flashcards</button>
-            <button className="followup-btn" onClick={() => sendPrompt("Explain this at a beginner level, assume I know nothing", "🟢 Beginner")}>Beginner</button>
-            <button className="followup-btn" onClick={() => sendPrompt("Explain this at an advanced academic level with technical terminology", "🔴 Advanced")}>Advanced</button>
           </div>
         )}
         <div ref={messagesEndRef} />

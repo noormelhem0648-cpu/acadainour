@@ -313,89 +313,110 @@ body {
 }
 .user-message .msg-time { color: rgba(255,255,255,0.6); }
 
-/* ── Icon Action Buttons (Claude-style) ───────────────────── */
-.msg-actions {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  opacity: 0;
-  transform: translateY(2px);
-  transition: opacity 0.15s ease, transform 0.15s ease;
+/* ── Three-dots button ────────────────────────────────────── */
+.msg-dropdown-wrap {
+  position: relative;
 }
-.message-bubble:hover .msg-actions {
-  opacity: 1;
-  transform: translateY(0);
-}
-.msg-icon-btn {
+.msg-dots-btn {
   background: none;
   border: none;
-  color: var(--text-muted);
-  padding: 5px;
-  border-radius: 7px;
   cursor: pointer;
-  display: inline-flex;
+  display: flex;
+  gap: 3px;
   align-items: center;
-  gap: 4px;
-  font-size: 0.75rem;
-  transition: background 0.15s, color 0.15s;
+  padding: 4px 6px;
+  border-radius: 7px;
+  transition: background 0.15s;
 }
-.msg-icon-btn svg {
+.msg-dots-btn span {
+  display: block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+.msg-dots-btn:hover { background: var(--accent-light); }
+.msg-dots-btn:hover span { opacity: 1; background: var(--accent-dark); }
+
+/* ── Dropdown menu ────────────────────────────────────────── */
+.msg-dropdown {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  right: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  min-width: 180px;
+  z-index: 200;
+  overflow: hidden;
+  animation: dropUp 0.15s ease;
+}
+@keyframes dropUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.msg-dropdown-section {
+  padding: 4px;
+}
+.dd-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 2px 0;
+}
+.dd-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 0.82rem;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s, color 0.12s;
+  white-space: nowrap;
+}
+.dd-item svg {
   width: 15px;
   height: 15px;
   flex-shrink: 0;
+  color: var(--text-muted);
 }
-.msg-icon-btn:hover {
+.dd-item:hover {
   background: var(--accent-light);
   color: var(--accent-dark);
 }
-.msg-icon-btn.liked {
-  color: var(--accent);
-}
-.msg-icon-btn.disliked {
-  color: #e57373;
-}
+.dd-item:hover svg { color: var(--accent-dark); }
 
 /* ── Retry Button ─────────────────────────────────────────── */
+.msg-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  border-radius: 8px;
+  padding: 5px 10px;
+  transition: background 0.15s, color 0.15s;
+  color: var(--text-muted);
+}
+.msg-icon-btn svg { width: 14px; height: 14px; }
 .msg-icon-btn.retry-btn {
   border: 1.5px solid var(--accent);
   color: #fff;
   background: var(--accent);
-  padding: 5px 14px;
   font-weight: 600;
-  border-radius: 10px;
-  opacity: 1;
-  transform: none;
 }
 .msg-icon-btn.retry-btn:hover { background: var(--accent-dark); }
 
-/* ── Follow-up Buttons ────────────────────────────────────── */
-.followups {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding: 4px 4px;
-  align-self: flex-start;
-  max-width: 100%;
-  animation: fadeSlideIn 0.3s ease-out;
-}
-.followup-btn {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  color: var(--text);
-  padding: 6px 12px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 0.75rem;
-  font-weight: 500;
-  transition: all var(--transition);
-  white-space: nowrap;
-}
-.followup-btn:hover {
-  border-color: var(--accent);
-  background: var(--accent-light);
-  color: var(--accent-dark);
-  transform: translateY(-1px);
-}
 
 /* ── Attachment Preview ───────────────────────────────────── */
 .attachment-preview {
@@ -646,8 +667,6 @@ body {
   .card-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
   .message { max-width: 92%; font-size: 0.87rem; padding: 12px 14px; }
   .messages-container { height: calc(100vh - 115px); padding: 16px 10px; }
-  .followups { gap: 4px; }
-  .followup-btn { font-size: 0.72rem; padding: 5px 10px; }
   .msg-icon-btn { padding: 4px; }
   .msg-icon-btn svg { width: 14px; height: 14px; }
   .msg-footer { gap: 4px; }
@@ -664,7 +683,6 @@ body {
 
 @media (max-width: 380px) {
   .message { max-width: 95%; }
-  .followup-btn { font-size: 0.68rem; padding: 4px 8px; }
   .back-btn { padding: 5px 8px; font-size: 0.75rem; }
 }
 
