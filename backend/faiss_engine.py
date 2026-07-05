@@ -9,10 +9,13 @@ INDEXES_PATH = "indexes"
 os.makedirs(INDEXES_PATH, exist_ok=True)
 
 
+EMBED_MODEL = "gemini-embedding-001"
+
+
 def get_embedding(text: str) -> list:
     """Get embedding vector for a text using Gemini Embeddings."""
     response = _get_client().models.embed_content(
-        model="gemini-embedding-exp-03-07",
+        model=EMBED_MODEL,
         contents=text
     )
     return response.embeddings[0].values

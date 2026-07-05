@@ -1,6 +1,10 @@
 # Environment
 .env
 .env.local
+.env.keys
+keys.txt
+rebuild.log
+nohup.out
 
 # Python
 __pycache__/
@@ -19,10 +23,9 @@ ENV/
 *.swo
 
 # Project specific
-indexes/
+# indexes/ ARE committed so RAG (book answers) works on Render.
+# subjects/ (raw PDFs) stay ignored — only the built indexes are needed at runtime.
 subjects/
-*.faiss
-*.pkl
 
 # OS
 .DS_Store

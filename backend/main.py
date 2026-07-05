@@ -18,13 +18,54 @@ from auth import (
 
 app = FastAPI(title="Noura AI — Backend")
 
+# Allowed frontend origins. Extra origins can be added via ALLOWED_ORIGINS env (comma-separated).
+_default_origins = [
+    "https://acadai-frontend.onrender.com",
+    "http://localhost:3000",
+    "http://localhost:5173",
+]
+_env_origins = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
+ALLOWED_ORIGINS = list(dict.fromkeys(_default_origins + _env_origins))
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+def send_email(to_email: str, subject: str, body_html: str) -> bool:
+    """Send an email via SMTP. Returns True on success. Configure via env vars."""
+    import smtplib
+    from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
+
+    host = os.getenv("SMTP_HOST", "smtp.gmail.com")
+    port = int(os.getenv("SMTP_PORT", "587"))
+    smtp_user = os.getenv("SMTP_USER", "")
+    smtp_pass = os.getenv("SMTP_PASS", "")
+    from_email = os.getenv("FROM_EMAIL", smtp_user)
+
+    if not smtp_user or not smtp_pass:
+        print("[Email] SMTP not configured (SMTP_USER/SMTP_PASS missing).")
+        return False
+
+    try:
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"] = f"Noura AI <{from_email}>"
+        msg["To"] = to_email
+        msg.attach(MIMEText(body_html, "html"))
+        with smtplib.SMTP(host, port, timeout=15) as server:
+            server.starttls()
+            server.login(smtp_user, smtp_pass)
+            server.sendmail(from_email, to_email, msg.as_string())
+        return True
+    except Exception as e:
+        print(f"[Email] Failed to send: {e}")
+        return False
+
 
 def _load_db_keys():
     """Pull all active contributed keys from DB into the AI engine."""
@@ -67,6 +108,13 @@ class RegisterRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: str
     password: str
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
 
 class QuizRequest(BaseModel):
     subject_code: str
@@ -116,6 +164,45 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid email or password.")
     token = create_access_token(user.id, user.role)
     return {"token": token, "user": {"id": user.id, "name": user.name, "email": user.email, "role": user.role}}
+
+@app.post("/auth/forgot-password")
+def forgot_password(req: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    import secrets, datetime
+    email = req.email.lower().strip()
+    user = db.query(User).filter(User.email == email).first()
+    # Always return success (don't reveal whether email exists)
+    if user:
+        reset_token = secrets.token_urlsafe(32)
+        user.reset_token = reset_token
+        user.reset_expiry = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+        db.commit()
+        frontend_url = os.getenv("FRONTEND_URL", "https://acadai-frontend.onrender.com")
+        link = f"{frontend_url}/?reset_token={reset_token}"
+        html = f"""
+        <div style="font-family:Arial,sans-serif;max-width:480px;margin:auto;padding:24px;border:1px solid #eee;border-radius:12px">
+          <h2 style="color:#c9858a">Noura AI 🎓</h2>
+          <p>مرحباً {user.name}،</p>
+          <p>طلبت إعادة تعيين كلمة السر. اضغط الرابط التالي (صالح لمدة ساعة):</p>
+          <p><a href="{link}" style="display:inline-block;background:#c9858a;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none">إعادة تعيين كلمة السر</a></p>
+          <p style="color:#888;font-size:13px">إذا ما طلبت هذا، تجاهل الرسالة.</p>
+        </div>
+        """
+        send_email(email, "إعادة تعيين كلمة السر — Noura AI", html)
+    return {"ok": True, "message": "إذا كان الإيميل مسجّل، رح توصلك رسالة خلال دقائق."}
+
+@app.post("/auth/reset-password")
+def reset_password(req: ResetPasswordRequest, db: Session = Depends(get_db)):
+    import datetime
+    if len(req.new_password) < 6:
+        raise HTTPException(status_code=400, detail="كلمة السر لازم 6 أحرف على الأقل.")
+    user = db.query(User).filter(User.reset_token == req.token).first()
+    if not user or not user.reset_expiry or user.reset_expiry < datetime.datetime.utcnow():
+        raise HTTPException(status_code=400, detail="الرابط غير صالح أو منتهي. اطلب رابط جديد.")
+    user.hashed_password = hash_password(req.new_password)
+    user.reset_token = None
+    user.reset_expiry = None
+    db.commit()
+    return {"ok": True, "message": "تم تغيير كلمة السر بنجاح! سجّل دخول بكلمتك الجديدة."}
 
 @app.get("/auth/me")
 def get_me(user: User = Depends(require_user)):
@@ -235,6 +322,39 @@ def _is_subject_blocked(subject_code: str, db: Session) -> Optional[Restriction]
     ).first()
 
 
+def _get_book_context(subject_code: str, query: str, top_k: int = 5) -> str:
+    """Search the course FAISS index and return joined relevant chunks (or '')."""
+    try:
+        chunks = search(subject_code, query, top_k=top_k)
+        if chunks:
+            return "\n\n".join(chunks)
+    except Exception as e:
+        print(f"[Book Context] search failed for {subject_code}: {e}")
+    return ""
+
+
+DAILY_MESSAGE_LIMIT = 100
+
+
+def _check_daily_limit(user: User, db: Session):
+    """Raise 429 if the user exceeded their daily message quota. Increments on success."""
+    if not user:
+        return
+    import datetime
+    today = datetime.date.today().isoformat()
+    # Reset counter if it's a new day
+    if getattr(user, "daily_date", None) != today:
+        user.daily_date = today
+        user.daily_count = 0
+    if (user.daily_count or 0) >= DAILY_MESSAGE_LIMIT:
+        raise HTTPException(
+            status_code=429,
+            detail=f"وصلت الحد اليومي ({DAILY_MESSAGE_LIMIT} رسالة). جرب بكرا 🌙 — You reached your daily limit of {DAILY_MESSAGE_LIMIT} messages. Try again tomorrow.",
+        )
+    user.daily_count = (user.daily_count or 0) + 1
+    db.commit()
+
+
 @app.get("/restrictions/check/{subject_code}")
 def check_restriction(subject_code: str, db: Session = Depends(get_db)):
     r = _is_subject_blocked(subject_code, db)
@@ -314,9 +434,10 @@ async def ask_assistant(request: ChatRequest, user: Optional[User] = Depends(get
             "conversation_id": None,
         }
 
+    _check_daily_limit(user, db)
+
     try:
-        book_chunks = search(request.subject_code, request.message, top_k=5)
-        context_from_books = ""
+        context_from_books = _get_book_context(request.subject_code, request.message, top_k=5)
 
         answer = generate_academic_response(
             user_query=request.message,
@@ -348,10 +469,12 @@ async def ask_assistant(request: ChatRequest, user: Optional[User] = Depends(get
         return {
             "answer": answer,
             "subject_code": request.subject_code,
-            "source": "course_materials" if book_chunks else "general_knowledge",
+            "source": "course_materials" if context_from_books else "general_knowledge",
             "conversation_id": convo_id,
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"[/ask Error] {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -364,9 +487,22 @@ async def ask_assistant_stream(request: ChatRequest, user: Optional[User] = Depe
 
     restriction = _is_subject_blocked(request.subject_code, db)
 
+    # Daily limit (only when not blocked — blocked messages are free)
+    limit_error = None
+    if not restriction:
+        try:
+            _check_daily_limit(user, db)
+        except HTTPException as e:
+            limit_error = e.detail
+
+    # Fetch course book context (unless blocked/limited)
+    book_context = ""
+    if not restriction and not limit_error:
+        book_context = _get_book_context(request.subject_code, request.message, top_k=5)
+
     # Create/resolve conversation up front so we can return its id
     convo_id = request.conversation_id
-    if user and not restriction:
+    if user and not restriction and not limit_error:
         if not convo_id:
             convo = Conversation(user_id=user.id, subject_code=request.subject_code, title=request.message[:40])
             db.add(convo)
@@ -390,12 +526,17 @@ async def ask_assistant_stream(request: ChatRequest, user: Optional[User] = Depe
             yield f"data: {json.dumps({'type': 'done'})}\n\n"
             return
 
+        if limit_error:
+            yield f"data: {json.dumps({'type': 'chunk', 'text': '⏳ ' + limit_error})}\n\n"
+            yield f"data: {json.dumps({'type': 'done'})}\n\n"
+            return
+
         full_answer = ""
         try:
             for chunk in generate_academic_response_stream(
                 user_query=request.message,
                 chat_history=request.history,
-                context_from_books="",
+                context_from_books=book_context,
                 image_data=request.image_data,
                 image_mime_type=request.image_mime_type,
             ):
@@ -425,7 +566,21 @@ async def upload_and_ask(
     message: str = Form(...),
     history: str = Form(default="[]"),
     file: UploadFile = File(...),
+    user: Optional[User] = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
+    # Block if subject is restricted (closes the upload bypass)
+    restriction = _is_subject_blocked(subject_code, db)
+    if restriction:
+        reason = restriction.reason or "لا يوجد سبب محدد"
+        return {
+            "answer": f"🔒 **هاي المادة محجوبة حالياً من قِبَل الدكتور.**\n\n📋 السبب: {reason}",
+            "subject_code": subject_code,
+            "blocked": True,
+        }
+
+    _check_daily_limit(user, db)
+
     try:
         chat_history = json.loads(history)
     except Exception:
@@ -445,8 +600,7 @@ async def upload_and_ask(
     else:
         extra_context = f"\n[Note: Student uploaded a file named '{file.filename}' — type: {mime_type}]"
 
-    book_chunks = search(subject_code, message, top_k=5)
-    context_from_books = ""
+    context_from_books = _get_book_context(subject_code, message, top_k=5)
 
     answer = generate_academic_response(
         user_query=message + extra_context,
@@ -459,21 +613,20 @@ async def upload_and_ask(
     return {
         "answer": answer,
         "subject_code": subject_code,
-        "source": "course_materials" if book_chunks else "general_knowledge",
+        "source": "course_materials" if context_from_books else "general_knowledge",
     }
 
 
 @app.post("/quiz")
-async def generate_quiz(request: QuizRequest):
+async def generate_quiz(request: QuizRequest, user: Optional[User] = Depends(get_current_user), db: Session = Depends(get_db)):
+    restriction = _is_subject_blocked(request.subject_code, db)
+    if restriction:
+        return {"quiz": "🔒 هاي المادة محجوبة حالياً من قِبَل الدكتور.", "subject_code": request.subject_code, "blocked": True}
+    _check_daily_limit(user, db)
     try:
         topic_note = f" Focus on the topic: {request.topic}." if request.topic else ""
-        book_chunks = []
-        try:
-            query = f"Generate a quiz with {request.num_questions} multiple-choice questions.{topic_note}"
-            book_chunks = search(request.subject_code, query, top_k=8)
-        except Exception as e:
-            print(f"[/quiz] FAISS search failed: {e}")
-        context_from_books = "\n\n".join(book_chunks) if book_chunks else ""
+        query = f"Generate a quiz with {request.num_questions} multiple-choice questions.{topic_note}"
+        context_from_books = _get_book_context(request.subject_code, query, top_k=8)
         prompt = (
             f"Generate {request.num_questions} multiple-choice questions "
             f"for subject {request.subject_code}.{topic_note}\n"

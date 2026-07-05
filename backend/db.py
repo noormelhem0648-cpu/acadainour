@@ -26,6 +26,12 @@ class User(Base):
     hashed_password = Column(Text, nullable=False)
     role = Column(String(20), default="student")  # student / instructor
     created_at = Column(DateTime, server_default=func.now())
+    # Daily usage limit tracking
+    daily_count = Column(Integer, default=0)
+    daily_date = Column(String(10), default="")  # YYYY-MM-DD
+    # Password reset
+    reset_token = Column(String(200), nullable=True)
+    reset_expiry = Column(DateTime, nullable=True)
     conversations = relationship("Conversation", back_populates="user")
 
 
@@ -72,9 +78,28 @@ class Restriction(Base):
     created_at = Column(DateTime, server_default=func.now())
 
 
+def _migrate():
+    """Add new columns to existing tables (create_all does not alter tables)."""
+    from sqlalchemy import text
+    statements = [
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS daily_count INTEGER DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS daily_date VARCHAR(10) DEFAULT ''",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token VARCHAR(200)",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_expiry TIMESTAMP",
+    ]
+    with engine.begin() as conn:
+        for stmt in statements:
+            try:
+                conn.execute(text(stmt))
+            except Exception as e:
+                print(f"[DB Migrate] {stmt[:50]}... -> {e}")
+    print("[DB] Migration checked.")
+
+
 def init_db():
     if engine:
         Base.metadata.create_all(bind=engine)
+        _migrate()
         print("[DB] Tables created successfully.")
     else:
         print("[DB] Skipped — no DATABASE_URL.")

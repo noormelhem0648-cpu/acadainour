@@ -8,7 +8,14 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from db import get_db, User
 
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "SUPER_SECRET_KEY_FOR_SMART_STUDENT_N_2026")
+_FALLBACK_SECRET = "SUPER_SECRET_KEY_FOR_SMART_STUDENT_N_2026"
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", _FALLBACK_SECRET)
+if SECRET_KEY == _FALLBACK_SECRET:
+    print("=" * 60)
+    print("⚠️  SECURITY WARNING: JWT_SECRET_KEY is not set!")
+    print("⚠️  Using the public fallback key — anyone can forge logins.")
+    print("⚠️  Add JWT_SECRET_KEY (long random string) to your env NOW.")
+    print("=" * 60)
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_DAYS = 7
 

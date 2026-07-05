@@ -1076,6 +1076,25 @@ body {
   font-size: 0.82rem;
 }
 .auth-switch:hover { text-decoration: underline; }
+.auth-info {
+  color: #2e7d32;
+  font-size: 0.82rem;
+  text-align: center;
+  padding: 8px;
+  background: rgba(76,175,80,0.1);
+  border-radius: 8px;
+}
+.auth-forgot-link {
+  display: block;
+  margin: 12px auto 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.auth-forgot-link:hover { color: var(--accent); }
 
 /* ── Scrollbar Styling ────────────────────────────────────── */
 .messages-container::-webkit-scrollbar { width: 5px; }
