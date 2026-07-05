@@ -149,13 +149,7 @@ def _is_rate_limit_error(error_str):
     return any(kw in error_str for kw in ["429", "rate", "quota", "resource_exhausted", "resource has been exhausted"])
 
 
-def generate_academic_response(
-    user_query: str,
-    chat_history: list,
-    context_from_books: str = "",
-    image_data: str = None,
-    image_mime_type: str = None
-) -> str:
+def _build_contents(user_query, chat_history, context_from_books, image_data, image_mime_type):
     if context_from_books and context_from_books.strip():
         full_prompt = (
             f"The following is relevant content retrieved from the course textbook:\n\n"
@@ -171,22 +165,65 @@ def generate_academic_response(
     for msg in recent_history:
         role = "user" if msg["role"] == "user" else "model"
         contents.append(
-            types.Content(
-                role=role,
-                parts=[types.Part.from_text(text=msg["content"])]
-            )
+            types.Content(role=role, parts=[types.Part.from_text(text=msg["content"])])
         )
 
     current_parts = []
     if image_data and image_mime_type:
         import base64
         image_bytes = base64.b64decode(image_data)
-        current_parts.append(
-            types.Part.from_bytes(data=image_bytes, mime_type=image_mime_type)
-        )
+        current_parts.append(types.Part.from_bytes(data=image_bytes, mime_type=image_mime_type))
 
     current_parts.append(types.Part.from_text(text=full_prompt))
     contents.append(types.Content(role="user", parts=current_parts))
+    return contents
+
+
+def generate_academic_response_stream(
+    user_query: str,
+    chat_history: list,
+    context_from_books: str = "",
+    image_data: str = None,
+    image_mime_type: str = None
+):
+    """Yield response text chunks as they are generated (for streaming)."""
+    contents = _build_contents(user_query, chat_history, context_from_books, image_data, image_mime_type)
+    num_keys = max(len(_clients), 1)
+
+    for attempt in range(num_keys * 2):
+        client = _get_client()
+        try:
+            stream = client.models.generate_content_stream(
+                model="gemini-2.5-flash-lite",
+                contents=contents,
+                config=_build_config(),
+            )
+            for chunk in stream:
+                if chunk.text:
+                    yield chunk.text
+            return
+        except Exception as e:
+            error_str = str(e).lower()
+            print(f"[AI Stream Error] attempt {attempt + 1}: {e}")
+            if _is_rate_limit_error(error_str) and num_keys > 1:
+                _rotate_key()
+                continue
+            elif num_keys > 1:
+                _rotate_key()
+                continue
+            break
+
+    yield "⏳ وصلنا للحد المجاني على كل المفاتيح — جرب بعد شوي.\n\n⏳ All keys reached their limit — try again shortly."
+
+
+def generate_academic_response(
+    user_query: str,
+    chat_history: list,
+    context_from_books: str = "",
+    image_data: str = None,
+    image_mime_type: str = None
+) -> str:
+    contents = _build_contents(user_query, chat_history, context_from_books, image_data, image_mime_type)
 
     # Try every key at least once, then do a second round with short backoff
     num_keys = max(len(_clients), 1)

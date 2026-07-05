@@ -2,12 +2,13 @@ import os
 import json
 import base64
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Depends
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Optional
 from sqlalchemy.orm import Session
 
-from ai_engine import generate_academic_response, _add_keys
+from ai_engine import generate_academic_response, generate_academic_response_stream, _add_keys
 from faiss_engine import search
 from db import init_db, get_db, User, Conversation, Message, Restriction, ContributedKey
 from auth import (
@@ -354,6 +355,68 @@ async def ask_assistant(request: ChatRequest, user: Optional[User] = Depends(get
     except Exception as e:
         print(f"[/ask Error] {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/ask/stream")
+async def ask_assistant_stream(request: ChatRequest, user: Optional[User] = Depends(get_current_user), db: Session = Depends(get_db)):
+    if not request.message.strip():
+        raise HTTPException(status_code=400, detail="Message cannot be empty.")
+
+    restriction = _is_subject_blocked(request.subject_code, db)
+
+    # Create/resolve conversation up front so we can return its id
+    convo_id = request.conversation_id
+    if user and not restriction:
+        if not convo_id:
+            convo = Conversation(user_id=user.id, subject_code=request.subject_code, title=request.message[:40])
+            db.add(convo)
+            db.commit()
+            db.refresh(convo)
+            convo_id = convo.id
+        else:
+            convo = db.query(Conversation).filter(Conversation.id == convo_id, Conversation.user_id == user.id).first()
+            if convo:
+                convo.updated_at = __import__("datetime").datetime.utcnow()
+                db.commit()
+
+    def event_stream():
+        # Send conversation id first
+        yield f"data: {json.dumps({'type': 'meta', 'conversation_id': convo_id})}\n\n"
+
+        if restriction:
+            reason = restriction.reason or "لا يوجد سبب محدد"
+            blocked_msg = f"🔒 **هاي المادة محجوبة حالياً من قِبَل الدكتور.**\n\n📋 السبب: {reason}\n\nراجع دكتورك للمزيد من المعلومات."
+            yield f"data: {json.dumps({'type': 'chunk', 'text': blocked_msg})}\n\n"
+            yield f"data: {json.dumps({'type': 'done'})}\n\n"
+            return
+
+        full_answer = ""
+        try:
+            for chunk in generate_academic_response_stream(
+                user_query=request.message,
+                chat_history=request.history,
+                context_from_books="",
+                image_data=request.image_data,
+                image_mime_type=request.image_mime_type,
+            ):
+                full_answer += chunk
+                yield f"data: {json.dumps({'type': 'chunk', 'text': chunk})}\n\n"
+        except Exception as e:
+            print(f"[/ask/stream Error] {e}")
+            yield f"data: {json.dumps({'type': 'chunk', 'text': 'صار خطأ — حاول مرة ثانية 🔄'})}\n\n"
+
+        # Persist after generation
+        if user and convo_id and full_answer:
+            try:
+                db.add(Message(conversation_id=convo_id, role="user", content=request.message))
+                db.add(Message(conversation_id=convo_id, role="assistant", content=full_answer))
+                db.commit()
+            except Exception as e:
+                print(f"[/ask/stream DB Error] {e}")
+
+        yield f"data: {json.dumps({'type': 'done'})}\n\n"
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
 @app.post("/upload-and-ask")

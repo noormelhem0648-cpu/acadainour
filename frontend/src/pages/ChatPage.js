@@ -289,6 +289,79 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
     });
   };
 
+  // Append text to the last assistant message (for streaming)
+  const appendToLast = (text) => {
+    setMessages(prev => {
+      const updated = [...prev];
+      const last = updated[updated.length - 1];
+      if (last && last.role === "assistant") {
+        updated[updated.length - 1] = { ...last, content: last.content + text };
+      }
+      messagesRef.current = updated;
+      return updated;
+    });
+  };
+
+  // Stream a response token-by-token. Returns conversation_id.
+  const streamAPI = async (userMessage, msgHistory, convoId, onChunk) => {
+    const history = msgHistory.map(m => ({
+      role: m.role === "assistant" ? "model" : "user",
+      content: m.content,
+    }));
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const res = await fetch(API_URL + "/ask/stream", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ subject_code: subjectCode, message: userMessage, history, conversation_id: convoId || null }),
+    });
+    if (!res.ok || !res.body) throw new Error("stream failed");
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let convId = convoId;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n\n");
+      buffer = lines.pop();
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith("data:")) continue;
+        try {
+          const data = JSON.parse(trimmed.slice(5).trim());
+          if (data.type === "meta") convId = data.conversation_id;
+          else if (data.type === "chunk") onChunk(data.text);
+        } catch {}
+      }
+    }
+    return convId;
+  };
+
+  // Add an empty assistant message and stream the answer into it.
+  const streamInto = async (userMessage, historyMsgs, errorText = "صار خطأ — حاول مرة ثانية 🔄") => {
+    addMessage("assistant", "");
+    try {
+      await streamAPI(userMessage, historyMsgs, null, (chunk) => appendToLast(chunk));
+    } catch (err) {
+      try {
+        const result = await callAPI(userMessage, historyMsgs);
+        appendToLast(result.answer);
+      } catch {
+        setMessages(prev => {
+          const updated = [...prev];
+          updated[updated.length - 1] = { role: "assistant", content: errorText, time: Date.now(), isError: true };
+          messagesRef.current = updated;
+          return updated;
+        });
+      }
+    }
+  };
+
   const sendMessage = async () => {
     if (loading) return;
     if (!input.trim() && !attachedImage && !attachedFile) return;
@@ -297,12 +370,12 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
     setInput("");
     setLoading(true);
 
-    try {
-      let answer;
-      const currentMsgs = messagesRef.current;
-      const historyMsgs = currentMsgs.slice(0, -1);
+    const currentMsgs = messagesRef.current;
+    const historyMsgs = currentMsgs.slice(0, -1);
 
-      if (attachedImage || attachedFile) {
+    if (attachedImage || attachedFile) {
+      // Files use the non-streaming endpoint
+      try {
         const formData = new FormData();
         formData.append("subject_code", subjectCode);
         formData.append("message", userMessage);
@@ -311,16 +384,17 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
         else if (attachedFile) formData.append("file", attachedFile);
         const res = await fetch(API_URL + "/upload-and-ask", { method: "POST", body: formData });
         const data = await res.json();
-        answer = data.answer || data.detail || "No response.";
-      } else {
-        const result = await callAPI(userMessage, historyMsgs);
-        answer = result.answer;
+        addMessage("assistant", data.answer || data.detail || "No response.");
+        clearAttachments();
+      } catch (err) {
+        addMessage("assistant", "عذراً، حصل خطأ بالاتصال. حاول مرة ثانية. 🔄", { isError: true });
       }
-      addMessage("assistant", answer);
-      clearAttachments();
-    } catch (err) {
-      addMessage("assistant", "عذراً، حصل خطأ بالاتصال. حاول مرة ثانية. 🔄\nSorry, connection error. Please try again.", { isError: true });
+      setLoading(false);
+      return;
     }
+
+    // Text message → stream the response
+    await streamInto(userMessage, historyMsgs, "عذراً، حصل خطأ بالاتصال. حاول مرة ثانية. 🔄");
     setLoading(false);
   };
 
@@ -337,13 +411,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
       return updated;
     });
     setLoading(true);
-
-    try {
-      const { answer } = await callAPI(userMessage, historyBefore);
-      addMessage("assistant", answer);
-    } catch (err) {
-      addMessage("assistant", "عذراً، حصل خطأ. حاول مرة ثانية. 🔄", { isError: true });
-    }
+    await streamInto(userMessage, historyBefore, "عذراً، حصل خطأ. حاول مرة ثانية. 🔄");
     setLoading(false);
   };
 
@@ -361,13 +429,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
       return updated;
     });
     setLoading(true);
-
-    try {
-      const { answer } = await callAPI(userMessage, historyBefore);
-      addMessage("assistant", answer);
-    } catch (err) {
-      addMessage("assistant", "عذراً، حصل خطأ بالاتصال. حاول مرة ثانية. 🔄", { isError: true });
-    }
+    await streamInto(userMessage, historyBefore, "عذراً، حصل خطأ بالاتصال. حاول مرة ثانية. 🔄");
     setLoading(false);
   };
 
@@ -388,13 +450,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
     const typeLabels = { mix: "Mix", mcq: "MCQ", fillblank: "Fill Blank", short: "Short Answer" };
     addMessage("user", `📝 Quiz (${typeLabels[type || "mix"]})${topic ? ": " + topic : ""}`);
     setLoading(true);
-
-    try {
-      const { answer } = await callAPI(quizPrompt, messagesRef.current.slice(0, -1));
-      addMessage("assistant", answer);
-    } catch (err) {
-      addMessage("assistant", "ما قدرت أعمل الكويز. حاول مرة ثانية 🔄", { isError: true });
-    }
+    await streamInto(quizPrompt, messagesRef.current.slice(0, -1), "ما قدرت أعمل الكويز. حاول مرة ثانية 🔄");
     setLoading(false);
     setQuizTopic("");
   };
@@ -429,13 +485,7 @@ Use the mixed Arabic+English style for the exam.`;
 
     addMessage("user", `📄 Exam (${diffLabels[examDifficulty]})${examUnits.trim() ? " — " + examUnits.trim() : ""}${examTopic ? ": " + examTopic : ""}`);
     setLoading(true);
-
-    try {
-      const { answer } = await callAPI(examPrompt, messagesRef.current.slice(0, -1));
-      addMessage("assistant", answer);
-    } catch (err) {
-      addMessage("assistant", "ما قدرت أعمل الامتحان. حاول مرة ثانية 🔄", { isError: true });
-    }
+    await streamInto(examPrompt, messagesRef.current.slice(0, -1), "ما قدرت أعمل الامتحان. حاول مرة ثانية 🔄");
     setLoading(false);
     setExamTopic("");
   };
@@ -444,12 +494,7 @@ Use the mixed Arabic+English style for the exam.`;
     if (loading) return;
     addMessage("user", displayText || prompt);
     setLoading(true);
-    try {
-      const { answer } = await callAPI(prompt, messagesRef.current.slice(0, -1));
-      addMessage("assistant", answer);
-    } catch (err) {
-      addMessage("assistant", "صار خطأ — حاول مرة ثانية 🔄", { isError: true });
-    }
+    await streamInto(prompt, messagesRef.current.slice(0, -1), "صار خطأ — حاول مرة ثانية 🔄");
     setLoading(false);
   };
 
@@ -514,7 +559,12 @@ Use the mixed Arabic+English style for the exam.`;
               role={msg.role === "assistant" ? "article" : "none"}
               aria-label={msg.role === "assistant" ? "AI response" : "Your message"}
             >
-              {msg.role === "assistant" ? (<ReactMarkdown>{msg.content}</ReactMarkdown>) : (<p>{msg.content}</p>)}
+              {msg.role === "assistant"
+                ? (msg.content
+                    ? <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    : <div className="loading-dots"><span className="dot" /><span className="dot" /><span className="dot" /></div>)
+                : (<p>{msg.content}</p>)}
+              {!(msg.role === "assistant" && !msg.content) && (
               <div className="msg-footer">
                 <span className="msg-time">{formatTime(msg.time)}</span>
                 {msg.role === "assistant" && (
@@ -598,19 +648,10 @@ Use the mixed Arabic+English style for the exam.`;
                   )
                 )}
               </div>
+              )}
             </div>
           );
         })}
-        {loading && (
-          <div className="message assistant-message loading-message" role="status" aria-label="Loading">
-            <div className="loading-content">
-              <div className="loading-dots">
-                <span className="dot" /><span className="dot" /><span className="dot" />
-              </div>
-              <span className="loading-step">{LOADING_STEPS[loadingStep]}</span>
-            </div>
-          </div>
-        )}
         <div ref={messagesEndRef} />
       </div>
 
