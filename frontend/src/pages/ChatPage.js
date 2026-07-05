@@ -81,6 +81,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
   const [examUnits, setExamUnits] = useState("");
   const [likedMsgs, setLikedMsgs] = useState({});
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
   const [showHistory, setShowHistory] = useState(false);
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [keyInput, setKeyInput] = useState("");
@@ -526,13 +527,23 @@ Use the mixed Arabic+English style for the exam.`;
                     <div className="msg-dropdown-wrap">
                       <button
                         className="msg-dots-btn"
-                        onClick={() => setOpenDropdown(openDropdown === idx ? null : idx)}
+                        onClick={(e) => {
+                          if (openDropdown === idx) { setOpenDropdown(null); return; }
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          const dropW = 220;
+                          let left = rect.left;
+                          if (left + dropW > window.innerWidth - 8) left = window.innerWidth - dropW - 8;
+                          if (left < 8) left = 8;
+                          const top = rect.top - 8;
+                          setDropdownPos({ top, left });
+                          setOpenDropdown(idx);
+                        }}
                         aria-label="Message options"
                       >
                         <span /><span /><span />
                       </button>
                       {openDropdown === idx && (
-                        <div className="msg-dropdown">
+                        <div className="msg-dropdown" style={{ top: dropdownPos.top, left: dropdownPos.left, transform: "translateY(-100%)" }}>
                           {/* ── Actions ── */}
                           <div className="dd-section-label">Actions</div>
                           <div className="msg-dropdown-section">
