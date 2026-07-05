@@ -3,6 +3,26 @@ import time
 from google import genai
 from google.genai import types
 
+# ThinkingConfig only exists in newer google-genai versions — detect safely
+try:
+    _THINKING_SUPPORTED = hasattr(types, "ThinkingConfig")
+except Exception:
+    _THINKING_SUPPORTED = False
+
+
+def _build_config():
+    kwargs = dict(
+        system_instruction=SYSTEM_PROMPT,
+        temperature=0.3,
+        max_output_tokens=1200,
+    )
+    if _THINKING_SUPPORTED:
+        try:
+            kwargs["thinking_config"] = types.ThinkingConfig(thinking_budget=0)
+        except Exception:
+            pass
+    return types.GenerateContentConfig(**kwargs)
+
 _known_keys: set = set()
 _clients: list = []
 _current_key_idx = 0
@@ -147,7 +167,7 @@ def generate_academic_response(
         full_prompt = f"Student's question: {user_query}"
 
     contents = []
-    recent_history = chat_history[-20:] if len(chat_history) > 20 else chat_history
+    recent_history = chat_history[-8:] if len(chat_history) > 8 else chat_history
     for msg in recent_history:
         role = "user" if msg["role"] == "user" else "model"
         contents.append(
@@ -179,10 +199,7 @@ def generate_academic_response(
             response = client.models.generate_content(
                 model="gemini-2.5-flash-lite",
                 contents=contents,
-                config=types.GenerateContentConfig(
-                    system_instruction=SYSTEM_PROMPT,
-                    temperature=0.3,
-                ),
+                config=_build_config(),
             )
             return response.text
 
