@@ -26,6 +26,7 @@ ENV/
 # indexes/ ARE committed so RAG (book answers) works on Render.
 # subjects/ (raw PDFs) stay ignored — only the built indexes are needed at runtime.
 subjects/
+indexes/*/_partial.pkl
 
 # OS
 .DS_Store

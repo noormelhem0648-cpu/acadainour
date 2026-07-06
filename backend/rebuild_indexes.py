@@ -1,7 +1,7 @@
 """
-Re-embed existing text chunks with the current embedding model (gemini-embedding-001)
-and rebuild each subject's FAISS index. Reuses texts.pkl — does NOT re-parse PDFs.
-Resumable: skips subjects whose index was already rebuilt in this run (marker file).
+Re-embed existing text chunks with gemini-embedding-001 and rebuild FAISS indexes.
+Reuses texts.pkl (no PDF re-parsing). RESUMABLE: checkpoints per subject, so you can
+re-run this as many times as needed and it continues where it stopped.
 """
 import os
 import time
@@ -12,12 +12,12 @@ from google import genai
 
 EMBED_MODEL = "gemini-embedding-001"
 INDEXES_PATH = "indexes"
-BATCH_SIZE = 80
-MARKER = ".rebuilt_v2"  # presence means this subject is done with new model
+BATCH_SIZE = 20
+MARKER = ".rebuilt_v2"
+PARTIAL = "_partial.pkl"
 
 
 def _load_keys():
-    """Load all keys from env and from keys.txt / .env.keys (one per line)."""
     keys = []
     for name in ["GEMINI_API_KEY"] + [f"GEMINI_API_KEY{i}" for i in range(1, 30)] + [f"GEMINI_API_KEY_{i}" for i in range(1, 30)]:
         v = os.getenv(name)
@@ -40,33 +40,41 @@ print(f"Loaded {len(CLIENTS)} API key(s) for rotation.")
 _idx = 0
 
 
-def embed_batch(texts, retries=None):
+def embed_batch(texts):
+    """Try all keys; if all exhausted, wait and keep trying (never give up)."""
     global _idx
-    retries = retries or (len(CLIENTS) * 2 + 3)
-    for attempt in range(retries):
+    full_sweeps = 0
+    attempt = 0
+    while True:
         client = CLIENTS[_idx % len(CLIENTS)]
         try:
             resp = client.models.embed_content(model=EMBED_MODEL, contents=texts)
             return [e.values for e in resp.embeddings]
         except Exception as e:
             msg = str(e).lower()
-            if any(k in msg for k in ["429", "rate", "quota", "exhausted"]):
-                _idx += 1  # rotate to next key immediately
-                if attempt >= len(CLIENTS):
-                    time.sleep(5)
-                continue
-            print(f"    batch error: {str(e)[:120]}")
-            time.sleep(3)
             _idx += 1
-    return None
+            attempt += 1
+            if any(k in msg for k in ["429", "rate", "quota", "exhausted", "resource"]):
+                if attempt % len(CLIENTS) == 0:
+                    full_sweeps += 1
+                    wait = min(30 * full_sweeps, 120)
+                    print(f"    all keys busy (sweep {full_sweeps}) — waiting {wait}s...")
+                    time.sleep(wait)
+                continue
+            else:
+                print(f"    error: {str(e)[:110]}")
+                time.sleep(3)
+                if attempt > len(CLIENTS) * 3:
+                    return None
 
 
 def rebuild_subject(code):
     path = os.path.join(INDEXES_PATH, code)
     texts_file = os.path.join(path, "texts.pkl")
     marker = os.path.join(path, MARKER)
+    partial_file = os.path.join(path, PARTIAL)
     if os.path.exists(marker):
-        print(f"[{code}] already rebuilt, skipping.")
+        print(f"[{code}] already done, skipping.")
         return
     if not os.path.exists(texts_file):
         print(f"[{code}] no texts.pkl, skipping.")
@@ -74,34 +82,52 @@ def rebuild_subject(code):
 
     with open(texts_file, "rb") as f:
         texts = pickle.load(f)
-    print(f"[{code}] {len(texts)} chunks — embedding...")
 
-    all_vecs = []
-    valid_texts = []
-    for i in range(0, len(texts), BATCH_SIZE):
+    # Resume from checkpoint
+    done_vecs = []
+    if os.path.exists(partial_file):
+        with open(partial_file, "rb") as f:
+            done_vecs = pickle.load(f)
+        print(f"[{code}] resuming from {len(done_vecs)}/{len(texts)}")
+    else:
+        print(f"[{code}] {len(texts)} chunks — embedding...")
+
+    start = len(done_vecs)
+    for i in range(start, len(texts), BATCH_SIZE):
         batch = texts[i:i + BATCH_SIZE]
         vecs = embed_batch(batch)
         if vecs is None:
-            print(f"[{code}] FAILED at batch {i}. Aborting this subject.")
+            print(f"[{code}] hard error at {i}, saving checkpoint & aborting.")
+            with open(partial_file, "wb") as f:
+                pickle.dump(done_vecs, f)
             return
-        all_vecs.extend(vecs)
-        valid_texts.extend(batch)
-        done = min(i + BATCH_SIZE, len(texts))
-        print(f"[{code}] {done}/{len(texts)}")
-        time.sleep(0.3)
+        done_vecs.extend(vecs)
+        # checkpoint every batch
+        with open(partial_file, "wb") as f:
+            pickle.dump(done_vecs, f)
+        print(f"[{code}] {min(i + BATCH_SIZE, len(texts))}/{len(texts)}")
+        time.sleep(1.2)
 
-    arr = np.array(all_vecs).astype("float32")
+    arr = np.array(done_vecs).astype("float32")
     index = faiss.IndexFlatL2(arr.shape[1])
     index.add(arr)
     faiss.write_index(index, os.path.join(path, "index.faiss"))
-    with open(texts_file, "wb") as f:
-        pickle.dump(valid_texts, f)
     open(marker, "w").close()
-    print(f"[{code}] ✅ DONE — {len(valid_texts)} vectors, dim {arr.shape[1]}")
+    if os.path.exists(partial_file):
+        os.remove(partial_file)
+    print(f"[{code}] DONE - {len(done_vecs)} vectors")
 
 
 if __name__ == "__main__":
-    subjects = sorted(d for d in os.listdir(INDEXES_PATH) if os.path.isdir(os.path.join(INDEXES_PATH, d)))
+    # Smallest subjects first so we finish many quickly before the big ones
+    subjects = [d for d in os.listdir(INDEXES_PATH) if os.path.isdir(os.path.join(INDEXES_PATH, d))]
+    def size(code):
+        p = os.path.join(INDEXES_PATH, code, "texts.pkl")
+        try:
+            return len(pickle.load(open(p, "rb")))
+        except Exception:
+            return 0
+    subjects.sort(key=size)
     print(f"Rebuilding {len(subjects)} subjects with {EMBED_MODEL}\n")
     for code in subjects:
         rebuild_subject(code)

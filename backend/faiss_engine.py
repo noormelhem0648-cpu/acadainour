@@ -65,9 +65,16 @@ def search(subject_code: str, query: str, top_k: int = 5) -> list:
     path = get_index_path(subject_code)
     index_file = os.path.join(path, "index.faiss")
     texts_file = os.path.join(path, "texts.pkl")
+    marker = os.path.join(path, ".rebuilt_v2")
 
     if not os.path.exists(index_file) or not os.path.exists(texts_file):
         print(f"[FAISS] No index found for subject: {subject_code}")
+        return []
+
+    # Only trust indexes rebuilt with the current embedding model.
+    # Non-rebuilt subjects fall back to general knowledge (safe, honest).
+    if not os.path.exists(marker):
+        print(f"[FAISS] Index for {subject_code} not rebuilt with current model — skipping.")
         return []
 
     index = faiss.read_index(index_file)
