@@ -239,7 +239,8 @@ def remove_instructor(email: str, secret: str, db: Session = Depends(get_db)):
 @app.post("/keys/contribute")
 def contribute_key(req: KeyContributeRequest, user: User = Depends(require_user), db: Session = Depends(get_db)):
     key = req.api_key.strip()
-    if not key.startswith("AIza") or len(key) < 30:
+    # Accept both key formats: classic "AIza..." and newer "AQ...."
+    if len(key) < 30 or not (key.startswith("AIza") or key.startswith("AQ")):
         raise HTTPException(status_code=400, detail="مفتاح غير صالح. تأكد أنه من Google AI Studio.")
     existing = db.query(ContributedKey).filter(ContributedKey.api_key == key).first()
     if existing:
