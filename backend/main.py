@@ -9,6 +9,7 @@ from typing import List, Dict, Optional
 from sqlalchemy.orm import Session
 
 from ai_engine import generate_academic_response, generate_academic_response_stream, _add_keys
+from subjects_meta import get_subject_info
 from faiss_engine import search
 from db import init_db, get_db, User, Conversation, Message, Restriction, ContributedKey
 from auth import (
@@ -456,6 +457,7 @@ async def ask_assistant(request: ChatRequest, user: User = Depends(require_user)
             context_from_books=context_from_books,
             image_data=request.image_data,
             image_mime_type=request.image_mime_type,
+            subject_info=get_subject_info(request.subject_code),
         )
 
         # Save to database if user is logged in
@@ -551,6 +553,7 @@ async def ask_assistant_stream(request: ChatRequest, user: User = Depends(requir
                 context_from_books=book_context,
                 image_data=request.image_data,
                 image_mime_type=request.image_mime_type,
+                subject_info=get_subject_info(request.subject_code),
             ):
                 full_answer += chunk
                 yield f"data: {json.dumps({'type': 'chunk', 'text': chunk})}\n\n"
@@ -621,6 +624,7 @@ async def upload_and_ask(
         context_from_books=context_from_books,
         image_data=image_data,
         image_mime_type=image_mime_type,
+        subject_info=get_subject_info(subject_code),
     )
 
     return {

@@ -152,16 +152,24 @@ def _is_rate_limit_error(error_str):
     return any(kw in error_str for kw in ["429", "rate", "quota", "resource_exhausted", "resource has been exhausted"])
 
 
-def _build_contents(user_query, chat_history, context_from_books, image_data, image_mime_type):
+def _build_contents(user_query, chat_history, context_from_books, image_data, image_mime_type, subject_info=""):
+    subject_line = ""
+    if subject_info:
+        subject_line = (
+            f"[Current subject the student is studying: {subject_info}. "
+            f"If the student asks what this subject is about, answer using this. "
+            f"If the student asks something clearly OUTSIDE this subject's scope, gently note it's not part of this course, then still help.]\n\n"
+        )
     if context_from_books and context_from_books.strip():
         full_prompt = (
+            f"{subject_line}"
             f"The following is relevant content retrieved from the course textbook:\n\n"
             f"{context_from_books}\n\n"
             f"---\n"
             f"Student's question: {user_query}"
         )
     else:
-        full_prompt = f"Student's question: {user_query}"
+        full_prompt = f"{subject_line}Student's question: {user_query}"
 
     contents = []
     recent_history = chat_history[-8:] if len(chat_history) > 8 else chat_history
@@ -191,10 +199,11 @@ def generate_academic_response_stream(
     chat_history: list,
     context_from_books: str = "",
     image_data: str = None,
-    image_mime_type: str = None
+    image_mime_type: str = None,
+    subject_info: str = ""
 ):
     """Yield response text chunks as they are generated (for streaming)."""
-    contents = _build_contents(user_query, chat_history, context_from_books, image_data, image_mime_type)
+    contents = _build_contents(user_query, chat_history, context_from_books, image_data, image_mime_type, subject_info)
     num_keys = max(len(_clients), 1)
 
     for attempt in range(num_keys * 2):
@@ -228,9 +237,10 @@ def generate_academic_response(
     chat_history: list,
     context_from_books: str = "",
     image_data: str = None,
-    image_mime_type: str = None
+    image_mime_type: str = None,
+    subject_info: str = ""
 ) -> str:
-    contents = _build_contents(user_query, chat_history, context_from_books, image_data, image_mime_type)
+    contents = _build_contents(user_query, chat_history, context_from_books, image_data, image_mime_type, subject_info)
 
     # Try every key at least once, then do a second round with short backoff
     num_keys = max(len(_clients), 1)
