@@ -76,9 +76,10 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
   const [showExamModal, setShowExamModal] = useState(false);
   const [quizTopic, setQuizTopic] = useState("");
   const [quizType, setQuizType] = useState("mix");
+  const [quizLevel, setQuizLevel] = useState("medium");
   const [examTopic, setExamTopic] = useState("");
   const [examDifficulty, setExamDifficulty] = useState("medium");
-  const [examUnits, setExamUnits] = useState("");
+  const [examType, setExamType] = useState("mix");
   const [likedMsgs, setLikedMsgs] = useState({});
   const [openDropdown, setOpenDropdown] = useState(null);
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
@@ -449,22 +450,29 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
     setLoading(false);
   };
 
-  const QUIZ_TYPES = {
-    mix: "Generate a quiz with 7 questions using a MIX of: multiple choice (ضع دائرة), True/False, fill-in-the-blank (املأ الفراغ), and 1-2 short answer questions (أسئلة قصيرة).",
-    mcq: "Generate a quiz with 7 multiple choice questions (ضع دائرة حول الإجابة الصحيحة). Each question should have 4 options (a, b, c, d).",
-    fillblank: "Generate a quiz with 7 fill-in-the-blank questions (املأ الفراغ). Each sentence should have one blank (_______) for the student to complete.",
-    short: "Generate a quiz with 5 short answer questions (أسئلة مقالية قصيرة). Each question requires a 1-3 sentence answer.",
+  const LEVELS = {
+    easy: "Easy (سهل) — basic recall, simple vocabulary.",
+    medium: "Medium (متوسط) — university level, understanding & application.",
+    hard: "Hard (صعب) — challenging, analysis & critical thinking.",
   };
+  const TYPE_INSTR = {
+    mix: "a MIX of multiple choice, True/False, fill-in-the-blank and short answer.",
+    mcq: "multiple choice questions only, 4 options (a,b,c,d) each.",
+    fillblank: "fill-in-the-blank questions only (one _____ blank per sentence).",
+    short: "short answer questions only (1-3 sentence answers).",
+    truefalse: "True/False questions only.",
+  };
+  const TYPE_LABEL = { mix: "Mix", mcq: "MCQ", fillblank: "Fill Blank", short: "Short Answer", truefalse: "True/False" };
 
   const generateQuiz = async (topic, type) => {
     if (loading) return;
     setShowQuizModal(false);
-    const topicText = topic ? ` Focus on the topic: "${topic}".` : "";
-    const typePrompt = QUIZ_TYPES[type || "mix"];
-    const quizPrompt = `${typePrompt}${topicText} Number each question. Put all answers at the end under "## Answers" section.`;
-
-    const typeLabels = { mix: "Mix", mcq: "MCQ", fillblank: "Fill Blank", short: "Short Answer" };
-    addMessage("user", `📝 Quiz (${typeLabels[type || "mix"]})${topic ? ": " + topic : ""}`);
+    const topicText = topic ? ` on the topic: "${topic}"` : " covering the subject";
+    const quizPrompt = `Generate a practice QUIZ${topicText} for subject ${subjectCode}.
+Level: ${LEVELS[quizLevel]}
+Question type: ${TYPE_INSTR[type || "mix"]}
+Make 6-8 questions. Number each one. Put all correct answers at the end under "## Answers".`;
+    addMessage("user", `📝 Quiz — ${TYPE_LABEL[type || "mix"]} · ${quizLevel}${topic ? " · " + topic : ""}`);
     setLoading(true);
     await streamInto(quizPrompt, messagesRef.current.slice(0, -1), "ما قدرت أعمل الكويز. حاول مرة ثانية 🔄");
     setLoading(false);
@@ -474,32 +482,17 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
   const generateExam = async () => {
     if (loading) return;
     setShowExamModal(false);
-    const diffLabels = { easy: "Easy (سهل)", medium: "Medium (متوسط)", hard: "Hard (صعب)" };
-    const diffPrompts = {
-      easy: "Make the questions simple and straightforward, suitable for beginners. Use basic vocabulary and simple sentence structures.",
-      medium: "Make the questions at a university level, requiring understanding of concepts and application.",
-      hard: "Make the questions challenging, requiring deep analysis, critical thinking, and advanced knowledge.",
-    };
-    const unitText = examUnits.trim() ? ` Focus ONLY on these units/chapters: ${examUnits.trim()}.` : " Cover all available material.";
-    const topicText = examTopic ? ` Special focus on: "${examTopic}".` : "";
+    const topicText = examTopic.trim() ? ` on the topic: "${examTopic.trim()}"` : " covering the subject";
+    const examPrompt = `IMPORTANT: This is a practice exam generation request. Generate the FULL exam WITH all answers.
 
-    const examPrompt = `IMPORTANT: This is a practice exam generation request. Generate the FULL exam with ALL questions and answers.
+Generate a FULL PRACTICE EXAM${topicText} for subject ${subjectCode}.
+Level: ${LEVELS[examDifficulty]}
+Question type: ${TYPE_INSTR[examType]}
 
-Generate a FULL PRACTICE EXAM for subject ${subjectCode}.${unitText}${topicText}
-Difficulty level: ${diffLabels[examDifficulty]}. ${diffPrompts[examDifficulty]}
-
-Structure the exam EXACTLY like this:
-
-## Section A: Multiple Choice — ضع دائرة (5 questions, 4 options each, 10 marks)
-## Section B: True or False — صح أم خطأ (5 questions, 5 marks)
-## Section C: Fill in the Blank — املأ الفراغ (5 questions, 10 marks)
-## Section D: Short Answer — أجب بإيجاز (3 questions, 15 marks)
-
-Total: 40 marks, 18 questions.
-At the very end, add: ## Answer Key — with all correct answers.
-Use the mixed Arabic+English style for the exam.`;
-
-    addMessage("user", `📄 Exam (${diffLabels[examDifficulty]})${examUnits.trim() ? " — " + examUnits.trim() : ""}${examTopic ? ": " + examTopic : ""}`);
+Make it a proper exam (about 15-18 questions, grouped into clear sections with marks).
+At the very end add: ## Answer Key — with all correct answers.
+Use the mixed Arabic+English style.`;
+    addMessage("user", `📄 Exam — ${TYPE_LABEL[examType]} · ${examDifficulty}${examTopic.trim() ? " · " + examTopic.trim() : ""}`);
     setLoading(true);
     await streamInto(examPrompt, messagesRef.current.slice(0, -1), "ما قدرت أعمل الامتحان. حاول مرة ثانية 🔄");
     setLoading(false);
@@ -731,9 +724,12 @@ Use the mixed Arabic+English style for the exam.`;
         <div className="quiz-modal-overlay" onClick={() => setShowExamModal(false)} role="dialog" aria-modal="true">
           <div className="quiz-modal" onClick={e => e.stopPropagation()}>
             <h3>📄 Exam Generator</h3>
-            <p>اختار المستوى والوحدة وحدد الموضوع</p>
+            <p>اكتب الموضوع، واختار المستوى والنوع</p>
 
-            <label className="modal-label">المستوى — Difficulty</label>
+            <label className="modal-label">الموضوع — Topic (اتركه فاضي = كل المادة)</label>
+            <input type="text" className="quiz-topic-input" placeholder="مثال: Past Simple, Paragraph Writing..." value={examTopic} onChange={e => setExamTopic(e.target.value)} onKeyDown={e => { if (e.key === "Enter") generateExam(); }} />
+
+            <label className="modal-label">المستوى — Level</label>
             <div className="quiz-type-selector three-cols">
               {[
                 { key: "easy", label: "🟢", desc: "سهل" },
@@ -747,11 +743,22 @@ Use the mixed Arabic+English style for the exam.`;
               ))}
             </div>
 
-            <label className="modal-label">الوحدات — Units/Chapters</label>
-            <input type="text" className="quiz-topic-input" placeholder="e.g. Unit 1, 3, 5 or Phonetics, Morphology... (اتركه فاضي = الكل)" value={examUnits} onChange={e => setExamUnits(e.target.value)} />
+            <label className="modal-label">النوع — Type</label>
+            <div className="quiz-type-selector">
+              {[
+                { key: "mix", label: "🎯 Mix", desc: "ميكس" },
+                { key: "mcq", label: "⭕ MCQ", desc: "ضع دائرة" },
+                { key: "truefalse", label: "✔️ T/F", desc: "صح وخطأ" },
+                { key: "fillblank", label: "✏️ Fill", desc: "املأ الفراغ" },
+                { key: "short", label: "📝 Short", desc: "أسئلة قصيرة" },
+              ].map(t => (
+                <button key={t.key} className={"quiz-type-btn" + (examType === t.key ? " active" : "")} onClick={() => setExamType(t.key)}>
+                  <span className="quiz-type-icon">{t.label}</span>
+                  <span className="quiz-type-desc">{t.desc}</span>
+                </button>
+              ))}
+            </div>
 
-            <label className="modal-label">موضوع محدد (اختياري)</label>
-            <input type="text" className="quiz-topic-input" placeholder="e.g. Past Simple, Vowels..." value={examTopic} onChange={e => setExamTopic(e.target.value)} onKeyDown={e => { if (e.key === "Enter") generateExam(); }} />
             <div className="quiz-modal-actions">
               <button className="quiz-modal-btn primary" onClick={generateExam}>📄 Generate Exam</button>
               <button className="quiz-modal-btn cancel" onClick={() => setShowExamModal(false)}>Cancel</button>
@@ -764,11 +771,40 @@ Use the mixed Arabic+English style for the exam.`;
         <div className="quiz-modal-overlay" onClick={() => setShowQuizModal(false)} role="dialog" aria-modal="true" aria-label="Quiz options">
           <div className="quiz-modal" onClick={e => e.stopPropagation()}>
             <h3>📝 Quiz Generator</h3>
-            <p>اختار نوع الأسئلة والموضوع</p>
+            <p>اكتب الموضوع، واختار المستوى والنوع</p>
+
+            <label className="modal-label">الموضوع — Topic (اختياري)</label>
+            <input
+              type="text"
+              className="quiz-topic-input"
+              placeholder="مثال: Past Simple, Morphology..."
+              value={quizTopic}
+              onChange={e => setQuizTopic(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter") generateQuiz(quizTopic, quizType); }}
+              autoFocus
+              aria-label="Quiz topic"
+            />
+
+            <label className="modal-label">المستوى — Level</label>
+            <div className="quiz-type-selector three-cols">
+              {[
+                { key: "easy", label: "🟢", desc: "سهل" },
+                { key: "medium", label: "🟡", desc: "متوسط" },
+                { key: "hard", label: "🔴", desc: "صعب" },
+              ].map(d => (
+                <button key={d.key} className={"quiz-type-btn" + (quizLevel === d.key ? " active" : "")} onClick={() => setQuizLevel(d.key)}>
+                  <span className="quiz-type-icon">{d.label}</span>
+                  <span className="quiz-type-desc">{d.desc}</span>
+                </button>
+              ))}
+            </div>
+
+            <label className="modal-label">النوع — Type</label>
             <div className="quiz-type-selector">
               {[
                 { key: "mix", label: "🎯 Mix", desc: "ميكس" },
                 { key: "mcq", label: "⭕ MCQ", desc: "ضع دائرة" },
+                { key: "truefalse", label: "✔️ T/F", desc: "صح وخطأ" },
                 { key: "fillblank", label: "✏️ Fill", desc: "املأ الفراغ" },
                 { key: "short", label: "📝 Short", desc: "أسئلة قصيرة" },
               ].map(t => (
@@ -782,16 +818,6 @@ Use the mixed Arabic+English style for the exam.`;
                 </button>
               ))}
             </div>
-            <input
-              type="text"
-              className="quiz-topic-input"
-              placeholder="الموضوع (اختياري) — e.g. Past Simple, Morphology..."
-              value={quizTopic}
-              onChange={e => setQuizTopic(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter") generateQuiz(quizTopic, quizType); }}
-              autoFocus
-              aria-label="Quiz topic"
-            />
             <div className="quiz-modal-actions">
               <button className="quiz-modal-btn primary" onClick={() => generateQuiz(quizTopic, quizType)}>
                 🎯 Generate
