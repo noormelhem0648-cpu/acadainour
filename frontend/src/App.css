@@ -896,6 +896,12 @@ body {
   transition: all 0.2s;
 }
 .inst-logout-btn:hover { border-color: #e57373; color: #e57373; }
+.inst-try-btn {
+  background: var(--accent); border: none; color: #fff;
+  padding: 6px 14px; border-radius: 10px; cursor: pointer; font-size: 0.82rem;
+  font-weight: 600; transition: all 0.2s;
+}
+.inst-try-btn:hover { background: var(--accent-dark); }
 
 .instructor-main { max-width: 700px; margin: 0 auto; padding: 28px 20px; display: flex; flex-direction: column; gap: 20px; }
 

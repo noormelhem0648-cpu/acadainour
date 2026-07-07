@@ -315,8 +315,10 @@ def delete_conversation(convo_id: int, user: User = Depends(require_user), db: S
 def root():
     return {"status": "Noura AI backend is running ✓"}
 
-def _is_subject_blocked(subject_code: str, db: Session) -> Optional[Restriction]:
-    """Return active restriction for a subject, or None."""
+def _is_subject_blocked(subject_code: str, db: Session, user: Optional[User] = None) -> Optional[Restriction]:
+    """Return active restriction for a subject, or None. Instructors are never blocked."""
+    if user is not None and getattr(user, "role", "") == "instructor":
+        return None
     import datetime
     now = datetime.datetime.utcnow()
     return db.query(Restriction).filter(
@@ -369,8 +371,8 @@ def _check_daily_limit(user: User, db: Session):
 
 
 @app.get("/restrictions/check/{subject_code}")
-def check_restriction(subject_code: str, db: Session = Depends(get_db)):
-    r = _is_subject_blocked(subject_code, db)
+def check_restriction(subject_code: str, user: Optional[User] = Depends(get_current_user), db: Session = Depends(get_db)):
+    r = _is_subject_blocked(subject_code, db, user)  # instructors bypass
     if r:
         return {"blocked": True, "reason": r.reason or ""}
     return {"blocked": False}
@@ -445,7 +447,7 @@ async def ask_assistant(request: ChatRequest, user: User = Depends(require_user)
         raise HTTPException(status_code=400, detail="Message cannot be empty.")
     _check_message_length(request.message)
 
-    restriction = _is_subject_blocked(request.subject_code, db)
+    restriction = _is_subject_blocked(request.subject_code, db, user)
     if restriction:
         reason = restriction.reason or "لا يوجد سبب محدد"
         return {
@@ -508,7 +510,7 @@ async def ask_assistant_stream(request: ChatRequest, user: User = Depends(requir
         raise HTTPException(status_code=400, detail="Message cannot be empty.")
     _check_message_length(request.message)
 
-    restriction = _is_subject_blocked(request.subject_code, db)
+    restriction = _is_subject_blocked(request.subject_code, db, user)
 
     # Daily limit (only when not blocked — blocked messages are free)
     limit_error = None
@@ -595,7 +597,7 @@ async def upload_and_ask(
 ):
     _check_message_length(message)
     # Block if subject is restricted (closes the upload bypass)
-    restriction = _is_subject_blocked(subject_code, db)
+    restriction = _is_subject_blocked(subject_code, db, user)
     if restriction:
         reason = restriction.reason or "لا يوجد سبب محدد"
         return {
@@ -645,7 +647,7 @@ async def upload_and_ask(
 
 @app.post("/quiz")
 async def generate_quiz(request: QuizRequest, user: User = Depends(require_user), db: Session = Depends(get_db)):
-    restriction = _is_subject_blocked(request.subject_code, db)
+    restriction = _is_subject_blocked(request.subject_code, db, user)
     if restriction:
         return {"quiz": "🔒 هاي المادة محجوبة حالياً من قِبَل الدكتور.", "subject_code": request.subject_code, "blocked": True}
     _check_daily_limit(user, db)

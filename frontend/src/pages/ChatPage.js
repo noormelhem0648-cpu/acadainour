@@ -52,11 +52,13 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
   const [blocked, setBlocked] = useState(null); // null=loading, false=ok, string=reason
 
   useEffect(() => {
-    fetch(`${API_URL}/restrictions/check/${subjectCode}`)
+    fetch(`${API_URL}/restrictions/check/${subjectCode}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
       .then(r => r.json())
       .then(d => setBlocked(d.blocked ? (d.reason || "كويز أو امتحان") : false))
       .catch(() => setBlocked(false));
-  }, [subjectCode]);
+  }, [subjectCode, token]);
 
   const [messages, setMessages] = useState([
     {

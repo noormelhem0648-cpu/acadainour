@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const API_URL = "https://acadai-backend-avvo.onrender.com";
 
 export default function InstructorPage({ darkMode, setDarkMode, user, token, onLogout }) {
+  const navigate = useNavigate();
   const [restrictions, setRestrictions] = useState([]);
   const [subjectInput, setSubjectInput] = useState("");
   const [reasonInput, setReasonInput] = useState("");
@@ -79,6 +81,7 @@ export default function InstructorPage({ darkMode, setDarkMode, user, token, onL
           </div>
         </div>
         <div className="instructor-header-right">
+          <button className="inst-try-btn" onClick={() => navigate("/years")}>🎓 جرّب كطالب</button>
           <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
             {darkMode ? "☀️" : "🌙"}
           </button>
