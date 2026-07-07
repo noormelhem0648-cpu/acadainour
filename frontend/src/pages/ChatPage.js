@@ -382,7 +382,11 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
         formData.append("history", JSON.stringify(historyMsgs.map(m => ({ role: m.role === "assistant" ? "model" : "user", content: m.content }))));
         if (attachedImage) formData.append("file", attachedImage);
         else if (attachedFile) formData.append("file", attachedFile);
-        const res = await fetch(API_URL + "/upload-and-ask", { method: "POST", body: formData });
+        const res = await fetch(API_URL + "/upload-and-ask", {
+          method: "POST",
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          body: formData,
+        });
         const data = await res.json();
         addMessage("assistant", data.answer || data.detail || "No response.");
         clearAttachments();
@@ -676,6 +680,7 @@ Use the mixed Arabic+English style for the exam.`;
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           rows={1}
+          maxLength={4000}
           dir={isRTL(input) ? "rtl" : "ltr"}
           aria-label="Type your message"
         />

@@ -335,6 +335,15 @@ def _get_book_context(subject_code: str, query: str, top_k: int = 5) -> str:
 
 
 DAILY_MESSAGE_LIMIT = 100
+MAX_MESSAGE_LEN = 4000
+
+
+def _check_message_length(message: str):
+    if len(message) > MAX_MESSAGE_LEN:
+        raise HTTPException(
+            status_code=400,
+            detail=f"الرسالة طويلة جداً (الحد {MAX_MESSAGE_LEN} حرف). اختصرها شوي — Message too long (max {MAX_MESSAGE_LEN} chars).",
+        )
 
 
 def _check_daily_limit(user: User, db: Session):
@@ -421,9 +430,10 @@ def delete_restriction(restriction_id: int, user: User = Depends(require_instruc
 
 
 @app.post("/ask")
-async def ask_assistant(request: ChatRequest, user: Optional[User] = Depends(get_current_user), db: Session = Depends(get_db)):
+async def ask_assistant(request: ChatRequest, user: User = Depends(require_user), db: Session = Depends(get_db)):
     if not request.message.strip():
         raise HTTPException(status_code=400, detail="Message cannot be empty.")
+    _check_message_length(request.message)
 
     restriction = _is_subject_blocked(request.subject_code, db)
     if restriction:
@@ -482,9 +492,10 @@ async def ask_assistant(request: ChatRequest, user: Optional[User] = Depends(get
 
 
 @app.post("/ask/stream")
-async def ask_assistant_stream(request: ChatRequest, user: Optional[User] = Depends(get_current_user), db: Session = Depends(get_db)):
+async def ask_assistant_stream(request: ChatRequest, user: User = Depends(require_user), db: Session = Depends(get_db)):
     if not request.message.strip():
         raise HTTPException(status_code=400, detail="Message cannot be empty.")
+    _check_message_length(request.message)
 
     restriction = _is_subject_blocked(request.subject_code, db)
 
@@ -567,9 +578,10 @@ async def upload_and_ask(
     message: str = Form(...),
     history: str = Form(default="[]"),
     file: UploadFile = File(...),
-    user: Optional[User] = Depends(get_current_user),
+    user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
+    _check_message_length(message)
     # Block if subject is restricted (closes the upload bypass)
     restriction = _is_subject_blocked(subject_code, db)
     if restriction:
@@ -619,7 +631,7 @@ async def upload_and_ask(
 
 
 @app.post("/quiz")
-async def generate_quiz(request: QuizRequest, user: Optional[User] = Depends(get_current_user), db: Session = Depends(get_db)):
+async def generate_quiz(request: QuizRequest, user: User = Depends(require_user), db: Session = Depends(get_db)):
     restriction = _is_subject_blocked(request.subject_code, db)
     if restriction:
         return {"quiz": "🔒 هاي المادة محجوبة حالياً من قِبَل الدكتور.", "subject_code": request.subject_code, "blocked": True}
