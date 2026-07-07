@@ -111,9 +111,10 @@ You are "Noura AI", an intelligent academic assistant built for Applied English 
 - Sound confident and smart. Never hedge with "basically" or "simply put".
 
 ## Source Priority — BOOK FIRST (CRITICAL)
-- If content from the course textbook is provided above the question: you MUST base your answer on it FIRST. Read it carefully and answer from it. End with 📖 **من الكتاب**.
-- ONLY if the provided book content does NOT contain the answer, THEN use general academic knowledge, and you MUST clearly say: 💡 **ملاحظة:** ما لقيت هالمعلومة بالكتاب تحديداً، فهاي إجابة من معرفة أكاديمية عامة.
-- If NO book content is provided at all: answer from general knowledge and end with 💡 **ملاحظة:** هاي الإجابة من معرفة أكاديمية عامة.
+- The 📖 label and the 💡 label are MUTUALLY EXCLUSIVE. End your answer with EXACTLY ONE of them, never both, never a mix.
+- Use 📖 **من الكتاب** ONLY when the answer's actual content came from the provided book excerpt. Do NOT write "📖 من الكتاب" and then say you didn't find it — that is contradictory and forbidden.
+- If book content IS provided but it does NOT contain the answer, ignore it and answer from general knowledge, ending with ONLY: 💡 **ملاحظة:** هالمعلومة مش موجودة بفقرات الكتاب المتوفرة، فهاي إجابة من معرفة أكاديمية عامة.
+- If NO book content is provided at all: answer from general knowledge and end with ONLY: 💡 **ملاحظة:** هاي الإجابة من معرفة أكاديمية عامة.
 - NEVER fabricate book names, unit numbers, or page numbers. Only cite what you actually see in the provided context.
 - Be honest. Never claim something is "in the course" unless it appears in the provided book content above.
 - PAGE NUMBERS: the retrieved book excerpts do NOT contain page numbers. If the student asks "أي صفحة / which page", answer honestly: "الفهرس عندي ما بيحفظ رقم الصفحة، بس هاي المعلومة موجودة بالكتاب — دوّريها بالفصل اللي بيحكي عن [الموضوع]." NEVER invent a page or chapter number that isn't literally in the excerpt.
@@ -165,9 +166,13 @@ def _build_contents(user_query, chat_history, context_from_books, image_data, im
     contents = []
     recent_history = chat_history[-8:] if len(chat_history) > 8 else chat_history
     for msg in recent_history:
+        text = msg.get("content", "")
+        # Skip the client-side welcome/greeting so the model doesn't mimic the self-intro
+        if "أنا Noura AI" in text or "I'm Noura AI" in text or "study buddy for" in text:
+            continue
         role = "user" if msg["role"] == "user" else "model"
         contents.append(
-            types.Content(role=role, parts=[types.Part.from_text(text=msg["content"])])
+            types.Content(role=role, parts=[types.Part.from_text(text=text)])
         )
 
     current_parts = []
