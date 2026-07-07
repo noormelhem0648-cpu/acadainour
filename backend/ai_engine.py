@@ -113,7 +113,9 @@ You are "Noura AI", an intelligent academic assistant built for Applied English 
 
 ## Source Priority — BOOK FIRST (CRITICAL)
 - The 📖 label and the 💡 label are MUTUALLY EXCLUSIVE. End your answer with EXACTLY ONE of them, never both, never a mix.
-- Use 📖 **من الكتاب** ONLY when the answer's actual content came from the provided book excerpt. Do NOT write "📖 من الكتاب" and then say you didn't find it — that is contradictory and forbidden.
+- Use 📖 **من الكتاب** ONLY when the SPECIFIC facts in your answer are literally present in the provided excerpt above. If the excerpt is about a DIFFERENT topic than the question (e.g. excerpt is about essay writing but the question is about phonemes), the answer did NOT come from the book — you MUST use 💡 and must NOT write "📖 من الكتاب".
+- ANTI-FABRICATION (very important): NEVER invent a unit/chapter title or say "📖 من الكتاب — Units: Phonetics" unless those exact words appear in the excerpt. Fabricating a book citation is a serious error. When unsure, use 💡.
+- Do NOT write "📖 من الكتاب" and then say you didn't find it — that is contradictory and forbidden.
 - UNIT/CHAPTER: if the provided book excerpt contains a Unit / Chapter / Section number or title (e.g. "UNIT 2", "CHAPTER 3", a unit title like "Humor"), CITE it: 📖 **من الكتاب — Unit 2 (Humor)**. This helps the student find it. If the excerpt has no unit/chapter label, just write 📖 **من الكتاب**. Never invent a unit/chapter number that isn't in the excerpt.
 - If book content IS provided but it does NOT contain the answer, ignore it and answer from general knowledge, ending with ONLY: 💡 **ملاحظة:** هالمعلومة مش موجودة بفقرات الكتاب المتوفرة، فهاي إجابة من معرفة أكاديمية عامة.
 - If NO book content is provided at all: answer from general knowledge and end with ONLY: 💡 **ملاحظة:** هاي الإجابة من معرفة أكاديمية عامة.
@@ -157,10 +159,17 @@ def _is_rate_limit_error(error_str):
 def _build_contents(user_query, chat_history, context_from_books, image_data, image_mime_type, subject_info=""):
     subject_line = ""
     if subject_info:
+        try:
+            from subjects_meta import get_all_subjects_map
+            all_map = get_all_subjects_map()
+        except Exception:
+            all_map = ""
         subject_line = (
-            f"[Current subject the student is studying: {subject_info}. "
-            f"If the student asks what this subject is about, answer using this. "
-            f"If the student asks something clearly OUTSIDE this subject's scope, gently note it's not part of this course, then still help.]\n\n"
+            f"[Current subject the student is studying: {subject_info}.\n"
+            f"All available subjects and their topics:\n{all_map}\n"
+            f"RULES:\n"
+            f"- If the question fits THIS subject, answer normally.\n"
+            f"- If the question clearly belongs to ANOTHER subject (e.g. student asks about phonemes/phonetics while in an Essay Writing course), say clearly: 'هذا الموضوع مش من مادة [الحالية]، هو من مادة [الكود + الاسم]. افتحيها من القائمة وبساعدك فيها 👍' — then you MAY give a short general explanation, but you MUST NOT claim it is from this subject's book.]\n\n"
         )
     if context_from_books and context_from_books.strip():
         full_prompt = (

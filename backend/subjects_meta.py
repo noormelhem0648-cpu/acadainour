@@ -7,8 +7,8 @@ SUBJECT_META = {
     "AEL103": {"name": "Vocabulary Building", "book": "English Vocabulary in Use (Upper-Intermediate)"},
     "AEL105": {"name": "Listening & Speaking", "book": "NorthStar 2 (Listening & Speaking)"},
     "AEL109": {"name": "Academic Writing (Paragraphs)", "book": "Longman Academic Writing Series 2"},
-    "AEL110": {"name": "", "book": ""},
-    "AEL209": {"name": "", "book": ""},
+    "AEL110": {"name": "Pronunciation", "book": "English Pronunciation in Use (Mark Hancock)"},
+    "AEL209": {"name": "Essay Writing", "book": "Great Essays"},
     "AEL211": {"name": "Advanced Listening, Speaking & Reading", "book": "NorthStar 4"},
     "AEL301": {"name": "Advanced English Grammar", "book": "Longman Student Grammar Workbook"},
     "AEL302": {"name": "Collocations & Idioms", "book": "Collocations in Use / English Idioms in Use"},
@@ -27,3 +27,13 @@ def get_subject_info(subject_code: str) -> str:
     if not meta or not meta.get("name"):
         return ""
     return f"{meta['name']} (textbook: {meta['book']})"
+
+
+def get_all_subjects_map() -> str:
+    """A compact list of every subject and its topic, so the AI can redirect
+    a student to the correct subject when their question belongs elsewhere."""
+    lines = []
+    for code, meta in SUBJECT_META.items():
+        if meta.get("name"):
+            lines.append(f"- {code}: {meta['name']}")
+    return "\n".join(lines)
