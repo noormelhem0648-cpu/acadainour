@@ -268,6 +268,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
           headers,
           body: JSON.stringify({ subject_code: subjectCode, message: userMessage, history, conversation_id: convoId || null }),
         });
+        if (res.status === 401) { handleAuthExpired(); throw new Error("auth expired"); }
         if (res.status === 404 && attempt < 2) {
           await new Promise(r => setTimeout(r, 800));
           continue;
@@ -302,6 +303,15 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
     });
   };
 
+  // If the token is invalid/expired, log the user out to re-authenticate.
+  const handleAuthExpired = () => {
+    localStorage.removeItem("acadai_token");
+    localStorage.removeItem("acadai_user");
+    alert("انتهت جلستك — سجّل دخول من جديد 🔑\nYour session expired — please log in again.");
+    if (onLogout) onLogout();
+    else window.location.reload();
+  };
+
   // Stream a response token-by-token. Returns conversation_id.
   const streamAPI = async (userMessage, msgHistory, convoId, onChunk) => {
     const history = msgHistory.map(m => ({
@@ -316,6 +326,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
       headers,
       body: JSON.stringify({ subject_code: subjectCode, message: userMessage, history, conversation_id: convoId || null }),
     });
+    if (res.status === 401) { handleAuthExpired(); throw new Error("auth expired"); }
     if (!res.ok || !res.body) throw new Error("stream failed");
 
     const reader = res.body.getReader();
@@ -348,6 +359,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
     try {
       await streamAPI(userMessage, historyMsgs, null, (chunk) => appendToLast(chunk));
     } catch (err) {
+      if (err && err.message === "auth expired") return;  // already logging out
       try {
         const result = await callAPI(userMessage, historyMsgs);
         appendToLast(result.answer);
