@@ -130,6 +130,8 @@ class QuizCheckRequest(BaseModel):
 class RestrictionRequest(BaseModel):
     subject_code: str
     reason: Optional[str] = ""
+    start_time: Optional[str] = None  # ISO datetime; None = start now
+    end_time: Optional[str] = None    # ISO datetime; None = 1 year
 
 class KeyContributeRequest(BaseModel):
     api_key: str
@@ -387,37 +389,44 @@ def list_restrictions(user: User = Depends(require_instructor), db: Session = De
             "start_time": str(r.start_time),
             "end_time": str(r.end_time),
             "active": r.start_time <= now <= r.end_time,
+            "scheduled": r.start_time > now,
         }
         for r in rows
     ]
+
+
+def _parse_dt(val, default):
+    if not val:
+        return default
+    import datetime
+    try:
+        # Accept "YYYY-MM-DDTHH:MM" (from <input type=datetime-local>) as local→naive UTC
+        return datetime.datetime.fromisoformat(val.replace("Z", ""))
+    except Exception:
+        return default
 
 
 @app.post("/restrictions")
 def create_restriction(req: RestrictionRequest, user: User = Depends(require_instructor), db: Session = Depends(get_db)):
     import datetime
     now = datetime.datetime.utcnow()
-    # If already blocked by this instructor, update end_time to "forever-ish"
-    existing = db.query(Restriction).filter(
-        Restriction.instructor_id == user.id,
-        Restriction.subject_code == req.subject_code.upper(),
-        Restriction.end_time >= now,
-    ).first()
-    if existing:
-        existing.end_time = now + datetime.timedelta(days=365)
-        existing.reason = req.reason or existing.reason
-        db.commit()
-        return {"ok": True, "id": existing.id}
+    start = _parse_dt(req.start_time, now)
+    end = _parse_dt(req.end_time, now + datetime.timedelta(days=365))
+    if end <= start:
+        raise HTTPException(status_code=400, detail="وقت النهاية لازم يكون بعد وقت البداية.")
+
+    # Create a NEW scheduled restriction each time (allows multiple future windows)
     r = Restriction(
         instructor_id=user.id,
         subject_code=req.subject_code.upper(),
         reason=req.reason or "",
-        start_time=now,
-        end_time=now + datetime.timedelta(days=365),
+        start_time=start,
+        end_time=end,
     )
     db.add(r)
     db.commit()
     db.refresh(r)
-    return {"ok": True, "id": r.id}
+    return {"ok": True, "id": r.id, "scheduled": start > now}
 
 
 @app.delete("/restrictions/{restriction_id}")

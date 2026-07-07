@@ -914,6 +914,11 @@ body {
 }
 
 .inst-form { display: flex; flex-direction: column; gap: 10px; }
+.inst-dt-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 2px 0 -4px;
+}
 .inst-input {
   width: 100%; padding: 11px 14px; border: 1.5px solid var(--border);
   border-radius: 10px; background: var(--bg); color: var(--text);

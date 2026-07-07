@@ -22,9 +22,16 @@ def get_embedding(text: str) -> list:
 
 
 def get_index_path(subject_code: str) -> str:
-    """Return the folder path for a subject's FAISS index."""
-    # Normalize: remove spaces (AEL 101 → AEL101)
-    code = subject_code.replace(" ", "")
+    """Return the folder path for a subject's FAISS index.
+
+    ISOLATION GUARANTEE: each subject maps to exactly one folder
+    indexes/<CODE>/. The code is sanitized to letters+digits only, so it can
+    NEVER contain path separators or '..' — a subject can never read another
+    subject's folder or escape the indexes directory.
+    """
+    import re
+    # Keep only A-Z and 0-9 (AEL 101 / ael-101 → AEL101). Blocks path traversal.
+    code = re.sub(r"[^A-Za-z0-9]", "", subject_code).upper()
     return os.path.join(INDEXES_PATH, code)
 
 
