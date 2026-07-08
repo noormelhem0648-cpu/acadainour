@@ -234,9 +234,28 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
     } catch { setKeyStatus("خطأ بالاتصال"); }
   };
 
+  const MAX_FILE_MB = 10;
+  const ALLOWED_IMAGE = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+  const ALLOWED_FILE_EXT = [".pdf", ".docx", ".txt", ".pptx", ".xlsx", ".csv"];
+
+  const validateFile = (file, { image }) => {
+    if (file.size > MAX_FILE_MB * 1024 * 1024) {
+      return `الملف كبير جداً (الحد ${MAX_FILE_MB}MB) — File too large (max ${MAX_FILE_MB}MB).`;
+    }
+    if (image) {
+      if (!ALLOWED_IMAGE.includes(file.type)) return "الصور المسموحة: PNG, JPG, WEBP فقط.";
+    } else {
+      const ok = ALLOWED_FILE_EXT.some(ext => file.name.toLowerCase().endsWith(ext));
+      if (!ok) return "الملفات المسموحة: PDF, DOCX, TXT, PPTX, XLSX, CSV.";
+    }
+    return null;
+  };
+
   const handleImageSelect = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    const err = validateFile(file, { image: true });
+    if (err) { alert("⚠️ " + err); e.target.value = ""; return; }
     setAttachedImage(file);
     const reader = new FileReader();
     reader.onloadend = () => setImagePreview(reader.result);
@@ -246,6 +265,8 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    const err = validateFile(file, { image: false });
+    if (err) { alert("⚠️ " + err); e.target.value = ""; return; }
     setAttachedFile(file);
   };
 

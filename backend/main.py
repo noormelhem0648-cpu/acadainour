@@ -36,6 +36,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from fastapi.responses import JSONResponse
+from fastapi.requests import Request
+
+
+@app.exception_handler(Exception)
+async def _global_exception_handler(request: Request, exc: Exception):
+    """Catch any unhandled error so a single bad request never crashes the server."""
+    print(f"[Unhandled Error] {request.url.path}: {exc}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "صار خطأ غير متوقع — حاول مرة ثانية 🔄 (Something went wrong, please retry.)"},
+    )
+
 def send_email(to_email: str, subject: str, body_html: str) -> bool:
     """Send an email via SMTP. Returns True on success. Configure via env vars."""
     import smtplib
@@ -614,6 +627,10 @@ async def upload_and_ask(
         chat_history = []
 
     file_bytes = await file.read()
+    # Guard against oversized uploads that could exhaust server memory
+    MAX_UPLOAD = 10 * 1024 * 1024  # 10 MB
+    if len(file_bytes) > MAX_UPLOAD:
+        raise HTTPException(status_code=413, detail="الملف كبير جداً (الحد 10MB). — File too large (max 10MB).")
     encoded = base64.b64encode(file_bytes).decode("utf-8")
     mime_type = file.content_type
 
