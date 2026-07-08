@@ -6,6 +6,7 @@ import SubjectsPage from "./pages/SubjectsPage";
 import ChatPage from "./pages/ChatPage";
 import AuthPage from "./pages/AuthPage";
 import InstructorPage from "./pages/InstructorPage";
+import PrivacyPage from "./pages/PrivacyPage";
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("theme") === "dark");
@@ -38,6 +39,11 @@ function App() {
 
   const themeProps = { darkMode, setDarkMode, user, token, onLogout: handleLogout };
 
+  // Privacy page is public — accessible even when logged out
+  if (typeof window !== "undefined" && window.location.pathname === "/privacy") {
+    return <PrivacyPage />;
+  }
+
   if (!user) {
     return <AuthPage onLogin={handleLogin} />;
   }
@@ -50,6 +56,7 @@ function App() {
         <Route path="/subjects/:year" element={<SubjectsPage {...themeProps} />} />
         <Route path="/chat/:subjectCode" element={<ChatPage {...themeProps} />} />
         <Route path="/instructor" element={user?.role === "instructor" ? <InstructorPage {...themeProps} /> : <Navigate to="/" replace />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

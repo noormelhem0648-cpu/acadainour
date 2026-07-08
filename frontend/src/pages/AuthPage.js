@@ -94,6 +94,7 @@ export default function AuthPage({ onLogin }) {
       <div className="auth-card">
         <h1 className="auth-logo">Noura AI</h1>
         <p className="auth-subtitle">Smart Student Assistant</p>
+        <a className="auth-privacy-link" href="/privacy">الخصوصية والشروط</a>
 
         {(mode === "login" || mode === "register") && (
           <>

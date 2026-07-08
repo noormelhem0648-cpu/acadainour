@@ -1106,6 +1106,31 @@ body {
   text-decoration: underline;
 }
 .auth-forgot-link:hover { color: var(--accent); }
+.auth-privacy-link {
+  display: inline-block; margin-top: 6px; font-size: 0.72rem;
+  color: var(--text-muted); text-decoration: underline;
+}
+
+/* ── Privacy Page ─────────────────────────────────────────── */
+.privacy-page {
+  min-height: 100vh; background: var(--bg); color: var(--text);
+  display: flex; justify-content: center; padding: 30px 16px;
+}
+.privacy-card {
+  max-width: 640px; width: 100%; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 16px;
+  padding: 28px 30px; box-shadow: var(--shadow); line-height: 1.8;
+}
+.privacy-card h1 { font-size: 1.35rem; color: var(--accent); margin: 0 0 4px; }
+.privacy-updated { font-size: 0.78rem; color: var(--text-muted); margin: 0 0 18px; }
+.privacy-card h2 { font-size: 1rem; margin: 20px 0 6px; }
+.privacy-card p, .privacy-card li { font-size: 0.9rem; color: var(--text); }
+.privacy-card ul { padding-right: 20px; }
+.privacy-back {
+  margin-top: 24px; background: var(--accent); color: #fff; border: none;
+  padding: 10px 22px; border-radius: 10px; cursor: pointer; font-weight: 600;
+}
+.privacy-back:hover { background: var(--accent-dark); }
 
 /* ── Scrollbar Styling ────────────────────────────────────── */
 .messages-container::-webkit-scrollbar { width: 5px; }
