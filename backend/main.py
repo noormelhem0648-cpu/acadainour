@@ -328,6 +328,11 @@ def delete_conversation(convo_id: int, user: User = Depends(require_user), db: S
 def root():
     return {"status": "Noura AI backend is running ✓"}
 
+@app.get("/health")
+def health():
+    """Ultra-light endpoint for uptime pingers (UptimeRobot/cron-job.org)."""
+    return {"ok": True}
+
 def _is_subject_blocked(subject_code: str, db: Session, user: Optional[User] = None) -> Optional[Restriction]:
     """Return active restriction for a subject, or None. Instructors are never blocked."""
     if user is not None and getattr(user, "role", "") == "instructor":
