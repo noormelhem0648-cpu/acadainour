@@ -718,29 +718,46 @@ body {
 
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 600px) {
-  .header { padding: 10px 12px; gap: 6px; }
-  .app-name { font-size: 1rem; }
+  /* Header: keep all buttons reachable, scroll sideways if too many */
+  .header {
+    padding: 8px 8px; gap: 5px;
+    overflow-x: auto; flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  .header::-webkit-scrollbar { display: none; }
+  .app-name { font-size: 0.95rem; flex: 0 0 auto; min-width: 60px; }
+  .header-action-btn { padding: 5px 7px; font-size: 0.85rem; flex: 0 0 auto; }
+  .quiz-header-btn { padding: 5px 9px; font-size: 0.78rem; flex: 0 0 auto; }
+  .back-btn { flex: 0 0 auto; }
+
   .main-content { padding: 28px 12px 20px; }
   .card-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-  .message { max-width: 92%; font-size: 0.87rem; padding: 12px 14px; }
+  .message { max-width: 92%; font-size: 0.9rem; padding: 12px 14px; }
   .messages-container { height: calc(100vh - 115px); padding: 16px 10px; }
   .msg-icon-btn { padding: 4px; }
   .msg-icon-btn svg { width: 14px; height: 14px; }
   .msg-footer { gap: 4px; }
   .input-area { padding: 10px 10px; gap: 6px; }
+  .message-input { font-size: 16px; }  /* 16px stops iOS auto-zoom on focus */
   .attach-btn { padding: 7px 8px; font-size: 0.9rem; }
   .send-btn { padding: 9px 14px; }
-  .quiz-modal { padding: 22px 18px; width: 94%; }
+  .quiz-modal { padding: 22px 18px; width: 94%; max-height: 88vh; overflow-y: auto; }
+  .quiz-type-selector { gap: 6px; }
+  .msg-dropdown { min-width: 180px; }
+  .dd-followup-grid { grid-template-columns: 1fr 1fr; }
 }
 
 /* On touch devices show actions always (no hover) */
 @media (hover: none) {
   .msg-actions { opacity: 1; transform: none; }
+  .msg-dots-btn { padding: 6px 9px; }  /* bigger tap target */
 }
 
 @media (max-width: 380px) {
   .message { max-width: 95%; }
   .back-btn { padding: 5px 8px; font-size: 0.75rem; }
+  .app-name { font-size: 0.85rem; }
+  .card-grid { grid-template-columns: 1fr; }
 }
 
 /* ── Header Action Buttons ─────────────────────────────────── */
