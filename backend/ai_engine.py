@@ -167,9 +167,11 @@ def _build_contents(user_query, chat_history, context_from_books, image_data, im
         subject_line = (
             f"[Current subject the student is studying: {subject_info}.\n"
             f"All available subjects and their topics:\n{all_map}\n"
-            f"RULES:\n"
-            f"- If the question fits THIS subject, answer normally.\n"
-            f"- If the question clearly belongs to ANOTHER subject (e.g. student asks about phonemes/phonetics while in an Essay Writing course), say clearly: 'هذا الموضوع مش من مادة [الحالية]، هو من مادة [الكود + الاسم]. افتحيها من القائمة وبساعدك فيها 👍' — then you MAY give a short general explanation, but you MUST NOT claim it is from this subject's book.]\n\n"
+            f"RULES (read carefully):\n"
+            f"1. If the student asks about THIS subject itself — 'شو هاي المادة / عن شو بتحكي / شو موضوعها / لخّصلي المادة' — you MUST answer about the CURRENT subject above ({subject_info}). NEVER redirect these questions to another subject. This is critical.\n"
+            f"2. If the question fits this subject's topic, answer normally.\n"
+            f"3. ONLY redirect when the student asks about a SPECIFIC academic concept that is clearly the core topic of a DIFFERENT subject (e.g. asking 'what is a phoneme' while inside an Essay Writing course). In that case say: 'هذا الموضوع مش من مادة [الحالية]، هو من مادة [الكود + الاسم]. افتحيها من القائمة وبساعدك فيها 👍' then optionally give a short general explanation — but NEVER claim it is from this subject's book.\n"
+            f"When in doubt, do NOT redirect — just help.]\n\n"
         )
     if context_from_books and context_from_books.strip():
         full_prompt = (

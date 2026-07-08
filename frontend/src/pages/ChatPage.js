@@ -86,16 +86,6 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
   const [openDropdown, setOpenDropdown] = useState(null);
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
   const [showHistory, setShowHistory] = useState(false);
-  const [showKeyModal, setShowKeyModal] = useState(false);
-  const [keyInput, setKeyInput] = useState("");
-  const [keyStatus, setKeyStatus] = useState(null);
-  const [hasKey, setHasKey] = useState(false);
-
-  useEffect(() => {
-    if (!token) return;
-    fetch(`${API_URL}/keys/my`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json()).then(d => setHasKey(d.has_key)).catch(() => {});
-  }, [token]);
   const [savedChats, setSavedChats] = useState([]);
 
   const messagesEndRef = useRef(null);
@@ -217,21 +207,6 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
 
   const handleLike = (idx, type) => {
     setLikedMsgs(prev => ({ ...prev, [idx]: prev[idx] === type ? null : type }));
-  };
-
-  const submitKey = async () => {
-    if (!keyInput.trim()) return;
-    setKeyStatus("loading");
-    try {
-      const res = await fetch(`${API_URL}/keys/contribute`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ api_key: keyInput.trim() }),
-      });
-      const d = await res.json();
-      if (res.ok) { setKeyStatus("success"); setHasKey(true); setKeyInput(""); }
-      else setKeyStatus(d.detail || "خطأ");
-    } catch { setKeyStatus("خطأ بالاتصال"); }
   };
 
   const MAX_FILE_MB = 10;
@@ -530,6 +505,15 @@ Use the mixed Arabic+English style.`;
     setLoading(false);
   };
 
+  const subjectSummary = async () => {
+    if (loading) return;
+    const prompt = `أعطيني ملخص واضح ومنظّم عن هاي المادة (${subjectCode}) بالضبط: عن شو بتحكي، أهم المواضيع اللي بتغطيها، وليش مهمة للطالب. لا توجّهني لأي مادة ثانية — هاي هي المادة المقصودة.`;
+    addMessage("user", "📋 ملخص المادة");
+    setLoading(true);
+    await streamInto(prompt, messagesRef.current.slice(0, -1), "ما قدرت أعمل الملخص. حاول مرة ثانية 🔄");
+    setLoading(false);
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -562,6 +546,7 @@ Use the mixed Arabic+English style.`;
       <header className="header" role="banner">
         <button className="back-btn" onClick={() => navigate(-1)} aria-label="Go back">Back</button>
         <span className="app-name">{subjectCode}</span>
+        <button className="header-action-btn" onClick={subjectSummary} disabled={loading} title="ملخص المادة">📋</button>
         <button className="header-action-btn" onClick={startNewChat} aria-label="New chat">➕</button>
         <button className="header-action-btn" onClick={() => setShowHistory(!showHistory)} aria-label="Chat history">💬</button>
         <button className="quiz-header-btn" onClick={() => setShowQuizModal(true)} disabled={loading}>Quiz</button>
@@ -569,14 +554,6 @@ Use the mixed Arabic+English style.`;
         <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)} aria-label="Toggle dark mode">
           {darkMode ? "☀️" : "🌙"}
         </button>
-        {token && (
-          <button
-            className={"header-action-btn key-btn" + (hasKey ? " key-active" : "")}
-            onClick={() => setShowKeyModal(true)}
-            title={hasKey ? "مفتاحك مضاف ✓" : "أضف مفتاح Gemini"}
-          >🔑</button>
-        )}
-        {onLogout && <button className="header-action-btn" onClick={onLogout} aria-label="Logout" title="Logout">🚪</button>}
       </header>
 
       <div className="messages-container" role="log" aria-label="Chat messages" aria-live="polite">
@@ -856,51 +833,6 @@ Use the mixed Arabic+English style.`;
         </div>
       )}
 
-      {showKeyModal && (
-        <div className="quiz-modal-overlay" onClick={() => { setShowKeyModal(false); setKeyStatus(null); }} role="dialog" aria-modal="true">
-          <div className="quiz-modal" onClick={e => e.stopPropagation()}>
-            <h3>🔑 أضف مفتاح Gemini</h3>
-            <p style={{fontSize:"0.83rem",color:"var(--text-muted)",margin:"4px 0 16px"}}>
-              مفتاحك يُضاف لقاعدة البيانات ويُستخدم لتوسيع طاقة السيرفر للجميع.
-              احصل على مفتاح مجاني من <strong>aistudio.google.com</strong>
-            </p>
-            {hasKey ? (
-              <div style={{textAlign:"center",padding:"12px 0"}}>
-                <div style={{fontSize:"2rem",marginBottom:8}}>✅</div>
-                <p style={{color:"var(--text-muted)",fontSize:"0.85rem"}}>مفتاحك مضاف — شكراً على دعم السيرفر! 🎉</p>
-                <button className="quiz-modal-btn cancel" style={{marginTop:12}} onClick={() => setShowKeyModal(false)}>إغلاق</button>
-              </div>
-            ) : (
-              <>
-                <input
-                  className="quiz-topic-input"
-                  placeholder="AIzaSy..."
-                  value={keyInput}
-                  onChange={e => setKeyInput(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && submitKey()}
-                  autoFocus
-                  style={{fontFamily:"monospace",fontSize:"0.85rem"}}
-                />
-                {keyStatus && keyStatus !== "loading" && (
-                  <div style={{
-                    marginTop:10, padding:"8px 12px", borderRadius:8, fontSize:"0.83rem",
-                    background: keyStatus === "success" ? "#e8f5e9" : "#fdecea",
-                    color: keyStatus === "success" ? "#2e7d32" : "#c62828"
-                  }}>
-                    {keyStatus === "success" ? "✅ تم إضافة مفتاحك بنجاح!" : keyStatus}
-                  </div>
-                )}
-                <div className="quiz-modal-actions">
-                  <button className="quiz-modal-btn primary" onClick={submitKey} disabled={keyStatus === "loading" || !keyInput.trim()}>
-                    {keyStatus === "loading" ? "جاري..." : "✅ إضافة"}
-                  </button>
-                  <button className="quiz-modal-btn cancel" onClick={() => { setShowKeyModal(false); setKeyStatus(null); }}>إلغاء</button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
