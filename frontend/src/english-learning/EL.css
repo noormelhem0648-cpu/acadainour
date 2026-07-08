@@ -2,35 +2,39 @@
    English Learning — Scoped Styles (.el-app)
    ═══════════════════════════════════════════ */
 .el-app {
-  --el-bg:        #f5f7fa;
+  --el-bg:        #ffffff;
   --el-bg2:       #ffffff;
-  --el-bg3:       #eef1f6;
-  --el-border:    #dde2ec;
-  --el-text:      #1a1d27;
-  --el-text2:     #4a5068;
-  --el-muted:     #8890a8;
-  --el-accent:    #4f46e5;
-  --el-accent2:   #818cf8;
+  --el-bg3:       #f8f5f2;
+  --el-border:    #e8e2db;
+  --el-text:      #1a1a1a;
+  --el-text2:     #4a4441;
+  --el-muted:     #7a7370;
+  --el-accent:    #c9858a;
+  --el-accent2:   #e09fa3;
+  --el-accent-light: #f5e8e9;
   --el-green:     #16a34a;
   --el-red:       #dc2626;
-  --el-yellow:    #ca8a04;
-  --el-radius:    14px;
+  --el-yellow:    #b45309;
+  --el-radius:    16px;
   --el-radius-sm: 8px;
-  --el-shadow:    0 2px 12px rgba(0,0,0,.08);
+  --el-shadow:    0 2px 16px rgba(0,0,0,.08);
   --el-shadow-lg: 0 8px 32px rgba(0,0,0,.12);
   font-family: 'Segoe UI', system-ui, sans-serif;
   font-size: 15px;
   line-height: 1.6;
 }
 .el-app.el-dark {
-  --el-bg:      #0f1117;
-  --el-bg2:     #1a1d27;
-  --el-bg3:     #222636;
-  --el-border:  #2e3349;
-  --el-text:    #e8eaf0;
-  --el-text2:   #9ca3b8;
-  --el-muted:   #5c637a;
-  --el-shadow:  0 2px 12px rgba(0,0,0,.4);
+  --el-bg:        #111111;
+  --el-bg2:       #1e1e1e;
+  --el-bg3:       #1a1a1a;
+  --el-border:    #2e2e2e;
+  --el-text:      #f0ece8;
+  --el-text2:     #b0aaa6;
+  --el-muted:     #7a7370;
+  --el-accent:    #c9858a;
+  --el-accent2:   #e09fa3;
+  --el-accent-light: #2a1f20;
+  --el-shadow:    0 2px 12px rgba(0,0,0,.4);
   --el-shadow-lg: 0 8px 32px rgba(0,0,0,.5);
 }
 
@@ -177,7 +181,7 @@
 .el-app .el-phonetic { color: var(--el-yellow); font-weight: 600; }
 .el-app .el-text-muted { color: var(--el-muted); }
 
-.el-app .el-challenge-box { background: var(--el-bg2); border: 1px solid var(--el-border); border-radius: var(--el-radius); padding: 18px; }
+.el-app .el-challenge-box { background: var(--el-accent-light); border: 1px solid var(--el-border); border-radius: var(--el-radius); padding: 18px; }
 .el-app .el-challenge-title { font-weight: 700; margin-bottom: 8px; font-size: 1rem; color: var(--el-text); }
 .el-app .el-challenge-desc { color: var(--el-text2); font-size: .85rem; margin-bottom: 12px; }
 .el-app .el-mimic-words { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
@@ -229,7 +233,7 @@
 .el-app .el-dictation-btns { display: flex; gap: 10px; }
 
 /* Shadowing */
-.el-app .el-shadowing-chunk-box { background: var(--el-bg2); border: 1.5px solid var(--el-border); border-radius: var(--el-radius); padding: 20px; text-align: center; }
+.el-app .el-shadowing-chunk-box { background: var(--el-accent-light); border: 1.5px solid var(--el-border); border-radius: var(--el-radius); padding: 20px; text-align: center; }
 .el-app .el-chunk-label { font-size: .8rem; color: var(--el-muted); margin-bottom: 8px; font-weight: 600; }
 .el-app .el-chunk-text { font-size: 1.8rem; font-weight: 800; color: var(--el-accent); margin-bottom: 10px; }
 .el-app .el-chunk-native { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
@@ -250,7 +254,7 @@
 .el-app .el-challenge-q { font-weight: 600; margin-bottom: 10px; font-size: .9rem; color: var(--el-text); }
 .el-app .el-writing-area { width: 100%; border: 1.5px solid var(--el-border); border-radius: var(--el-radius-sm); background: var(--el-bg3); color: var(--el-text); font-size: .9rem; padding: 10px 12px; resize: vertical; font-family: 'Segoe UI', system-ui, sans-serif; transition: border-color .2s; }
 .el-app .el-writing-area:focus { outline: none; border-color: var(--el-accent); }
-.el-app .el-companion-section { background: var(--el-bg2); border: 1.5px solid var(--el-border); border-radius: var(--el-radius); padding: 20px; }
+.el-app .el-companion-section { background: var(--el-accent-light); border: 1.5px solid var(--el-border); border-radius: var(--el-radius); padding: 20px; }
 .el-app .el-companion-title { font-weight: 700; font-size: 1rem; margin-bottom: 6px; color: var(--el-text); }
 .el-app .el-companion-desc { color: var(--el-text2); font-size: .85rem; margin-bottom: 14px; line-height: 1.6; }
 .el-app .el-prompt-preview { background: var(--el-bg3); border-radius: var(--el-radius-sm); padding: 14px; max-height: 160px; overflow-y: auto; margin-bottom: 14px; }
