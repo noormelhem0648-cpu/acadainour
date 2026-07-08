@@ -54,11 +54,19 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
           <p>Powered by course materials from Yarmouk University - Applied English Language Department</p>
         </div>
 
-        <div className="card-grid single">
+        <div className="card-grid">
           <button className="dept-card" onClick={() => navigate("/years")}>
-            <div className="card-icon">[Books]</div>
-            <h2>Applied English Language</h2>
-            <p>14 subjects across 4 years</p>
+            <div className="card-icon">📚</div>
+            <h2>اللغة الإنجليزية التطبيقية</h2>
+            <p>Applied English Language</p>
+            <p style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginTop: 4 }}>14 مادة × 4 سنوات — يرموك</p>
+            <span className="card-arrow">&gt;</span>
+          </button>
+          <button className="dept-card" onClick={() => navigate("/english-learning")}>
+            <div className="card-icon">🎓</div>
+            <h2>تعليم اللغة الإنجليزية</h2>
+            <p>للناطقين بغيرها</p>
+            <p style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginTop: 4 }}>من الصفر إلى الطلاقة — 6 مستويات × 30 يوماً</p>
             <span className="card-arrow">&gt;</span>
           </button>
         </div>

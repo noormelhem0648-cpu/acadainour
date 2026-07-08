@@ -7,6 +7,11 @@ import ChatPage from "./pages/ChatPage";
 import AuthPage from "./pages/AuthPage";
 import InstructorPage from "./pages/InstructorPage";
 import PrivacyPage from "./pages/PrivacyPage";
+import ELHomePage from "./english-learning/pages/ELHomePage";
+import ELDaysPage from "./english-learning/pages/ELDaysPage";
+import ELDayPage from "./english-learning/pages/ELDayPage";
+import ELComponentPage from "./english-learning/pages/ELComponentPage";
+import ELChatPage from "./english-learning/pages/ELChatPage";
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("theme") === "dark");
@@ -57,6 +62,11 @@ function App() {
         <Route path="/chat/:subjectCode" element={<ChatPage {...themeProps} />} />
         <Route path="/instructor" element={user?.role === "instructor" ? <InstructorPage {...themeProps} /> : <Navigate to="/" replace />} />
         <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/english-learning" element={<ELHomePage darkMode={darkMode} setDarkMode={setDarkMode} />} />
+        <Route path="/english-learning/level/:levelId" element={<ELDaysPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
+        <Route path="/english-learning/level/:levelId/day/:dayId" element={<ELDayPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
+        <Route path="/english-learning/level/:levelId/day/:dayId/chat" element={<ELChatPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
+        <Route path="/english-learning/level/:levelId/day/:dayId/:componentId" element={<ELComponentPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
