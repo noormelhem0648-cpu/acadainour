@@ -22,8 +22,10 @@ app = FastAPI(title="Noura AI — Backend")
 # Allowed frontend origins. Extra origins can be added via ALLOWED_ORIGINS env (comma-separated).
 _default_origins = [
     "https://acadai-frontend.onrender.com",
+    "https://english-noura.onrender.com",   # English learning standalone site
     "http://localhost:3000",
     "http://localhost:5173",
+    "http://localhost:5174",
 ]
 _env_origins = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
 ALLOWED_ORIGINS = list(dict.fromkeys(_default_origins + _env_origins))
@@ -332,6 +334,38 @@ def root():
 def health():
     """Ultra-light endpoint for uptime pingers (UptimeRobot/cron-job.org)."""
     return {"ok": True}
+
+
+# ──────────────────────────────────────────────
+# English Learning — AI Tutor Chat (no auth required)
+# ──────────────────────────────────────────────
+class EnglishChatRequest(BaseModel):
+    message: str
+    history: List[Dict] = []
+    subject_info: str = ""  # carries day context + companion system prompt
+
+@app.post("/english-tutor/stream")
+async def english_tutor_stream(req: EnglishChatRequest):
+    """Streaming SSE endpoint for the English learning AI companion. No auth needed."""
+    if not req.message or len(req.message) > 2000:
+        raise HTTPException(status_code=400, detail="Message too short or too long.")
+
+    async def event_stream():
+        try:
+            for chunk in generate_academic_response_stream(
+                user_query=req.message,
+                chat_history=req.history,
+                context_from_books="",
+                subject_info=req.subject_info,
+            ):
+                yield f"data: {chunk}\n\n"
+            yield "data: [DONE]\n\n"
+        except Exception as e:
+            yield f"data: ⚠️ Error: {str(e)}\n\n"
+            yield "data: [DONE]\n\n"
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream",
+                              headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 def _is_subject_blocked(subject_code: str, db: Session, user: Optional[User] = None) -> Optional[Restriction]:
     """Return active restriction for a subject, or None. Instructors are never blocked."""
