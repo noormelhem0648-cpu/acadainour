@@ -213,11 +213,11 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
           <div className="el-content-panel">
             <div className="el-comp-body">
               {componentId === 'vocab'     && <VocabComp day={day} setAvatarState={setAvatarState} setBuddyMessages={setBuddyMessages} />}
-              {componentId === 'grammar'   && <GrammarComp day={day} />}
+              {componentId === 'grammar'   && <GrammarComp day={day} setBuddyMessages={setBuddyMessages} setAvatarState={setAvatarState} />}
               {componentId === 'reading'   && <ReadingComp day={day} setAvatarState={setAvatarState} setBuddyMessages={setBuddyMessages} />}
               {componentId === 'listening' && <ListeningComp day={day} setAvatarState={setAvatarState} setBuddyMessages={setBuddyMessages} />}
               {componentId === 'shadowing' && <ShadowingComp day={day} />}
-              {componentId === 'writing'   && <WritingComp day={day} levelId={levelId} dayId={dayId} navigate={navigate} setBuddyMessages={setBuddyMessages} setBuddyInput={setBuddyInput} />}
+              {componentId === 'writing'   && <WritingComp day={day} levelId={levelId} dayId={dayId} navigate={navigate} setBuddyMessages={setBuddyMessages} setBuddyInput={setBuddyInput} setAvatarState={setAvatarState} />}
             </div>
 
             <div className="el-comp-footer">
@@ -308,9 +308,143 @@ function VocabComp({ day }) {
   )
 }
 
+/* ─── Role-play Mode ─── */
+const ROLEPLAY_SCENARIOS = [
+  { icon: '🍽️', title: 'At a Restaurant', prompt: 'You are a waiter at an upscale restaurant. Greet the customer, take their order, and respond naturally. Use today\'s grammar in your responses.' },
+  { icon: '💼', title: 'Job Interview', prompt: 'You are a professional interviewer. Ask the candidate questions about their experience and skills. Use formal language and grammar structures from today\'s lesson.' },
+  { icon: '🏥', title: 'Doctor\'s Appointment', prompt: 'You are a friendly doctor. Ask the patient about their symptoms, give advice, and use polite formal language throughout.' },
+  { icon: '✈️', title: 'Airport Check-in', prompt: 'You are an airline check-in agent. Help the passenger with their booking, ask about luggage, and handle a minor issue politely.' },
+  { icon: '📚', title: 'Academic Discussion', prompt: 'You are a professor holding a tutorial. Discuss ideas with the student, challenge their thinking, and use academic language from today\'s lesson.' },
+]
+
+function RolePlayMode({ day, setBuddyMessages, setAvatarState }) {
+  const [active, setActive] = useState(false)
+  const [scenario, setScenario] = useState(null)
+  const [exchange, setExchange] = useState([])
+  const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(false)
+  const endRef = useRef(null)
+  const recognitionRef = useRef(null)
+  const [listening, setListening] = useState(false)
+
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [exchange])
+
+  const startScenario = async (sc) => {
+    setScenario(sc)
+    setExchange([])
+    setActive(true)
+    setLoading(true)
+    setAvatarState('speaking')
+    try {
+      const systemPrompt = `${sc.prompt}\n\nAlso naturally incorporate grammar patterns from today's lesson: ${day.grammar?.patterns?.map(p => p.name).join(', ')}. Keep responses short (2-3 sentences). After each exchange, add one brief tip in Arabic about the grammar used, prefixed with "💡 نصيحة:".`
+      const res = await fetch(`${BACKEND}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: 'Start the scenario. Say your opening line.' }],
+          system: systemPrompt
+        })
+      })
+      const data = await res.json()
+      const reply = data.response || data.message || 'Hello! Ready to begin?'
+      setExchange([{ role: 'buddy', text: reply }])
+      speak(reply, null, () => setAvatarState('listening'))
+    } catch { setAvatarState('idle') }
+    finally { setLoading(false) }
+  }
+
+  const sendLine = async () => {
+    if (!input.trim() || loading) return
+    const userLine = input
+    setInput('')
+    const newEx = [...exchange, { role: 'user', text: userLine }]
+    setExchange(newEx)
+    setLoading(true)
+    setAvatarState('thinking')
+    try {
+      const systemPrompt = `${scenario.prompt}\n\nGrammar from today's lesson: ${day.grammar?.patterns?.map(p => p.name).join(', ')}. Keep responses to 2-3 sentences. After each reply add a one-line tip prefixed "💡 نصيحة:" about grammar or vocabulary used.`
+      const msgs = newEx.map(e => ({ role: e.role === 'buddy' ? 'assistant' : 'user', content: e.text }))
+      const res = await fetch(`${BACKEND}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: msgs, system: systemPrompt })
+      })
+      const data = await res.json()
+      const reply = data.response || ''
+      setExchange(prev => [...prev, { role: 'buddy', text: reply }])
+      speak(reply, null, () => setAvatarState('listening'))
+    } catch { setAvatarState('idle') }
+    finally { setLoading(false) }
+  }
+
+  const startVoice = () => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SR) { alert('المتصفح لا يدعم التعرف على الصوت'); return }
+    if (listening) { recognitionRef.current?.stop(); return }
+    const r = new SR()
+    r.lang = 'en-US'
+    r.interimResults = false
+    r.onstart = () => { setListening(true); setAvatarState('listening') }
+    r.onresult = e => { setInput(e.results[0][0].transcript); setListening(false) }
+    r.onerror = () => { setListening(false); setAvatarState('idle') }
+    r.onend = () => { setListening(false) }
+    recognitionRef.current = r
+    r.start()
+  }
+
+  if (!active) {
+    return (
+      <div className="el-roleplay-section">
+        <div className="el-roleplay-title">🎭 وضع التمثيل اللغوي — Role-play</div>
+        <div className="el-roleplay-desc">اختر سيناريو وتحدّث مع المساعد كأنه شخص حقيقي. يستخدم قواعد درس اليوم ويُصحّح نطقك وتراكيبك.</div>
+        <div className="el-roleplay-grid">
+          {ROLEPLAY_SCENARIOS.map(sc => (
+            <button key={sc.title} className="el-roleplay-card" onClick={() => startScenario(sc)}>
+              <div className="el-roleplay-icon">{sc.icon}</div>
+              <div className="el-roleplay-name">{sc.title}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="el-roleplay-active">
+      <div className="el-roleplay-header">
+        <span>{scenario.icon} {scenario.title}</span>
+        <button className="el-nav-btn" style={{ padding: '4px 12px', fontSize: '.8rem' }} onClick={() => setActive(false)}>✕ إنهاء</button>
+      </div>
+      <div className="el-roleplay-exchange">
+        {exchange.map((e, i) => (
+          <div key={i} className={`el-roleplay-line ${e.role}`}>
+            {e.role === 'buddy' && <button className="el-speak-btn" onClick={() => speak(e.text)} style={{ marginLeft: 4 }}>🔊</button>}
+            <span className="el-roleplay-text">{e.text}</span>
+          </div>
+        ))}
+        {loading && <div className="el-roleplay-line buddy"><span className="el-buddy-typing"><span/><span/><span/></span></div>}
+        <div ref={endRef} />
+      </div>
+      <div className="el-roleplay-input-row">
+        <input
+          className="el-buddy-input"
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && sendLine()}
+          placeholder="ردّك بالإنجليزية..."
+          disabled={loading}
+        />
+        <button className={'el-buddy-mic' + (listening ? ' listening' : '')} onClick={startVoice}>🎤</button>
+        <button className="el-buddy-send" onClick={sendLine} disabled={loading || !input.trim()}>↑</button>
+      </div>
+    </div>
+  )
+}
+
 /* ─── Grammar ─── */
-function GrammarComp({ day }) {
+function GrammarComp({ day, setBuddyMessages, setAvatarState }) {
   const [shown, setShown] = useState({})
+  const [rolePlay, setRolePlay] = useState(false)
   const { grammar: g } = day
 
   return (
@@ -348,6 +482,11 @@ function GrammarComp({ day }) {
           ))}
         </div>
       ))}
+
+      <button className="el-roleplay-toggle" onClick={() => setRolePlay(r => !r)}>
+        🎭 {rolePlay ? 'إخفاء وضع التمثيل' : 'تدرّب بالتمثيل اللغوي'}
+      </button>
+      {rolePlay && <RolePlayMode day={day} setBuddyMessages={setBuddyMessages} setAvatarState={setAvatarState} />}
     </div>
   )
 }
@@ -486,9 +625,55 @@ function ShadowingComp({ day }) {
   )
 }
 
+/* ─── Live Correction Parser ─── */
+function parseCorrectionResponse(text) {
+  // Parse lines like: CORRECTION: [original] → [fixed] | Reason: [why]
+  const lines = text.split('\n')
+  const corrections = []
+  for (const line of lines) {
+    const match = line.match(/CORRECTION:\s*(.+?)\s*→\s*(.+?)(?:\s*\|\s*Reason:\s*(.+))?$/i)
+    if (match) {
+      corrections.push({ original: match[1].trim(), fixed: match[2].trim(), reason: match[3]?.trim() || '' })
+    }
+  }
+  return corrections
+}
+
+/* ─── Inline Correction Display ─── */
+function CorrectionDisplay({ corrections, originalText }) {
+  if (!corrections.length) return null
+  let highlighted = originalText
+  for (const c of corrections) {
+    highlighted = highlighted.replace(
+      c.original,
+      `%%DEL%%${c.original}%%/DEL%%%%INS%%${c.fixed}%%/INS%%`
+    )
+  }
+  const parts = highlighted.split(/(%%DEL%%.*?%%\/DEL%%|%%INS%%.*?%%\/INS%%)/g)
+  return (
+    <div className="el-correction-display">
+      <div className="el-correction-label">✏️ التصحيح بالخط الأحمر</div>
+      <div className="el-correction-text">
+        {parts.map((p, i) => {
+          if (p.startsWith('%%DEL%%')) return <del key={i} className="el-correction-del">{p.replace(/%%DEL%%|%%\/DEL%%/g, '')}</del>
+          if (p.startsWith('%%INS%%')) return <ins key={i} className="el-correction-ins">{p.replace(/%%INS%%|%%\/INS%%/g, '')}</ins>
+          return <span key={i}>{p}</span>
+        })}
+      </div>
+      {corrections.map((c, i) => (
+        <div key={i} className="el-correction-note">
+          <span className="el-correction-why">💡 لماذا؟</span> {c.reason}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 /* ─── Writing & AI Chat ─── */
-function WritingComp({ day, levelId, dayId, navigate, setBuddyMessages, setBuddyInput }) {
+function WritingComp({ day, levelId, dayId, navigate, setBuddyMessages, setBuddyInput, setAvatarState }) {
   const [responses, setResponses] = useState({})
+  const [corrections, setCorrections] = useState({})
+  const [checking, setChecking] = useState({})
   const { writing: w } = day
 
   const sendToBuddy = (text, challengeIdx) => {
@@ -496,6 +681,38 @@ function WritingComp({ day, levelId, dayId, navigate, setBuddyMessages, setBuddy
     const msg = `تحدي الكتابة ${challengeIdx + 1}:\n${w.challenges[challengeIdx]}\n\nإجابتي:\n${text}`
     setBuddyInput('')
     setBuddyMessages(prev => [...prev, { role: 'user', content: msg }])
+  }
+
+  const checkLive = async (text, idx) => {
+    if (!text.trim() || checking[idx]) return
+    setChecking(c => ({ ...c, [idx]: true }))
+    setAvatarState('correcting')
+    try {
+      const systemPrompt = `أنت مُصحِّح لغوي دقيق. عندما يرسل الطالب جملة أو فقرة إنجليزية، أعد الرد بهذا التنسيق الصارم فقط:
+
+CORRECTION: [الكلمة/العبارة الخاطئة] → [الصواب] | Reason: [شرح قصير بالعربي]
+
+اكتب سطراً واحداً لكل خطأ. إذا لم يوجد خطأ، اكتب: ✅ ممتاز! لا أخطاء في هذه الفقرة.`
+      const res = await fetch(`${BACKEND}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: text }],
+          system: systemPrompt
+        })
+      })
+      const data = await res.json()
+      const reply = data.response || data.message || ''
+      const parsed = parseCorrectionResponse(reply)
+      setCorrections(c => ({ ...c, [idx]: { raw: reply, parsed } }))
+      setAvatarState(parsed.length ? 'correcting' : 'happy')
+      setBuddyMessages(prev => [...prev, { role: 'assistant', content: reply }])
+    } catch {
+      setAvatarState('idle')
+    } finally {
+      setChecking(c => ({ ...c, [idx]: false }))
+      setTimeout(() => setAvatarState('idle'), 3000)
+    }
   }
 
   return (
@@ -508,17 +725,30 @@ function WritingComp({ day, levelId, dayId, navigate, setBuddyMessages, setBuddy
             className="el-writing-area"
             placeholder="اكتب إجابتك هنا بالإنجليزية..."
             value={responses[i] || ''}
-            onChange={e => setResponses(r => ({ ...r, [i]: e.target.value }))}
+            onChange={e => { setResponses(r => ({ ...r, [i]: e.target.value })); setCorrections(c => ({ ...c, [i]: null })) }}
             rows={5}
           />
-          <button
-            className="el-nav-btn"
-            style={{ marginTop: 8 }}
-            onClick={() => sendToBuddy(responses[i] || '', i)}
-            disabled={!responses[i]?.trim()}
-          >
-            🤖 أرسل للتصحيح الفوري
-          </button>
+          <div className="el-writing-btns">
+            <button
+              className="el-nav-btn el-check-btn"
+              onClick={() => checkLive(responses[i] || '', i)}
+              disabled={!responses[i]?.trim() || checking[i]}
+            >
+              {checking[i] ? '⏳ جاري التصحيح...' : '🖊️ صحّح فوراً'}
+            </button>
+            <button
+              className="el-nav-btn"
+              onClick={() => sendToBuddy(responses[i] || '', i)}
+              disabled={!responses[i]?.trim()}
+            >
+              🤖 ناقش مع المساعد
+            </button>
+          </div>
+          {corrections[i] && (
+            corrections[i].parsed.length > 0
+              ? <CorrectionDisplay corrections={corrections[i].parsed} originalText={responses[i] || ''} />
+              : <div className="el-correction-ok">✅ ممتاز! لا أخطاء في هذه الفقرة.</div>
+          )}
         </div>
       ))}
     </div>

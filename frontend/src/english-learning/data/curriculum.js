@@ -8,6 +8,15 @@ import { A2_DAYS_21_30 } from './curriculum_a2_21_30.js'
 import { B1_DAYS_1_10 } from './curriculum_b1_1_10.js'
 import { B1_DAYS_11_20 } from './curriculum_b1_11_20.js'
 import { B1_DAYS_21_30 } from './curriculum_b1_21_30.js'
+import { B2_DAYS_1_10 } from './curriculum_b2_1_10.js'
+import { B2_DAYS_11_20 } from './curriculum_b2_11_20.js'
+import { B2_DAYS_21_30 } from './curriculum_b2_21_30.js'
+import { C1_DAYS_1_10 } from './curriculum_c1_1_10.js'
+import { C1_DAYS_11_20 } from './curriculum_c1_11_20.js'
+import { C1_DAYS_21_30 } from './curriculum_c1_21_30.js'
+import { C2_DAYS_1_10 } from './curriculum_c2_1_10.js'
+import { C2_DAYS_11_20 } from './curriculum_c2_11_20.js'
+import { C2_DAYS_21_30 } from './curriculum_c2_21_30.js'
 
 const baseDays = [...DAYS_1_10, ...DAYS_11_20, ...DAYS_21_30]
 
@@ -25,6 +34,9 @@ export const ALL_DAYS = baseDays.map(day => {
 
 export const A2_ALL_DAYS = [...A2_DAYS_1_10, ...A2_DAYS_11_20, ...A2_DAYS_21_30]
 export const B1_ALL_DAYS = [...B1_DAYS_1_10, ...B1_DAYS_11_20, ...B1_DAYS_21_30]
+export const B2_ALL_DAYS = [...B2_DAYS_1_10, ...B2_DAYS_11_20, ...B2_DAYS_21_30]
+export const C1_ALL_DAYS = [...C1_DAYS_1_10, ...C1_DAYS_11_20, ...C1_DAYS_21_30]
+export const C2_ALL_DAYS = [...C2_DAYS_1_10, ...C2_DAYS_11_20, ...C2_DAYS_21_30]
 
 export const LEVELS = [
   { id: 'A1', name: 'A1 — Beginner', nameAr: 'مبتدئ', description: 'من الصفر إلى التواصل الأساسي', totalDays: 30, available: true },
@@ -48,5 +60,8 @@ export function getDay(levelId, dayId) {
   if (levelId === 'A1') return ALL_DAYS.find(d => d.id === dayId) || null
   if (levelId === 'A2') return A2_ALL_DAYS.find(d => d.id === dayId) || null
   if (levelId === 'B1') return B1_ALL_DAYS.find(d => d.id === dayId) || null
+  if (levelId === 'B2') return B2_ALL_DAYS.find(d => d.id === dayId) || null
+  if (levelId === 'C1') return C1_ALL_DAYS.find(d => d.id === dayId) || null
+  if (levelId === 'C2') return C2_ALL_DAYS.find(d => d.id === dayId) || null
   return null
 }

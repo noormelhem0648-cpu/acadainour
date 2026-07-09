@@ -530,7 +530,7 @@ export const A2_DAYS_11_20 = [
       chunk: "I'll help you — don't worry, it'll be fine!",
       nativeForm: "I'll help ya — don't worry, it'll be fine!",
       explanation: "'it will' → 'it'll' — تلتصقان في الكلام الطبيعي.",
-      steps: ['استمع للاختصارات', 'تدرّب على 'll بسرعة', 'أضف نبرة طمأنينة'],
+      steps: ['استمع للاختصارات', "تدرّب على 'll بسرعة", 'أضف نبرة طمأنينة'],
       youtubeUrl: '',
     },
     writing: {

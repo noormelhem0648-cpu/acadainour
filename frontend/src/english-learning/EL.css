@@ -464,6 +464,107 @@
 /* active buddy toggle btn */
 .el-app .el-icon-btn.active { background: var(--el-accent); color: #fff; }
 
+/* ── Writing Buttons ── */
+.el-app .el-writing-btns { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.el-app .el-check-btn { background: var(--el-yellow); color: #fff; border-color: var(--el-yellow); }
+.el-app .el-check-btn:hover { opacity: .88; }
+
+/* ── Live Correction Display ── */
+.el-app .el-correction-display {
+  margin-top: 12px;
+  background: var(--el-bg3);
+  border: 1.5px solid var(--el-border);
+  border-radius: var(--el-radius);
+  padding: 16px;
+}
+.el-app .el-correction-label {
+  font-weight: 700; font-size: .85rem; color: var(--el-text2); margin-bottom: 10px;
+}
+.el-app .el-correction-text {
+  font-size: .95rem; line-height: 1.9; color: var(--el-text);
+  background: var(--el-bg2); border-radius: var(--el-radius-sm); padding: 12px 16px;
+  margin-bottom: 10px;
+}
+.el-app .el-correction-del {
+  color: var(--el-red);
+  text-decoration: line-through;
+  background: rgba(220,38,38,.1);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-weight: 600;
+}
+.el-app .el-correction-ins {
+  color: var(--el-green);
+  text-decoration: none;
+  font-weight: 700;
+  background: rgba(22,163,74,.1);
+  border-radius: 3px;
+  padding: 1px 4px;
+  margin-right: 3px;
+}
+.el-app .el-correction-note {
+  font-size: .82rem; color: var(--el-text2); line-height: 1.5;
+  border-right: 3px solid var(--el-yellow); padding: 4px 10px; margin-top: 6px;
+  background: var(--el-bg2); border-radius: 0 var(--el-radius-sm) var(--el-radius-sm) 0;
+}
+.el-app .el-correction-why { font-weight: 700; color: var(--el-yellow); }
+.el-app .el-correction-ok {
+  margin-top: 12px; background: rgba(22,163,74,.1); border: 1.5px solid var(--el-green);
+  border-radius: var(--el-radius-sm); padding: 12px 16px; color: var(--el-green);
+  font-weight: 600; font-size: .9rem;
+}
+
+/* ── Role-play Section ── */
+.el-app .el-roleplay-toggle {
+  border: 1.5px dashed var(--el-accent); background: var(--el-accent-light); color: var(--el-accent);
+  border-radius: var(--el-radius); padding: 12px 20px; cursor: pointer; font-size: .9rem;
+  font-weight: 700; transition: all .2s; width: 100%; text-align: center;
+}
+.el-app .el-roleplay-toggle:hover { background: var(--el-accent); color: #fff; }
+
+.el-app .el-roleplay-section {
+  background: var(--el-bg2); border: 1.5px solid var(--el-border); border-radius: var(--el-radius); padding: 20px;
+}
+.el-app .el-roleplay-title { font-weight: 800; font-size: 1.1rem; color: var(--el-accent); margin-bottom: 6px; }
+.el-app .el-roleplay-desc { color: var(--el-text2); font-size: .85rem; margin-bottom: 16px; line-height: 1.6; }
+.el-app .el-roleplay-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+.el-app .el-roleplay-card {
+  background: var(--el-bg3); border: 1.5px solid var(--el-border); border-radius: var(--el-radius);
+  padding: 16px 10px; cursor: pointer; text-align: center; transition: all .2s;
+  display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--el-text);
+}
+.el-app .el-roleplay-card:hover { border-color: var(--el-accent); background: var(--el-accent-light); transform: translateY(-2px); }
+.el-app .el-roleplay-icon { font-size: 2rem; }
+.el-app .el-roleplay-name { font-weight: 700; font-size: .82rem; }
+
+.el-app .el-roleplay-active {
+  background: var(--el-bg2); border: 1.5px solid var(--el-accent); border-radius: var(--el-radius);
+  display: flex; flex-direction: column; overflow: hidden; max-height: 420px;
+}
+.el-app .el-roleplay-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px; background: var(--el-accent); color: #fff;
+  font-weight: 700; font-size: .95rem;
+}
+.el-app .el-roleplay-exchange {
+  flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px;
+}
+.el-app .el-roleplay-line {
+  max-width: 88%; padding: 10px 14px; border-radius: 14px; font-size: .88rem; line-height: 1.6; word-break: break-word;
+}
+.el-app .el-roleplay-line.buddy {
+  background: var(--el-bg3); border: 1px solid var(--el-border); align-self: flex-start;
+  border-bottom-left-radius: 4px; display: flex; align-items: flex-start; gap: 6px;
+}
+.el-app .el-roleplay-line.user {
+  background: var(--el-accent); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px;
+}
+.el-app .el-roleplay-text { white-space: pre-wrap; color: inherit; }
+.el-app .el-roleplay-line.buddy .el-roleplay-text { color: var(--el-text); }
+.el-app .el-roleplay-input-row {
+  display: flex; gap: 6px; padding: 10px; border-top: 1px solid var(--el-border); background: var(--el-bg2);
+}
+
 /* Mobile */
 @media (max-width: 600px) {
   .el-app .el-hero-title { font-size: 1.7rem; }
