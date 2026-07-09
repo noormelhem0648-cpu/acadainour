@@ -12,6 +12,8 @@ import ELDaysPage from "./english-learning/pages/ELDaysPage";
 import ELDayPage from "./english-learning/pages/ELDayPage";
 import ELComponentPage from "./english-learning/pages/ELComponentPage";
 import ELChatPage from "./english-learning/pages/ELChatPage";
+import ELLedgerPage from "./english-learning/pages/ELLedgerPage"
+import ELErrorsPage from "./english-learning/pages/ELErrorsPage";
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("theme") === "dark");
@@ -67,6 +69,8 @@ function App() {
         <Route path="/english-learning/level/:levelId/day/:dayId" element={<ELDayPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
         <Route path="/english-learning/level/:levelId/day/:dayId/chat" element={<ELChatPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
         <Route path="/english-learning/level/:levelId/day/:dayId/:componentId" element={<ELComponentPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
+        <Route path="/english-learning/ledger" element={<ELLedgerPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
+        <Route path="/english-learning/errors" element={<ELErrorsPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

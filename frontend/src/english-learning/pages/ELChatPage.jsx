@@ -111,12 +111,27 @@ export default function ELChatPage({ darkMode, setDarkMode }) {
         </div>
 
         <div className="el-chat-messages">
-          {messages.map((msg, i) => (
-            <div key={i} className={`el-bubble ${msg.role}`}>
-              <div className="el-bubble-role">{msg.role === 'assistant' ? '🤖 Noura AI' : '👤 أنت'}</div>
-              <div>{msg.content || (loading && i === messages.length - 1 ? '...' : '')}</div>
-            </div>
-          ))}
+          {messages.map((msg, i) => {
+            const isAI = msg.role === 'assistant'
+            const isTyping = isAI && loading && i === messages.length - 1 && !msg.content
+            return (
+              <div key={i} className={`el-msg-row ${isAI ? 'ai' : 'user'}`}>
+                {isAI && (
+                  <div className="el-msg-avatar ai-avatar" title="Noura AI">N</div>
+                )}
+                <div className={`el-bubble ${isAI ? 'ai' : 'user'}`}>
+                  {isAI && <div className="el-bubble-name">Noura AI 🎓</div>}
+                  {isTyping
+                    ? <span className="el-typing-dots"><span/><span/><span/></span>
+                    : <div className="el-bubble-text">{msg.content}</div>
+                  }
+                </div>
+                {!isAI && (
+                  <div className="el-msg-avatar user-avatar" title="أنت">أ</div>
+                )}
+              </div>
+            )
+          })}
           <div ref={bottomRef} />
         </div>
 

@@ -14,6 +14,7 @@ import { B2_DAYS_21_30 } from './curriculum_b2_21_30.js'
 import { C1_DAYS_1_10 } from './curriculum_c1_1_10.js'
 import { C1_DAYS_11_20 } from './curriculum_c1_11_20.js'
 import { C1_DAYS_21_30 } from './curriculum_c1_21_30.js'
+import { C1_DAYS_31_35 } from './curriculum_c1_31_35.js'
 import { C2_DAYS_1_10 } from './curriculum_c2_1_10.js'
 import { C2_DAYS_11_20 } from './curriculum_c2_11_20.js'
 import { C2_DAYS_21_30 } from './curriculum_c2_21_30.js'
@@ -35,16 +36,16 @@ export const ALL_DAYS = baseDays.map(day => {
 export const A2_ALL_DAYS = [...A2_DAYS_1_10, ...A2_DAYS_11_20, ...A2_DAYS_21_30]
 export const B1_ALL_DAYS = [...B1_DAYS_1_10, ...B1_DAYS_11_20, ...B1_DAYS_21_30]
 export const B2_ALL_DAYS = [...B2_DAYS_1_10, ...B2_DAYS_11_20, ...B2_DAYS_21_30]
-export const C1_ALL_DAYS = [...C1_DAYS_1_10, ...C1_DAYS_11_20, ...C1_DAYS_21_30]
+export const C1_ALL_DAYS = [...C1_DAYS_1_10, ...C1_DAYS_11_20, ...C1_DAYS_21_30, ...C1_DAYS_31_35]
 export const C2_ALL_DAYS = [...C2_DAYS_1_10, ...C2_DAYS_11_20, ...C2_DAYS_21_30]
 
 export const LEVELS = [
-  { id: 'A1', name: 'A1 — Beginner', nameAr: 'مبتدئ', description: 'من الصفر إلى التواصل الأساسي', totalDays: 30, available: true },
-  { id: 'A2', name: 'A2 — Elementary', nameAr: 'أساسي', description: 'بناء الثقة في التواصل اليومي', totalDays: 30, available: true },
-  { id: 'B1', name: 'B1 — Intermediate', nameAr: 'متوسط', description: 'التعبير عن الآراء والأفكار', totalDays: 30, available: true },
-  { id: 'B2', name: 'B2 — Upper Intermediate', nameAr: 'فوق المتوسط', description: 'التحدث بطلاقة في مواضيع متنوعة', totalDays: 30, available: true },
-  { id: 'C1', name: 'C1 — Advanced', nameAr: 'متقدم', description: 'الطلاقة والدقة اللغوية العالية', totalDays: 30, available: true },
-  { id: 'C2', name: 'C2 — Mastery', nameAr: 'إتقان', description: 'مستوى شبه الأصيل', totalDays: 30, available: true },
+  { id: 'A1', name: 'A1 — Beginner',          nameAr: 'مبتدئ',         description: 'من الصفر إلى التواصل الأساسي',        totalDays: 30, available: true },
+  { id: 'A2', name: 'A2 — Elementary',         nameAr: 'أساسي',         description: 'بناء الثقة في التواصل اليومي',        totalDays: 30, available: true },
+  { id: 'B1', name: 'B1 — Intermediate',       nameAr: 'متوسط',         description: 'التعبير عن الآراء والأفكار',          totalDays: 30, available: true },
+  { id: 'B2', name: 'B2 — Upper Intermediate', nameAr: 'فوق المتوسط',   description: 'التحدث بطلاقة في مواضيع متنوعة',     totalDays: 30, available: true },
+  { id: 'C1', name: 'C1 — Advanced',           nameAr: 'متقدم',         description: 'الطلاقة والدقة اللغوية العالية',     totalDays: 35, available: true },
+  { id: 'C2', name: 'C2 — Mastery',            nameAr: 'إتقان',         description: 'مستوى شبه الأصيل',                  totalDays: 30, available: true },
 ]
 
 export const COMPONENTS = [
