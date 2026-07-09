@@ -291,6 +291,179 @@
 .el-app .el-send-btn:hover:not(:disabled) { opacity: .85; }
 .el-app .el-send-btn:disabled { opacity: .4; cursor: not-allowed; }
 
+/* ── Study Room — Split Screen ── */
+.el-app .el-study-room {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+.el-app .el-content-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  min-width: 0;
+}
+.el-app .el-study-room.buddy-open .el-content-panel {
+  border-left: 1px solid var(--el-border);
+}
+
+/* ── Study Buddy Panel ── */
+.el-app .el-buddy-panel {
+  width: 340px;
+  min-width: 280px;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  background: var(--el-bg2);
+  border-left: 1px solid var(--el-border);
+  height: 100%;
+}
+
+/* Avatar */
+.el-app .el-buddy-avatar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 10px 10px;
+  border-bottom: 1px solid var(--el-border);
+  gap: 4px;
+}
+.el-app .el-buddy-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2.5px solid var(--el-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--el-bg3);
+  position: relative;
+  transition: border-color .3s;
+}
+.el-app .el-buddy-emoji { font-size: 1.8rem; line-height: 1; }
+.el-app .el-buddy-pulse {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--el-accent);
+  animation: el-pulse 1.2s ease-in-out infinite;
+}
+@keyframes el-pulse {
+  0%, 100% { opacity: .6; transform: scale(1); }
+  50% { opacity: 0; transform: scale(1.25); }
+}
+.el-app .el-buddy-label { font-size: .72rem; font-weight: 600; transition: color .3s; }
+.el-app .el-buddy-name { font-size: .8rem; color: var(--el-muted); }
+
+/* Messages */
+.el-app .el-buddy-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.el-app .el-buddy-welcome {
+  text-align: center;
+  color: var(--el-muted);
+  font-size: .85rem;
+  padding: 20px 10px;
+  line-height: 1.7;
+}
+.el-app .el-buddy-msg {
+  max-width: 92%;
+  padding: 9px 12px;
+  border-radius: 14px;
+  font-size: .88rem;
+  line-height: 1.55;
+  word-break: break-word;
+}
+.el-app .el-buddy-msg.user {
+  background: var(--el-accent);
+  color: #fff;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+.el-app .el-buddy-msg.assistant {
+  background: var(--el-bg3);
+  color: var(--el-text);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+  border: 1px solid var(--el-border);
+}
+.el-app .el-buddy-msg-text { white-space: pre-wrap; }
+.el-app .el-buddy-typing {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 4px 0;
+}
+.el-app .el-buddy-typing span {
+  width: 7px; height: 7px;
+  background: var(--el-muted);
+  border-radius: 50%;
+  animation: el-bounce .9s ease-in-out infinite;
+}
+.el-app .el-buddy-typing span:nth-child(2) { animation-delay: .2s; }
+.el-app .el-buddy-typing span:nth-child(3) { animation-delay: .4s; }
+@keyframes el-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+/* Input row */
+.el-app .el-buddy-input-row {
+  display: flex;
+  gap: 6px;
+  padding: 10px;
+  border-top: 1px solid var(--el-border);
+  background: var(--el-bg2);
+}
+.el-app .el-buddy-input {
+  flex: 1;
+  border: 1.5px solid var(--el-border);
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-size: .88rem;
+  background: var(--el-bg3);
+  color: var(--el-text);
+  font-family: inherit;
+  min-width: 0;
+}
+.el-app .el-buddy-input:focus { outline: none; border-color: var(--el-accent); }
+.el-app .el-buddy-mic {
+  border: none;
+  background: var(--el-bg3);
+  border-radius: 50%;
+  width: 36px; height: 36px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background .15s;
+  flex-shrink: 0;
+}
+.el-app .el-buddy-mic:hover { background: var(--el-border); }
+.el-app .el-buddy-mic.listening { background: var(--el-accent); animation: el-pulse 1s infinite; }
+.el-app .el-buddy-send {
+  border: none;
+  background: var(--el-accent);
+  color: #fff;
+  border-radius: 50%;
+  width: 36px; height: 36px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 700;
+  transition: opacity .15s;
+  flex-shrink: 0;
+}
+.el-app .el-buddy-send:disabled { opacity: .4; cursor: not-allowed; }
+.el-app .el-buddy-send:hover:not(:disabled) { opacity: .85; }
+
+/* active buddy toggle btn */
+.el-app .el-icon-btn.active { background: var(--el-accent); color: #fff; }
+
 /* Mobile */
 @media (max-width: 600px) {
   .el-app .el-hero-title { font-size: 1.7rem; }
@@ -302,4 +475,6 @@
   .el-app .el-chunk-text { font-size: 1.3rem; }
   .el-app .el-bubble { max-width: 95%; }
   .el-app .el-comp-body { padding: 14px; }
+  .el-app .el-buddy-panel { width: 100%; max-width: 100%; position: fixed; bottom: 0; left: 0; right: 0; height: 55vh; z-index: 100; border-top: 2px solid var(--el-accent); }
+  .el-app .el-study-room.buddy-open .el-content-panel { padding-bottom: 55vh; }
 }

@@ -1,18 +1,162 @@
 import { useNavigate, useParams } from 'react-router-dom'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { getDay, COMPONENTS } from '../data/curriculum'
 import { useProgress } from '../hooks/useProgress'
 import '../EL.css'
 
 const EL = '/english-learning'
+const BACKEND = 'https://acadai-backend-avvo.onrender.com'
 
-function speak(text) {
+function speak(text, onStart, onEnd) {
   if (!window.speechSynthesis) return
   window.speechSynthesis.cancel()
   const u = new SpeechSynthesisUtterance(text)
   u.lang = 'en-US'
   u.rate = 0.85
+  if (onStart) u.onstart = onStart
+  if (onEnd) u.onend = onEnd
   window.speechSynthesis.speak(u)
+}
+
+/* ─── Avatar expressions ─── */
+const AVATAR_STATES = {
+  idle:      { emoji: '🤖', label: 'جاهز', color: '#c9858a' },
+  thinking:  { emoji: '🤔', label: 'يفكر...', color: '#b45309' },
+  speaking:  { emoji: '🗣️', label: 'يتحدث', color: '#16a34a' },
+  happy:     { emoji: '😊', label: 'ممتاز!', color: '#16a34a' },
+  correcting:{ emoji: '✏️', label: 'يُصحّح', color: '#c9858a' },
+  listening: { emoji: '👂', label: 'يستمع', color: '#6366f1' },
+}
+
+/* ─── Study Buddy Panel ─── */
+function StudyBuddy({ companionPrompt, dayContext, avatarState, setAvatarState, messages, setMessages, inputText, setInputText }) {
+  const [loading, setLoading] = useState(false)
+  const messagesEndRef = useRef(null)
+  const recognitionRef = useRef(null)
+  const [isListening, setIsListening] = useState(false)
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  const sendMessage = useCallback(async (text) => {
+    if (!text.trim()) return
+    const userMsg = { role: 'user', content: text }
+    setMessages(prev => [...prev, userMsg])
+    setInputText('')
+    setLoading(true)
+    setAvatarState('thinking')
+
+    try {
+      const systemPrompt = companionPrompt + '\n\nسياق الدرس: ' + dayContext
+      const res = await fetch(`${BACKEND}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [...messages, userMsg].map(m => ({ role: m.role, content: m.content })),
+          system: systemPrompt
+        })
+      })
+      const data = await res.json()
+      const reply = data.response || data.message || 'عذراً، لم أتمكن من الاستجابة.'
+      setMessages(prev => [...prev, { role: 'assistant', content: reply }])
+      setAvatarState('speaking')
+      speak(reply, null, () => setAvatarState('idle'))
+    } catch {
+      setMessages(prev => [...prev, { role: 'assistant', content: 'تعذّر الاتصال بالخادم. تأكد من اتصالك بالإنترنت.' }])
+      setAvatarState('idle')
+    } finally {
+      setLoading(false)
+    }
+  }, [messages, companionPrompt, dayContext, setMessages, setAvatarState, setInputText])
+
+  const startVoice = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SpeechRecognition) { alert('المتصفح لا يدعم التعرف على الصوت'); return }
+    if (isListening) { recognitionRef.current?.stop(); return }
+    const r = new SpeechRecognition()
+    r.lang = 'en-US'
+    r.interimResults = false
+    r.onstart = () => { setIsListening(true); setAvatarState('listening') }
+    r.onresult = e => {
+      const t = e.results[0][0].transcript
+      setInputText(t)
+      setIsListening(false)
+      setAvatarState('idle')
+      sendMessage(t)
+    }
+    r.onerror = () => { setIsListening(false); setAvatarState('idle') }
+    r.onend = () => { setIsListening(false); setAvatarState('idle') }
+    recognitionRef.current = r
+    r.start()
+  }
+
+  const av = AVATAR_STATES[avatarState] || AVATAR_STATES.idle
+
+  return (
+    <div className="el-buddy-panel">
+      <div className="el-buddy-avatar-wrap">
+        <div className="el-buddy-avatar" style={{ borderColor: av.color }}>
+          <span className="el-buddy-emoji">{av.emoji}</span>
+          {avatarState === 'thinking' && <div className="el-buddy-pulse" />}
+        </div>
+        <div className="el-buddy-label" style={{ color: av.color }}>{av.label}</div>
+        <div className="el-buddy-name">Noura AI</div>
+      </div>
+
+      <div className="el-buddy-messages">
+        {messages.length === 0 && (
+          <div className="el-buddy-welcome">
+            <p>مرحباً! أنا هنا لمساعدتك في درس اليوم.</p>
+            <p>اكتب أو تحدث إليّ بالإنجليزية وسأُصحّح وأُرشدك.</p>
+          </div>
+        )}
+        {messages.map((m, i) => (
+          <div key={i} className={`el-buddy-msg ${m.role}`}>
+            {m.role === 'assistant' && (
+              <button className="el-speak-btn" onClick={() => speak(m.content)} style={{ float: 'left', marginLeft: 4 }}>🔊</button>
+            )}
+            <span className="el-buddy-msg-text">{m.content}</span>
+          </div>
+        ))}
+        {loading && (
+          <div className="el-buddy-msg assistant">
+            <span className="el-buddy-typing">
+              <span />
+              <span />
+              <span />
+            </span>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      <div className="el-buddy-input-row">
+        <input
+          className="el-buddy-input"
+          value={inputText}
+          onChange={e => setInputText(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && sendMessage(inputText)}
+          placeholder="اكتب بالإنجليزية أو اضغط 🎤"
+          disabled={loading}
+        />
+        <button
+          className={'el-buddy-mic' + (isListening ? ' listening' : '')}
+          onClick={startVoice}
+          title="تحدث"
+        >
+          🎤
+        </button>
+        <button
+          className="el-buddy-send"
+          onClick={() => sendMessage(inputText)}
+          disabled={loading || !inputText.trim()}
+        >
+          ↑
+        </button>
+      </div>
+    </div>
+  )
 }
 
 export default function ELComponentPage({ darkMode, setDarkMode }) {
@@ -22,6 +166,11 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
   const day = getDay(levelId, Number(dayId))
   const compIndex = COMPONENTS.findIndex(c => c.id === componentId)
   const comp = COMPONENTS[compIndex]
+
+  const [buddyMessages, setBuddyMessages] = useState([])
+  const [buddyInput, setBuddyInput] = useState('')
+  const [avatarState, setAvatarState] = useState('idle')
+  const [buddyOpen, setBuddyOpen] = useState(true)
 
   if (!day || !comp) return <div className="el-app"><div className="el-page"><p style={{ padding: 32 }}>Not found.</p></div></div>
 
@@ -35,13 +184,18 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
     else navigate(`${EL}/level/${levelId}/day/${dayId}`)
   }
 
+  const dayContext = `Level ${levelId}, Day ${dayId}: ${day.title}. Component: ${comp.labelEn}.`
+
   return (
     <div className={`el-app${darkMode ? ' el-dark' : ''}`}>
       <div className="el-page el-comp-page">
         <header className="el-top-bar">
           <button className="el-icon-btn" onClick={() => navigate(`${EL}/level/${levelId}/day/${dayId}`)}>←</button>
           <span className="el-top-bar-title">{comp.icon} {comp.labelEn}</span>
-          <button className="el-icon-btn" onClick={() => setDarkMode(!darkMode)}>{darkMode ? '☀️' : '🌙'}</button>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button className={'el-icon-btn' + (buddyOpen ? ' active' : '')} onClick={() => setBuddyOpen(b => !b)} title="Study Buddy">🤖</button>
+            <button className="el-icon-btn" onClick={() => setDarkMode(!darkMode)}>{darkMode ? '☀️' : '🌙'}</button>
+          </div>
         </header>
 
         <div className="el-comp-progress-strip">
@@ -55,24 +209,41 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
           ))}
         </div>
 
-        <div className="el-comp-body">
-          {componentId === 'vocab'     && <VocabComp day={day} />}
-          {componentId === 'grammar'   && <GrammarComp day={day} />}
-          {componentId === 'reading'   && <ReadingComp day={day} />}
-          {componentId === 'listening' && <ListeningComp day={day} />}
-          {componentId === 'shadowing' && <ShadowingComp day={day} />}
-          {componentId === 'writing'   && <WritingComp day={day} levelId={levelId} dayId={dayId} navigate={navigate} />}
-        </div>
+        <div className={'el-study-room' + (buddyOpen ? ' buddy-open' : '')}>
+          <div className="el-content-panel">
+            <div className="el-comp-body">
+              {componentId === 'vocab'     && <VocabComp day={day} setAvatarState={setAvatarState} setBuddyMessages={setBuddyMessages} />}
+              {componentId === 'grammar'   && <GrammarComp day={day} />}
+              {componentId === 'reading'   && <ReadingComp day={day} setAvatarState={setAvatarState} setBuddyMessages={setBuddyMessages} />}
+              {componentId === 'listening' && <ListeningComp day={day} setAvatarState={setAvatarState} setBuddyMessages={setBuddyMessages} />}
+              {componentId === 'shadowing' && <ShadowingComp day={day} />}
+              {componentId === 'writing'   && <WritingComp day={day} levelId={levelId} dayId={dayId} navigate={navigate} setBuddyMessages={setBuddyMessages} setBuddyInput={setBuddyInput} />}
+            </div>
 
-        <div className="el-comp-footer">
-          {compIndex > 0 && (
-            <button className="el-nav-btn" onClick={() => navigate(`${EL}/level/${levelId}/day/${dayId}/${COMPONENTS[compIndex - 1].id}`)}>
-              ← السابق
-            </button>
+            <div className="el-comp-footer">
+              {compIndex > 0 && (
+                <button className="el-nav-btn" onClick={() => navigate(`${EL}/level/${levelId}/day/${dayId}/${COMPONENTS[compIndex - 1].id}`)}>
+                  ← السابق
+                </button>
+              )}
+              <button className={'el-nav-btn primary' + (done ? ' already-done' : '')} onClick={handleDone}>
+                {done ? '✓ مكتمل' : compIndex < COMPONENTS.length - 1 ? 'أكملت ← التالي' : 'أكملت اليوم ✓'}
+              </button>
+            </div>
+          </div>
+
+          {buddyOpen && (
+            <StudyBuddy
+              companionPrompt={day.writing?.companionPrompt || 'أنت مدرس لغة مساعد.'}
+              dayContext={dayContext}
+              avatarState={avatarState}
+              setAvatarState={setAvatarState}
+              messages={buddyMessages}
+              setMessages={setBuddyMessages}
+              inputText={buddyInput}
+              setInputText={setBuddyInput}
+            />
           )}
-          <button className={'el-nav-btn primary' + (done ? ' already-done' : '')} onClick={handleDone}>
-            {done ? '✓ مكتمل' : compIndex < COMPONENTS.length - 1 ? 'أكملت ← التالي' : 'أكملت اليوم ✓'}
-          </button>
         </div>
       </div>
     </div>
@@ -316,16 +487,15 @@ function ShadowingComp({ day }) {
 }
 
 /* ─── Writing & AI Chat ─── */
-function WritingComp({ day, levelId, dayId, navigate }) {
+function WritingComp({ day, levelId, dayId, navigate, setBuddyMessages, setBuddyInput }) {
   const [responses, setResponses] = useState({})
-  const [copied, setCopied] = useState(false)
   const { writing: w } = day
 
-  const copyPrompt = () => {
-    navigator.clipboard.writeText(w.companionPrompt).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    })
+  const sendToBuddy = (text, challengeIdx) => {
+    if (!text.trim()) return
+    const msg = `تحدي الكتابة ${challengeIdx + 1}:\n${w.challenges[challengeIdx]}\n\nإجابتي:\n${text}`
+    setBuddyInput('')
+    setBuddyMessages(prev => [...prev, { role: 'user', content: msg }])
   }
 
   return (
@@ -339,28 +509,18 @@ function WritingComp({ day, levelId, dayId, navigate }) {
             placeholder="اكتب إجابتك هنا بالإنجليزية..."
             value={responses[i] || ''}
             onChange={e => setResponses(r => ({ ...r, [i]: e.target.value }))}
-            rows={4}
+            rows={5}
           />
+          <button
+            className="el-nav-btn"
+            style={{ marginTop: 8 }}
+            onClick={() => sendToBuddy(responses[i] || '', i)}
+            disabled={!responses[i]?.trim()}
+          >
+            🤖 أرسل للتصحيح الفوري
+          </button>
         </div>
       ))}
-
-      <div className="el-companion-section">
-        <div className="el-companion-title">🤖 رفيق المحادثة الحية</div>
-        <p className="el-companion-desc">
-          انسخ هذا البرومبت، افتح المحادثة مع Noura AI، والصقه لتبدأ محادثة حية مخصصة لدرس اليوم.
-        </p>
-        <div className="el-prompt-preview">
-          <pre className="el-prompt-text">{w.companionPrompt}</pre>
-        </div>
-        <div className="el-companion-btns">
-          <button className="el-nav-btn" onClick={copyPrompt}>
-            {copied ? '✓ تم النسخ' : '📋 انسخ البرومبت'}
-          </button>
-          <button className="el-nav-btn primary" onClick={() => navigate(`${EL}/level/${levelId}/day/${dayId}/chat`)}>
-            💬 افتح المحادثة الحية
-          </button>
-        </div>
-      </div>
     </div>
   )
 }
