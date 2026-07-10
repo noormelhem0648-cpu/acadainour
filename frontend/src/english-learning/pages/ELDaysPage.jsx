@@ -1,16 +1,25 @@
 import { useNavigate, useParams } from 'react-router-dom'
-import { ALL_DAYS, LEVELS, COMPONENTS } from '../data/curriculum'
+import { ALL_DAYS, A2_ALL_DAYS, B1_ALL_DAYS, B2_ALL_DAYS, C1_ALL_DAYS, C2_ALL_DAYS, LEVELS, COMPONENTS } from '../data/curriculum'
 import { useProgress } from '../hooks/useProgress'
 import '../EL.css'
 
 const EL = '/english-learning'
+
+const LEVEL_DAYS = {
+  A1: ALL_DAYS,
+  A2: A2_ALL_DAYS,
+  B1: B1_ALL_DAYS,
+  B2: B2_ALL_DAYS,
+  C1: C1_ALL_DAYS,
+  C2: C2_ALL_DAYS,
+}
 
 export default function ELDaysPage({ darkMode, setDarkMode }) {
   const { levelId } = useParams()
   const navigate = useNavigate()
   const progress = useProgress()
   const level = LEVELS.find(l => l.id === levelId)
-  const days = levelId === 'A1' ? ALL_DAYS : []
+  const days = LEVEL_DAYS[levelId] || []
 
   if (!level) return <div className="el-app"><div className="el-page"><p style={{ padding: 32 }}>Level not found.</p></div></div>
 

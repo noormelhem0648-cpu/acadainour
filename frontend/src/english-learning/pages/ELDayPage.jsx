@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom'
-import { getDay, COMPONENTS } from '../data/curriculum'
+import { getDay, COMPONENTS, LEVELS } from '../data/curriculum'
 import { useProgress } from '../hooks/useProgress'
 import '../EL.css'
 
@@ -9,6 +9,7 @@ export default function ELDayPage({ darkMode, setDarkMode }) {
   const { levelId, dayId } = useParams()
   const navigate = useNavigate()
   const progress = useProgress()
+  const level = LEVELS.find(l => l.id === levelId)
   const day = getDay(levelId, Number(dayId))
 
   if (!day) return <div className="el-app"><div className="el-page"><p style={{ padding: 32 }}>Day not found.</p></div></div>
@@ -25,7 +26,7 @@ export default function ELDayPage({ darkMode, setDarkMode }) {
         </header>
 
         <div className="el-day-hero">
-          <div className="el-day-hero-num">Day {day.id} / 30</div>
+          <div className="el-day-hero-num">Day {day.id} / {level?.totalDays || 30}</div>
           <h2 className="el-day-hero-title">{day.title}</h2>
           <p className="el-day-hero-ar">{day.titleAr}</p>
           <p className="el-day-hero-sub">{day.subtitle}</p>
@@ -65,7 +66,7 @@ export default function ELDayPage({ darkMode, setDarkMode }) {
               ← اليوم {Number(dayId) - 1}
             </button>
           )}
-          {Number(dayId) < 30 && (
+          {Number(dayId) < (level?.totalDays || 30) && (
             <button className="el-nav-btn primary" onClick={() => navigate(`${EL}/level/${levelId}/day/${Number(dayId) + 1}`)}>
               اليوم {Number(dayId) + 1} →
             </button>
