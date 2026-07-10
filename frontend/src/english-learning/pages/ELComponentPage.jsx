@@ -497,6 +497,9 @@ function VocabComp({ day, levelId, dayId, progress }) {
 
       {/* Teacher Corner */}
       <TeacherCorner words={v.words} dayTitle={day.title} />
+      <VocabStoryGen words={v.words} dayTitle={day.title} />
+      <TeachMeMode words={v.words} dayTitle={day.title} />
+      <SituationalCards words={v.words} />
     </div>
   )
 }
@@ -862,6 +865,9 @@ function GrammarComp({ day, setBuddyMessages, setAvatarState }) {
         🎭 {rolePlay ? 'إخفاء وضع التمثيل' : 'تدرّب بالتمثيل اللغوي'}
       </button>
       {rolePlay && <RolePlayMode day={day} setBuddyMessages={setBuddyMessages} setAvatarState={setAvatarState} />}
+
+      <GrammarDetective day={day} />
+      <DebateMode day={day} />
     </div>
   )
 }
@@ -1217,6 +1223,8 @@ function ListeningComp({ day }) {
           : <button className="el-nav-btn" onClick={retry}>🔄 حاول مرة ثانية</button>
         }
       </div>
+
+      {score && <AILiveReaction score={score} />}
     </div>
   )
 }
@@ -1252,6 +1260,8 @@ function ShadowingComp({ day }) {
       <a href={s.youtubeUrl} target="_blank" rel="noopener noreferrer" className="el-yt-btn">
         ▶ افتح YouTube للتدريب
       </a>
+
+      <DialoguePartner day={day} />
     </div>
   )
 }
@@ -1409,8 +1419,545 @@ CORRECTION: [الكلمة/العبارة الخاطئة] → [الصواب] | Re
               ? <CorrectionDisplay corrections={corrections[i].parsed} originalText={responses[i] || ''} />
               : <div className="el-correction-ok">✅ ممتاز! لا أخطاء في هذه الفقرة.</div>
           )}
+          {corrections[i] && <WritingUpgrade text={responses[i] || ''} />}
         </div>
       ))}
+    </div>
+  )
+}
+
+/* ─── Grammar Detective ─── */
+function GrammarDetective({ day }) {
+  const [open, setOpen] = useState(false)
+  const [sentences] = useState(() => {
+    const patterns = day.grammar?.patterns || []
+    return [
+      { text: 'She go to school every day and studyes hard.', errors: ['go', 'studyes'], fixes: ['goes', 'studies'], hint: 'فعل المضارع مع he/she/it يأخذ s' },
+      { text: 'I have went to Paris last year with my family.', errors: ['have went'], fixes: ['went'], hint: 'الفعل went استخدم وحده في الماضي البسيط' },
+      { text: 'There is many students in the classroom today.', errors: ['is'], fixes: ['are'], hint: 'students جمع → نستخدم are' },
+    ]
+  })
+  const [clicked, setClicked] = useState({}) // {sentIdx_wordIdx: 'wrong'|'right'}
+  const [revealed, setRevealed] = useState({})
+
+  const handleWord = (sIdx, wIdx, word, sentence) => {
+    const key = `${sIdx}_${wIdx}`
+    if (clicked[key]) return
+    const isError = sentence.errors.some(e => word.toLowerCase().includes(e.toLowerCase()))
+    setClicked(c => ({ ...c, [key]: isError ? 'right' : 'wrong' }))
+  }
+
+  return (
+    <div className="el-detective-section" style={{ marginTop: 20 }}>
+      <button className="el-roleplay-toggle" style={{ marginBottom: open ? 14 : 0 }} onClick={() => setOpen(o => !o)}>
+        🔍 {open ? 'إغلاق Grammar Detective' : 'Grammar Detective — اكتشف الأخطاء المخفية'}
+      </button>
+      {open && (
+        <>
+          <div className="el-detective-desc">اضغط على الكلمة التي تعتقد أنها خاطئة نحوياً في كل جملة:</div>
+          {sentences.map((s, sIdx) => {
+            const words = s.text.split(' ')
+            const foundAll = s.errors.every(err =>
+              Object.entries(clicked).some(([k, v]) => k.startsWith(`${sIdx}_`) && v === 'right')
+            )
+            return (
+              <div key={sIdx} className="el-detective-sentence">
+                <div className="el-detective-text">
+                  {words.map((w, wIdx) => {
+                    const key = `${sIdx}_${wIdx}`
+                    const st = clicked[key]
+                    return (
+                      <span key={wIdx}>
+                        <span
+                          className={`el-detective-word${st === 'right' ? ' clicked-right' : st === 'wrong' ? ' clicked-wrong' : ''}`}
+                          onClick={() => handleWord(sIdx, wIdx, w, s)}
+                        >{w}</span>
+                        {' '}
+                      </span>
+                    )
+                  })}
+                </div>
+                {foundAll && (
+                  <div className="el-detective-result found">
+                    ✅ وجدت الخطأ! الصواب: <strong>{s.fixes.join(' / ')}</strong> — {s.hint}
+                  </div>
+                )}
+                {!foundAll && (
+                  <button
+                    className="el-nav-btn"
+                    style={{ marginTop: 8, padding: '4px 12px', fontSize: '.78rem' }}
+                    onClick={() => setRevealed(r => ({ ...r, [sIdx]: true }))}
+                  >
+                    {revealed[sIdx] ? `💡 الخطأ في: ${s.errors.join(', ')} → ${s.fixes.join(', ')}` : '💡 أرني الخطأ'}
+                  </button>
+                )}
+              </div>
+            )
+          })}
+        </>
+      )}
+    </div>
+  )
+}
+
+/* ─── Debate Mode ─── */
+function DebateMode({ day }) {
+  const [open, setOpen] = useState(false)
+  const [stance, setStance] = useState(null)
+  const [msgs, setMsgs] = useState([])
+  const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(false)
+  const endRef = useRef(null)
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [msgs])
+
+  const topic = `"${day.title}" — هل هذا الموضوع مهم في حياتنا اليومية؟`
+
+  const startDebate = async (chosenStance) => {
+    setStance(chosenStance)
+    setMsgs([])
+    setLoading(true)
+    try {
+      const sys = `You are a sharp academic debater. The topic is: "${day.title}".
+The student will argue ${chosenStance === 'for' ? 'FOR' : 'AGAINST'} this topic. You argue the OPPOSITE side strongly.
+Keep each response to 2-3 sentences max. After each student argument, rate it: [STRONG] or [WEAK] and explain why in Arabic briefly.
+Use vocabulary from today's lesson naturally. Challenge the student to use better language.`
+      const res = await fetch(`${BACKEND}/api/chat`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: [{ role: 'user', content: 'Start the debate with your opening argument.' }], system: sys })
+      })
+      const data = await res.json()
+      setMsgs([{ role: 'ai', text: data.response || data.message || 'Let us begin...' }])
+    } catch { setMsgs([{ role: 'ai', text: 'تعذّر الاتصال.' }]) }
+    finally { setLoading(false) }
+  }
+
+  const sendArg = async () => {
+    if (!input.trim() || loading) return
+    const userText = input; setInput('')
+    const history = [...msgs, { role: 'user', text: userText }]
+    setMsgs(history)
+    setLoading(true)
+    try {
+      const sys = `You are a sharp academic debater arguing AGAINST the student on: "${day.title}". Rate their argument [STRONG] or [WEAK] first, then counter-argue in 2-3 sentences. Brief Arabic feedback.`
+      const res = await fetch(`${BACKEND}/api/chat`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: history.map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.text })),
+          system: sys
+        })
+      })
+      const data = await res.json()
+      setMsgs(h => [...h, { role: 'ai', text: data.response || data.message || '...' }])
+    } catch { setMsgs(h => [...h, { role: 'ai', text: 'تعذّر الاتصال.' }]) }
+    finally { setLoading(false) }
+  }
+
+  return (
+    <div className="el-debate-section">
+      <button className="el-roleplay-toggle" style={{ marginBottom: open ? 14 : 0 }} onClick={() => setOpen(o => !o)}>
+        🗣️ {open ? 'إغلاق Debate Mode' : 'Debate Mode — جادل الـ AI باللغة الإنجليزية'}
+      </button>
+      {open && (
+        <>
+          <div className="el-debate-topic">📌 موضوع النقاش: {topic}</div>
+          {!stance ? (
+            <div className="el-debate-stance">
+              <button className="el-debate-stance-btn" onClick={() => startDebate('for')}>👍 أنا مع الفكرة</button>
+              <button className="el-debate-stance-btn" onClick={() => startDebate('against')}>👎 أنا ضد الفكرة</button>
+            </div>
+          ) : (
+            <>
+              <div className="el-debate-msgs">
+                {msgs.map((m, i) => {
+                  const isStrong = m.text.includes('[STRONG]')
+                  const isWeak = m.text.includes('[WEAK]')
+                  const clean = m.text.replace('[STRONG]', '').replace('[WEAK]', '')
+                  return (
+                    <div key={i} className={`el-debate-msg ${m.role}`}>
+                      {clean}
+                      {m.role === 'ai' && isStrong && <div><span className="el-debate-score strong">💪 حجة قوية</span></div>}
+                      {m.role === 'ai' && isWeak && <div><span className="el-debate-score weak">⚠️ حجة ضعيفة</span></div>}
+                    </div>
+                  )
+                })}
+                {loading && <div className="el-debate-msg ai"><span className="el-buddy-typing"><span/><span/><span/></span></div>}
+                <div ref={endRef} />
+              </div>
+              <div className="el-buddy-input-row" style={{ padding: 0, border: 'none', background: 'transparent', gap: 6 }}>
+                <input
+                  className="el-buddy-input"
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && sendArg()}
+                  placeholder="اكتب حجتك بالإنجليزية..."
+                  disabled={loading}
+                />
+                <button className="el-buddy-send" onClick={sendArg} disabled={loading || !input.trim()}>↑</button>
+              </div>
+              <button className="el-nav-btn" style={{ marginTop: 8, fontSize: '.8rem' }} onClick={() => { setStance(null); setMsgs([]) }}>🔄 نقاش جديد</button>
+            </>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
+/* ─── Writing Upgrade (3 levels) ─── */
+function WritingUpgrade({ text }) {
+  const [level, setLevel] = useState(null)
+  const [result, setResult] = useState({})
+  const [loading, setLoading] = useState(false)
+
+  const upgrade = async (lvl) => {
+    setLevel(lvl)
+    if (result[lvl]) return
+    setLoading(true)
+    try {
+      const prompts = {
+        b1: 'Improve this text to B1 level: clearer vocabulary, simple improvements. Show ONLY the improved text.',
+        b2: 'Rewrite this text at B2 level: professional vocabulary, varied sentence structure. Show ONLY the improved text.',
+        c2: 'Rewrite this text at C2/native level: sophisticated, academic, polished. Show ONLY the improved text.'
+      }
+      const res = await fetch(`${BACKEND}/api/chat`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: [{ role: 'user', content: `${prompts[lvl]}\n\nText: "${text}"` }], system: 'You are a professional English writing coach.' })
+      })
+      const data = await res.json()
+      setResult(r => ({ ...r, [lvl]: data.response || data.message || text }))
+    } catch { setResult(r => ({ ...r, [lvl]: 'تعذّر الاتصال.' })) }
+    finally { setLoading(false) }
+  }
+
+  return (
+    <div className="el-upgrade-section">
+      <div className="el-upgrade-title">✨ ارتقِ بكتابتك — 3 مستويات</div>
+      <div className="el-upgrade-levels">
+        {[['b1','B1 — تحسين بسيط'],['b2','B2 — احترافي'],['c2','C2 — أكاديمي']].map(([k,lbl]) => (
+          <button key={k} className={`el-upgrade-lvl-btn${level === k ? ' active' : ''}`} onClick={() => upgrade(k)}>{lbl}</button>
+        ))}
+      </div>
+      {loading && level && !result[level] && <div style={{ textAlign: 'center', color: 'var(--el-muted)', padding: 10 }}>⏳ يُحسّن النص...</div>}
+      {level && result[level] && (
+        <div>
+          <div className="el-upgrade-label">📝 النص المُحسَّن ({level.toUpperCase()}):</div>
+          <div className="el-upgrade-result">{result[level]}</div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ─── AI Live Reaction after Listening score ─── */
+function AILiveReaction({ score }) {
+  const reactions = [
+    { min: 100, emoji: '🎉', text: 'واو! نتيجة مثالية! أنت تستمع بأذن موسيقار!', color: '#dcfce7', border: '#16a34a' },
+    { min: 70,  emoji: '😊', text: 'أحسنت! أداء ممتاز — فقط بعض الكلمات تحتاج مزيداً من التركيز.', color: '#dbeafe', border: '#3b82f6' },
+    { min: 40,  emoji: '💪', text: 'جيد! الاستماع مهارة تتطور — استمع مرة أخرى للمقاطع الصعبة.', color: '#fef3c7', border: '#f59e0b' },
+    { min: 0,   emoji: '🤗', text: 'لا بأس! كل خطأ درس. استمع مرة ثانية ببطء وركّز على البداية.', color: '#fee2e2', border: '#ef4444' },
+  ]
+  const r = reactions.find(rx => score.pct >= rx.min) || reactions[reactions.length - 1]
+  return (
+    <div className="el-reaction-box" style={{ background: r.color, borderColor: r.border }}>
+      <div className="el-reaction-emoji">{r.emoji}</div>
+      <div className="el-reaction-text">{r.text}</div>
+    </div>
+  )
+}
+
+/* ─── Vocabulary Story Generator ─── */
+function VocabStoryGen({ words, dayTitle }) {
+  const [open, setOpen] = useState(false)
+  const [genre, setGenre] = useState('قصة مغامرة')
+  const [story, setStory] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [usedWords, setUsedWords] = useState([])
+
+  const genres = ['قصة مغامرة', 'حوار حياة يومية', 'تقرير إخباري', 'قصة رومانسية']
+
+  const generate = async () => {
+    setLoading(true)
+    setStory('')
+    const wordList = words.slice(0, 8).map(w => w.word).join(', ')
+    try {
+      const res = await fetch(`${BACKEND}/api/chat`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: `Write a short ${genre} story (5-7 sentences) naturally using these words: ${wordList}. Make the story engaging and memorable. Write in English only.` }],
+          system: `You are a creative English storyteller. Use ALL the given words naturally in context. Topic theme: ${dayTitle}`
+        })
+      })
+      const data = await res.json()
+      const text = data.response || data.message || ''
+      setStory(text)
+      setUsedWords(words.filter(w => text.toLowerCase().includes(w.word.toLowerCase())).map(w => w.word))
+    } catch { setStory('تعذّر إنشاء القصة. تحقق من الإنترنت.') }
+    finally { setLoading(false) }
+  }
+
+  const highlight = (text) => {
+    if (!usedWords.length) return text
+    let result = text
+    usedWords.forEach(w => {
+      result = result.replace(new RegExp(`\\b${w}\\b`, 'gi'), `__BOLD__${w}__/BOLD__`)
+    })
+    return result.split(/(__)/).map((part, i) => {
+      if (part.startsWith('BOLD__')) return <strong key={i} className="el-story-highlight">{part.slice(6)}</strong>
+      if (part === '__/BOLD__') return null
+      return <span key={i}>{part}</span>
+    })
+  }
+
+  return (
+    <div className="el-story-section">
+      <button className="el-roleplay-toggle" style={{ marginBottom: open ? 14 : 0 }} onClick={() => setOpen(o => !o)}>
+        📖 {open ? 'إغلاق مولّد القصص' : 'Vocabulary Story Generator — تعلّم الكلمات بقصة'}
+      </button>
+      {open && (
+        <>
+          <div className="el-story-title">اختر نوع القصة:</div>
+          <div className="el-story-settings">
+            {genres.map(g => (
+              <button key={g} className={`el-story-setting-btn${genre === g ? ' active' : ''}`} onClick={() => setGenre(g)}>{g}</button>
+            ))}
+          </div>
+          <button className="el-nav-btn primary" onClick={generate} disabled={loading}>
+            {loading ? '⏳ يكتب القصة...' : '✨ اكتب لي قصة'}
+          </button>
+          {story && (
+            <>
+              <div className="el-story-text">
+                {typeof story === 'string' ? highlight(story) : story}
+              </div>
+              <div style={{ marginTop: 8, fontSize: '.8rem', color: 'var(--el-muted)' }}>
+                الكلمات المستخدمة: {usedWords.join(', ') || 'يُعثر عليها في النص'}
+              </div>
+            </>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
+/* ─── Teach Me Mode ─── */
+function TeachMeMode({ words, dayTitle }) {
+  const [open, setOpen] = useState(false)
+  const [selectedWord, setSelectedWord] = useState(null)
+  const [msgs, setMsgs] = useState([])
+  const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [score, setScore] = useState(null)
+  const endRef = useRef(null)
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [msgs])
+
+  const startTeach = async (word) => {
+    setSelectedWord(word)
+    setMsgs([])
+    setScore(null)
+    setLoading(true)
+    try {
+      const sys = `You are a student who just learned the word "${word.word}" (${word.arabic}) in a lesson about "${dayTitle}".
+Pretend you forgot what it means. Ask the student to explain it to you in English.
+After their explanation, give a score /10 and 1 line of feedback in Arabic.
+Ask ONE follow-up question to test deeper understanding.`
+      const res = await fetch(`${BACKEND}/api/chat`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: [{ role: 'user', content: 'Start by saying you forgot the meaning and ask them to teach you.' }], system: sys })
+      })
+      const data = await res.json()
+      setMsgs([{ role: 'ai', text: data.response || data.message || '...' }])
+    } catch { } finally { setLoading(false) }
+  }
+
+  const send = async () => {
+    if (!input.trim() || loading) return
+    const userText = input; setInput('')
+    const history = [...msgs, { role: 'user', text: userText }]
+    setMsgs(history)
+    setLoading(true)
+    try {
+      const sys = `You are a student who forgot the word "${selectedWord?.word}". The user is teaching you. After 1-2 exchanges, give a final score X/10 and brief Arabic feedback. Ask follow-up questions to deepen understanding.`
+      const res = await fetch(`${BACKEND}/api/chat`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: history.map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.text })),
+          system: sys
+        })
+      })
+      const data = await res.json()
+      const reply = data.response || data.message || '...'
+      setMsgs(h => [...h, { role: 'ai', text: reply }])
+      const match = reply.match(/(\d+)\/10/)
+      if (match) setScore(parseInt(match[1]))
+    } catch { } finally { setLoading(false) }
+  }
+
+  return (
+    <div className="el-teach-section">
+      <button className="el-roleplay-toggle" style={{ background: '#f0f9ff', borderColor: '#38bdf8', color: '#0369a1', marginBottom: open ? 14 : 0 }} onClick={() => setOpen(o => !o)}>
+        🎓 {open ? 'إغلاق Teach Me' : 'Teach Me Mode — علّم الـ AI واثبت فهمك'}
+      </button>
+      {open && (
+        <>
+          <div style={{ fontSize: '.85rem', color: 'var(--el-text2)', marginBottom: 10 }}>اختر كلمة وعلّمها للـ AI — اذا قدرت تشرح، إذن فهمتِ فعلاً:</div>
+          <div className="el-teach-word-pick">
+            {words.slice(0, 10).map((w, i) => (
+              <button
+                key={i}
+                className={`el-teach-word-chip${selectedWord?.word === w.word ? ' active' : ''}`}
+                onClick={() => startTeach(w)}
+              >
+                {w.word}
+              </button>
+            ))}
+          </div>
+          {selectedWord && (
+            <>
+              <div className="el-teach-msgs">
+                {msgs.map((m, i) => (
+                  <div key={i} className={`el-teach-msg ${m.role}`}>{m.text}</div>
+                ))}
+                {loading && <div className="el-teach-msg ai"><span className="el-buddy-typing"><span/><span/><span/></span></div>}
+                <div ref={endRef} />
+              </div>
+              {score !== null && (
+                <div className="el-teach-score">
+                  <span>🏅 درجتك:</span>
+                  <strong style={{ color: score >= 7 ? '#15803d' : score >= 5 ? '#b45309' : '#dc2626' }}>{score}/10</strong>
+                  <span>{score >= 7 ? '— أنتِ معلمة ممتازة! 🎉' : score >= 5 ? '— فهم جيد، تحتاجين مزيداً من التفاصيل' : '— راجعي الكلمة وحاولي مجدداً'}</span>
+                </div>
+              )}
+              <div className="el-buddy-input-row" style={{ padding: 0, border: 'none', background: 'transparent', gap: 6, marginTop: 8 }}>
+                <input
+                  className="el-buddy-input"
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && send()}
+                  placeholder="اشرح للـ AI بالإنجليزية..."
+                  disabled={loading}
+                />
+                <button className="el-buddy-send" onClick={send} disabled={loading || !input.trim()}>↑</button>
+              </div>
+            </>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
+/* ─── Dialogue Partner (Shadowing) ─── */
+function DialoguePartner({ day }) {
+  const [open, setOpen] = useState(false)
+  const [currentLine, setCurrentLine] = useState(0)
+  const [playingKey, trigger] = useTTS()
+
+  const { shadowing: s } = day
+  // Build a simple dialogue from shadowing chunk
+  const lines = [
+    { role: 'A', text: s.chunk, isStudent: false },
+    { role: 'B', text: s.nativeForm, isStudent: true },
+    { role: 'A', text: s.steps?.[0] || 'Listen carefully and repeat.', isStudent: false },
+    { role: 'B', text: s.chunk, isStudent: true },
+  ]
+
+  const advance = () => {
+    if (currentLine < lines.length - 1) setCurrentLine(c => c + 1)
+    else setCurrentLine(0)
+  }
+
+  return (
+    <div className="el-dialogue-section">
+      <button className="el-roleplay-toggle" style={{ marginBottom: open ? 14 : 0 }} onClick={() => setOpen(o => !o)}>
+        🎙️ {open ? 'إغلاق Dialogue Partner' : 'Dialogue Partner — اقرأ دورك بصوت عالٍ'}
+      </button>
+      {open && (
+        <>
+          <div style={{ fontSize: '.85rem', color: 'var(--el-muted)', marginBottom: 12 }}>
+            الدور B (الأخضر) هو دورك — اقرأه بصوت عالٍ. الدور A يُشغّل تلقائياً.
+          </div>
+          <div className="el-dialogue-script">
+            {lines.map((line, i) => (
+              <div key={i} className={`el-dialogue-line${line.isStudent ? ' student-role' : ''}`}>
+                <div className="el-dialogue-role">{line.role}</div>
+                <div className="el-dialogue-text">{line.text}</div>
+                {!line.isStudent && (
+                  <button
+                    className="el-speak-btn"
+                    onClick={() => trigger(line.text, 'en-US', `dial-${i}`)}
+                  >
+                    {playingKey === `dial-${i}` ? '⏹' : '🔊'}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="el-tts-pair" style={{ justifyContent: 'center', marginTop: 10 }}>
+            <button className="el-nav-btn" onClick={() => { setCurrentLine(0); trigger(lines[0].text, 'en-US', 'dial-0') }}>
+              🔄 أعد من البداية
+            </button>
+            <button className="el-nav-btn primary" onClick={advance}>
+              التالي →
+            </button>
+          </div>
+          <div style={{ textAlign: 'center', marginTop: 8, fontSize: '.8rem', color: 'var(--el-accent)' }}>
+            السطر الحالي: {currentLine + 1} / {lines.length}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+/* ─── Situational Cards ("What Would You Say?") ─── */
+function SituationalCards({ words }) {
+  const [open, setOpen] = useState(false)
+  const [cardIdx, setCardIdx] = useState(0)
+  const [revealed, setRevealed] = useState(false)
+
+  const cards = [
+    { scenario: 'صديقك قال شيئاً خاطئاً في محادثة عامة — كيف تُصحّحه بلطف؟', context: 'اجتماعي رسمي', answer: '"I think you might mean… Actually, what I understand is…" — استخدم I think / I understand لتليين التصحيح' },
+    { scenario: 'أستاذك يشرح مفهوماً وأنت لا تفهم. كيف تطلب الإيضاح؟', context: 'أكاديمي', answer: '"Could you clarify that point? / I\'m not sure I follow — could you give an example?"' },
+    { scenario: 'في مقابلة عمل، سألوك عن نقطة ضعف لديك. كيف تجيب بذكاء؟', context: 'مهني', answer: '"One area I\'m working to improve is… — I\'ve been taking steps to address this by…"' },
+    { scenario: 'زميلك قاطعك وأنت تتحدث في اجتماع. كيف تستعيد دورك؟', context: 'مهني', answer: '"If I may finish my point… / Just to complete what I was saying…"' },
+    { scenario: 'شخص غريب يطلب منك اتجاهات في شارع إنجليزي. كيف ترد لو ما عرفتِ؟', context: 'يومي', answer: '"I\'m afraid I\'m not from around here, but you could try Google Maps / ask at that shop."' },
+  ]
+
+  const card = cards[cardIdx % cards.length]
+
+  return (
+    <div className="el-situation-section">
+      <button className="el-roleplay-toggle" style={{ marginBottom: open ? 14 : 0 }} onClick={() => setOpen(o => !o)}>
+        💬 {open ? 'إغلاق البطاقات' : '"ماذا تقولين في هذا الموقف؟" — بطاقات تفاعلية'}
+      </button>
+      {open && (
+        <>
+          <div className="el-situation-card">
+            <div style={{ fontSize: '.72rem', color: 'var(--el-muted)', marginBottom: 6 }}>🗂️ {card.context}</div>
+            <div className="el-situation-scenario">📌 {card.scenario}</div>
+            {!revealed ? (
+              <button
+                className="el-nav-btn primary el-situation-reveal-btn"
+                onClick={() => setRevealed(true)}
+              >
+                💡 كيف أقولها بالإنجليزية؟
+              </button>
+            ) : (
+              <div className="el-situation-answer">{card.answer}</div>
+            )}
+          </div>
+          <div className="el-situation-nav">
+            <button className="el-nav-btn" onClick={() => { setCardIdx(i => i + 1); setRevealed(false) }}>
+              بطاقة أخرى →
+            </button>
+            <button className="el-nav-btn" onClick={() => setRevealed(false)}>🔄 إعادة</button>
+          </div>
+          <div style={{ textAlign: 'center', fontSize: '.75rem', color: 'var(--el-muted)', marginTop: 6 }}>
+            بطاقة {(cardIdx % cards.length) + 1} / {cards.length}
+          </div>
+        </>
+      )}
     </div>
   )
 }

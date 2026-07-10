@@ -14,6 +14,11 @@ import ELComponentPage from "./english-learning/pages/ELComponentPage";
 import ELChatPage from "./english-learning/pages/ELChatPage";
 import ELLedgerPage from "./english-learning/pages/ELLedgerPage"
 import ELErrorsPage from "./english-learning/pages/ELErrorsPage";
+import ELRolePlayPage from "./english-learning/pages/ELRolePlayPage";
+import ELSpeedRoundPage from "./english-learning/pages/ELSpeedRoundPage";
+import ELProgressPage from "./english-learning/pages/ELProgressPage";
+import ELNotebookPage from "./english-learning/pages/ELNotebookPage";
+import ELIPAPage from "./english-learning/pages/ELIPAPage";
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("theme") === "dark");
@@ -71,6 +76,11 @@ function App() {
         <Route path="/english-learning/level/:levelId/day/:dayId/:componentId" element={<ELComponentPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
         <Route path="/english-learning/ledger" element={<ELLedgerPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
         <Route path="/english-learning/errors" element={<ELErrorsPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
+        <Route path="/english-learning/progress" element={<ELProgressPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
+        <Route path="/english-learning/notebook" element={<ELNotebookPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
+        <Route path="/english-learning/ipa" element={<ELIPAPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
+        <Route path="/english-learning/level/:levelId/day/:dayId/roleplay" element={<ELRolePlayPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
+        <Route path="/english-learning/level/:levelId/day/:dayId/speed" element={<ELSpeedRoundPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

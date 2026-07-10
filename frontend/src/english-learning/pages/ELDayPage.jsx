@@ -60,6 +60,21 @@ export default function ELDayPage({ darkMode, setDarkMode }) {
           })}
         </div>
 
+        {/* Extra Activities */}
+        <div className="el-day-extras">
+          <div className="el-day-extras-title">⚡ أنشطة إضافية</div>
+          <div className="el-day-extras-row">
+            <button className="el-extra-btn speed" onClick={() => navigate(`${EL}/level/${levelId}/day/${dayId}/speed`)}>
+              ⚡ Speed Round
+              <span className="el-extra-sub">60 ثانية — اختبر نفسك</span>
+            </button>
+            <button className="el-extra-btn roleplay" onClick={() => navigate(`${EL}/level/${levelId}/day/${dayId}/roleplay`)}>
+              🎭 Role-Play
+              <span className="el-extra-sub">محادثة بكلمات اليوم</span>
+            </button>
+          </div>
+        </div>
+
         <div className="el-day-nav-row">
           {Number(dayId) > 1 && (
             <button className="el-nav-btn" onClick={() => navigate(`${EL}/level/${levelId}/day/${Number(dayId) - 1}`)}>
