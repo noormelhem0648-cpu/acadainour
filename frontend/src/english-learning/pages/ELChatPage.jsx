@@ -43,7 +43,9 @@ export default function ELChatPage({ darkMode, setDarkMode }) {
       const body = {
         message: text,
         history: history.slice(-8).map(m => ({ role: m.role, content: m.content })),
-        subject_info: `English Learning — ${levelId} Day ${dayId}: ${day.title}. SYSTEM: ${day.writing.companionPrompt}`
+        subject_info: `English Learning — ${levelId} Day ${dayId}: ${day.title}. SYSTEM: ${day.writing.companionPrompt}
+
+IMPORTANT RULE: If the student asks you to solve their homework, exam, or assignment for them, you MUST refuse clearly and explain that you cannot do that. Instead, offer to help them UNDERSTAND the concepts and guide them step by step. Say something like: "I can't solve the exam for you directly, but I can help you understand each question and guide you to find the answer yourself!" Always stay in the role of a helpful tutor who builds understanding, never a answer-provider.`
       }
 
       const res = await fetch(`${API}/english-tutor/stream`, {

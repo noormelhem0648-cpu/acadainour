@@ -86,28 +86,57 @@ function StudyBuddy({ companionPrompt, dayContext, avatarState, setAvatarState, 
   const sendMessage = useCallback(async (text) => {
     if (!text.trim()) return
     const userMsg = { role: 'user', content: text }
-    setMessages(prev => [...prev, userMsg])
+    const history = [...messages, userMsg]
+    setMessages(prev => [...prev, userMsg, { role: 'assistant', content: '' }])
     setInputText('')
     setLoading(true)
     setAvatarState('thinking')
 
     try {
-      const systemPrompt = companionPrompt + '\n\nسياق الدرس: ' + dayContext
-      const res = await fetch(`${BACKEND}/api/chat`, {
+      const subject_info = companionPrompt + '\n\nسياق الدرس: ' + dayContext + '\n\nIMPORTANT RULE: If the student asks you to solve their homework, exam, or assignment for them, refuse clearly and offer to help them understand and think through it instead. Say: "I can\'t solve it for you, but I can help you understand and guide you step by step!"'
+      const res = await fetch(`${BACKEND}/english-tutor/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [...messages, userMsg].map(m => ({ role: m.role, content: m.content })),
-          system: systemPrompt
+          message: text,
+          history: history.slice(-8).map(m => ({ role: m.role, content: m.content })),
+          subject_info
         })
       })
-      const data = await res.json()
-      const reply = data.response || data.message || 'عذراً، لم أتمكن من الاستجابة.'
-      setMessages(prev => [...prev, { role: 'assistant', content: reply }])
+      if (!res.ok) throw new Error('server')
+
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+      let full = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop()
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const chunk = line.slice(6)
+            if (chunk === '[DONE]') break
+            full += chunk
+            setMessages(prev => {
+              const copy = [...prev]
+              copy[copy.length - 1] = { role: 'assistant', content: full }
+              return copy
+            })
+          }
+        }
+      }
       setAvatarState('speaking')
-      speak(reply, null, () => setAvatarState('idle'))
+      speak(full, null, () => setAvatarState('idle'))
     } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'تعذّر الاتصال بالخادم. تأكد من اتصالك بالإنترنت.' }])
+      setMessages(prev => {
+        const copy = [...prev]
+        copy[copy.length - 1] = { role: 'assistant', content: 'تعذّر الاتصال بالخادم. تأكد من اتصالك بالإنترنت.' }
+        return copy
+      })
       setAvatarState('idle')
     } finally {
       setLoading(false)
