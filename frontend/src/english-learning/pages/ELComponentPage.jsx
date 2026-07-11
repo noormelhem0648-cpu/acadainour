@@ -1806,6 +1806,116 @@ function VocabStoryGen({ words, dayTitle, allLearnedWords = [] }) {
   )
 }
 
+/* ─── Fill-the-Gap Exercise ─── */
+function FillGapExercise({ words, allLearnedWords = [] }) {
+  const [open, setOpen] = useState(false)
+  const [useAll, setUseAll] = useState(false)
+  const [answers, setAnswers] = useState({})
+  const [checked, setChecked] = useState(false)
+  const pool = useAll && allLearnedWords.length >= 4 ? allLearnedWords : words
+
+  const sentences = pool.filter(w => w.example && w.example.toLowerCase().includes(w.word.toLowerCase())).slice(0, 6).map(w => ({
+    sentence: w.example.replace(new RegExp(`\\b${w.word}\\b`, 'i'), '_____'),
+    answer: w.word, arabic: w.arabic
+  }))
+
+  const score = sentences.filter((s, i) => (answers[i] || '').trim().toLowerCase() === s.answer.toLowerCase()).length
+
+  return (
+    <div className="el-fillgap-section">
+      <button className="el-roleplay-toggle" style={{ background:'#f0fdf4', borderColor:'#86efac', color:'#15803d', marginBottom: open ? 14 : 0 }} onClick={() => setOpen(o => !o)}>
+        {open ? 'اغلق التمرين' : 'Fill-the-Gap — اكمل الفراغ من كلمات اليوم'}
+      </button>
+      {open && (
+        <>
+          {allLearnedWords.length >= 4 && (
+            <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+              <button className={`el-family-chip${!useAll ? ' active' : ''}`} onClick={() => { setUseAll(false); setAnswers({}); setChecked(false) }}>كلمات اليوم</button>
+              <button className={`el-family-chip${useAll ? ' active' : ''}`} onClick={() => { setUseAll(true); setAnswers({}); setChecked(false) }}>كل كلماتي ({allLearnedWords.length})</button>
+            </div>
+          )}
+          {sentences.map((s, i) => {
+            const correct = (answers[i] || '').trim().toLowerCase() === s.answer.toLowerCase()
+            const parts = s.sentence.split('_____')
+            return (
+              <div key={i} className="el-fillgap-item">
+                <div className="el-fillgap-sentence">
+                  {parts[0]}
+                  <input
+                    className={`el-fillgap-input${checked ? (correct ? ' correct' : ' wrong') : ''}`}
+                    value={answers[i] || ''} onChange={e => setAnswers(a => ({ ...a, [i]: e.target.value }))}
+                    disabled={checked} placeholder="..." style={{ width: 120 }}
+                  />
+                  {parts[1]}
+                </div>
+                {checked && !correct && <div className="el-fillgap-hint">الصواب: <strong>{s.answer}</strong> ({s.arabic})</div>}
+              </div>
+            )
+          })}
+          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+            {!checked
+              ? <button className="el-nav-btn primary" onClick={() => setChecked(true)} disabled={!Object.keys(answers).length}>تحقق</button>
+              : <><div className="el-fillgap-score">{score === sentences.length ? 'ممتاز! كل الاجابات صحيحة' : `${score} / ${sentences.length} صحيحة`}</div><button className="el-nav-btn" onClick={() => { setAnswers({}); setChecked(false) }}>مرة اخرى</button></>
+            }
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+/* ─── Dialogue Partner (Shadowing) ─── */
+function DialoguePartner({ day }) {
+  const [open, setOpen] = useState(false)
+  const [currentLine, setCurrentLine] = useState(0)
+  const [playingKey, trigger] = useTTS()
+  const { shadowing: s } = day
+  const lines = [
+    { role: 'A', text: s.chunk, isStudent: false },
+    { role: 'B', text: s.nativeForm, isStudent: true },
+    { role: 'A', text: s.steps?.[0] || 'Listen carefully and repeat.', isStudent: false },
+    { role: 'B', text: s.chunk, isStudent: true },
+  ]
+  const advance = () => {
+    if (currentLine < lines.length - 1) setCurrentLine(c => c + 1)
+    else setCurrentLine(0)
+  }
+  return (
+    <div className="el-dialogue-section">
+      <button className="el-roleplay-toggle" style={{ marginBottom: open ? 14 : 0 }} onClick={() => setOpen(o => !o)}>
+        🎙️ {open ? 'إغلاق Dialogue Partner' : 'Dialogue Partner — اقرأ دورك بصوت عالٍ'}
+      </button>
+      {open && (
+        <>
+          <div style={{ fontSize: '.85rem', color: 'var(--el-muted)', marginBottom: 12 }}>
+            الدور B (الأخضر) هو دورك — اقرأه بصوت عالٍ. الدور A يُشغّل تلقائياً.
+          </div>
+          <div className="el-dialogue-script">
+            {lines.map((line, i) => (
+              <div key={i} className={`el-dialogue-line${line.isStudent ? ' student-role' : ''}`}>
+                <div className="el-dialogue-role">{line.role}</div>
+                <div className="el-dialogue-text">{line.text}</div>
+                {!line.isStudent && (
+                  <button className="el-speak-btn" onClick={() => trigger(line.text, 'en-US', `dial-${i}`)}>
+                    {playingKey === `dial-${i}` ? '⏹' : '🔊'}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="el-tts-pair" style={{ justifyContent: 'center', marginTop: 10 }}>
+            <button className="el-nav-btn" onClick={() => { setCurrentLine(0); trigger(lines[0].text, 'en-US', 'dial-0') }}>🔄 أعد من البداية</button>
+            <button className="el-nav-btn primary" onClick={advance}>التالي →</button>
+          </div>
+          <div style={{ textAlign: 'center', marginTop: 8, fontSize: '.8rem', color: 'var(--el-accent)' }}>
+            السطر الحالي: {currentLine + 1} / {lines.length}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 /* ─── Grammar Pattern Flashcards ─── */
 function GrammarPatternFlashcards({ patterns }) {
   const [open, setOpen] = useState(false)
