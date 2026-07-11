@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router-dom'
+﻿import { useNavigate, useParams } from 'react-router-dom'
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { getDay, COMPONENTS } from '../data/curriculum'
 import { useProgress, XP_VALUES } from '../hooks/useProgress'
@@ -6,6 +6,13 @@ import '../EL.css'
 
 const EL = '/english-learning'
 const BACKEND = 'https://acadai-backend-avvo.onrender.com'
+
+const authHeaders = () => {
+  const t = localStorage.getItem('acadai_token')
+  return t
+    ? { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` }
+    : { 'Content-Type': 'application/json' }
+}
 
 /* ─── TTS: dual accent (US / GB) with visual state ─── */
 let _ttsActive = null   // tracks the currently-playing utterance key
@@ -96,7 +103,7 @@ function StudyBuddy({ companionPrompt, dayContext, avatarState, setAvatarState, 
       const subject_info = companionPrompt + '\n\nسياق الدرس: ' + dayContext + '\n\nIMPORTANT RULE: If the student asks you to solve their homework, exam, or assignment for them, refuse clearly and offer to help them understand and think through it instead. Say: "I can\'t solve it for you, but I can help you understand and guide you step by step!"'
       const res = await fetch(`${BACKEND}/english-tutor/stream`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
           message: text,
           history: history.slice(-8).map(m => ({ role: m.role, content: m.content })),
@@ -468,6 +475,10 @@ function VocabComp({ day, levelId, dayId, progress }) {
                   <div className="el-fc-back">
                     <div className="el-fc-arabic">{w.arabic}</div>
                     <div className="el-fc-phonetic">{w.phonetic}</div>
+                    <div className="el-tts-pair" style={{ justifyContent: 'center', margin: '6px 0' }} onClick={e => e.stopPropagation()}>
+                      <TTSBtn text={w.word} lang="en-US" ttsKey={`fc-back-us-${i}`} playingKey={playingKey} trigger={trigger} />
+                      <TTSBtn text={w.word} lang="en-GB" ttsKey={`fc-back-gb-${i}`} playingKey={playingKey} trigger={trigger} />
+                    </div>
                     <div className="el-fc-example">{w.example}</div>
                     <div className="el-fc-example-ar">{w.exampleAr}</div>
                   </div>
@@ -509,12 +520,12 @@ function VocabComp({ day, levelId, dayId, progress }) {
 
       {/* Teacher Corner + new features */}
       <TeacherCorner words={v.words} dayTitle={day.title} />
-      <WordFamilyTree words={v.words} />
-      <FillGapExercise words={v.words} />
-      <CollocationsSection words={v.words} />
-      <PronunciationRecorder words={v.words} />
-      <VocabStoryGen words={v.words} dayTitle={day.title} />
-      <TeachMeMode words={v.words} dayTitle={day.title} />
+      <WordFamilyTree words={v.words} allLearnedWords={progress.hardWords} />
+      <FillGapExercise words={v.words} allLearnedWords={progress.hardWords} />
+      <CollocationsSection words={v.words} allLearnedWords={progress.hardWords} />
+      <PronunciationRecorder words={v.words} allLearnedWords={progress.hardWords} />
+      <VocabStoryGen words={v.words} dayTitle={day.title} allLearnedWords={progress.hardWords} />
+      <TeachMeMode words={v.words} dayTitle={day.title} allLearnedWords={progress.hardWords} />
       <SituationalCards words={v.words} />
     </div>
   )
@@ -553,7 +564,7 @@ ${wordList}
     try {
       const res = await fetch(`${BACKEND}/api/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
           messages: [...msgs, userMsg].map(m => ({ role: m.role, content: m.content })),
           system: systemPrompt
@@ -644,7 +655,7 @@ function RolePlayMode({ day, setBuddyMessages, setAvatarState }) {
       const systemPrompt = `${sc.prompt}\n\nAlso naturally incorporate grammar patterns from today's lesson: ${day.grammar?.patterns?.map(p => p.name).join(', ')}. Keep responses short (2-3 sentences). After each exchange, add one brief tip in Arabic about the grammar used, prefixed with "💡 نصيحة:".`
       const res = await fetch(`${BACKEND}/api/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
           messages: [{ role: 'user', content: 'Start the scenario. Say your opening line.' }],
           system: systemPrompt
@@ -671,7 +682,7 @@ function RolePlayMode({ day, setBuddyMessages, setAvatarState }) {
       const msgs = newEx.map(e => ({ role: e.role === 'buddy' ? 'assistant' : 'user', content: e.text }))
       const res = await fetch(`${BACKEND}/api/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({ messages: msgs, system: systemPrompt })
       })
       const data = await res.json()
@@ -1409,7 +1420,7 @@ CORRECTION: [الكلمة/العبارة الخاطئة] → [الصواب] | Re
 اكتب سطراً واحداً لكل خطأ. إذا لم يوجد خطأ، اكتب: ✅ ممتاز! لا أخطاء في هذه الفقرة.`
       const res = await fetch(`${BACKEND}/api/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
           messages: [{ role: 'user', content: text }],
           system: systemPrompt
@@ -1572,7 +1583,7 @@ The student will argue ${chosenStance === 'for' ? 'FOR' : 'AGAINST'} this topic.
 Keep each response to 2-3 sentences max. After each student argument, rate it: [STRONG] or [WEAK] and explain why in Arabic briefly.
 Use vocabulary from today's lesson naturally. Challenge the student to use better language.`
       const res = await fetch(`${BACKEND}/api/chat`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: authHeaders(),
         body: JSON.stringify({ messages: [{ role: 'user', content: 'Start the debate with your opening argument.' }], system: sys })
       })
       const data = await res.json()
@@ -1590,7 +1601,7 @@ Use vocabulary from today's lesson naturally. Challenge the student to use bette
     try {
       const sys = `You are a sharp academic debater arguing AGAINST the student on: "${day.title}". Rate their argument [STRONG] or [WEAK] first, then counter-argue in 2-3 sentences. Brief Arabic feedback.`
       const res = await fetch(`${BACKEND}/api/chat`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: authHeaders(),
         body: JSON.stringify({
           messages: history.map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.text })),
           system: sys
@@ -1670,7 +1681,7 @@ function WritingUpgrade({ text }) {
         c2: 'Rewrite this text at C2/native level: sophisticated, academic, polished. Show ONLY the improved text.'
       }
       const res = await fetch(`${BACKEND}/api/chat`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: authHeaders(),
         body: JSON.stringify({ messages: [{ role: 'user', content: `${prompts[lvl]}\n\nText: "${text}"` }], system: 'You are a professional English writing coach.' })
       })
       const data = await res.json()
@@ -1716,7 +1727,7 @@ function AILiveReaction({ score }) {
 }
 
 /* ─── Vocabulary Story Generator ─── */
-function VocabStoryGen({ words, dayTitle }) {
+function VocabStoryGen({ words, dayTitle, allLearnedWords = [] }) {
   const [open, setOpen] = useState(false)
   const [genre, setGenre] = useState('قصة مغامرة')
   const [story, setStory] = useState('')
@@ -1731,7 +1742,7 @@ function VocabStoryGen({ words, dayTitle }) {
     const wordList = words.slice(0, 8).map(w => w.word).join(', ')
     try {
       const res = await fetch(`${BACKEND}/api/chat`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: authHeaders(),
         body: JSON.stringify({
           messages: [{ role: 'user', content: `Write a short ${genre} story (5-7 sentences) naturally using these words: ${wordList}. Make the story engaging and memorable. Write in English only.` }],
           system: `You are a creative English storyteller. Use ALL the given words naturally in context. Topic theme: ${dayTitle}`
@@ -1791,7 +1802,7 @@ function VocabStoryGen({ words, dayTitle }) {
 }
 
 /* ─── Teach Me Mode ─── */
-function TeachMeMode({ words, dayTitle }) {
+function TeachMeMode({ words, dayTitle, allLearnedWords = [] }) {
   const [open, setOpen] = useState(false)
   const [selectedWord, setSelectedWord] = useState(null)
   const [msgs, setMsgs] = useState([])
@@ -1812,7 +1823,7 @@ Pretend you forgot what it means. Ask the student to explain it to you in Englis
 After their explanation, give a score /10 and 1 line of feedback in Arabic.
 Ask ONE follow-up question to test deeper understanding.`
       const res = await fetch(`${BACKEND}/api/chat`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: authHeaders(),
         body: JSON.stringify({ messages: [{ role: 'user', content: 'Start by saying you forgot the meaning and ask them to teach you.' }], system: sys })
       })
       const data = await res.json()
@@ -1829,7 +1840,7 @@ Ask ONE follow-up question to test deeper understanding.`
     try {
       const sys = `You are a student who forgot the word "${selectedWord?.word}". The user is teaching you. After 1-2 exchanges, give a final score X/10 and brief Arabic feedback. Ask follow-up questions to deepen understanding.`
       const res = await fetch(`${BACKEND}/api/chat`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: authHeaders(),
         body: JSON.stringify({
           messages: history.map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.text })),
           system: sys
@@ -1852,7 +1863,7 @@ Ask ONE follow-up question to test deeper understanding.`
         <>
           <div style={{ fontSize: '.85rem', color: 'var(--el-text2)', marginBottom: 10 }}>اختر كلمة وعلّمها للـ AI — اذا قدرت تشرح، إذن فهمتِ فعلاً:</div>
           <div className="el-teach-word-pick">
-            {words.slice(0, 10).map((w, i) => (
+            {(allLearnedWords.length > 0 ? [...words, ...allLearnedWords] : words).slice(0, 14).map((w, i) => (
               <button
                 key={i}
                 className={`el-teach-word-chip${selectedWord?.word === w.word ? ' active' : ''}`}
@@ -2014,9 +2025,11 @@ function SituationalCards({ words }) {
 
 
 /* ─── Word Family Tree ─── */
-function WordFamilyTree({ words }) {
+function WordFamilyTree({ words, allLearnedWords = [] }) {
   const [open, setOpen] = useState(false)
+  const [useAll, setUseAll] = useState(false)
   const [selected, setSelected] = useState(null)
+  const pool = useAll && allLearnedWords.length > 0 ? allLearnedWords : words
   const [family, setFamily] = useState({})
   const [loading, setLoading] = useState(false)
   const [playingKey, trigger] = useTTS()
@@ -2027,7 +2040,7 @@ function WordFamilyTree({ words }) {
     setLoading(true)
     try {
       const res = await fetch(`${BACKEND}/api/chat`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: authHeaders(),
         body: JSON.stringify({
           messages: [{ role: 'user', content: `Word families for "${word.word}" as JSON: {"noun":"...","verb":"...","adjective":"...","adverb":"...","example":"..."} — JSON only, no markdown.` }],
           system: 'Reply ONLY with a JSON object.'
@@ -2048,8 +2061,14 @@ function WordFamilyTree({ words }) {
       </button>
       {open && (
         <>
+          {allLearnedWords.length > 0 && (
+            <div style={{ display: 'flex', gap: 8, marginBottom: 10, alignItems: 'center' }}>
+              <button className={`el-family-chip${!useAll ? ' active' : ''}`} onClick={() => { setUseAll(false); setSelected(null) }}>كلمات اليوم</button>
+              <button className={`el-family-chip${useAll ? ' active' : ''}`} onClick={() => { setUseAll(true); setSelected(null) }}>كل كلماتي المحفوظة ({allLearnedWords.length})</button>
+            </div>
+          )}
           <div className="el-family-pick">
-            {words.slice(0, 12).map((w, i) => (
+            {pool.slice(0, 16).map((w, i) => (
               <button key={i} className={`el-family-chip${selected === w.word ? ' active' : ''}`} onClick={() => loadFamily(w)}>{w.word}</button>
             ))}
           </div>
@@ -2073,12 +2092,14 @@ function WordFamilyTree({ words }) {
 }
 
 /* ─── Fill-the-Gap Exercise ─── */
-function FillGapExercise({ words }) {
+function FillGapExercise({ words, allLearnedWords = [] }) {
   const [open, setOpen] = useState(false)
+  const [useAll, setUseAll] = useState(false)
   const [answers, setAnswers] = useState({})
   const [checked, setChecked] = useState(false)
+  const pool = useAll && allLearnedWords.length >= 4 ? allLearnedWords : words
 
-  const sentences = words.slice(0, 6).map(w => ({
+  const sentences = pool.filter(w => w.example && w.example.toLowerCase().includes(w.word.toLowerCase())).slice(0, 6).map(w => ({
     sentence: w.example.replace(new RegExp(`\\b${w.word}\\b`, 'i'), '_____'),
     answer: w.word, arabic: w.arabic
   }))
@@ -2092,6 +2113,12 @@ function FillGapExercise({ words }) {
       </button>
       {open && (
         <>
+          {allLearnedWords.length >= 4 && (
+            <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+              <button className={`el-family-chip${!useAll ? ' active' : ''}`} onClick={() => { setUseAll(false); setAnswers({}); setChecked(false) }}>كلمات اليوم</button>
+              <button className={`el-family-chip${useAll ? ' active' : ''}`} onClick={() => { setUseAll(true); setAnswers({}); setChecked(false) }}>كل كلماتي ({allLearnedWords.length})</button>
+            </div>
+          )}
           {sentences.map((s, i) => {
             const correct = (answers[i] || '').trim().toLowerCase() === s.answer.toLowerCase()
             const parts = s.sentence.split('_____')
@@ -2135,7 +2162,7 @@ function CollocationsSection({ words }) {
     setLoading(true)
     try {
       const res = await fetch(`${BACKEND}/api/chat`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: authHeaders(),
         body: JSON.stringify({
           messages: [{ role: 'user', content: `5 natural collocations for "${word.word}" as JSON array: [{"collocation":"...","example":"...","ar":"..."}]. JSON only.` }],
           system: 'Reply ONLY with a JSON array.'
@@ -2222,7 +2249,7 @@ function WritingPromptCard({ dayTitle }) {
     setLoading(true)
     try {
       const res = await fetch(`${BACKEND}/api/chat`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: authHeaders(),
         body: JSON.stringify({
           messages: [{ role: 'user', content: `Topic: "${dayTitle}". Write 3 writing prompts as JSON: [{"level":"B1","prompt":"..."},{"level":"B2","prompt":"..."},{"level":"C2","prompt":"..."}]. JSON only.` }],
           system: 'Reply ONLY with a JSON array.'
@@ -2271,7 +2298,7 @@ function ReadingComprehensionQuiz({ passage }) {
     setLoading(true)
     try {
       const res = await fetch(`${BACKEND}/api/chat`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: authHeaders(),
         body: JSON.stringify({
           messages: [{ role: 'user', content: `Passage: "${passage.slice(0, 600)}"\n\nCreate 4 MCQ questions as JSON: [{"q":"...","options":["a","b","c","d"],"correct":0,"explanation":"Arabic explanation"}]. JSON only.` }],
           system: 'Reply ONLY with a valid JSON array.'
@@ -2360,12 +2387,16 @@ function ReadingBookmarks() {
 }
 
 /* ─── Pronunciation Recorder ─── */
-function PronunciationRecorder({ words }) {
+function PronunciationRecorder({ words, allLearnedWords = [] }) {
   const [open, setOpen] = useState(false)
+  const [useAll, setUseAll] = useState(false)
   const [selected, setSelected] = useState(null)
   const [recorded, setRecorded] = useState('')
+  const [confidence, setConfidence] = useState(0)
   const [listening, setListening] = useState(false)
   const [result, setResult] = useState(null)
+  const [diffFeedback, setDiffFeedback] = useState('')
+  const pool = useAll && allLearnedWords.length > 0 ? allLearnedWords : words
 
   const lev = (a, b) => {
     const dp = Array.from({length:a.length+1},(_,i)=>Array.from({length:b.length+1},(_,j)=>i===0?j:j===0?i:0))
@@ -2373,54 +2404,129 @@ function PronunciationRecorder({ words }) {
     return dp[a.length][b.length]
   }
 
+  const analyzeDiff = (heard, target) => {
+    // Find first differing position
+    const h = heard.toLowerCase(), t = target.toLowerCase()
+    let firstDiff = -1
+    for (let i = 0; i < Math.max(h.length, t.length); i++) {
+      if (h[i] !== t[i]) { firstDiff = i; break }
+    }
+    if (firstDiff === -1) return ''
+    const targetChar = t[firstDiff] || '(نهاية الكلمة)'
+    const heardChar = h[firstDiff] || '(نهاية الكلمة)'
+    // Map common English phoneme mistakes
+    const hints = {
+      'th': 'ضعي طرف لسانك بين أسنانك للصوت /θ/',
+      'v': 'الشفة السفلى تلمس الأسنان العليا للصوت /v/',
+      'p': 'أغلقي شفتيك ثم أفتحيهما بقوة للصوت /p/',
+      'b': 'مثل /p/ لكن مع اهتزاز الحلق',
+      'r': 'لفّي اللسان للخلف قليلاً للصوت /r/ الأمريكي',
+      'w': 'ابدئي بضم الشفتين للصوت /w/',
+    }
+    const hint = hints[targetChar] || hints[t.slice(firstDiff, firstDiff+2)] || `ركزي على الحرف "${targetChar}" في موضع ${firstDiff + 1}`
+    return hint
+  }
+
   const record = () => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-    if (!SR) { alert('يحتاج Chrome'); return }
-    const r = new SR(); r.lang='en-US'; r.interimResults=false
+    if (!SR) { alert('يحتاج Chrome أو Edge'); return }
+    const r = new SR(); r.lang='en-US'; r.interimResults=false; r.maxAlternatives=3
     r.onstart=()=>setListening(true)
     r.onresult=e=>{
-      const txt=e.results[0][0].transcript.toLowerCase().trim()
-      setRecorded(txt)
-      const target=(selected?.word||'').toLowerCase()
-      if(txt===target) setResult('match')
-      else if(lev(txt,target)<=2||txt.includes(target)) setResult('close')
-      else setResult('try')
+      // Pick best matching alternative
+      const alts = Array.from(e.results[0]).map(a => a.transcript.toLowerCase().trim())
+      const target = (selected?.word||'').toLowerCase()
+      const best = alts.reduce((a, b) => lev(a, target) <= lev(b, target) ? a : b)
+      const conf = e.results[0][0].confidence
+      setRecorded(best)
+      setConfidence(Math.round(conf * 100))
+      const dist = lev(best, target)
+      const pct = 1 - dist / Math.max(target.length, 1)
+      if (dist === 0) { setResult('match'); setDiffFeedback('') }
+      else if (pct >= 0.7 || best.includes(target) || target.includes(best)) { setResult('close'); setDiffFeedback(analyzeDiff(best, target)) }
+      else { setResult('try'); setDiffFeedback(analyzeDiff(best, target)) }
       setListening(false)
     }
     r.onerror=()=>setListening(false); r.onend=()=>setListening(false)
     r.start()
   }
 
+  const speakWord = (rate=0.7) => {
+    window.speechSynthesis.cancel()
+    const u = new SpeechSynthesisUtterance(selected.word)
+    u.lang='en-US'; u.rate=rate
+    const voices = window.speechSynthesis.getVoices()
+    const v = voices.find(v => v.lang==='en-US')
+    if (v) u.voice = v
+    window.speechSynthesis.speak(u)
+  }
+
   return (
     <div className="el-pronrec-section">
       <button className="el-roleplay-toggle" style={{ background:'#fce7f3', borderColor:'#f9a8d4', color:'#9d174d', marginBottom: open ? 14 : 0 }} onClick={()=>setOpen(o=>!o)}>
-        {open ? 'اغلق تسجيل النطق' : 'Pronunciation Recorder — سجلي نطقك وقارنيه'}
+        {open ? 'اغلق تسجيل النطق' : 'Pronunciation Recorder — سجلي نطقك واعرفي أي صوت أخطأتِ'}
       </button>
       {open && (
         <>
+          {allLearnedWords.length > 0 && (
+            <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+              <button className={`el-family-chip${!useAll ? ' active' : ''}`} onClick={() => { setUseAll(false); setSelected(null); setResult(null) }}>كلمات اليوم</button>
+              <button className={`el-family-chip${useAll ? ' active' : ''}`} onClick={() => { setUseAll(true); setSelected(null); setResult(null) }}>كل كلماتي ({allLearnedWords.length})</button>
+            </div>
+          )}
           <div className="el-family-pick">
-            {words.slice(0,12).map((w,i)=>(
+            {pool.slice(0,16).map((w,i)=>(
               <button key={i} className={`el-family-chip${selected?.word===w.word?' active':''}`}
-                onClick={()=>{setSelected(w);setRecorded('');setResult(null)}}>{w.word}</button>
+                onClick={()=>{setSelected(w);setRecorded('');setResult(null);setDiffFeedback('')}}>{w.word}</button>
             ))}
           </div>
           {selected && (
             <div className="el-pronrec-card">
               <div className="el-pronrec-word">{selected.word}</div>
               <div className="el-pronrec-ipa">{selected.ipa}</div>
-              <button className="el-speak-btn" style={{fontSize:'1.2rem',margin:'8px auto',display:'block'}}
-                onClick={()=>{window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(selected.word);u.lang='en-US';u.rate=0.75;window.speechSynthesis.speak(u)}}>
-                استمعي للنموذج
-              </button>
-              <button className={`el-pronrec-btn${listening?' recording':''}`} onClick={record} disabled={listening}>
-                {listening ? 'يسجل...' : 'سجلي نطقك'}
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'center', margin: '8px 0' }}>
+                <button className="el-speak-btn" style={{fontSize:'1rem'}}
+                  onClick={() => speakWord(0.6)}>🔊 بطيء</button>
+                <button className="el-speak-btn" style={{fontSize:'1rem'}}
+                  onClick={() => speakWord(0.9)}>🔊 عادي</button>
+              </div>
+              <button className={`el-pronrec-btn${listening?' recording':' record'}`} onClick={record} disabled={listening}>
+                {listening ? '🔴 يسجل — تكلمي الآن...' : '🎤 سجلي نطقك'}
               </button>
               {recorded && (
                 <div className="el-pronrec-result">
-                  <div>سمعت: <strong>"{recorded}"</strong></div>
-                  {result==='match' && <div className="el-pronrec-feedback match">نطق ممتاز!</div>}
-                  {result==='close' && <div className="el-pronrec-feedback close">قريب جدا — حاولي مرة اخرى</div>}
-                  {result==='try' && <div className="el-pronrec-feedback try">استمعي مرة اخرى وركزي على IPA</div>}
+                  <div style={{ fontSize: '.85rem', color: 'var(--el-text2)', marginBottom: 6 }}>
+                    سمعت: <strong>"{recorded}"</strong>
+                    {confidence > 0 && <span style={{ marginRight: 8, color: 'var(--el-muted)', fontSize: '.78rem' }}>({confidence}% وضوح)</span>}
+                  </div>
+                  {result==='match' && <div className="el-pronrec-feedback match">✅ نطق مثالي! أحسنتِ تماماً</div>}
+                  {result==='close' && (
+                    <div className="el-pronrec-feedback close">
+                      🟡 قريب جداً — لاحظي الفرق:
+                      <div className="el-pronrec-diff">
+                        <span>🎯 الصواب: <strong>{selected.word}</strong></span>
+                        <span>👂 سمعت: <strong>{recorded}</strong></span>
+                      </div>
+                      {diffFeedback && <div className="el-pronrec-hint">💡 {diffFeedback}</div>}
+                    </div>
+                  )}
+                  {result==='try' && (
+                    <div className="el-pronrec-feedback tryagain">
+                      🔴 جربي مرة أخرى:
+                      <div className="el-pronrec-diff">
+                        <span>🎯 الصواب: <strong>{selected.word}</strong></span>
+                        <span>👂 سمعت: <strong>{recorded}</strong></span>
+                      </div>
+                      {diffFeedback && <div className="el-pronrec-hint">💡 {diffFeedback}</div>}
+                      <div style={{ fontSize: '.8rem', marginTop: 4, color: 'var(--el-muted)' }}>
+                        IPA: {selected.ipa} — استمعي للنموذج بشكل بطيء ثم كرري
+                      </div>
+                    </div>
+                  )}
+                  <button className="el-nav-btn" style={{ marginTop: 8, fontSize: '.8rem' }}
+                    onClick={() => { setRecorded(''); setResult(null); setDiffFeedback('') }}>
+                    🔄 حاولي مرة أخرى
+                  </button>
                 </div>
               )}
             </div>

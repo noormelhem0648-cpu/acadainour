@@ -1585,3 +1585,27 @@
   line-height: 1;
 }
 .el-app.el-dark .el-install-dismiss { color: #d8b4fe; border-color: #a855f7; }
+
+/* ── Pronunciation Diff Feedback ── */
+.el-app .el-pronrec-diff {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--el-bg3);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 8px 0;
+  font-size: .85rem;
+}
+.el-app .el-pronrec-hint {
+  font-size: .82rem;
+  color: #0369a1;
+  background: #e0f2fe;
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin-top: 4px;
+}
+.el-app.el-dark .el-pronrec-hint { background: #0c2340; color: #7dd3fc; }
+.el-app .el-pronrec-feedback.match { color: var(--el-green); font-weight: 700; font-size: 1rem; }
+.el-app .el-pronrec-feedback.close { color: #b45309; }
+.el-app .el-pronrec-feedback.tryagain { color: var(--el-red); }
