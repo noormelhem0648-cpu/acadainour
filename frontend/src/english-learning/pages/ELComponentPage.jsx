@@ -14,6 +14,38 @@ const authHeaders = () => {
     : { 'Content-Type': 'application/json' }
 }
 
+/* ─── AI one-shot call via streaming endpoint ─── */
+async function aiAsk(userMessage, systemPrompt, history = []) {
+  const res = await fetch(`${BACKEND}/english-tutor/stream`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({
+      message: userMessage,
+      history: history.map(m => ({ role: m.role, content: m.content })),
+      subject_info: systemPrompt
+    })
+  })
+  if (!res.ok) throw new Error(`${res.status}`)
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = '', full = ''
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+    const lines = buffer.split('\n')
+    buffer = lines.pop()
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        const chunk = line.slice(6)
+        if (chunk === '[DONE]') break
+        full += chunk
+      }
+    }
+  }
+  return full
+}
+
 /* ─── TTS: dual accent (US / GB) with visual state ─── */
 let _ttsActive = null   // tracks the currently-playing utterance key
 
@@ -560,16 +592,8 @@ ${wordList}
     setInput('')
     setLoading(true)
     try {
-      const res = await fetch(`${BACKEND}/api/chat`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({
-          messages: [...msgs, userMsg].map(m => ({ role: m.role, content: m.content })),
-          system: systemPrompt
-        })
-      })
-      const data = await res.json()
-      setMsgs(prev => [...prev, { role: 'assistant', content: data.response || data.message || '...' }])
+      const aiReply = await aiAsk(userMsg.content, systemPrompt, msgs)
+      setMsgs(prev => [...prev, { role: 'assistant', content: aiReply || '...' }])
     } catch {
       setMsgs(prev => [...prev, { role: 'assistant', content: 'تعذّر الاتصال. تحقق من الإنترنت.' }])
     } finally { setLoading(false) }
@@ -651,16 +675,7 @@ function RolePlayMode({ day, setBuddyMessages, setAvatarState }) {
     setAvatarState('speaking')
     try {
       const systemPrompt = `${sc.prompt}\n\nAlso naturally incorporate grammar patterns from today's lesson: ${day.grammar?.patterns?.map(p => p.name).join(', ')}. Keep responses short (2-3 sentences). After each exchange, add one brief tip in Arabic about the grammar used, prefixed with "💡 نصيحة:".`
-      const res = await fetch(`${BACKEND}/api/chat`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({
-          messages: [{ role: 'user', content: 'Start the scenario. Say your opening line.' }],
-          system: systemPrompt
-        })
-      })
-      const data = await res.json()
-      const reply = data.response || data.message || 'Hello! Ready to begin?'
+      const reply = await aiAsk('Start the scenario. Say your opening line.', systemPrompt) || 'Hello! Ready to begin?'
       setExchange([{ role: 'buddy', text: reply }])
       speak(reply, null, () => setAvatarState('listening'))
     } catch { setAvatarState('idle') }
@@ -677,14 +692,8 @@ function RolePlayMode({ day, setBuddyMessages, setAvatarState }) {
     setAvatarState('thinking')
     try {
       const systemPrompt = `${scenario.prompt}\n\nGrammar from today's lesson: ${day.grammar?.patterns?.map(p => p.name).join(', ')}. Keep responses to 2-3 sentences. After each reply add a one-line tip prefixed "💡 نصيحة:" about grammar or vocabulary used.`
-      const msgs = newEx.map(e => ({ role: e.role === 'buddy' ? 'assistant' : 'user', content: e.text }))
-      const res = await fetch(`${BACKEND}/api/chat`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({ messages: msgs, system: systemPrompt })
-      })
-      const data = await res.json()
-      const reply = data.response || ''
+      const roleHist = newEx.slice(0,-1).map(e => ({ role: e.role === 'buddy' ? 'assistant' : 'user', content: e.text }))
+      const reply = await aiAsk(userLine, systemPrompt, roleHist) || ''
       setExchange(prev => [...prev, { role: 'buddy', text: reply }])
       speak(reply, null, () => setAvatarState('listening'))
     } catch { setAvatarState('idle') }
@@ -1416,16 +1425,7 @@ function WritingComp({ day, levelId, dayId, navigate, setBuddyMessages, setBuddy
 CORRECTION: [الكلمة/العبارة الخاطئة] → [الصواب] | Reason: [شرح قصير بالعربي]
 
 اكتب سطراً واحداً لكل خطأ. إذا لم يوجد خطأ، اكتب: ✅ ممتاز! لا أخطاء في هذه الفقرة.`
-      const res = await fetch(`${BACKEND}/api/chat`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({
-          messages: [{ role: 'user', content: text }],
-          system: systemPrompt
-        })
-      })
-      const data = await res.json()
-      const reply = data.response || data.message || ''
+      const reply = await aiAsk(text, systemPrompt)
       const parsed = parseCorrectionResponse(reply)
       setCorrections(c => ({ ...c, [idx]: { raw: reply, parsed } }))
       setAvatarState(parsed.length ? 'correcting' : 'happy')
@@ -1580,12 +1580,8 @@ function DebateMode({ day }) {
 The student will argue ${chosenStance === 'for' ? 'FOR' : 'AGAINST'} this topic. You argue the OPPOSITE side strongly.
 Keep each response to 2-3 sentences max. After each student argument, rate it: [STRONG] or [WEAK] and explain why in Arabic briefly.
 Use vocabulary from today's lesson naturally. Challenge the student to use better language.`
-      const res = await fetch(`${BACKEND}/api/chat`, {
-        method: 'POST', headers: authHeaders(),
-        body: JSON.stringify({ messages: [{ role: 'user', content: 'Start the debate with your opening argument.' }], system: sys })
-      })
-      const data = await res.json()
-      setMsgs([{ role: 'ai', text: data.response || data.message || 'Let us begin...' }])
+      const debateReply = await aiAsk('Start the debate with your opening argument.', sys)
+      setMsgs([{ role: 'ai', text: debateReply || 'Let us begin...' }])
     } catch { setMsgs([{ role: 'ai', text: 'تعذّر الاتصال.' }]) }
     finally { setLoading(false) }
   }
@@ -1598,15 +1594,9 @@ Use vocabulary from today's lesson naturally. Challenge the student to use bette
     setLoading(true)
     try {
       const sys = `You are a sharp academic debater arguing AGAINST the student on: "${day.title}". Rate their argument [STRONG] or [WEAK] first, then counter-argue in 2-3 sentences. Brief Arabic feedback.`
-      const res = await fetch(`${BACKEND}/api/chat`, {
-        method: 'POST', headers: authHeaders(),
-        body: JSON.stringify({
-          messages: history.map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.text })),
-          system: sys
-        })
-      })
-      const data = await res.json()
-      setMsgs(h => [...h, { role: 'ai', text: data.response || data.message || '...' }])
+      const histForAI = history.slice(0,-1).map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.text }))
+      const debArg = await aiAsk(userText, sys, histForAI)
+      setMsgs(h => [...h, { role: 'ai', text: debArg || '...' }])
     } catch { setMsgs(h => [...h, { role: 'ai', text: 'تعذّر الاتصال.' }]) }
     finally { setLoading(false) }
   }
@@ -1678,12 +1668,8 @@ function WritingUpgrade({ text }) {
         b2: 'Rewrite this text at B2 level: professional vocabulary, varied sentence structure. Show ONLY the improved text.',
         c2: 'Rewrite this text at C2/native level: sophisticated, academic, polished. Show ONLY the improved text.'
       }
-      const res = await fetch(`${BACKEND}/api/chat`, {
-        method: 'POST', headers: authHeaders(),
-        body: JSON.stringify({ messages: [{ role: 'user', content: `${prompts[lvl]}\n\nText: "${text}"` }], system: 'You are a professional English writing coach.' })
-      })
-      const data = await res.json()
-      setResult(r => ({ ...r, [lvl]: data.response || data.message || text }))
+      const upgraded = await aiAsk(`${prompts[lvl]}\n\nText: "${text}"`, 'You are a professional English writing coach.')
+      setResult(r => ({ ...r, [lvl]: upgraded || text }))
     } catch { setResult(r => ({ ...r, [lvl]: 'تعذّر الاتصال.' })) }
     finally { setLoading(false) }
   }
@@ -1740,23 +1726,13 @@ function VocabStoryGen({ words, dayTitle, allLearnedWords = [] }) {
     setUsedWords([])
     const wordList = words.slice(0, 8).map(w => w.word).join(', ')
     try {
-      const res = await fetch(`${BACKEND}/api/chat`, {
-        method: 'POST', headers: authHeaders(),
-        body: JSON.stringify({
-          messages: [{ role: 'user', content: `Write a short ${genre} story (5-7 sentences) naturally using these words: ${wordList}. Make the story engaging and memorable. Write in English only.` }],
-          system: `You are a creative English storyteller. Use ALL the given words naturally in context. Topic theme: ${dayTitle}`
-        })
-      })
-      if (!res.ok) {
-        const errText = await res.text()
-        setStory(`خطأ من الخادم (${res.status}). ${errText.slice(0, 100)}`)
-        return
-      }
-      const data = await res.json()
-      const text = data.response || data.message || data.content || data.text || JSON.stringify(data)
-      if (!text || text === '{}') { setStory('الخادم لم يُرجع نصاً. جربي مرة أخرى.'); return }
-      setStory(text)
-      setUsedWords(words.filter(w => text.toLowerCase().includes(w.word.toLowerCase())).map(w => w.word))
+      const storyText = await aiAsk(
+        `Write a short ${genre} story (5-7 sentences) naturally using these words: ${wordList}. Make the story engaging and memorable. Write in English only.`,
+        `You are a creative English storyteller. Use ALL the given words naturally in context. Topic theme: ${dayTitle}`
+      )
+      if (!storyText) { setStory('الخادم لم يُرجع نصاً. جربي مرة أخرى.'); return }
+      setStory(storyText)
+      setUsedWords(words.filter(w => storyText.toLowerCase().includes(w.word.toLowerCase())).map(w => w.word))
     } catch (e) {
       setStory('تعذّر إنشاء القصة. تحقق من الإنترنت. (' + (e?.message || '') + ')')
     } finally { setLoading(false) }
@@ -1962,15 +1938,8 @@ function WritingPromptCard({ dayTitle }) {
   const generate = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`${BACKEND}/api/chat`, {
-        method: 'POST', headers: authHeaders(),
-        body: JSON.stringify({
-          messages: [{ role: 'user', content: `Topic: "${dayTitle}". Write 3 writing prompts as JSON: [{"level":"B1","prompt":"..."},{"level":"B2","prompt":"..."},{"level":"C2","prompt":"..."}]. JSON only.` }],
-          system: 'Reply ONLY with a JSON array.'
-        })
-      })
-      const data = await res.json()
-      const txt = (data.response || data.message || '[]').replace(/```json|```/g,'').trim()
+      const wpRaw = await aiAsk(`Topic: "${dayTitle}". Write 3 writing prompts as JSON: [{"level":"B1","prompt":"..."},{"level":"B2","prompt":"..."},{"level":"C2","prompt":"..."}]. JSON only.`, 'Reply ONLY with a JSON array.')
+      const txt = (wpRaw || '[]').replace(/```json|```/g,'').trim()
       try { setPrompts(JSON.parse(txt)) } catch { setPrompts([
         { level: 'B1', prompt: `Write 3 sentences about ${dayTitle}.` },
         { level: 'B2', prompt: `Write a short paragraph discussing ${dayTitle}.` },
@@ -2011,15 +1980,8 @@ function ReadingComprehensionQuiz({ passage }) {
     if (questions.length) { setOpen(true); return }
     setLoading(true)
     try {
-      const res = await fetch(`${BACKEND}/api/chat`, {
-        method: 'POST', headers: authHeaders(),
-        body: JSON.stringify({
-          messages: [{ role: 'user', content: `Passage: "${passage.slice(0, 600)}"\n\nCreate 4 MCQ questions as JSON: [{"q":"...","options":["a","b","c","d"],"correct":0,"explanation":"Arabic explanation"}]. JSON only.` }],
-          system: 'Reply ONLY with a valid JSON array.'
-        })
-      })
-      const data = await res.json()
-      const txt = (data.response || data.message || '[]').replace(/```json|```/g,'').trim()
+      const qRaw = await aiAsk(`Passage: "${passage.slice(0, 600)}"\n\nCreate 4 MCQ questions as JSON: [{"q":"...","options":["a","b","c","d"],"correct":0,"explanation":"Arabic explanation"}]. JSON only.`, 'Reply ONLY with a valid JSON array.')
+      const txt = (qRaw || '[]').replace(/```json|```/g,'').trim()
       try { setQuestions(JSON.parse(txt)) } catch { setQuestions([]) }
       setOpen(true)
     } catch { } finally { setLoading(false) }
