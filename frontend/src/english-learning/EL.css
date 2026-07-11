@@ -1355,3 +1355,186 @@
   .el-app .el-buddy-panel { width: 100%; max-width: 100%; position: fixed; bottom: 0; left: 0; right: 0; height: 55vh; z-index: 100; border-top: 2px solid var(--el-accent); }
   .el-app .el-study-room.buddy-open .el-content-panel { padding-bottom: 55vh; }
 }
+
+/* ── Review Page (SM-2) ── */
+.el-app .el-review-page { padding: 20px 16px; max-width: 520px; margin: 0 auto; }
+.el-app .el-review-intro { display: flex; flex-direction: column; align-items: center; }
+.el-app .el-review-intro-card { background: var(--el-bg2); border: 1.5px solid var(--el-border); border-radius: var(--el-radius); padding: 28px 24px; text-align: center; width: 100%; }
+.el-app .el-review-intro-icon { font-size: 3rem; margin-bottom: 12px; }
+.el-app .el-review-intro-desc { color: var(--el-text2); margin: 8px 0 16px; }
+.el-app .el-review-tip { background: var(--el-accent-light); border-radius: var(--el-radius-sm); padding: 10px 14px; font-size: .82rem; color: var(--el-text2); margin-bottom: 16px; text-align: right; }
+.el-app .el-review-stats-row { display: flex; gap: 12px; justify-content: center; margin-bottom: 20px; }
+.el-app .el-review-stat { background: var(--el-bg3); border-radius: 10px; padding: 12px 20px; text-align: center; }
+.el-app .el-review-stat-num { font-size: 1.6rem; font-weight: 800; color: var(--el-accent); }
+.el-app .el-review-stat-label { font-size: .72rem; color: var(--el-muted); }
+.el-app .el-review-start-btn { margin-top: 4px; }
+.el-app .el-review-empty { text-align: center; padding: 32px 0; }
+.el-app .el-review-empty-icon { font-size: 3rem; margin-bottom: 12px; }
+.el-app .el-review-session { width: 100%; }
+.el-app .el-review-progress-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+.el-app .el-review-progress-bar { flex: 1; height: 8px; background: var(--el-border); border-radius: 99px; overflow: hidden; }
+.el-app .el-review-progress-fill { height: 100%; background: var(--el-accent); border-radius: 99px; transition: width .4s; }
+.el-app .el-review-progress-label { font-size: .8rem; color: var(--el-muted); white-space: nowrap; }
+.el-app .el-review-card { background: var(--el-bg2); border: 2px solid var(--el-border); border-radius: 20px; min-height: 240px; cursor: pointer; perspective: 800px; transition: border-color .2s; }
+.el-app .el-review-card:hover { border-color: var(--el-accent); }
+.el-app .el-review-card-inner { position: relative; width: 100%; height: 240px; transform-style: preserve-3d; transition: transform .5s; }
+.el-app .el-review-card.flipped .el-review-card-inner { transform: rotateY(180deg); }
+.el-app .el-review-front, .el-app .el-review-back { position: absolute; inset: 0; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+.el-app .el-review-back { transform: rotateY(180deg); }
+.el-app .el-review-level-tag { font-size: .72rem; color: var(--el-muted); margin-bottom: 10px; }
+.el-app .el-review-word { font-size: 2.2rem; font-weight: 800; color: var(--el-text); margin-bottom: 6px; }
+.el-app .el-review-ipa { font-size: .9rem; color: var(--el-muted); font-style: italic; }
+.el-app .el-review-tap-hint { font-size: .75rem; color: var(--el-muted); margin-top: 14px; opacity: .6; }
+.el-app .el-review-word-back { font-size: 1.5rem; font-weight: 800; color: var(--el-accent); margin-bottom: 6px; }
+.el-app .el-review-arabic { font-size: 1.2rem; color: var(--el-text2); margin-bottom: 4px; }
+.el-app .el-review-rating { margin-top: 18px; }
+.el-app .el-review-rating-label { text-align: center; font-size: .85rem; color: var(--el-muted); margin-bottom: 10px; }
+.el-app .el-review-rating-btns { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.el-app .el-review-rate-btn { border: 2px solid; border-radius: 12px; padding: 8px 14px; background: transparent; cursor: pointer; font-size: .8rem; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 2px; transition: background .15s; }
+.el-app .el-review-rate-btn:hover { background: var(--el-bg3); }
+.el-app .el-review-done { text-align: center; padding: 20px 0; }
+.el-app .el-review-done-icon { font-size: 3rem; margin-bottom: 12px; }
+.el-app .el-review-results-grid { background: var(--el-bg2); border-radius: var(--el-radius-sm); padding: 12px; margin: 16px 0; display: flex; flex-direction: column; gap: 6px; max-height: 250px; overflow-y: auto; }
+.el-app .el-review-result-row { display: flex; align-items: center; gap: 10px; font-size: .85rem; }
+.el-app .el-review-result-word { font-weight: 700; flex: 1; }
+.el-app .el-review-result-arabic { flex: 1; color: var(--el-text2); }
+.el-app .el-review-done-score { font-size: 1rem; font-weight: 700; color: var(--el-green); margin-top: 8px; }
+
+/* ── Word Family Tree ── */
+.el-app .el-family-section { background: var(--el-bg2); border: 1.5px solid var(--el-border); border-radius: var(--el-radius); padding: 16px; margin-top: 20px; }
+.el-app .el-family-pick { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.el-app .el-family-chip { border: 1.5px solid var(--el-border); border-radius: 20px; padding: 5px 14px; background: var(--el-bg3); cursor: pointer; font-size: .82rem; transition: all .15s; }
+.el-app .el-family-chip.active { background: var(--el-accent); color: #fff; border-color: var(--el-accent); }
+.el-app .el-family-tree { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.el-app .el-family-row { background: var(--el-bg3); border-radius: 10px; padding: 10px 12px; }
+.el-app .el-family-label { font-size: .7rem; color: var(--el-muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
+.el-app .el-family-val { font-weight: 700; font-size: .95rem; color: var(--el-text); }
+.el-app .el-family-ex { font-size: .78rem; color: var(--el-text2); margin-top: 3px; }
+
+/* ── Fill-the-Gap ── */
+.el-app .el-fillgap-section { background: var(--el-bg2); border: 1.5px solid var(--el-border); border-radius: var(--el-radius); padding: 16px; margin-top: 20px; }
+.el-app .el-fillgap-item { border-bottom: 1px solid var(--el-border); padding: 12px 0; display: flex; flex-direction: column; gap: 6px; }
+.el-app .el-fillgap-item:last-child { border-bottom: none; }
+.el-app .el-fillgap-sentence { font-size: .9rem; color: var(--el-text); }
+.el-app .el-fillgap-input { border: 1.5px solid var(--el-border); border-radius: 8px; padding: 7px 12px; font-size: .9rem; background: var(--el-bg3); color: var(--el-text); width: 100%; max-width: 240px; }
+.el-app .el-fillgap-input.correct { border-color: var(--el-green); background: #dcfce7; }
+.el-app .el-fillgap-input.wrong { border-color: var(--el-red); background: #fee2e2; }
+.el-app .el-fillgap-score { font-weight: 700; font-size: .9rem; color: var(--el-green); margin-top: 10px; }
+
+/* ── Collocations ── */
+.el-app .el-colloc-section { background: var(--el-bg2); border: 1.5px solid var(--el-border); border-radius: var(--el-radius); padding: 16px; margin-top: 20px; }
+.el-app .el-colloc-row { border-bottom: 1px solid var(--el-border); padding: 10px 0; }
+.el-app .el-colloc-row:last-child { border-bottom: none; }
+.el-app .el-colloc-phrase { font-weight: 700; color: var(--el-accent); font-size: .9rem; }
+.el-app .el-colloc-example { font-size: .82rem; color: var(--el-text2); font-style: italic; margin-top: 2px; }
+.el-app .el-colloc-ar { font-size: .8rem; color: var(--el-muted); margin-top: 2px; }
+
+/* ── Grammar Pattern Flashcards ── */
+.el-app .el-gflash-section { background: var(--el-bg2); border: 1.5px solid var(--el-border); border-radius: var(--el-radius); padding: 16px; margin-top: 20px; }
+.el-app .el-gflash-wrap { perspective: 800px; margin: 12px 0; }
+.el-app .el-gflash-card { height: 180px; cursor: pointer; }
+.el-app .el-gflash-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .5s; }
+.el-app .el-gflash-card.flipped .el-gflash-inner { transform: rotateY(180deg); }
+.el-app .el-gflash-front, .el-app .el-gflash-back { position: absolute; inset: 0; backface-visibility: hidden; background: var(--el-bg3); border: 2px solid var(--el-accent); border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
+.el-app .el-gflash-back { transform: rotateY(180deg); }
+.el-app .el-gflash-formula { font-size: .95rem; font-weight: 700; color: var(--el-text); font-family: monospace; background: var(--el-bg2); border-radius: 6px; padding: 4px 10px; margin-bottom: 8px; }
+.el-app .el-gflash-ex { font-size: .82rem; color: var(--el-text2); font-style: italic; }
+.el-app .el-gflash-nav { display: flex; gap: 10px; justify-content: center; margin-top: 8px; }
+
+/* ── Writing Prompt Card ── */
+.el-app .el-wprompt-section { background: var(--el-bg2); border: 1.5px solid var(--el-border); border-radius: var(--el-radius); padding: 16px; margin-bottom: 20px; }
+.el-app .el-wprompt-card { background: var(--el-bg3); border-radius: 10px; padding: 12px 14px; margin: 8px 0; border-right: 3px solid var(--el-accent); }
+.el-app .el-wprompt-level { font-size: .7rem; font-weight: 700; color: var(--el-accent); text-transform: uppercase; margin-bottom: 4px; }
+.el-app .el-wprompt-text { font-size: .9rem; color: var(--el-text); }
+
+/* ── Reading Comprehension Quiz ── */
+.el-app .el-rcquiz-wrap { background: var(--el-bg2); border: 1.5px solid var(--el-border); border-radius: var(--el-radius); padding: 16px; margin-top: 20px; }
+.el-app .el-rcquiz-q { margin-bottom: 16px; }
+.el-app .el-rcquiz-qtext { font-weight: 700; font-size: .9rem; margin-bottom: 8px; }
+.el-app .el-rcquiz-options { display: flex; flex-direction: column; gap: 6px; }
+.el-app .el-rcquiz-opt { border: 1.5px solid var(--el-border); border-radius: 8px; padding: 9px 12px; background: var(--el-bg3); cursor: pointer; font-size: .85rem; text-align: right; transition: all .15s; }
+.el-app .el-rcquiz-opt:hover:not(:disabled) { border-color: var(--el-accent); }
+.el-app .el-rcquiz-opt.correct { border-color: var(--el-green); background: #dcfce7; color: #14532d; }
+.el-app .el-rcquiz-opt.wrong { border-color: var(--el-red); background: #fee2e2; color: #7f1d1d; }
+.el-app .el-rcquiz-opt.dim { opacity: .5; }
+.el-app .el-rcquiz-explain { font-size: .8rem; color: var(--el-text2); background: var(--el-bg3); border-radius: 6px; padding: 8px 10px; margin-top: 8px; }
+.el-app .el-rcquiz-score { font-weight: 700; color: var(--el-green); text-align: center; margin: 12px 0 0; }
+
+/* ── Reading Bookmarks ── */
+.el-app .el-bmark-section { background: var(--el-bg2); border: 1.5px solid var(--el-border); border-radius: var(--el-radius); padding: 14px; margin-top: 16px; }
+.el-app .el-bmark-title { font-weight: 700; font-size: .9rem; margin-bottom: 10px; }
+.el-app .el-bmark-item { display: flex; align-items: flex-start; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--el-border); }
+.el-app .el-bmark-item:last-child { border-bottom: none; }
+.el-app .el-bmark-text { flex: 1; font-size: .82rem; color: var(--el-text2); font-style: italic; }
+.el-app .el-bmark-del { background: none; border: none; cursor: pointer; color: var(--el-red); font-size: 1rem; padding: 0 4px; }
+
+/* ── Pronunciation Recorder ── */
+.el-app .el-pronrec-section { background: var(--el-bg2); border: 1.5px solid var(--el-border); border-radius: var(--el-radius); padding: 16px; margin-top: 20px; }
+.el-app .el-pronrec-pick { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.el-app .el-pronrec-card { background: var(--el-bg3); border-radius: 12px; padding: 16px; text-align: center; border: 2px solid var(--el-border); }
+.el-app .el-pronrec-word { font-size: 1.6rem; font-weight: 800; margin-bottom: 4px; }
+.el-app .el-pronrec-ipa { font-size: .85rem; color: var(--el-muted); margin-bottom: 12px; }
+.el-app .el-pronrec-btn { border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: .9rem; cursor: pointer; transition: opacity .15s; }
+.el-app .el-pronrec-btn.record { background: var(--el-accent); color: #fff; }
+.el-app .el-pronrec-btn.recording { background: var(--el-red); color: #fff; animation: pulse 1s infinite; }
+.el-app .el-pronrec-btn:disabled { opacity: .5; cursor: not-allowed; }
+.el-app .el-pronrec-result { font-size: 1.4rem; font-weight: 800; margin: 10px 0 4px; }
+.el-app .el-pronrec-result.match { color: var(--el-green); }
+.el-app .el-pronrec-result.close { color: #f59e0b; }
+.el-app .el-pronrec-result.tryagain { color: var(--el-red); }
+.el-app .el-pronrec-feedback { font-size: .82rem; color: var(--el-text2); }
+
+/* ── XP Pop Animation ── */
+.el-app .el-xpop-overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 9999; pointer-events: none; }
+.el-app .el-xpop-bubble { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #fff; border-radius: 20px; padding: 20px 32px; text-align: center; box-shadow: 0 8px 40px rgba(245,158,11,.4); animation: xpop-in .4s cubic-bezier(.17,.67,.35,1.4); }
+.el-app .el-xpop-icon { font-size: 2rem; margin-bottom: 4px; }
+.el-app .el-xpop-amount { font-size: 2rem; font-weight: 900; }
+@keyframes xpop-in { from { opacity: 0; transform: scale(.5) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+/* ── Listening Speed Control ── */
+.el-app .el-speed-control-wrap { background: var(--el-bg2); border: 1.5px solid var(--el-border); border-radius: var(--el-radius); padding: 16px; margin-top: 16px; }
+.el-app .el-speed-control-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.el-app .el-speed-ctrl-btn { border: 1.5px solid var(--el-border); border-radius: 8px; padding: 7px 14px; background: var(--el-bg3); cursor: pointer; font-size: .85rem; font-weight: 600; transition: all .15s; }
+.el-app .el-speed-ctrl-btn.active { background: var(--el-accent); color: #fff; border-color: var(--el-accent); }
+
+/* ── Offline Indicator ── */
+.el-app .el-offline-bar { background: #ef4444; color: #fff; text-align: center; padding: 6px 12px; font-size: .82rem; font-weight: 700; }
+
+/* ── Review Badge / Due Count ── */
+.el-app .el-review-badge { position: absolute; top: -5px; right: -5px; background: var(--el-red); color: #fff; border-radius: 99px; font-size: .65rem; font-weight: 800; padding: 2px 6px; min-width: 18px; text-align: center; line-height: 1.4; }
+.el-app .el-tool-btn-wrap { position: relative; display: inline-flex; }
+
+/* ── Hard Words Warm-up (Day Page) ── */
+.el-app .el-warmup-section { background: linear-gradient(135deg, var(--el-accent-light), var(--el-bg2)); border: 2px solid var(--el-accent); border-radius: var(--el-radius); padding: 16px; margin-bottom: 18px; }
+.el-app .el-warmup-title { font-weight: 800; color: var(--el-accent); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.el-app .el-warmup-words { display: flex; flex-wrap: wrap; gap: 8px; }
+.el-app .el-warmup-chip { background: var(--el-bg2); border: 1.5px solid var(--el-accent); border-radius: 20px; padding: 5px 12px; font-size: .82rem; display: flex; align-items: center; gap: 5px; }
+.el-app .el-warmup-chip-word { font-weight: 700; color: var(--el-text); }
+.el-app .el-warmup-chip-ar { color: var(--el-muted); font-size: .75rem; }
+.el-app .el-warmup-go { margin-top: 12px; font-size: .8rem; color: var(--el-accent); font-weight: 700; text-decoration: none; cursor: pointer; background: none; border: none; padding: 0; }
+
+/* ── Vocabulary Growth Chart ── */
+.el-app .el-vocgrowth-section { background: var(--el-bg2); border: 1.5px solid var(--el-border); border-radius: var(--el-radius); padding: 16px; margin-top: 24px; }
+.el-app .el-vocgrowth-canvas { width: 100%; max-width: 480px; display: block; margin: 0 auto; }
+
+/* ── Level Completion Certificate ── */
+.el-app .el-cert-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 999; }
+.el-app .el-cert-modal { background: var(--el-bg); border-radius: 24px; padding: 36px 28px; text-align: center; max-width: 340px; width: 92%; box-shadow: 0 12px 48px rgba(0,0,0,.3); }
+.el-app .el-cert-icon { font-size: 3.5rem; margin-bottom: 12px; }
+.el-app .el-cert-title { font-size: 1.5rem; font-weight: 900; color: var(--el-accent); margin-bottom: 8px; }
+.el-app .el-cert-body { color: var(--el-text2); font-size: .9rem; margin-bottom: 20px; line-height: 1.7; }
+.el-app .el-cert-level { display: inline-block; background: var(--el-accent); color: #fff; border-radius: 99px; padding: 4px 16px; font-weight: 800; font-size: 1rem; margin-bottom: 16px; }
+
+/* ── Level Color Themes ── */
+.el-app.level-A1 { --el-accent: #3b82f6; --el-accent2: #60a5fa; --el-accent-light: #eff6ff; }
+.el-app.level-A2 { --el-accent: #06b6d4; --el-accent2: #22d3ee; --el-accent-light: #ecfeff; }
+.el-app.level-B1 { --el-accent: #10b981; --el-accent2: #34d399; --el-accent-light: #ecfdf5; }
+.el-app.level-B2 { --el-accent: #f59e0b; --el-accent2: #fbbf24; --el-accent-light: #fffbeb; }
+.el-app.level-C1 { --el-accent: #ef4444; --el-accent2: #f87171; --el-accent-light: #fef2f2; }
+.el-app.level-C2 { --el-accent: #8b5cf6; --el-accent2: #a78bfa; --el-accent-light: #f5f3ff; }
+.el-app.el-dark.level-A1 { --el-accent-light: #1e3a5f; }
+.el-app.el-dark.level-A2 { --el-accent-light: #164e63; }
+.el-app.el-dark.level-B1 { --el-accent-light: #064e3b; }
+.el-app.el-dark.level-B2 { --el-accent-light: #451a03; }
+.el-app.el-dark.level-C1 { --el-accent-light: #450a0a; }
+.el-app.el-dark.level-C2 { --el-accent-light: #2e1065; }

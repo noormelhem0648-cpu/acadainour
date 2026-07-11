@@ -4,6 +4,18 @@ import { LEVELS, getDay } from '../data/curriculum'
 import { useProgress } from '../hooks/useProgress'
 import '../EL.css'
 
+function useOnlineStatus() {
+  const [online, setOnline] = useState(navigator.onLine)
+  useEffect(() => {
+    const on = () => setOnline(true)
+    const off = () => setOnline(false)
+    window.addEventListener('online', on)
+    window.addEventListener('offline', off)
+    return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off) }
+  }, [])
+  return online
+}
+
 const EL = '/english-learning'
 
 /* ─── Word of the Day Splash ─── */
@@ -194,11 +206,14 @@ function PopQuiz({ onClose }) {
 export default function ELHomePage({ darkMode, setDarkMode }) {
   const navigate = useNavigate()
   const progress = useProgress()
+  const online = useOnlineStatus()
   const [showQuiz, setShowQuiz] = useState(() => Math.random() < 0.25)
   const [showWotd, setShowWotd] = useState(true)
+  const dueCount = progress.dueWords?.().length || 0
 
   return (
     <div className={`el-app${darkMode ? ' el-dark' : ''}`}>
+      {!online && <div className="el-offline-bar">⚠️ أنتِ غير متصلة بالإنترنت — بعض الميزات لن تعمل</div>}
       {/* Word of the Day splash (shows once per day) */}
       {showWotd && <WordOfDaySplash onClose={() => setShowWotd(false)} />}
 
@@ -278,6 +293,13 @@ export default function ELHomePage({ darkMode, setDarkMode }) {
               <span className="el-tool-icon">⭐</span>
               <span>كلمات صعبة</span>
             </button>
+            <div className="el-tool-btn-wrap">
+              <button className="el-tool-btn" onClick={() => navigate(`${EL}/review`)}>
+                <span className="el-tool-icon">🔁</span>
+                <span>مراجعة</span>
+              </button>
+              {dueCount > 0 && <span className="el-review-badge">{dueCount}</span>}
+            </div>
           </div>
 
           {/* Hero */}

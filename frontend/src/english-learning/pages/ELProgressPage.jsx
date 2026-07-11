@@ -6,6 +6,108 @@ import '../EL.css'
 
 const BACKEND = 'https://acadai-backend-avvo.onrender.com'
 
+/* ── Vocab Growth Chart ── */
+function VocabGrowthChart({ darkMode }) {
+  const canvasRef = useRef(null)
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    const W = canvas.width, H = canvas.height
+    const isDark = darkMode
+    ctx.clearRect(0, 0, W, H)
+
+    // Collect words learned per day from SM-2 data
+    const smData = JSON.parse(localStorage.getItem('el_sm2') || '{}')
+    const byDate = {}
+    Object.values(smData).forEach(w => {
+      if (w.lastReview) {
+        const d = new Date(w.lastReview).toISOString().slice(0, 10)
+        byDate[d] = (byDate[d] || 0) + 1
+      }
+    })
+    const dates = Object.keys(byDate).sort().slice(-14)
+    if (dates.length === 0) {
+      ctx.fillStyle = isDark ? '#9BA8C8' : '#6B7280'
+      ctx.font = '14px system-ui'
+      ctx.textAlign = 'center'
+      ctx.fillText('لا بيانات بعد — ابدأي المراجعة!', W / 2, H / 2)
+      return
+    }
+    // Cumulative
+    let cum = 0
+    const points = dates.map(d => { cum += byDate[d]; return cum })
+    const maxVal = Math.max(...points, 1)
+    const padL = 36, padR = 16, padT = 16, padB = 28
+    const chartW = W - padL - padR, chartH = H - padT - padB
+
+    // Grid lines
+    for (let i = 0; i <= 4; i++) {
+      const y = padT + chartH - (i / 4) * chartH
+      ctx.beginPath()
+      ctx.moveTo(padL, y); ctx.lineTo(padL + chartW, y)
+      ctx.strokeStyle = isDark ? 'rgba(255,255,255,.07)' : 'rgba(0,0,0,.07)'
+      ctx.lineWidth = 1; ctx.stroke()
+      ctx.fillStyle = isDark ? '#6B7280' : '#9CA3AF'
+      ctx.font = '10px system-ui'; ctx.textAlign = 'right'
+      ctx.fillText(Math.round(maxVal * i / 4), padL - 4, y + 4)
+    }
+
+    // Area fill
+    const xStep = chartW / Math.max(points.length - 1, 1)
+    const toX = i => padL + i * xStep
+    const toY = v => padT + chartH - (v / maxVal) * chartH
+
+    ctx.beginPath()
+    points.forEach((v, i) => i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)))
+    ctx.lineTo(toX(points.length - 1), padT + chartH)
+    ctx.lineTo(padL, padT + chartH)
+    ctx.closePath()
+    ctx.fillStyle = 'rgba(10,184,136,.15)'; ctx.fill()
+
+    // Line
+    ctx.beginPath()
+    points.forEach((v, i) => i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)))
+    ctx.strokeStyle = '#0AB888'; ctx.lineWidth = 2.5
+    ctx.lineJoin = 'round'; ctx.stroke()
+
+    // Dots + labels
+    ctx.textAlign = 'center'
+    points.forEach((v, i) => {
+      ctx.beginPath()
+      ctx.arc(toX(i), toY(v), 4, 0, Math.PI * 2)
+      ctx.fillStyle = '#0AB888'; ctx.fill()
+      ctx.strokeStyle = isDark ? '#111' : '#fff'; ctx.lineWidth = 2; ctx.stroke()
+      if (i % Math.ceil(dates.length / 5) === 0 || i === dates.length - 1) {
+        ctx.fillStyle = isDark ? '#9BA8C8' : '#6B7280'
+        ctx.font = '9px system-ui'
+        ctx.fillText(dates[i].slice(5), toX(i), padT + chartH + 14)
+      }
+    })
+  }, [darkMode])
+
+  return <canvas ref={canvasRef} width={460} height={180} className="el-vocgrowth-canvas" />
+}
+
+/* ── Level Completion Certificate ── */
+function LevelCertificate({ levelId, onClose }) {
+  const levelNames = { A1: 'المبتدئ', A2: 'الأساسي', B1: 'المتوسط', B2: 'فوق المتوسط', C1: 'المتقدم', C2: 'الإتقان' }
+  return (
+    <div className="el-cert-backdrop" onClick={onClose}>
+      <div className="el-cert-modal" onClick={e => e.stopPropagation()}>
+        <div className="el-cert-icon">🏆</div>
+        <div className="el-cert-level">{levelId}</div>
+        <div className="el-cert-title">مبروك! أكملتِ المستوى</div>
+        <div className="el-cert-body">
+          لقد أكملتِ مستوى <strong>{levelId} — {levelNames[levelId] || ''}</strong> بنجاح!<br />
+          استمري في التقدم نحو المستوى التالي 🚀
+        </div>
+        <button className="el-nav-btn primary" onClick={onClose}>شكراً! ✓</button>
+      </div>
+    </div>
+  )
+}
+
 const EL = '/english-learning'
 
 /* ── Radar Chart (Canvas) ── */
@@ -125,8 +227,27 @@ export default function ELProgressPage({ darkMode, setDarkMode }) {
     JSON.parse(localStorage.getItem('english_progress') || '{}')
   ).filter(Boolean).length
 
+  // Check for 100% completed level
+  const [certLevel, setCertLevel] = useState(() => {
+    const shown = JSON.parse(localStorage.getItem('el_cert_shown') || '{}')
+    for (const lvl of LEVELS) {
+      const lp = progress.levelProgress(lvl.id, lvl.totalDays)
+      if (lp.pct === 100 && !shown[lvl.id]) return lvl.id
+    }
+    return null
+  })
+  const dismissCert = () => {
+    if (certLevel) {
+      const shown = JSON.parse(localStorage.getItem('el_cert_shown') || '{}')
+      shown[certLevel] = true
+      localStorage.setItem('el_cert_shown', JSON.stringify(shown))
+      setCertLevel(null)
+    }
+  }
+
   return (
     <div className={`el-app${darkMode ? ' el-dark' : ''}`}>
+      {certLevel && <LevelCertificate levelId={certLevel} onClose={dismissCert} />}
       <div className="el-page">
 
         <header className="el-top-bar">
@@ -227,6 +348,12 @@ export default function ELProgressPage({ darkMode, setDarkMode }) {
                 </div>
               )
             })}
+          </div>
+
+          {/* Vocab Growth Chart */}
+          <div className="el-vocgrowth-section">
+            <h3 className="el-section-title">📈 نمو مفرداتك المراجَعة</h3>
+            <VocabGrowthChart darkMode={darkMode} />
           </div>
 
           {/* Weekly AI Report */}

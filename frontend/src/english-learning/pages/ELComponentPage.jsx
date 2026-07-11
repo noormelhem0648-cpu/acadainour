@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { getDay, COMPONENTS } from '../data/curriculum'
-import { useProgress } from '../hooks/useProgress'
+import { useProgress, XP_VALUES } from '../hooks/useProgress'
 import '../EL.css'
 
 const EL = '/english-learning'
@@ -253,6 +253,7 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
   const [buddyInput, setBuddyInput] = useState('')
   const [avatarState, setAvatarState] = useState('idle')
   const [buddyOpen, setBuddyOpen] = useState(true)
+  const [showXP, setShowXP] = useState(false)
 
   if (!day || !comp) return <div className="el-app"><div className="el-page"><p style={{ padding: 32 }}>Not found.</p></div></div>
 
@@ -260,16 +261,27 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
   const done = progress.isDone(progressKey)
 
   const handleDone = () => {
-    progress.markDone(progressKey)
-    const next = COMPONENTS[compIndex + 1]
-    if (next) navigate(`${EL}/level/${levelId}/day/${dayId}/${next.id}`)
-    else navigate(`${EL}/level/${levelId}/day/${dayId}`)
+    if (!done) {
+      setShowXP(true)
+      setTimeout(() => {
+        progress.markDone(progressKey)
+        progress.addXP?.(componentId)
+        const next = COMPONENTS[compIndex + 1]
+        if (next) navigate(`${EL}/level/${levelId}/day/${dayId}/${next.id}`)
+        else navigate(`${EL}/level/${levelId}/day/${dayId}`)
+      }, 1200)
+    } else {
+      const next = COMPONENTS[compIndex + 1]
+      if (next) navigate(`${EL}/level/${levelId}/day/${dayId}/${next.id}`)
+      else navigate(`${EL}/level/${levelId}/day/${dayId}`)
+    }
   }
 
   const dayContext = `Level ${levelId}, Day ${dayId}: ${day.title}. Component: ${comp.labelEn}.`
 
   return (
     <div className={`el-app${darkMode ? ' el-dark' : ''}`}>
+      {showXP && <XPPopAnimation amount={XP_VALUES[componentId] || 15} onDone={() => setShowXP(false)} />}
       <div className="el-page el-comp-page">
         <header className="el-top-bar">
           <button className="el-icon-btn" onClick={() => navigate(`${EL}/level/${levelId}/day/${dayId}`)}>←</button>
@@ -495,8 +507,12 @@ function VocabComp({ day, levelId, dayId, progress }) {
         <div className="el-mimic-tip">💡 {v.mimicTip}</div>
       </div>
 
-      {/* Teacher Corner */}
+      {/* Teacher Corner + new features */}
       <TeacherCorner words={v.words} dayTitle={day.title} />
+      <WordFamilyTree words={v.words} />
+      <FillGapExercise words={v.words} />
+      <CollocationsSection words={v.words} />
+      <PronunciationRecorder words={v.words} />
       <VocabStoryGen words={v.words} dayTitle={day.title} />
       <TeachMeMode words={v.words} dayTitle={day.title} />
       <SituationalCards words={v.words} />
@@ -866,6 +882,7 @@ function GrammarComp({ day, setBuddyMessages, setAvatarState }) {
       </button>
       {rolePlay && <RolePlayMode day={day} setBuddyMessages={setBuddyMessages} setAvatarState={setAvatarState} />}
 
+      <GrammarPatternFlashcards patterns={g.patterns} />
       <GrammarDetective day={day} />
       <DebateMode day={day} />
     </div>
@@ -1136,6 +1153,41 @@ function ReadingComp({ day, levelId, dayId }) {
           </div>
         ))}
       </div>
+      <ReadingComprehensionQuiz passage={r.passage} />
+      <ReadingBookmarks />
+    </div>
+  )
+}
+
+/* ─── Listening Speed Control ─── */
+function ListeningSpeedControl({ text }) {
+  const [rate, setRate] = useState(1)
+  const [playing, setPlaying] = useState(false)
+  const speeds = [0.6, 0.75, 1, 1.1, 1.25]
+  const labels = ['0.6x', '0.75x', '1x', '1.1x', '1.25x']
+
+  const play = (r) => {
+    window.speechSynthesis.cancel()
+    if (playing) { setPlaying(false); return }
+    const u = new SpeechSynthesisUtterance(text)
+    u.lang = 'en-US'; u.rate = r
+    u.onend = () => setPlaying(false)
+    u.onerror = () => setPlaying(false)
+    setPlaying(true)
+    window.speechSynthesis.speak(u)
+  }
+
+  return (
+    <div className="el-speed-control-wrap">
+      <div className="el-speed-control-label">🎚️ سرعة الاستماع:</div>
+      <div className="el-speed-control-btns">
+        {speeds.map((s, i) => (
+          <button key={s} className={`el-speed-ctrl-btn${rate === s ? ' active' : ''}`} onClick={() => setRate(s)}>{labels[i]}</button>
+        ))}
+      </div>
+      <button className={`el-nav-btn${playing ? ' primary' : ''}`} style={{ marginTop: 8 }} onClick={() => play(rate)}>
+        {playing ? '⏹ أوقف' : '▶ استمع'}
+      </button>
     </div>
   )
 }
@@ -1169,10 +1221,7 @@ function ListeningComp({ day }) {
       <div className="el-full-text-box">
         <div className="el-full-text-label">النص الكامل — استمع أولاً:</div>
         <div className="el-full-text">{l.text}</div>
-        <div className="el-tts-pair" style={{ marginTop: 8 }}>
-          <TTSBtn text={l.text} lang="en-US" ttsKey="lst-us" playingKey={playingKey} trigger={trigger} label="🇺🇸 استمع" />
-          <TTSBtn text={l.text} lang="en-GB" ttsKey="lst-gb" playingKey={playingKey} trigger={trigger} label="🇬🇧 استمع" />
-        </div>
+        <ListeningSpeedControl text={l.text} />
       </div>
 
       <div className="el-dictation-title">✏️ امْلأ الفراغات</div>
@@ -1382,6 +1431,7 @@ CORRECTION: [الكلمة/العبارة الخاطئة] → [الصواب] | Re
 
   return (
     <div className="el-section">
+      <WritingPromptCard dayTitle={day.title} />
       <div className="el-writing-title">✍️ تحديات الكتابة</div>
       {w.challenges.map((ch, i) => (
         <div key={i} className="el-writing-challenge">
@@ -1961,3 +2011,451 @@ function SituationalCards({ words }) {
     </div>
   )
 }
+
+
+/* ─── Word Family Tree ─── */
+function WordFamilyTree({ words }) {
+  const [open, setOpen] = useState(false)
+  const [selected, setSelected] = useState(null)
+  const [family, setFamily] = useState({})
+  const [loading, setLoading] = useState(false)
+  const [playingKey, trigger] = useTTS()
+
+  const loadFamily = async (word) => {
+    setSelected(word.word)
+    if (family[word.word]) return
+    setLoading(true)
+    try {
+      const res = await fetch(`${BACKEND}/api/chat`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: `Word families for "${word.word}" as JSON: {"noun":"...","verb":"...","adjective":"...","adverb":"...","example":"..."} — JSON only, no markdown.` }],
+          system: 'Reply ONLY with a JSON object.'
+        })
+      })
+      const data = await res.json()
+      try {
+        const txt = (data.response || data.message || '{}').replace(/```json|```/g,'').trim()
+        setFamily(f => ({ ...f, [word.word]: JSON.parse(txt) }))
+      } catch { setFamily(f => ({ ...f, [word.word]: { noun: word.word, verb: '-', adjective: '-', adverb: '-', example: word.example } })) }
+    } catch { } finally { setLoading(false) }
+  }
+
+  return (
+    <div className="el-family-section">
+      <button className="el-roleplay-toggle" style={{ marginBottom: open ? 14 : 0 }} onClick={() => setOpen(o => !o)}>
+        {open ? 'اغلق شجرة الكلمات' : 'Word Family Tree — اسم/فعل/صفة/ظرف'}
+      </button>
+      {open && (
+        <>
+          <div className="el-family-pick">
+            {words.slice(0, 12).map((w, i) => (
+              <button key={i} className={`el-family-chip${selected === w.word ? ' active' : ''}`} onClick={() => loadFamily(w)}>{w.word}</button>
+            ))}
+          </div>
+          {selected && loading && !family[selected] && <div style={{ padding: 12, textAlign: 'center', color: 'var(--el-muted)' }}>يبحث...</div>}
+          {selected && family[selected] && (
+            <div className="el-family-tree">
+              {[['اسم', family[selected].noun], ['فعل', family[selected].verb], ['صفة', family[selected].adjective], ['ظرف', family[selected].adverb]].map(([lbl, val]) => (
+                <div key={lbl} className="el-family-row">
+                  <span className="el-family-label">{lbl}</span>
+                  <span className="el-family-val">{val || '-'}</span>
+                  {val && val !== '-' && <button className="el-speak-btn" onClick={() => trigger(val, 'en-US', `fam-${val}`)}>{playingKey === `fam-${val}` ? '⏹' : '🔊'}</button>}
+                </div>
+              ))}
+              <div className="el-family-example">✦ {family[selected].example}</div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
+/* ─── Fill-the-Gap Exercise ─── */
+function FillGapExercise({ words }) {
+  const [open, setOpen] = useState(false)
+  const [answers, setAnswers] = useState({})
+  const [checked, setChecked] = useState(false)
+
+  const sentences = words.slice(0, 6).map(w => ({
+    sentence: w.example.replace(new RegExp(`\\b${w.word}\\b`, 'i'), '_____'),
+    answer: w.word, arabic: w.arabic
+  }))
+
+  const score = sentences.filter((s, i) => (answers[i] || '').trim().toLowerCase() === s.answer.toLowerCase()).length
+
+  return (
+    <div className="el-fillgap-section">
+      <button className="el-roleplay-toggle" style={{ background:'#f0fdf4', borderColor:'#86efac', color:'#15803d', marginBottom: open ? 14 : 0 }} onClick={() => setOpen(o => !o)}>
+        {open ? 'اغلق التمرين' : 'Fill-the-Gap — اكمل الفراغ من كلمات اليوم'}
+      </button>
+      {open && (
+        <>
+          {sentences.map((s, i) => {
+            const correct = (answers[i] || '').trim().toLowerCase() === s.answer.toLowerCase()
+            const parts = s.sentence.split('_____')
+            return (
+              <div key={i} className="el-fillgap-item">
+                <div className="el-fillgap-sentence">
+                  {parts[0]}
+                  <input
+                    className={`el-fillgap-input${checked ? (correct ? ' correct' : ' wrong') : ''}`}
+                    value={answers[i] || ''} onChange={e => setAnswers(a => ({ ...a, [i]: e.target.value }))}
+                    disabled={checked} placeholder="..." style={{ width: 120 }}
+                  />
+                  {parts[1]}
+                </div>
+                {checked && !correct && <div className="el-fillgap-hint">الصواب: <strong>{s.answer}</strong> ({s.arabic})</div>}
+              </div>
+            )
+          })}
+          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+            {!checked
+              ? <button className="el-nav-btn primary" onClick={() => setChecked(true)} disabled={!Object.keys(answers).length}>تحقق</button>
+              : <><div className="el-fillgap-score">{score === sentences.length ? 'ممتاز! كل الاجابات صحيحة' : `${score} / ${sentences.length} صحيحة`}</div><button className="el-nav-btn" onClick={() => { setAnswers({}); setChecked(false) }}>مرة اخرى</button></>
+            }
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+/* ─── Collocations Section ─── */
+function CollocationsSection({ words }) {
+  const [open, setOpen] = useState(false)
+  const [selected, setSelected] = useState(null)
+  const [data, setData] = useState({})
+  const [loading, setLoading] = useState(false)
+
+  const load = async (word) => {
+    setSelected(word.word)
+    if (data[word.word]) return
+    setLoading(true)
+    try {
+      const res = await fetch(`${BACKEND}/api/chat`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: `5 natural collocations for "${word.word}" as JSON array: [{"collocation":"...","example":"...","ar":"..."}]. JSON only.` }],
+          system: 'Reply ONLY with a JSON array.'
+        })
+      })
+      const d = await res.json()
+      try {
+        const txt = (d.response || d.message || '[]').replace(/```json|```/g,'').trim()
+        setData(prev => ({ ...prev, [word.word]: JSON.parse(txt) }))
+      } catch { setData(prev => ({ ...prev, [word.word]: [{ collocation: word.word, example: word.example, ar: word.arabic }] })) }
+    } catch { } finally { setLoading(false) }
+  }
+
+  return (
+    <div className="el-colloc-section">
+      <button className="el-roleplay-toggle" style={{ background:'#fef9c3', borderColor:'#fde047', color:'#854d0e', marginBottom: open ? 14 : 0 }} onClick={() => setOpen(o => !o)}>
+        {open ? 'اغلق التلازمات' : 'Collocations — الكلمات التي تلازم بعضها'}
+      </button>
+      {open && (
+        <>
+          <div className="el-family-pick">
+            {words.slice(0, 10).map((w, i) => (
+              <button key={i} className={`el-family-chip${selected === w.word ? ' active' : ''}`} onClick={() => load(w)}>{w.word}</button>
+            ))}
+          </div>
+          {selected && loading && !data[selected] && <div style={{ padding: 12, color: 'var(--el-muted)' }}>يبحث...</div>}
+          {selected && (data[selected] || []).map((c, i) => (
+            <div key={i} className="el-colloc-row">
+              <strong className="el-colloc-phrase">{c.collocation}</strong>
+              <em className="el-colloc-example">{c.example}</em>
+              <span className="el-colloc-ar">{c.ar}</span>
+            </div>
+          ))}
+        </>
+      )}
+    </div>
+  )
+}
+
+/* ─── Grammar Pattern Flashcards ─── */
+function GrammarPatternFlashcards({ patterns }) {
+  const [open, setOpen] = useState(false)
+  const [idx, setIdx] = useState(0)
+  const [flipped, setFlipped] = useState(false)
+  if (!patterns || !patterns.length) return null
+  const card = patterns[idx % patterns.length]
+
+  return (
+    <div className="el-gflash-section">
+      <button className="el-roleplay-toggle" style={{ background:'#ede9fe', borderColor:'#a78bfa', color:'#5b21b6', marginBottom: open ? 14 : 0 }} onClick={() => setOpen(o => !o)}>
+        {open ? 'اغلق بطاقات القواعد' : 'Grammar Flashcards — احفظ القاعدة بالبطاقة'}
+      </button>
+      {open && (
+        <div className="el-gflash-wrap">
+          <div className={`el-gflash-card${flipped ? ' flipped' : ''}`} onClick={() => setFlipped(f => !f)}>
+            <div className="el-gflash-inner">
+              <div className="el-gflash-front">
+                <div className="el-gflash-name">{card.name}</div>
+                <div style={{ fontSize: '.78rem', color: 'var(--el-muted)', marginTop: 8 }}>اضغط لرؤية الصيغة</div>
+              </div>
+              <div className="el-gflash-back">
+                <div className="el-gflash-formula">{card.formula}</div>
+                <div className="el-gflash-ex">{card.examples?.[0]}</div>
+              </div>
+            </div>
+          </div>
+          <div className="el-gflash-nav">
+            <button className="el-nav-btn" onClick={() => { setIdx(i => Math.max(0, i - 1)); setFlipped(false) }}>←</button>
+            <span>{(idx % patterns.length) + 1} / {patterns.length}</span>
+            <button className="el-nav-btn" onClick={() => { setIdx(i => i + 1); setFlipped(false) }}>→</button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ─── Writing Prompt Generator ─── */
+function WritingPromptCard({ dayTitle }) {
+  const [prompts, setPrompts] = useState([])
+  const [loading, setLoading] = useState(false)
+
+  const generate = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch(`${BACKEND}/api/chat`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: `Topic: "${dayTitle}". Write 3 writing prompts as JSON: [{"level":"B1","prompt":"..."},{"level":"B2","prompt":"..."},{"level":"C2","prompt":"..."}]. JSON only.` }],
+          system: 'Reply ONLY with a JSON array.'
+        })
+      })
+      const data = await res.json()
+      const txt = (data.response || data.message || '[]').replace(/```json|```/g,'').trim()
+      try { setPrompts(JSON.parse(txt)) } catch { setPrompts([
+        { level: 'B1', prompt: `Write 3 sentences about ${dayTitle}.` },
+        { level: 'B2', prompt: `Write a short paragraph discussing ${dayTitle}.` },
+        { level: 'C2', prompt: `Write a critical analysis of ${dayTitle} using academic language.` }
+      ]) }
+    } catch { } finally { setLoading(false) }
+  }
+
+  const colors = { B1:'#22c55e', B2:'#3b82f6', C2:'#8b5cf6' }
+
+  return (
+    <div className="el-wprompt-section">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <div style={{ fontWeight: 700, fontSize: '.88rem' }}>افكار للكتابة</div>
+        <button className="el-nav-btn" style={{ fontSize: '.78rem', padding: '4px 10px' }} onClick={generate} disabled={loading}>
+          {loading ? '...' : 'افكار جديدة'}
+        </button>
+      </div>
+      {prompts.map((p, i) => (
+        <div key={i} className="el-wprompt-card" style={{ borderColor: colors[p.level] || '#ccc' }}>
+          <span className="el-wprompt-level" style={{ background: colors[p.level] || '#ccc' }}>{p.level}</span>
+          <span className="el-wprompt-text">{p.prompt}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/* ─── Reading Comprehension Quiz ─── */
+function ReadingComprehensionQuiz({ passage }) {
+  const [open, setOpen] = useState(false)
+  const [questions, setQuestions] = useState([])
+  const [answers, setAnswers] = useState({})
+  const [checked, setChecked] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  const generate = async () => {
+    if (questions.length) { setOpen(true); return }
+    setLoading(true)
+    try {
+      const res = await fetch(`${BACKEND}/api/chat`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: `Passage: "${passage.slice(0, 600)}"\n\nCreate 4 MCQ questions as JSON: [{"q":"...","options":["a","b","c","d"],"correct":0,"explanation":"Arabic explanation"}]. JSON only.` }],
+          system: 'Reply ONLY with a valid JSON array.'
+        })
+      })
+      const data = await res.json()
+      const txt = (data.response || data.message || '[]').replace(/```json|```/g,'').trim()
+      try { setQuestions(JSON.parse(txt)) } catch { setQuestions([]) }
+      setOpen(true)
+    } catch { } finally { setLoading(false) }
+  }
+
+  const score = questions.filter((q, i) => answers[i] === q.correct).length
+
+  return (
+    <div style={{ marginTop: 16 }}>
+      <button className="el-nav-btn primary" onClick={generate} disabled={loading}>
+        {loading ? 'يولد الاسئلة...' : 'اختبار فهم المقروء (AI)'}
+      </button>
+      {open && questions.length > 0 && (
+        <div className="el-rcquiz-wrap">
+          {questions.map((q, i) => (
+            <div key={i} className="el-rcquiz-q">
+              <div className="el-rcquiz-qtext">{i+1}. {q.q}</div>
+              <div className="el-rcquiz-options">
+                {(q.options || []).map((opt, oi) => {
+                  const isCorrect = checked && oi === q.correct
+                  const isWrong = checked && answers[i] === oi && oi !== q.correct
+                  return (
+                    <button key={oi}
+                      className={`el-rcquiz-opt${isCorrect ? ' correct' : isWrong ? ' wrong' : answers[i] === oi ? ' chosen' : ''}`}
+                      onClick={() => !checked && setAnswers(a => ({ ...a, [i]: oi }))}
+                    >{opt}</button>
+                  )
+                })}
+              </div>
+              {checked && <div className="el-rcquiz-explain">{q.explanation}</div>}
+            </div>
+          ))}
+          {!checked
+            ? <button className="el-nav-btn primary" onClick={() => setChecked(true)} disabled={Object.keys(answers).length < questions.length}>تحقق</button>
+            : <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <div className="el-rcquiz-score">{score}/{questions.length}</div>
+                <button className="el-nav-btn" onClick={() => { setChecked(false); setAnswers({}) }}>مرة اخرى</button>
+              </div>
+          }
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ─── Reading Bookmarks ─── */
+function ReadingBookmarks() {
+  const BOOK_KEY = 'el_bookmarks'
+  const loadBM = () => { try { return JSON.parse(localStorage.getItem(BOOK_KEY) || '[]') } catch { return [] } }
+  const [bookmarks, setBookmarks] = useState(loadBM)
+  const [input, setInput] = useState('')
+
+  const add = () => {
+    if (!input.trim()) return
+    const next = [...bookmarks, { text: input.trim(), date: Date.now() }]
+    setBookmarks(next); localStorage.setItem(BOOK_KEY, JSON.stringify(next)); setInput('')
+  }
+  const remove = (i) => {
+    const next = bookmarks.filter((_, bi) => bi !== i)
+    setBookmarks(next); localStorage.setItem(BOOK_KEY, JSON.stringify(next))
+  }
+
+  return (
+    <div className="el-bmark-section">
+      <div className="el-bmark-title">محفوظاتي من هذه القراءة</div>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+        <input className="el-buddy-input" value={input} onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && add()} placeholder="احفظي جملة مهمة..." style={{ flex: 1 }} />
+        <button className="el-buddy-send" onClick={add}>+</button>
+      </div>
+      {bookmarks.map((b, i) => (
+        <div key={i} className="el-bmark-item">
+          <span className="el-bmark-text">"{b.text}"</span>
+          <button className="el-bmark-del" onClick={() => remove(i)}>x</button>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/* ─── Pronunciation Recorder ─── */
+function PronunciationRecorder({ words }) {
+  const [open, setOpen] = useState(false)
+  const [selected, setSelected] = useState(null)
+  const [recorded, setRecorded] = useState('')
+  const [listening, setListening] = useState(false)
+  const [result, setResult] = useState(null)
+
+  const lev = (a, b) => {
+    const dp = Array.from({length:a.length+1},(_,i)=>Array.from({length:b.length+1},(_,j)=>i===0?j:j===0?i:0))
+    for(let i=1;i<=a.length;i++) for(let j=1;j<=b.length;j++) dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1])
+    return dp[a.length][b.length]
+  }
+
+  const record = () => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SR) { alert('يحتاج Chrome'); return }
+    const r = new SR(); r.lang='en-US'; r.interimResults=false
+    r.onstart=()=>setListening(true)
+    r.onresult=e=>{
+      const txt=e.results[0][0].transcript.toLowerCase().trim()
+      setRecorded(txt)
+      const target=(selected?.word||'').toLowerCase()
+      if(txt===target) setResult('match')
+      else if(lev(txt,target)<=2||txt.includes(target)) setResult('close')
+      else setResult('try')
+      setListening(false)
+    }
+    r.onerror=()=>setListening(false); r.onend=()=>setListening(false)
+    r.start()
+  }
+
+  return (
+    <div className="el-pronrec-section">
+      <button className="el-roleplay-toggle" style={{ background:'#fce7f3', borderColor:'#f9a8d4', color:'#9d174d', marginBottom: open ? 14 : 0 }} onClick={()=>setOpen(o=>!o)}>
+        {open ? 'اغلق تسجيل النطق' : 'Pronunciation Recorder — سجلي نطقك وقارنيه'}
+      </button>
+      {open && (
+        <>
+          <div className="el-family-pick">
+            {words.slice(0,12).map((w,i)=>(
+              <button key={i} className={`el-family-chip${selected?.word===w.word?' active':''}`}
+                onClick={()=>{setSelected(w);setRecorded('');setResult(null)}}>{w.word}</button>
+            ))}
+          </div>
+          {selected && (
+            <div className="el-pronrec-card">
+              <div className="el-pronrec-word">{selected.word}</div>
+              <div className="el-pronrec-ipa">{selected.ipa}</div>
+              <button className="el-speak-btn" style={{fontSize:'1.2rem',margin:'8px auto',display:'block'}}
+                onClick={()=>{window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(selected.word);u.lang='en-US';u.rate=0.75;window.speechSynthesis.speak(u)}}>
+                استمعي للنموذج
+              </button>
+              <button className={`el-pronrec-btn${listening?' recording':''}`} onClick={record} disabled={listening}>
+                {listening ? 'يسجل...' : 'سجلي نطقك'}
+              </button>
+              {recorded && (
+                <div className="el-pronrec-result">
+                  <div>سمعت: <strong>"{recorded}"</strong></div>
+                  {result==='match' && <div className="el-pronrec-feedback match">نطق ممتاز!</div>}
+                  {result==='close' && <div className="el-pronrec-feedback close">قريب جدا — حاولي مرة اخرى</div>}
+                  {result==='try' && <div className="el-pronrec-feedback try">استمعي مرة اخرى وركزي على IPA</div>}
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
+/* ─── XP Pop Animation ─── */
+export function XPPopAnimation({ amount, onDone }) {
+  useEffect(() => { const t = setTimeout(onDone, 1800); return () => clearTimeout(t) }, [onDone])
+  return (
+    <div className="el-xpop-overlay">
+      <div className="el-xpop-bubble">
+        <div className="el-xpop-icon">⭐</div>
+        <div className="el-xpop-amount">+{amount} XP</div>
+      </div>
+    </div>
+  )
+}
+
+/* ─── Study Timer hook ─── */
+export function useStudyTimer() {
+  const KEY = 'el_study_time'
+  const today = new Date().toISOString().slice(0, 10)
+  const loadTimer = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}') } catch { return {} } }
+  const [timerData] = useState(loadTimer)
+  const addTime = (seconds) => {
+    const d = loadTimer(); d[today] = (d[today] || 0) + seconds
+    localStorage.setItem(KEY, JSON.stringify(d))
+  }
+  const todayMinutes = Math.floor((timerData[today] || 0) / 60)
+  const weekMinutes = Math.floor(Object.entries(timerData).filter(([d]) => new Date(d) >= new Date(Date.now() - 7*86400000)).reduce((s,[,v])=>s+v, 0) / 60)
+  return { addTime, todayMinutes, weekMinutes, timerData }
+}
+

@@ -5,6 +5,28 @@ import '../EL.css'
 
 const EL = '/english-learning'
 
+function HardWordsWarmup({ progress, navigate }) {
+  const due = progress.dueWords?.() || []
+  const preview = due.slice(0, 5)
+  if (preview.length === 0) return null
+  return (
+    <div className="el-warmup-section">
+      <div className="el-warmup-title">🔥 مراجعة سريعة قبل البدء ({due.length} كلمة مستحقة)</div>
+      <div className="el-warmup-words">
+        {preview.map(w => (
+          <div key={w.id} className="el-warmup-chip">
+            <span className="el-warmup-chip-word">{w.word}</span>
+            <span className="el-warmup-chip-ar">{w.arabic}</span>
+          </div>
+        ))}
+      </div>
+      <button className="el-warmup-go" onClick={() => navigate(`${EL}/review`)}>
+        ابدأ جلسة المراجعة الكاملة ←
+      </button>
+    </div>
+  )
+}
+
 export default function ELDayPage({ darkMode, setDarkMode }) {
   const { levelId, dayId } = useParams()
   const navigate = useNavigate()
@@ -37,6 +59,8 @@ export default function ELDayPage({ darkMode, setDarkMode }) {
             <span>{dp.done} / {dp.total} مكونات مكتملة</span>
           </div>
         </div>
+
+        <HardWordsWarmup progress={progress} navigate={navigate} />
 
         <div className="el-components-list">
           {COMPONENTS.map(comp => {
