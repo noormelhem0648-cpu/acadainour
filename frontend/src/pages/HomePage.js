@@ -3,12 +3,36 @@ import { useNavigate } from "react-router-dom";
 
 const API_URL = "https://acadai-backend-avvo.onrender.com";
 
+function useInstallPrompt() {
+  const [prompt, setPrompt] = useState(null);
+  const [installed, setInstalled] = useState(
+    window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true
+  );
+  useEffect(() => {
+    const h = e => { e.preventDefault(); setPrompt(e); };
+    window.addEventListener('beforeinstallprompt', h);
+    window.addEventListener('appinstalled', () => { setInstalled(true); setPrompt(null); });
+    return () => window.removeEventListener('beforeinstallprompt', h);
+  }, []);
+  const install = async () => {
+    if (!prompt) return;
+    prompt.prompt();
+    const { outcome } = await prompt.userChoice;
+    if (outcome === 'accepted') setInstalled(true);
+    setPrompt(null);
+  };
+  return { prompt, installed, install };
+}
+
 export default function HomePage({ darkMode, setDarkMode, user, token, onLogout }) {
   const navigate = useNavigate();
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [keyInput, setKeyInput] = useState("");
   const [keyStatus, setKeyStatus] = useState(null);
   const [hasKey, setHasKey] = useState(false);
+  const [showInstallInfo, setShowInstallInfo] = useState(false);
+  const { prompt: installPrompt, installed, install } = useInstallPrompt();
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 
   useEffect(() => {
     if (!token) return;
@@ -44,6 +68,15 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
             onClick={() => setShowKeyModal(true)}
             title={hasKey ? "مفتاحك مضاف ✓" : "أضف مفتاح Gemini"}
           >🔑</button>
+        )}
+        {!installed && (
+          <button
+            className="header-action-btn install-btn"
+            onClick={installPrompt ? install : () => setShowInstallInfo(true)}
+            title="تثبيت التطبيق"
+          >
+            📲 تثبيت
+          </button>
         )}
         {onLogout && <button className="header-action-btn" onClick={onLogout} title="خروج">🚪</button>}
       </header>
@@ -114,6 +147,34 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+      {showInstallInfo && (
+        <div className="quiz-modal-overlay" onClick={() => setShowInstallInfo(false)}>
+          <div className="quiz-modal" onClick={e => e.stopPropagation()}>
+            <h3>📲 تثبيت التطبيق</h3>
+            {isIOS ? (
+              <div style={{ fontSize: '0.88rem', lineHeight: 1.8, color: 'var(--text-muted)', margin: '12px 0' }}>
+                <p>على <strong>iPhone / iPad</strong>:</p>
+                <ol style={{ paddingRight: 20, marginTop: 8 }}>
+                  <li>افتحي الموقع من <strong>Safari</strong></li>
+                  <li>اضغطي زر المشاركة <strong>⬆️</strong> في أسفل الشاشة</li>
+                  <li>اختاري <strong>"Add to Home Screen"</strong></li>
+                  <li>اضغطي <strong>Add</strong> ✓</li>
+                </ol>
+              </div>
+            ) : (
+              <div style={{ fontSize: '0.88rem', lineHeight: 1.8, color: 'var(--text-muted)', margin: '12px 0' }}>
+                <p>على <strong>Android</strong> (Chrome):</p>
+                <ol style={{ paddingRight: 20, marginTop: 8 }}>
+                  <li>افتحي قائمة المتصفح <strong>⋮</strong></li>
+                  <li>اختاري <strong>"Add to Home Screen"</strong> أو <strong>"Install App"</strong></li>
+                  <li>اضغطي <strong>Install</strong> ✓</li>
+                </ol>
+              </div>
+            )}
+            <button className="quiz-modal-btn cancel" onClick={() => setShowInstallInfo(false)}>حسناً</button>
           </div>
         </div>
       )}

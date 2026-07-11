@@ -774,6 +774,18 @@ body {
   border-color: var(--accent);
   transform: scale(1.05);
 }
+.install-btn {
+  border-color: #7c3aed !important;
+  color: #7c3aed;
+  font-size: 0.82rem !important;
+  font-weight: 700;
+  padding: 6px 12px !important;
+  white-space: nowrap;
+}
+.install-btn:hover {
+  background: #7c3aed !important;
+  color: #fff !important;
+}
 .key-btn.key-active {
   border-color: #4caf50;
   color: #4caf50;
