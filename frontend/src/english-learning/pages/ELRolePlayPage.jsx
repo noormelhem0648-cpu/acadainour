@@ -8,6 +8,35 @@ import '../EL.css'
 const API = 'https://acadai-backend-avvo.onrender.com'
 const EL = '/english-learning'
 
+/* ── Non-streaming AI call for structured data ── */
+async function aiAsk(message, systemPrompt) {
+  const token = localStorage.getItem('acadai_token')
+  const headers = { 'Content-Type': 'application/json' }
+  if (token) headers['Authorization'] = `Bearer ${token}`
+  const res = await fetch(`${API}/english-tutor/stream`, {
+    method: 'POST', headers,
+    body: JSON.stringify({ message, history: [], subject_info: systemPrompt })
+  })
+  if (!res.ok) throw new Error(res.status)
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = '', full = ''
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+    const lines = buffer.split('\n'); buffer = lines.pop()
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        const chunk = line.slice(6)
+        if (chunk === '[DONE]') break
+        full += chunk
+      }
+    }
+  }
+  return full
+}
+
 /* ── TTS helpers ── */
 let _activeSynth = null
 
@@ -85,35 +114,18 @@ export default function ELRolePlayPage({ darkMode, setDarkMode }) {
     setLoading(true)
     setRoundCount(r => r + 1)
 
-    const systemPrompt = `You are a language roleplay assistant. Always respond using the exact 4-line labeled format shown in the user message. Never add extra text.`
-
-    const recentHistory = newMessages.slice(-5)
-      .map(m => `${m.role === 'ai' ? topic.aiRole : 'Student'}: ${m.content}`)
-      .join('\n')
-
-    const wrappedMessage = `[ROLEPLAY]
-You are ${topic.aiRole}. ${topic.aiPersonality}. Setting: ${topic.setting}.
-Vocabulary to encourage: ${topic.focusWords.join(', ')}.
-
-Recent conversation:
-${recentHistory}
-
-The student just said: "${text}"
-
-Complete this template — replace each <...> with your answer, keep the labels exactly as written:
-REPLY: <your 1-2 sentence in-character response as ${topic.aiRole}>
-ERROR: <exact wrong word or phrase from "${text}", or the word none>
-FIX: <the corrected version of that word/phrase, or the word none>
-NOTE: <one Arabic sentence explaining the correction>`
+    // Step 1: natural in-character streaming reply
+    const roleplaySys = `You are ${topic.aiRole}. ${topic.aiPersonality}. Setting: ${topic.setting}.
+Stay completely in character. Keep your response to 1-2 sentences. Encourage use of: ${topic.focusWords.join(', ')}.`
 
     try {
       const res = await fetch(`${API}/english-tutor/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: wrappedMessage,
-          history: [],
-          subject_info: systemPrompt
+          message: text,
+          history: newMessages.slice(-6).map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.content })),
+          subject_info: roleplaySys
         })
       })
 
@@ -134,27 +146,38 @@ NOTE: <one Arabic sentence explaining the correction>`
             const chunk = line.slice(6)
             if (chunk === '[DONE]') break
             full += chunk
-            // Show streaming text — extract REPLY part if available, else show raw
-            const streamReply = full.match(/REPLY:\s*(.+?)(?=\nERROR:|$)/s)
-            const displayText = streamReply ? streamReply[1].trim() : full.replace(/^REPLY:\s*/i, '')
             setMessages(prev => {
               const copy = [...prev]
-              copy[copy.length - 1] = { role: 'ai', content: displayText, typing: false }
+              copy[copy.length - 1] = { role: 'ai', content: full, typing: false }
               return copy
             })
           }
         }
       }
 
-      // Parse structured response
-      const replyMatch = full.match(/REPLY:\s*(.+?)(?=\nERROR:|$)/s)
-      const errorMatch = full.match(/ERROR:\s*(.+?)(?=\nFIX:|$)/s)
-      const fixMatch   = full.match(/FIX:\s*(.+?)(?=\nNOTE:|$)/s)
-      const noteMatch  = full.match(/NOTE:\s*(.+?)$/s)
-      const replyText = replyMatch ? replyMatch[1].trim() : full.split('💬')[0].trim() || full
-      const correction = errorMatch && errorMatch[1].trim().toLowerCase() !== 'none'
-        ? { error: errorMatch[1].trim(), fix: fixMatch?.[1].trim() || '', note: noteMatch?.[1].trim() || '' }
-        : null
+      const replyText = full.trim()
+
+      // Step 2: separate focused call for grammar correction
+      let correction = null
+      try {
+        const corrPrompt = `Student wrote: "${text}"
+Find ONE grammar or spelling mistake. Reply in exactly 3 lines, no extra text:
+ERROR: [exact wrong word/phrase from the student, or: none]
+FIX: [corrected version, or: none]
+NOTE: [one Arabic sentence explaining why]`
+        const corrRaw = await aiAsk(corrPrompt, 'You are an English grammar checker. Return only the 3 labeled lines.')
+        const errM = corrRaw.match(/ERROR:\s*(.+)/i)
+        const fixM = corrRaw.match(/FIX:\s*(.+)/i)
+        const notM = corrRaw.match(/NOTE:\s*(.+)/i)
+        if (errM && errM[1].trim().toLowerCase() !== 'none') {
+          correction = {
+            error: errM[1].trim(),
+            fix: fixM?.[1].trim() || '',
+            note: notM?.[1].trim() || ''
+          }
+        }
+      } catch { /* correction is optional */ }
+
       setMessages(prev => {
         const copy = [...prev]
         copy[copy.length - 1] = { role: 'ai', content: replyText, correction, typing: false }
