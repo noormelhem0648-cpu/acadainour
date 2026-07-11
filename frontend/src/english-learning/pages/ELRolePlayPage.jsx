@@ -160,20 +160,32 @@ Stay completely in character. Keep your response to 1-2 sentences. Encourage use
       // Step 2: separate focused call for grammar correction
       let correction = null
       try {
-        const corrPrompt = `Student wrote: "${text}"
-Find ONE grammar or spelling mistake. Reply in exactly 3 lines, no extra text:
-ERROR: [exact wrong word/phrase from the student, or: none]
-FIX: [corrected version, or: none]
-NOTE: [one Arabic sentence explaining why]`
-        const corrRaw = await aiAsk(corrPrompt, 'You are an English grammar checker. Return only the 3 labeled lines.')
-        const errM = corrRaw.match(/ERROR:\s*(.+)/i)
-        const fixM = corrRaw.match(/FIX:\s*(.+)/i)
-        const notM = corrRaw.match(/NOTE:\s*(.+)/i)
-        if (errM && errM[1].trim().toLowerCase() !== 'none') {
+        const corrPrompt = `"${text}" ← هذه الجملة كتبها طالب إنجليزي.
+ابحث عن خطأ واحد فقط (إملاء أو قواعد).
+أجب بهذا الشكل الحرفي فقط بدون أي نص إضافي:
+WRONG: [الكلمة أو العبارة الخاطئة من الجملة، أو: none]
+RIGHT: [النسخة الصحيحة، أو: none]
+WHY: [جملة عربية قصيرة تشرح السبب]`
+        const corrRaw = await aiAsk(corrPrompt, 'أنت مصحح لغوي. أجب فقط بالسطور الثلاثة المطلوبة.')
+        // Try labeled format first
+        const wM = corrRaw.match(/WRONG:\s*(.+)/i)
+        const rM = corrRaw.match(/RIGHT:\s*(.+)/i)
+        const yM = corrRaw.match(/WHY:\s*(.+)/i)
+        if (wM && wM[1].trim().toLowerCase() !== 'none' && wM[1].trim() !== '') {
           correction = {
-            error: errM[1].trim(),
-            fix: fixM?.[1].trim() || '',
-            note: notM?.[1].trim() || ''
+            error: wM[1].trim().replace(/["""]/g, ''),
+            fix: rM?.[1].trim().replace(/["""]/g, '') || '',
+            note: yM?.[1].trim() || ''
+          }
+        } else if (corrRaw.trim() && !corrRaw.toLowerCase().includes('none') && corrRaw.length < 250) {
+          // AI didn't follow format — extract meaningful content
+          const lines = corrRaw.split('\n').map(l => l.trim()).filter(Boolean)
+          const noteLine = lines.find(l => /[؀-ۿ]/.test(l))
+          const engLines = lines.filter(l => !/[؀-ۿ]/.test(l) && l.length < 60)
+          if (engLines.length >= 2) {
+            correction = { error: engLines[0], fix: engLines[1], note: noteLine || '' }
+          } else if (noteLine) {
+            correction = { error: '', fix: '', note: noteLine }
           }
         }
       } catch { /* correction is optional */ }
@@ -319,9 +331,9 @@ NOTE: [one Arabic sentence explaining why]`
                     )}
                     {msg.role === 'ai' && msg.correction && (
                       <div className="el-rp-correction-wrap" style={{ marginTop: 8 }}>
-                        <div className="el-rp-correction-error">❌ {msg.correction.error}</div>
-                        <div className="el-rp-correction-fix">✅ {msg.correction.fix}</div>
-                        {msg.correction.note && <div className="el-rp-correction-note">{msg.correction.note}</div>}
+                        {msg.correction.error && <div className="el-rp-correction-error">❌ {msg.correction.error}</div>}
+                        {msg.correction.fix && <div className="el-rp-correction-fix">✅ {msg.correction.fix}</div>}
+                        {msg.correction.note && <div className="el-rp-correction-note">💡 {msg.correction.note}</div>}
                       </div>
                     )}
                   </div>
