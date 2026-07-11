@@ -1704,6 +1704,15 @@ function AILiveReaction({ score }) {
 }
 
 /* ─── Vocabulary Story Generator ─── */
+const LEVEL_LANG = {
+  1: { cefr: 'A1', desc: 'Use VERY simple English only. Short sentences. Basic vocabulary. No complex words.' },
+  2: { cefr: 'A2', desc: 'Use simple everyday English. Short clear sentences. Common words only.' },
+  3: { cefr: 'B1', desc: 'Use intermediate English. Normal sentences. Avoid academic or rare vocabulary.' },
+  4: { cefr: 'B2', desc: 'Use upper-intermediate English. Some complex sentences allowed.' },
+  5: { cefr: 'C1', desc: 'Use advanced English with rich vocabulary and complex structures.' },
+  6: { cefr: 'C2', desc: 'Use sophisticated English. Complex arguments, nuanced language.' },
+}
+
 function VocabStoryGen({ words, dayTitle, levelId, allLearnedWords = [] }) {
   const [open, setOpen] = useState(false)
   const [genre, setGenre] = useState('حوار حياة يومية')
