@@ -535,27 +535,9 @@ function VocabComp({ day, levelId, dayId, progress }) {
         </div>
       )}
 
-      <div className="el-challenge-box">
-        <div className="el-challenge-title">🎙️ تحدي المحاكاة الصوتية</div>
-        <p className="el-challenge-desc">استمع بلهجتين ثم كرر بصوت عالٍ 3 مرات — لاحظ الفرق بين الأمريكية والبريطانية:</p>
-        <div className="el-mimic-words">
-          {v.mimicChallenge.map((phrase, i) => (
-            <div key={i} className="el-mimic-item">
-              <span className="el-mimic-text">{phrase}</span>
-              <div className="el-tts-pair">
-                <TTSBtn text={phrase} lang="en-US" ttsKey={`us-mimic-${i}`} playingKey={playingKey} trigger={trigger} label="US 🔊" />
-                <TTSBtn text={phrase} lang="en-GB" ttsKey={`gb-mimic-${i}`} playingKey={playingKey} trigger={trigger} label="UK 🔊" />
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="el-mimic-tip">💡 {v.mimicTip}</div>
-      </div>
-
       {/* Teacher Corner + new features */}
       <TeacherCorner words={v.words} dayTitle={day.title} />
       <FillGapExercise words={v.words} allLearnedWords={progress.hardWords} />
-      <PronunciationRecorder words={v.words} allLearnedWords={progress.hardWords} />
       <VocabStoryGen words={v.words} dayTitle={day.title} allLearnedWords={progress.hardWords} />
     </div>
   )
@@ -698,11 +680,30 @@ function RolePlayMode({ day, setBuddyMessages, setAvatarState }) {
     setLoading(true)
     setAvatarState('thinking')
     try {
-      const systemPrompt = `${scenario.prompt}\n\nGrammar from today's lesson: ${day.grammar?.patterns?.map(p => p.name).join(', ')}. Keep responses to 2-3 sentences. After each reply add a one-line tip prefixed "💡 نصيحة:" about grammar or vocabulary used.`
+      const systemPrompt = `${scenario.prompt}
+
+Grammar patterns: ${day.grammar?.patterns?.map(p => p.name).join(', ')}.
+Keep your dialogue response to 1-2 sentences max.
+
+After your dialogue response, on a NEW LINE, check the student's last message for grammar/vocabulary errors.
+Use EXACTLY this format (no extra text):
+REPLY: your dialogue response here
+ERROR: the wrong word or phrase the student used (or "none" if correct)
+FIX: the correct version
+NOTE: one short Arabic explanation`
       const roleHist = newEx.slice(0,-1).map(e => ({ role: e.role === 'buddy' ? 'assistant' : 'user', content: e.text }))
-      const reply = await aiAsk(userLine, systemPrompt, roleHist) || ''
-      setExchange(prev => [...prev, { role: 'buddy', text: reply }])
-      speak(reply, null, () => setAvatarState('listening'))
+      const raw = await aiAsk(userLine, systemPrompt, roleHist) || ''
+      // Parse structured response
+      const replyMatch = raw.match(/REPLY:\s*(.+?)(?=\nERROR:|$)/s)
+      const errorMatch = raw.match(/ERROR:\s*(.+?)(?=\nFIX:|$)/s)
+      const fixMatch   = raw.match(/FIX:\s*(.+?)(?=\nNOTE:|$)/s)
+      const noteMatch  = raw.match(/NOTE:\s*(.+?)$/s)
+      const replyText = replyMatch ? replyMatch[1].trim() : raw
+      const correction = errorMatch && errorMatch[1].trim().toLowerCase() !== 'none'
+        ? { error: errorMatch[1].trim(), fix: fixMatch?.[1].trim() || '', note: noteMatch?.[1].trim() || '' }
+        : null
+      setExchange(prev => [...prev, { role: 'buddy', text: replyText, correction }])
+      speak(replyText, null, () => setAvatarState('listening'))
     } catch { setAvatarState('idle') }
     finally { setLoading(false) }
   }
@@ -747,9 +748,18 @@ function RolePlayMode({ day, setBuddyMessages, setAvatarState }) {
       </div>
       <div className="el-roleplay-exchange">
         {exchange.map((e, i) => (
-          <div key={i} className={`el-roleplay-line ${e.role}`}>
-            {e.role === 'buddy' && <button className="el-speak-btn" onClick={() => speak(e.text)} style={{ marginLeft: 4 }}>🔊</button>}
-            <span className="el-roleplay-text">{e.text}</span>
+          <div key={i}>
+            <div className={`el-roleplay-line ${e.role}`}>
+              {e.role === 'buddy' && <button className="el-speak-btn" onClick={() => speak(e.text)} style={{ marginLeft: 4 }}>🔊</button>}
+              <span className="el-roleplay-text">{e.text}</span>
+            </div>
+            {e.role === 'buddy' && e.correction && (
+              <div className="el-rp-correction-wrap">
+                <div className="el-rp-correction-error">❌ {e.correction.error}</div>
+                <div className="el-rp-correction-fix">✅ {e.correction.fix}</div>
+                {e.correction.note && <div className="el-rp-correction-note">{e.correction.note}</div>}
+              </div>
+            )}
           </div>
         ))}
         {loading && <div className="el-roleplay-line buddy"><span className="el-buddy-typing"><span/><span/><span/></span></div>}
@@ -901,11 +911,6 @@ function GrammarComp({ day, setBuddyMessages, setAvatarState }) {
           })}
         </div>
       ))}
-
-      <button className="el-roleplay-toggle" onClick={() => setRolePlay(r => !r)}>
-        🎭 {rolePlay ? 'إخفاء وضع التمثيل' : 'تدرّب بالتمثيل اللغوي'}
-      </button>
-      {rolePlay && <RolePlayMode day={day} setBuddyMessages={setBuddyMessages} setAvatarState={setAvatarState} />}
 
       <GrammarPatternFlashcards patterns={g.patterns} />
       <GrammarDetective day={day} />
@@ -1495,21 +1500,58 @@ CORRECTION: [الكلمة/العبارة الخاطئة] → [الصواب] | Re
 /* ─── Grammar Detective ─── */
 function GrammarDetective({ day }) {
   const [open, setOpen] = useState(false)
-  const [sentences] = useState(() => {
-    const patterns = day.grammar?.patterns || []
-    return [
-      { text: 'She go to school every day and studyes hard.', errors: ['go', 'studyes'], fixes: ['goes', 'studies'], hint: 'فعل المضارع مع he/she/it يأخذ s' },
-      { text: 'I have went to Paris last year with my family.', errors: ['have went'], fixes: ['went'], hint: 'الفعل went استخدم وحده في الماضي البسيط' },
-      { text: 'There is many students in the classroom today.', errors: ['is'], fixes: ['are'], hint: 'students جمع → نستخدم are' },
-    ]
-  })
-  const [clicked, setClicked] = useState({}) // {sentIdx_wordIdx: 'wrong'|'right'}
+  const [difficulty, setDifficulty] = useState('medium')
+  const [count, setCount] = useState(3)
+  const [sentences, setSentences] = useState([])
+  const [clicked, setClicked] = useState({})
   const [revealed, setRevealed] = useState({})
+  const [loading, setLoading] = useState(false)
+  const [generated, setGenerated] = useState(false)
+
+  const LEVELS = [
+    { key: 'easy', label: '🟢 سهل' },
+    { key: 'medium', label: '🟡 متوسط' },
+    { key: 'hard', label: '🔴 صعب' },
+  ]
+
+  const generate = async () => {
+    setLoading(true)
+    setSentences([])
+    setClicked({})
+    setRevealed({})
+    setGenerated(false)
+    const patterns = day.grammar?.patterns?.map(p => p.name).join(', ') || ''
+    const vocab = day.vocabulary?.words?.slice(0, 8).map(w => w.word).join(', ') || ''
+    const diffDesc = difficulty === 'easy'
+      ? 'simple grammar mistakes (subject-verb agreement, basic tenses)'
+      : difficulty === 'medium'
+      ? 'intermediate mistakes (wrong tense, misused preposition, article error)'
+      : 'advanced mistakes (complex tense confusion, subtle word choice errors, conditional structure)'
+    const prompt = `Generate exactly ${count} English sentences, each containing exactly ONE grammatical error.
+Difficulty: ${diffDesc}.
+Grammar patterns from today's lesson: ${patterns}.
+Vocabulary from today's lesson (try to use some): ${vocab}.
+
+Return ONLY a JSON array, no extra text:
+[
+  {"text": "sentence with error", "error": "wrong word or phrase", "fix": "correct word or phrase", "hint": "شرح بالعربية في جملة واحدة قصيرة"}
+]`
+    try {
+      const raw = await aiAsk(prompt, 'You are a grammar exercise generator. Return only valid JSON arrays, no markdown.')
+      const match = raw.match(/\[[\s\S]*\]/)
+      if (match) {
+        const parsed = JSON.parse(match[0])
+        setSentences(parsed.slice(0, count))
+        setGenerated(true)
+      }
+    } catch { }
+    setLoading(false)
+  }
 
   const handleWord = (sIdx, wIdx, word, sentence) => {
     const key = `${sIdx}_${wIdx}`
     if (clicked[key]) return
-    const isError = sentence.errors.some(e => word.toLowerCase().includes(e.toLowerCase()))
+    const isError = word.toLowerCase().replace(/[.,!?]/, '').includes(sentence.error.toLowerCase().split(' ')[0])
     setClicked(c => ({ ...c, [key]: isError ? 'right' : 'wrong' }))
   }
 
@@ -1520,46 +1562,64 @@ function GrammarDetective({ day }) {
       </button>
       {open && (
         <>
-          <div className="el-detective-desc">اضغط على الكلمة التي تعتقد أنها خاطئة نحوياً في كل جملة:</div>
-          {sentences.map((s, sIdx) => {
-            const words = s.text.split(' ')
-            const foundAll = s.errors.every(err =>
-              Object.entries(clicked).some(([k, v]) => k.startsWith(`${sIdx}_`) && v === 'right')
-            )
-            return (
-              <div key={sIdx} className="el-detective-sentence">
-                <div className="el-detective-text">
-                  {words.map((w, wIdx) => {
-                    const key = `${sIdx}_${wIdx}`
-                    const st = clicked[key]
-                    return (
-                      <span key={wIdx}>
-                        <span
-                          className={`el-detective-word${st === 'right' ? ' clicked-right' : st === 'wrong' ? ' clicked-wrong' : ''}`}
-                          onClick={() => handleWord(sIdx, wIdx, w, s)}
-                        >{w}</span>
-                        {' '}
-                      </span>
-                    )
-                  })}
-                </div>
-                {foundAll && (
-                  <div className="el-detective-result found">
-                    ✅ وجدت الخطأ! الصواب: <strong>{s.fixes.join(' / ')}</strong> — {s.hint}
+          <div className="el-detective-settings">
+            <div className="el-detective-row">
+              <span className="el-detective-label">المستوى:</span>
+              {LEVELS.map(l => (
+                <button key={l.key}
+                  className={`el-family-chip${difficulty === l.key ? ' active' : ''}`}
+                  onClick={() => setDifficulty(l.key)}>{l.label}</button>
+              ))}
+            </div>
+            <div className="el-detective-row">
+              <span className="el-detective-label">عدد الجمل:</span>
+              {[2, 3, 5, 7].map(n => (
+                <button key={n}
+                  className={`el-family-chip${count === n ? ' active' : ''}`}
+                  onClick={() => setCount(n)}>{n}</button>
+              ))}
+            </div>
+            <button className="el-nav-btn primary" style={{ marginTop: 8 }} onClick={generate} disabled={loading}>
+              {loading ? '⏳ جارٍ التوليد...' : '✨ توليد تمرين جديد'}
+            </button>
+          </div>
+          {generated && sentences.length > 0 && (
+            <>
+              <div className="el-detective-desc">اضغط على الكلمة الخاطئة في كل جملة:</div>
+              {sentences.map((s, sIdx) => {
+                const words = s.text.split(' ')
+                const foundAll = Object.entries(clicked).some(([k, v]) => k.startsWith(`${sIdx}_`) && v === 'right')
+                return (
+                  <div key={sIdx} className="el-detective-sentence">
+                    <div className="el-detective-text">
+                      {words.map((w, wIdx) => {
+                        const key = `${sIdx}_${wIdx}`
+                        const st = clicked[key]
+                        return (
+                          <span key={wIdx}>
+                            <span
+                              className={`el-detective-word${st === 'right' ? ' clicked-right' : st === 'wrong' ? ' clicked-wrong' : ''}`}
+                              onClick={() => handleWord(sIdx, wIdx, w, s)}
+                            >{w}</span>{' '}
+                          </span>
+                        )
+                      })}
+                    </div>
+                    {foundAll ? (
+                      <div className="el-detective-result found">
+                        ✅ الصواب: <strong>{s.fix}</strong> — {s.hint}
+                      </div>
+                    ) : (
+                      <button className="el-nav-btn" style={{ marginTop: 8, padding: '4px 12px', fontSize: '.78rem' }}
+                        onClick={() => setRevealed(r => ({ ...r, [sIdx]: true }))}>
+                        {revealed[sIdx] ? `💡 الخطأ: "${s.error}" → "${s.fix}" — ${s.hint}` : '💡 أرني الخطأ'}
+                      </button>
+                    )}
                   </div>
-                )}
-                {!foundAll && (
-                  <button
-                    className="el-nav-btn"
-                    style={{ marginTop: 8, padding: '4px 12px', fontSize: '.78rem' }}
-                    onClick={() => setRevealed(r => ({ ...r, [sIdx]: true }))}
-                  >
-                    {revealed[sIdx] ? `💡 الخطأ في: ${s.errors.join(', ')} → ${s.fixes.join(', ')}` : '💡 أرني الخطأ'}
-                  </button>
-                )}
-              </div>
-            )
-          })}
+                )
+              })}
+            </>
+          )}
         </>
       )}
     </div>
@@ -1630,7 +1690,15 @@ Use vocabulary from today's lesson naturally. Challenge the student to use bette
                   const clean = m.text.replace('[STRONG]', '').replace('[WEAK]', '')
                   return (
                     <div key={i} className={`el-debate-msg ${m.role}`}>
-                      {clean}
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                        <span style={{ flex: 1 }}>{clean}</span>
+                        {m.role === 'ai' && (
+                          <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                            <button className="el-speak-btn" title="استمعي" onClick={() => speak(clean)}>🔊</button>
+                            <button className="el-speak-btn" title="أوقف" onClick={() => window.speechSynthesis.cancel()}>⏹</button>
+                          </div>
+                        )}
+                      </div>
                       {m.role === 'ai' && isStrong && <div><span className="el-debate-score strong">💪 حجة قوية</span></div>}
                       {m.role === 'ai' && isWeak && <div><span className="el-debate-score weak">⚠️ حجة ضعيفة</span></div>}
                     </div>
