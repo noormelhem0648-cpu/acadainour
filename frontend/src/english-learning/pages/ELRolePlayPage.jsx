@@ -85,28 +85,29 @@ export default function ELRolePlayPage({ darkMode, setDarkMode }) {
     setLoading(true)
     setRoundCount(r => r + 1)
 
-    const systemPrompt = `You are playing the role of: ${topic.aiRole}. Personality: ${topic.aiPersonality}.
-Setting: ${topic.setting}
-Day vocabulary focus: ${topic.focusWords.join(', ')}
-Student's level: ${levelId} - Day ${dayId}: ${day?.title || ''}
+    const systemPrompt = `You are: ${topic.aiRole}. Personality: ${topic.aiPersonality}. Setting: ${topic.setting}.
+Focus words: ${topic.focusWords.join(', ')}.
+CRITICAL: You MUST respond using ONLY this exact 4-line format — no other text:
+REPLY: [your 1-2 sentence in-character response]
+ERROR: [the grammar/spelling mistake in student's message, or "none"]
+FIX: [the corrected version, or "none"]
+NOTE: [one short Arabic tip]`
 
-RULES:
-1. Stay completely in character as ${topic.aiRole}. Keep responses short (2-3 sentences).
-2. Encourage use of today's vocabulary: ${topic.focusWords.join(', ')}
-3. After your in-character response, check the student's last message for grammar/spelling mistakes.
-4. Output EXACTLY in this format (no deviation):
-REPLY: your in-character response here
-ERROR: the wrong word or phrase the student wrote (or "none" if correct)
-FIX: the correct version
-NOTE: one short Arabic explanation`
+    const wrappedMessage = `Student said: "${text}"
+
+Respond in EXACTLY this format:
+REPLY: [in-character reply, 1-2 sentences]
+ERROR: [wrong word/phrase from student, or "none"]
+FIX: [correct version, or "none"]
+NOTE: [Arabic tip in one sentence]`
 
     try {
       const res = await fetch(`${API}/english-tutor/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: text,
-          history: newMessages.slice(-8).map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.content })),
+          message: wrappedMessage,
+          history: newMessages.slice(-6).map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.content })),
           subject_info: systemPrompt
         })
       })
