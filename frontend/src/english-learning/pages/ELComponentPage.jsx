@@ -918,7 +918,6 @@ function GrammarComp({ day, levelId, setBuddyMessages, setAvatarState }) {
 
       <GrammarPatternFlashcards patterns={g.patterns} />
       <GrammarDetective day={day} levelId={levelId} />
-      <DebateMode day={day} levelId={levelId} />
     </div>
   )
 }
@@ -1645,120 +1644,6 @@ HINT: [شرح عربي قصير]
   )
 }
 
-/* ─── Debate Mode ─── */
-const LEVEL_LANG = {
-  1: { cefr: 'A1', desc: 'Use VERY simple English only. Short sentences. Basic vocabulary (colors, family, numbers). No complex words.' },
-  2: { cefr: 'A2', desc: 'Use simple everyday English. Short clear sentences. Common words only.' },
-  3: { cefr: 'B1', desc: 'Use intermediate English. Normal sentences. Avoid academic or rare vocabulary.' },
-  4: { cefr: 'B2', desc: 'Use upper-intermediate English. Some complex sentences allowed.' },
-  5: { cefr: 'C1', desc: 'Use advanced English with rich vocabulary and complex structures.' },
-  6: { cefr: 'C2', desc: 'Use sophisticated English. Complex arguments, nuanced language.' },
-}
-
-function DebateMode({ day, levelId }) {
-  const [open, setOpen] = useState(false)
-  const [stance, setStance] = useState(null)
-  const [msgs, setMsgs] = useState([])
-  const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
-  const endRef = useRef(null)
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [msgs])
-
-  const lvl = LEVEL_LANG[Number(levelId)] || LEVEL_LANG[3]
-  const topic = `"${day.title}" — هل هذا الموضوع مهم في حياتنا اليومية؟`
-  const vocab = day.vocabulary?.words?.slice(0, 8).map(w => w.word).join(', ') || ''
-
-  const buildSys = (stance) => `You are a debate partner for an English learner at CEFR level ${lvl.cefr}.
-Language rule: ${lvl.desc}
-Topic: "${day.title}". The student argues ${stance === 'for' ? 'FOR' : 'AGAINST'} this topic. You argue the OPPOSITE side.
-Rules:
-- Keep your response to 2 sentences MAX
-- Use only vocabulary appropriate for ${lvl.cefr} level${vocab ? `. Today's lesson words (use some): ${vocab}` : ''}
-- After each student argument, start with [STRONG] or [WEAK] then one short Arabic sentence of feedback
-- Never use words the student wouldn't know at ${lvl.cefr}`
-
-  const startDebate = async (chosenStance) => {
-    setStance(chosenStance)
-    setMsgs([])
-    setLoading(true)
-    try {
-      const debateReply = await aiAsk('Start the debate with your opening argument.', buildSys(chosenStance))
-      setMsgs([{ role: 'ai', text: debateReply || 'Let us begin...' }])
-    } catch { setMsgs([{ role: 'ai', text: 'تعذّر الاتصال.' }]) }
-    finally { setLoading(false) }
-  }
-
-  const sendArg = async () => {
-    if (!input.trim() || loading) return
-    const userText = input; setInput('')
-    const history = [...msgs, { role: 'user', text: userText }]
-    setMsgs(history)
-    setLoading(true)
-    try {
-      const histForAI = history.slice(0,-1).map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.text }))
-      const debArg = await aiAsk(userText, buildSys(stance), histForAI)
-      setMsgs(h => [...h, { role: 'ai', text: debArg || '...' }])
-    } catch { setMsgs(h => [...h, { role: 'ai', text: 'تعذّر الاتصال.' }]) }
-    finally { setLoading(false) }
-  }
-
-  return (
-    <div className="el-debate-section">
-      <button className="el-roleplay-toggle" style={{ marginBottom: open ? 14 : 0 }} onClick={() => setOpen(o => !o)}>
-        🗣️ {open ? 'إغلاق Debate Mode' : 'Debate Mode — جادل الـ AI باللغة الإنجليزية'}
-      </button>
-      {open && (
-        <>
-          {!stance ? (
-            <div className="el-debate-stance">
-              <button className="el-debate-stance-btn" onClick={() => startDebate('for')}>👍 أنا مع الفكرة</button>
-              <button className="el-debate-stance-btn" onClick={() => startDebate('against')}>👎 أنا ضد الفكرة</button>
-            </div>
-          ) : (
-            <>
-              <div className="el-debate-msgs">
-                {msgs.map((m, i) => {
-                  const isStrong = m.text.includes('[STRONG]')
-                  const isWeak = m.text.includes('[WEAK]')
-                  const clean = m.text.replace('[STRONG]', '').replace('[WEAK]', '')
-                  return (
-                    <div key={i} className={`el-debate-msg ${m.role}`}>
-                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
-                        <span style={{ flex: 1 }}>{clean}</span>
-                        {m.role === 'ai' && (
-                          <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
-                            <button className="el-speak-btn" title="استمعي" onClick={() => speak(clean)}>🔊</button>
-                            <button className="el-speak-btn" title="أوقف" onClick={() => window.speechSynthesis.cancel()}>⏹</button>
-                          </div>
-                        )}
-                      </div>
-                      {m.role === 'ai' && isStrong && <div><span className="el-debate-score strong">💪 حجة قوية</span></div>}
-                      {m.role === 'ai' && isWeak && <div><span className="el-debate-score weak">⚠️ حجة ضعيفة</span></div>}
-                    </div>
-                  )
-                })}
-                {loading && <div className="el-debate-msg ai"><span className="el-buddy-typing"><span/><span/><span/></span></div>}
-                <div ref={endRef} />
-              </div>
-              <div className="el-buddy-input-row" style={{ padding: 0, border: 'none', background: 'transparent', gap: 6 }}>
-                <input
-                  className="el-buddy-input"
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && sendArg()}
-                  placeholder="اكتب حجتك بالإنجليزية..."
-                  disabled={loading}
-                />
-                <button className="el-buddy-send" onClick={sendArg} disabled={loading || !input.trim()}>↑</button>
-              </div>
-              <button className="el-nav-btn" style={{ marginTop: 8, fontSize: '.8rem' }} onClick={() => { setStance(null); setMsgs([]) }}>🔄 نقاش جديد</button>
-            </>
-          )}
-        </>
-      )}
-    </div>
-  )
-}
 
 /* ─── Writing Upgrade (3 levels) ─── */
 function WritingUpgrade({ text }) {
