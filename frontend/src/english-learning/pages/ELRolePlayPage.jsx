@@ -85,21 +85,26 @@ export default function ELRolePlayPage({ darkMode, setDarkMode }) {
     setLoading(true)
     setRoundCount(r => r + 1)
 
-    const systemPrompt = `You are: ${topic.aiRole}. Personality: ${topic.aiPersonality}. Setting: ${topic.setting}.
-Focus words: ${topic.focusWords.join(', ')}.
-CRITICAL: You MUST respond using ONLY this exact 4-line format — no other text:
-REPLY: [your 1-2 sentence in-character response]
-ERROR: [the grammar/spelling mistake in student's message, or "none"]
-FIX: [the corrected version, or "none"]
-NOTE: [one short Arabic tip]`
+    const systemPrompt = `You are a language roleplay assistant. Always respond using the exact 4-line labeled format shown in the user message. Never add extra text.`
 
-    const wrappedMessage = `Student said: "${text}"
+    const recentHistory = newMessages.slice(-5)
+      .map(m => `${m.role === 'ai' ? topic.aiRole : 'Student'}: ${m.content}`)
+      .join('\n')
 
-Respond in EXACTLY this format:
-REPLY: [in-character reply, 1-2 sentences]
-ERROR: [wrong word/phrase from student, or "none"]
-FIX: [correct version, or "none"]
-NOTE: [Arabic tip in one sentence]`
+    const wrappedMessage = `[ROLEPLAY]
+You are ${topic.aiRole}. ${topic.aiPersonality}. Setting: ${topic.setting}.
+Vocabulary to encourage: ${topic.focusWords.join(', ')}.
+
+Recent conversation:
+${recentHistory}
+
+The student just said: "${text}"
+
+Complete this template — replace each <...> with your answer, keep the labels exactly as written:
+REPLY: <your 1-2 sentence in-character response as ${topic.aiRole}>
+ERROR: <exact wrong word or phrase from "${text}", or the word none>
+FIX: <the corrected version of that word/phrase, or the word none>
+NOTE: <one Arabic sentence explaining the correction>`
 
     try {
       const res = await fetch(`${API}/english-tutor/stream`, {
@@ -107,7 +112,7 @@ NOTE: [Arabic tip in one sentence]`
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: wrappedMessage,
-          history: newMessages.slice(-6).map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.content })),
+          history: [],
           subject_info: systemPrompt
         })
       })
