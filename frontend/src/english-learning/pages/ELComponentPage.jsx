@@ -573,14 +573,14 @@ function TeacherCorner({ words, dayTitle }) {
 
   const wordList = words.map((w, i) => `${i + 1}. ${w.word} (${w.arabic}) — ${w.ipa}`).join('\n')
 
-  const systemPrompt = `أنت أستاذ لغة إنجليزية. درس اليوم: "${dayTitle}". كلمات الدرس: ${wordList}
+  const systemPrompt = `أنت أستاذ لغة إنجليزية مباشر وموجز. درس اليوم: "${dayTitle}". كلمات الدرس: ${wordList}
 
-قواعد صارمة للرد:
-- الرد بالعربية دائماً ما لم يطلب الطالب الإنجليزية
-- اجعل ردك قصيراً ومركزاً: 3-5 نقاط كحد أقصى
-- استخدم نقاط واضحة (•) وليس فقرات طويلة
-- مثال واحد فقط بالإنجليزية مع ترجمته
-- لا تتجاوز 120 كلمة في الرد الواحد`
+قواعد الرد — اتبعها حرفياً:
+- الرد بالعربية فقط ما لم يُطلب غير ذلك
+- 3 نقاط بالحد الأقصى، كل نقطة سطر واحد
+- مثال إنجليزي واحد فقط إذا لزم
+- ممنوع: فقرات طويلة، مقدمات، خواتيم، عبارات مثل "هاي إجابة عامة" أو "من معرفة أكاديمية"
+- ابدأ مباشرة بالنقطة الأولى بدون ترحيب`
 
   const send = async () => {
     if (!input.trim() || loading) return
@@ -1720,47 +1720,56 @@ function AILiveReaction({ score }) {
 /* ─── Vocabulary Story Generator ─── */
 function VocabStoryGen({ words, dayTitle, allLearnedWords = [] }) {
   const [open, setOpen] = useState(false)
-  const [genre, setGenre] = useState('قصة مغامرة')
-  const [story, setStory] = useState('')
+  const [genre, setGenre] = useState('حوار حياة يومية')
+  const [lines, setLines] = useState([])   // [{speaker, text}]
   const [loading, setLoading] = useState(false)
   const [usedWords, setUsedWords] = useState([])
 
-  const genres = ['قصة مغامرة', 'حوار حياة يومية', 'تقرير إخباري', 'قصة رومانسية']
+  const genres = ['حوار حياة يومية', 'قصة مغامرة', 'تقرير إخباري', 'قصة رومانسية']
+  const isDialogue = genre === 'حوار حياة يومية' || genre === 'قصة رومانسية'
 
   const generate = async () => {
     setLoading(true)
-    setStory('')
+    setLines([])
     setUsedWords([])
-    const wordList = words.slice(0, 8).map(w => w.word).join(', ')
+    const wordList = words.slice(0, 10).map(w => w.word).join(', ')
     try {
-      const storyText = await aiAsk(
-        `Write a short ${genre} story (5-7 sentences) naturally using these words: ${wordList}. Make the story engaging and memorable. Write in English only.`,
-        `You are a creative English storyteller. Use ALL the given words naturally in context. Topic theme: ${dayTitle}`
-      )
-      if (!storyText) { setStory('الخادم لم يُرجع نصاً. جربي مرة أخرى.'); return }
-      setStory(storyText)
-      setUsedWords(words.filter(w => storyText.toLowerCase().includes(w.word.toLowerCase())).map(w => w.word))
+      const prompt = isDialogue
+        ? `Write a short dialogue (6-8 exchanges) between two people named Sarah and Mark. Use these English words naturally: ${wordList}. Format EXACTLY like this, one line per turn:\nSarah: ...\nMark: ...\nSarah: ...\nNo extra text before or after.`
+        : `Write a short ${genre} (5-7 sentences) using these English words naturally: ${wordList}. Format as a dialogue between a narrator and characters when possible. Each paragraph on its own line. English only.`
+      const raw = await aiAsk(prompt,
+        `You are a creative English writer for language learners. Topic: ${dayTitle}. Use ALL given words. Follow the format exactly.`)
+      if (!raw) { setLines([{ speaker: '', text: 'الخادم لم يُرجع نصاً. جربي مرة أخرى.' }]); return }
+      // Parse lines
+      const parsed = raw.split('\n').filter(l => l.trim()).map(l => {
+        const m = l.match(/^([A-Za-z؀-ۿ]+):\s*(.+)$/)
+        return m ? { speaker: m[1], text: m[2] } : { speaker: '', text: l.trim() }
+      })
+      setLines(parsed)
+      const allText = raw.toLowerCase()
+      setUsedWords(words.filter(w => allText.includes(w.word.toLowerCase())).map(w => w.word))
     } catch (e) {
-      setStory('تعذّر إنشاء القصة. تحقق من الإنترنت. (' + (e?.message || '') + ')')
+      setLines([{ speaker: '', text: 'تعذّر إنشاء القصة. (' + (e?.message || '') + ')' }])
     } finally { setLoading(false) }
   }
 
-  const highlight = (text) => {
-    if (!usedWords.length) return <span>{text}</span>
+  const highlightLine = (text) => {
+    if (!usedWords.length) return text
     const escaped = usedWords.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
     const pattern = new RegExp(`\\b(${escaped.join('|')})\\b`, 'gi')
-    const parts = text.split(pattern)
-    return parts.map((part, i) =>
+    return text.split(pattern).map((part, i) =>
       usedWords.some(w => w.toLowerCase() === part.toLowerCase())
         ? <strong key={i} className="el-story-highlight">{part}</strong>
         : <span key={i}>{part}</span>
     )
   }
 
+  const SPEAKER_COLORS = { Sarah: '#c9858a', Mark: '#3b82f6', Narrator: '#16a34a' }
+
   return (
     <div className="el-story-section">
       <button className="el-roleplay-toggle" style={{ marginBottom: open ? 14 : 0 }} onClick={() => setOpen(o => !o)}>
-        📖 {open ? 'إغلاق مولّد القصص' : 'Vocabulary Story Generator — تعلّم الكلمات بقصة'}
+        📖 {open ? 'إغلاق مولّد القصص' : 'Vocabulary Story Generator — تعلّم الكلمات بمحادثة'}
       </button>
       {open && (
         <>
@@ -1771,16 +1780,24 @@ function VocabStoryGen({ words, dayTitle, allLearnedWords = [] }) {
             ))}
           </div>
           <button className="el-nav-btn primary" onClick={generate} disabled={loading}>
-            {loading ? '⏳ يكتب القصة...' : '✨ اكتب لي قصة'}
+            {loading ? '⏳ يكتب...' : '✨ اكتب لي قصة'}
           </button>
-          {story && (
+          {lines.length > 0 && (
             <>
-              <div className="el-story-text">
-                {typeof story === 'string' ? highlight(story) : story}
+              <div className="el-story-dialogue">
+                {lines.map((l, i) => (
+                  <div key={i} className={`el-story-line${l.speaker ? ' has-speaker' : ''}`}
+                    style={{ '--speaker-color': SPEAKER_COLORS[l.speaker] || '#6366f1' }}>
+                    {l.speaker && <span className="el-story-speaker">{l.speaker}</span>}
+                    <span className="el-story-line-text">{highlightLine(l.text)}</span>
+                  </div>
+                ))}
               </div>
-              <div style={{ marginTop: 8, fontSize: '.8rem', color: 'var(--el-muted)' }}>
-                الكلمات المستخدمة: {usedWords.join(', ') || 'يُعثر عليها في النص'}
-              </div>
+              {usedWords.length > 0 && (
+                <div className="el-story-words-used">
+                  ✅ الكلمات المستخدمة: {usedWords.map((w, i) => <strong key={i}>{w}{i < usedWords.length-1 ? '، ' : ''}</strong>)}
+                </div>
+              )}
             </>
           )}
         </>

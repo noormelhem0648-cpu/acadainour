@@ -1262,6 +1262,12 @@
 .el-app .el-story-setting-btn.active { background: var(--el-accent); color: #fff; border-color: var(--el-accent); }
 .el-app .el-story-text { font-size: .9rem; line-height: 1.9; color: var(--el-text); white-space: pre-wrap; background: var(--el-bg3); border-radius: 10px; padding: 14px; margin-top: 12px; }
 .el-app .el-story-highlight { color: var(--el-accent); font-weight: 700; }
+.el-app .el-story-dialogue { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.el-app .el-story-line { display: flex; flex-direction: column; gap: 3px; background: var(--el-bg3); border-radius: 10px; padding: 10px 14px; border-right: 3px solid var(--el-border); }
+.el-app .el-story-line.has-speaker { border-right-color: var(--speaker-color, var(--el-accent)); }
+.el-app .el-story-speaker { font-size: .72rem; font-weight: 700; color: var(--speaker-color, var(--el-accent)); letter-spacing: .5px; }
+.el-app .el-story-line-text { font-size: .92rem; line-height: 1.7; color: var(--el-text); }
+.el-app .el-story-words-used { margin-top: 10px; font-size: .8rem; color: var(--el-muted); background: var(--el-bg3); border-radius: 8px; padding: 8px 12px; }
 
 /* ── Debate Mode ── */
 .el-app .el-debate-section { background: linear-gradient(135deg, #fef3c7, var(--el-bg2)); border: 1.5px solid #f59e0b; border-radius: var(--el-radius); padding: 18px; margin-top: 20px; }
