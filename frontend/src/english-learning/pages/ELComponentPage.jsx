@@ -64,7 +64,7 @@ function TTSBtn({ text, lang = 'en-US', ttsKey, playingKey, trigger, label }) {
       onClick={() => trigger(text, lang, k)}
       title={lang === 'en-GB' ? 'British English' : 'American English'}
     >
-      {isPlaying ? '⏹' : label || (lang === 'en-GB' ? '🇬🇧' : '🇺🇸')}
+      {isPlaying ? '⏹' : label || (lang === 'en-GB' ? 'UK 🔊' : 'US 🔊')}
     </button>
   )
 }
@@ -385,8 +385,8 @@ function VocabComp({ day, levelId, dayId, progress }) {
 
       {/* accent legend */}
       <div className="el-tts-legend">
-        <span>🇺🇸 = American English</span>
-        <span>🇬🇧 = British English</span>
+        <span>US = American English</span>
+        <span>UK = British English</span>
         <span style={{ opacity: .6, fontSize: '0.8rem' }}>اضغط مرة ثانية لإيقاف الصوت ⏹</span>
       </div>
 
@@ -396,7 +396,7 @@ function VocabComp({ day, levelId, dayId, progress }) {
             <thead>
               <tr>
                 <th>الكلمة</th>
-                <th>🇺🇸 🇬🇧</th>
+                <th>US / UK</th>
                 <th>IPA</th>
                 <th>المعنى</th>
                 <th>النطق بالعربي</th>
@@ -423,8 +423,8 @@ function VocabComp({ day, levelId, dayId, progress }) {
                     <td>
                       <em>{w.example}</em>
                       <div className="el-tts-pair" style={{ marginTop: 4 }}>
-                        <TTSBtn text={w.example} lang="en-US" ttsKey={`us-ex-${i}`} playingKey={playingKey} trigger={trigger} label="🇺🇸 جملة" />
-                        <TTSBtn text={w.example} lang="en-GB" ttsKey={`gb-ex-${i}`} playingKey={playingKey} trigger={trigger} label="🇬🇧 جملة" />
+                        <TTSBtn text={w.example} lang="en-US" ttsKey={`us-ex-${i}`} playingKey={playingKey} trigger={trigger} label="US جملة" />
+                        <TTSBtn text={w.example} lang="en-GB" ttsKey={`gb-ex-${i}`} playingKey={playingKey} trigger={trigger} label="UK جملة" />
                       </div>
                     </td>
                     <td className="el-text-muted">{w.exampleAr}</td>
@@ -509,8 +509,8 @@ function VocabComp({ day, levelId, dayId, progress }) {
             <div key={i} className="el-mimic-item">
               <span className="el-mimic-text">{phrase}</span>
               <div className="el-tts-pair">
-                <TTSBtn text={phrase} lang="en-US" ttsKey={`us-mimic-${i}`} playingKey={playingKey} trigger={trigger} label="🇺🇸" />
-                <TTSBtn text={phrase} lang="en-GB" ttsKey={`gb-mimic-${i}`} playingKey={playingKey} trigger={trigger} label="🇬🇧" />
+                <TTSBtn text={phrase} lang="en-US" ttsKey={`us-mimic-${i}`} playingKey={playingKey} trigger={trigger} label="US 🔊" />
+                <TTSBtn text={phrase} lang="en-GB" ttsKey={`gb-mimic-${i}`} playingKey={playingKey} trigger={trigger} label="UK 🔊" />
               </div>
             </div>
           ))}
@@ -955,8 +955,8 @@ function WordLookupPopup({ word, rect, vocabWords, onClose }) {
             <div className="el-lookup-arabic">{match.arabic}</div>
             <div className="el-lookup-phonetic">نطق: {match.phonetic}</div>
             <div className="el-tts-pair" style={{ margin: '6px 0' }}>
-              <TTSBtn text={match.word} lang="en-US" ttsKey="lu-us" playingKey={playingKey} trigger={trigger} label="🇺🇸" />
-              <TTSBtn text={match.word} lang="en-GB" ttsKey="lu-gb" playingKey={playingKey} trigger={trigger} label="🇬🇧" />
+              <TTSBtn text={match.word} lang="en-US" ttsKey="lu-us" playingKey={playingKey} trigger={trigger} label="US 🔊" />
+              <TTSBtn text={match.word} lang="en-GB" ttsKey="lu-gb" playingKey={playingKey} trigger={trigger} label="UK 🔊" />
             </div>
             <div className="el-lookup-example">{match.example}</div>
           </>
@@ -964,8 +964,8 @@ function WordLookupPopup({ word, rect, vocabWords, onClose }) {
           <>
             <div className="el-lookup-arabic" style={{ color: 'var(--el-muted)', fontSize: '.85rem' }}>الكلمة ليست في قاموس اليوم</div>
             <div className="el-tts-pair" style={{ margin: '6px 0' }}>
-              <TTSBtn text={word} lang="en-US" ttsKey="lu-us" playingKey={playingKey} trigger={trigger} label="🇺🇸 نطق" />
-              <TTSBtn text={word} lang="en-GB" ttsKey="lu-gb" playingKey={playingKey} trigger={trigger} label="🇬🇧 نطق" />
+              <TTSBtn text={word} lang="en-US" ttsKey="lu-us" playingKey={playingKey} trigger={trigger} label="US نطق" />
+              <TTSBtn text={word} lang="en-GB" ttsKey="lu-gb" playingKey={playingKey} trigger={trigger} label="UK نطق" />
             </div>
           </>
         )}
@@ -1132,8 +1132,8 @@ function ReadingComp({ day, levelId, dayId }) {
       >
         <HighlightedText text={r.passage} highlights={highlights} />
         <div className="el-tts-pair" style={{ marginTop: 10 }}>
-          <TTSBtn text={r.passage} lang="en-US" ttsKey="passage-us" playingKey={playingKey} trigger={trigger} label="🇺🇸 استمع" />
-          <TTSBtn text={r.passage} lang="en-GB" ttsKey="passage-gb" playingKey={playingKey} trigger={trigger} label="🇬🇧 استمع" />
+          <TTSBtn text={r.passage} lang="en-US" ttsKey="passage-us" playingKey={playingKey} trigger={trigger} label="US استمع" />
+          <TTSBtn text={r.passage} lang="en-GB" ttsKey="passage-gb" playingKey={playingKey} trigger={trigger} label="UK استمع" />
         </div>
       </div>
 
