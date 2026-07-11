@@ -1757,16 +1757,15 @@ function VocabStoryGen({ words, dayTitle, allLearnedWords = [] }) {
   }
 
   const highlight = (text) => {
-    if (!usedWords.length) return text
-    let result = text
-    usedWords.forEach(w => {
-      result = result.replace(new RegExp(`\\b${w}\\b`, 'gi'), `__BOLD__${w}__/BOLD__`)
-    })
-    return result.split(/(__)/).map((part, i) => {
-      if (part.startsWith('BOLD__')) return <strong key={i} className="el-story-highlight">{part.slice(6)}</strong>
-      if (part === '__/BOLD__') return null
-      return <span key={i}>{part}</span>
-    })
+    if (!usedWords.length) return <span>{text}</span>
+    const escaped = usedWords.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    const pattern = new RegExp(`\\b(${escaped.join('|')})\\b`, 'gi')
+    const parts = text.split(pattern)
+    return parts.map((part, i) =>
+      usedWords.some(w => w.toLowerCase() === part.toLowerCase())
+        ? <strong key={i} className="el-story-highlight">{part}</strong>
+        : <span key={i}>{part}</span>
+    )
   }
 
   return (
@@ -1818,16 +1817,16 @@ function TeachMeMode({ words, dayTitle, allLearnedWords = [] }) {
     setScore(null)
     setLoading(true)
     try {
-      const sys = `You are a student who just learned the word "${word.word}" (${word.arabic}) in a lesson about "${dayTitle}".
-Pretend you forgot what it means. Ask the student to explain it to you in English.
-After their explanation, give a score /10 and 1 line of feedback in Arabic.
-Ask ONE follow-up question to test deeper understanding.`
+      const sys = `You are a curious language student who just encountered the English word "${word.word}" and has NO idea what it means.
+Your ONLY job right now is to ask the user (your classmate) to explain it to you.
+Do NOT give any definition, do NOT evaluate anything yet.
+Just ask naturally in simple English like a confused student: "Hey, what does '${word.word}' mean? Can you explain it to me?"`
       const res = await fetch(`${BACKEND}/api/chat`, {
         method: 'POST', headers: authHeaders(),
-        body: JSON.stringify({ messages: [{ role: 'user', content: 'Start by saying you forgot the meaning and ask them to teach you.' }], system: sys })
+        body: JSON.stringify({ messages: [{ role: 'user', content: 'Ask me what the word means, as a confused student.' }], system: sys })
       })
       const data = await res.json()
-      setMsgs([{ role: 'ai', text: data.response || data.message || '...' }])
+      setMsgs([{ role: 'ai', text: data.response || data.message || `Hey! What does "${word.word}" mean? Can you explain it to me?` }])
     } catch { } finally { setLoading(false) }
   }
 
@@ -1838,7 +1837,17 @@ Ask ONE follow-up question to test deeper understanding.`
     setMsgs(history)
     setLoading(true)
     try {
-      const sys = `You are a student who forgot the word "${selectedWord?.word}". The user is teaching you. After 1-2 exchanges, give a final score X/10 and brief Arabic feedback. Ask follow-up questions to deepen understanding.`
+      const exchangeCount = history.filter(m => m.role === 'user').length
+      const sys = exchangeCount < 2
+        ? `You are a curious student learning the word "${selectedWord?.word}" (Arabic: ${selectedWord?.arabic}).
+The user is explaining it to you. React naturally as a student who is starting to understand.
+Ask ONE short follow-up question to understand better (example, how to use it in a sentence, difference from a similar word, etc.).
+Do NOT give a score yet. Stay in student mode — confused but curious.`
+        : `You are a student who has now heard 2+ explanations of the word "${selectedWord?.word}" (Arabic: ${selectedWord?.arabic}).
+Respond in 2 parts:
+1. One sentence reacting to what the user said (as a student who now understands).
+2. A score line EXACTLY like this: "Score: X/10" — where X reflects how clear and complete the explanation was.
+3. One line of feedback in Arabic starting with "ملاحظة:" praising what was good and suggesting what was missing.`
       const res = await fetch(`${BACKEND}/api/chat`, {
         method: 'POST', headers: authHeaders(),
         body: JSON.stringify({
@@ -1849,7 +1858,7 @@ Ask ONE follow-up question to test deeper understanding.`
       const data = await res.json()
       const reply = data.response || data.message || '...'
       setMsgs(h => [...h, { role: 'ai', text: reply }])
-      const match = reply.match(/(\d+)\/10/)
+      const match = reply.match(/Score:\s*(\d+)\/10/i)
       if (match) setScore(parseInt(match[1]))
     } catch { } finally { setLoading(false) }
   }
@@ -1976,47 +1985,89 @@ function SituationalCards({ words }) {
   const [open, setOpen] = useState(false)
   const [cardIdx, setCardIdx] = useState(0)
   const [revealed, setRevealed] = useState(false)
+  const [cards, setCards] = useState([])
+  const [loading, setLoading] = useState(false)
 
-  const cards = [
-    { scenario: 'صديقك قال شيئاً خاطئاً في محادثة عامة — كيف تُصحّحه بلطف؟', context: 'اجتماعي رسمي', answer: '"I think you might mean… Actually, what I understand is…" — استخدم I think / I understand لتليين التصحيح' },
-    { scenario: 'أستاذك يشرح مفهوماً وأنت لا تفهم. كيف تطلب الإيضاح؟', context: 'أكاديمي', answer: '"Could you clarify that point? / I\'m not sure I follow — could you give an example?"' },
-    { scenario: 'في مقابلة عمل، سألوك عن نقطة ضعف لديك. كيف تجيب بذكاء؟', context: 'مهني', answer: '"One area I\'m working to improve is… — I\'ve been taking steps to address this by…"' },
-    { scenario: 'زميلك قاطعك وأنت تتحدث في اجتماع. كيف تستعيد دورك؟', context: 'مهني', answer: '"If I may finish my point… / Just to complete what I was saying…"' },
-    { scenario: 'شخص غريب يطلب منك اتجاهات في شارع إنجليزي. كيف ترد لو ما عرفتِ؟', context: 'يومي', answer: '"I\'m afraid I\'m not from around here, but you could try Google Maps / ask at that shop."' },
-  ]
+  const wordList = words.slice(0, 8).map(w => w.word).join(', ')
 
-  const card = cards[cardIdx % cards.length]
+  const generateCards = async () => {
+    setLoading(true)
+    setCards([])
+    setCardIdx(0)
+    setRevealed(false)
+    try {
+      const res = await fetch(`${BACKEND}/api/chat`, {
+        method: 'POST', headers: authHeaders(),
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: `Create 5 real-life situational cards that use these English words naturally: ${wordList}.
+For each card, write a short scenario in Arabic where using one of the words is key, then give the ideal English response using that word.
+Return ONLY a JSON array:
+[{"scenario":"...Arabic situation description...","context":"...","word":"...target word...","answer":"...English response using the word..."}]
+JSON only, no markdown.` }],
+          system: 'Reply ONLY with a valid JSON array. Each item must use one of the given vocabulary words naturally in the answer.'
+        })
+      })
+      const data = await res.json()
+      const txt = (data.response || data.message || '[]').replace(/```json|```/g, '').trim()
+      try {
+        const parsed = JSON.parse(txt)
+        setCards(parsed)
+      } catch {
+        // fallback with words in generic situations
+        setCards(words.slice(0, 5).map(w => ({
+          scenario: `استخدمي كلمة "${w.word}" (${w.arabic}) في موقف يومي`,
+          context: 'يومي',
+          word: w.word,
+          answer: `"${w.example}" — استخدام "${w.word}" بشكل طبيعي`
+        })))
+      }
+    } catch {
+      setCards([])
+    } finally { setLoading(false) }
+  }
+
+  const card = cards[cardIdx % Math.max(cards.length, 1)]
 
   return (
     <div className="el-situation-section">
-      <button className="el-roleplay-toggle" style={{ marginBottom: open ? 14 : 0 }} onClick={() => setOpen(o => !o)}>
-        💬 {open ? 'إغلاق البطاقات' : '"ماذا تقولين في هذا الموقف؟" — بطاقات تفاعلية'}
+      <button className="el-roleplay-toggle" style={{ marginBottom: open ? 14 : 0 }} onClick={() => { setOpen(o => !o); if (!open && cards.length === 0) generateCards() }}>
+        💬 {open ? 'إغلاق البطاقات' : '"ماذا تقولين في هذا الموقف؟" — بطاقات من كلمات اليوم'}
       </button>
       {open && (
         <>
-          <div className="el-situation-card">
-            <div style={{ fontSize: '.72rem', color: 'var(--el-muted)', marginBottom: 6 }}>🗂️ {card.context}</div>
-            <div className="el-situation-scenario">📌 {card.scenario}</div>
-            {!revealed ? (
-              <button
-                className="el-nav-btn primary el-situation-reveal-btn"
-                onClick={() => setRevealed(true)}
-              >
-                💡 كيف أقولها بالإنجليزية؟
-              </button>
-            ) : (
-              <div className="el-situation-answer">{card.answer}</div>
-            )}
-          </div>
-          <div className="el-situation-nav">
-            <button className="el-nav-btn" onClick={() => { setCardIdx(i => i + 1); setRevealed(false) }}>
-              بطاقة أخرى →
+          <div style={{ display: 'flex', gap: 8, marginBottom: 10, alignItems: 'center' }}>
+            <span style={{ fontSize: '.8rem', color: 'var(--el-muted)' }}>الكلمات: <em>{wordList}</em></span>
+            <button className="el-nav-btn" style={{ fontSize: '.75rem', padding: '3px 10px', marginRight: 'auto' }} onClick={generateCards} disabled={loading}>
+              {loading ? '...' : '🔄 بطاقات جديدة'}
             </button>
-            <button className="el-nav-btn" onClick={() => setRevealed(false)}>🔄 إعادة</button>
           </div>
-          <div style={{ textAlign: 'center', fontSize: '.75rem', color: 'var(--el-muted)', marginTop: 6 }}>
-            بطاقة {(cardIdx % cards.length) + 1} / {cards.length}
-          </div>
+          {loading && <div style={{ textAlign: 'center', padding: 20, color: 'var(--el-muted)' }}>⏳ يولّد بطاقات من كلمات درسك...</div>}
+          {!loading && card && (
+            <>
+              <div className="el-situation-card">
+                <div style={{ fontSize: '.72rem', color: 'var(--el-muted)', marginBottom: 6 }}>🗂️ {card.context} · كلمة الموقف: <strong>{card.word}</strong></div>
+                <div className="el-situation-scenario">📌 {card.scenario}</div>
+                {!revealed ? (
+                  <button className="el-nav-btn primary el-situation-reveal-btn" onClick={() => setRevealed(true)}>
+                    💡 كيف أقولها بالإنجليزية؟
+                  </button>
+                ) : (
+                  <div className="el-situation-answer">{card.answer}</div>
+                )}
+              </div>
+              <div className="el-situation-nav">
+                <button className="el-nav-btn" onClick={() => { setCardIdx(i => i + 1); setRevealed(false) }} disabled={cards.length === 0}>
+                  بطاقة أخرى →
+                </button>
+                <button className="el-nav-btn" onClick={() => setRevealed(false)}>🔄 إعادة</button>
+              </div>
+              {cards.length > 0 && (
+                <div style={{ textAlign: 'center', fontSize: '.75rem', color: 'var(--el-muted)', marginTop: 6 }}>
+                  بطاقة {(cardIdx % cards.length) + 1} / {cards.length}
+                </div>
+              )}
+            </>
+          )}
         </>
       )}
     </div>
@@ -2500,27 +2551,44 @@ function PronunciationRecorder({ words, allLearnedWords = [] }) {
                     {confidence > 0 && <span style={{ marginRight: 8, color: 'var(--el-muted)', fontSize: '.78rem' }}>({confidence}% وضوح)</span>}
                   </div>
                   {result==='match' && <div className="el-pronrec-feedback match">✅ نطق مثالي! أحسنتِ تماماً</div>}
-                  {result==='close' && (
-                    <div className="el-pronrec-feedback close">
-                      🟡 قريب جداً — لاحظي الفرق:
+                  {(result==='close' || result==='try') && (
+                    <div className={`el-pronrec-feedback ${result === 'close' ? 'close' : 'tryagain'}`}>
+                      {result === 'close' ? '🟡 قريب جداً — الحرف الأحمر هو موضع الخطأ:' : '🔴 جربي مرة أخرى — شاهدي أين الخطأ:'}
                       <div className="el-pronrec-diff">
-                        <span>🎯 الصواب: <strong>{selected.word}</strong></span>
-                        <span>👂 سمعت: <strong>{recorded}</strong></span>
+                        <div>
+                          <span style={{ fontSize: '.75rem', color: 'var(--el-muted)' }}>🎯 الصواب:</span>{' '}
+                          <span style={{ fontFamily: 'monospace', fontSize: '1.1rem', letterSpacing: 2 }}>
+                            {selected.word.toLowerCase().split('').map((char, i) => {
+                              const heardChar = recorded.toLowerCase()[i]
+                              const wrong = heardChar !== char
+                              return (
+                                <span key={i} style={{
+                                  background: wrong ? '#fecaca' : 'transparent',
+                                  color: wrong ? '#dc2626' : 'inherit',
+                                  fontWeight: wrong ? 'bold' : 'normal',
+                                  borderBottom: wrong ? '2px solid #dc2626' : 'none',
+                                  padding: '0 1px', borderRadius: 2
+                                }}>{char}</span>
+                              )
+                            })}
+                            {recorded.length > selected.word.length && (
+                              <span style={{ background: '#fee2e2', color: '#dc2626', textDecoration: 'line-through', padding: '0 1px' }}>
+                                {recorded.toLowerCase().slice(selected.word.length)}
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                        <div>
+                          <span style={{ fontSize: '.75rem', color: 'var(--el-muted)' }}>👂 سمعت:</span>{' '}
+                          <span style={{ fontFamily: 'monospace', fontSize: '1.1rem', letterSpacing: 2 }}>{recorded}</span>
+                        </div>
                       </div>
                       {diffFeedback && <div className="el-pronrec-hint">💡 {diffFeedback}</div>}
-                    </div>
-                  )}
-                  {result==='try' && (
-                    <div className="el-pronrec-feedback tryagain">
-                      🔴 جربي مرة أخرى:
-                      <div className="el-pronrec-diff">
-                        <span>🎯 الصواب: <strong>{selected.word}</strong></span>
-                        <span>👂 سمعت: <strong>{recorded}</strong></span>
-                      </div>
-                      {diffFeedback && <div className="el-pronrec-hint">💡 {diffFeedback}</div>}
-                      <div style={{ fontSize: '.8rem', marginTop: 4, color: 'var(--el-muted)' }}>
-                        IPA: {selected.ipa} — استمعي للنموذج بشكل بطيء ثم كرري
-                      </div>
+                      {result === 'try' && (
+                        <div style={{ fontSize: '.8rem', marginTop: 4, color: 'var(--el-muted)' }}>
+                          IPA: {selected.ipa} — استمعي للنموذج بشكل بطيء ثم كرري
+                        </div>
+                      )}
                     </div>
                   )}
                   <button className="el-nav-btn" style={{ marginTop: 8, fontSize: '.8rem' }}
