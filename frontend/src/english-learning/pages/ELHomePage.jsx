@@ -4,6 +4,28 @@ import { LEVELS, getDay } from '../data/curriculum'
 import { useProgress } from '../hooks/useProgress'
 import '../EL.css'
 
+function usePWAInstall() {
+  const [prompt, setPrompt] = useState(null)
+  const [installed, setInstalled] = useState(
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true
+  )
+  useEffect(() => {
+    const handler = e => { e.preventDefault(); setPrompt(e) }
+    window.addEventListener('beforeinstallprompt', handler)
+    window.addEventListener('appinstalled', () => { setInstalled(true); setPrompt(null) })
+    return () => window.removeEventListener('beforeinstallprompt', handler)
+  }, [])
+  const install = async () => {
+    if (!prompt) return
+    prompt.prompt()
+    const { outcome } = await prompt.userChoice
+    if (outcome === 'accepted') setInstalled(true)
+    setPrompt(null)
+  }
+  return { canInstall: !!prompt && !installed, installed, install }
+}
+
 function useOnlineStatus() {
   const [online, setOnline] = useState(navigator.onLine)
   useEffect(() => {
@@ -207,6 +229,7 @@ export default function ELHomePage({ darkMode, setDarkMode }) {
   const navigate = useNavigate()
   const progress = useProgress()
   const online = useOnlineStatus()
+  const { canInstall, install } = usePWAInstall()
   const [showQuiz, setShowQuiz] = useState(() => Math.random() < 0.25)
   const [showWotd, setShowWotd] = useState(true)
   const dueCount = progress.dueWords?.().length || 0
@@ -301,6 +324,18 @@ export default function ELHomePage({ darkMode, setDarkMode }) {
               {dueCount > 0 && <span className="el-review-badge">{dueCount}</span>}
             </div>
           </div>
+
+          {/* PWA Install Banner */}
+          {canInstall && (
+            <div className="el-install-banner">
+              <span className="el-install-icon">📲</span>
+              <div className="el-install-text">
+                <div className="el-install-title">ثبّتي التطبيق على هاتفك</div>
+                <div className="el-install-sub">يعمل بدون إنترنت — مجاناً تماماً</div>
+              </div>
+              <button className="el-install-btn" onClick={install}>تثبيت</button>
+            </div>
+          )}
 
           {/* Hero */}
           <div className="el-hero-block">

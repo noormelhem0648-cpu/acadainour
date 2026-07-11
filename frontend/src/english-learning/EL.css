@@ -1538,3 +1538,38 @@
 .el-app.el-dark.level-B2 { --el-accent-light: #451a03; }
 .el-app.el-dark.level-C1 { --el-accent-light: #450a0a; }
 .el-app.el-dark.level-C2 { --el-accent-light: #2e1065; }
+
+/* ── PWA Install Banner ── */
+.el-app .el-install-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #fdf4ff, #f0f9ff);
+  border: 1.5px solid #c084fc;
+  border-radius: var(--el-radius);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.el-app.el-dark .el-install-banner {
+  background: linear-gradient(135deg, #2d1b4e, #0c2340);
+  border-color: #a855f7;
+}
+.el-app .el-install-icon { font-size: 2rem; flex-shrink: 0; }
+.el-app .el-install-text { flex: 1; }
+.el-app .el-install-title { font-weight: 800; font-size: .92rem; color: #7e22ce; }
+.el-app.el-dark .el-install-title { color: #d8b4fe; }
+.el-app .el-install-sub { font-size: .75rem; color: var(--el-muted); margin-top: 2px; }
+.el-app .el-install-btn {
+  border: none;
+  background: #7c3aed;
+  color: #fff;
+  border-radius: 10px;
+  padding: 9px 18px;
+  font-weight: 800;
+  font-size: .85rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity .15s;
+  flex-shrink: 0;
+}
+.el-app .el-install-btn:hover { opacity: .88; }

@@ -1,6 +1,9 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "إنجليزي نورا",
+  "name": "English with Noura — AcadAI",
+  "description": "تعلّم الإنجليزية خطوة بخطوة مع نظام ذكي وتمارين تفاعلية",
+  "lang": "ar",
+  "dir": "rtl",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,16 +13,22 @@
     {
       "src": "logo192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "logo512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/english-learning",
+  "scope": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "orientation": "portrait",
+  "theme_color": "#c9858a",
+  "background_color": "#ffffff",
+  "categories": ["education", "productivity"],
+  "screenshots": []
 }
