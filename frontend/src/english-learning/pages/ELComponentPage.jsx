@@ -1507,6 +1507,7 @@ function GrammarDetective({ day }) {
   const [revealed, setRevealed] = useState({})
   const [loading, setLoading] = useState(false)
   const [generated, setGenerated] = useState(false)
+  const [error, setError] = useState('')
 
   const LEVELS = [
     { key: 'easy', label: '🟢 سهل' },
@@ -1520,31 +1521,39 @@ function GrammarDetective({ day }) {
     setClicked({})
     setRevealed({})
     setGenerated(false)
-    const patterns = day.grammar?.patterns?.map(p => p.name).join(', ') || ''
+    setError('')
+    const patterns = day.grammar?.patterns?.map(p => p.name).join(', ') || 'general grammar'
     const vocab = day.vocabulary?.words?.slice(0, 8).map(w => w.word).join(', ') || ''
     const diffDesc = difficulty === 'easy'
-      ? 'simple grammar mistakes (subject-verb agreement, basic tenses)'
+      ? 'simple mistakes: subject-verb agreement or basic tense errors'
       : difficulty === 'medium'
-      ? 'intermediate mistakes (wrong tense, misused preposition, article error)'
-      : 'advanced mistakes (complex tense confusion, subtle word choice errors, conditional structure)'
-    const prompt = `Generate exactly ${count} English sentences, each containing exactly ONE grammatical error.
+      ? 'intermediate mistakes: wrong tense form, misused preposition, or article error'
+      : 'advanced mistakes: subtle conditional or perfect tense confusion'
+    const prompt = `Generate exactly ${count} English sentences. Each sentence must have exactly ONE grammar mistake.
 Difficulty: ${diffDesc}.
-Grammar patterns from today's lesson: ${patterns}.
-Vocabulary from today's lesson (try to use some): ${vocab}.
+Topic area: ${patterns}. ${vocab ? `Try to use some of these words: ${vocab}.` : ''}
 
-Return ONLY a JSON array, no extra text:
-[
-  {"text": "sentence with error", "error": "wrong word or phrase", "fix": "correct word or phrase", "hint": "شرح بالعربية في جملة واحدة قصيرة"}
-]`
+Respond with ONLY a raw JSON array (no markdown, no code block, no explanation):
+[{"text":"...","error":"wrong word","fix":"correct word","hint":"Arabic hint"}]`
     try {
-      const raw = await aiAsk(prompt, 'You are a grammar exercise generator. Return only valid JSON arrays, no markdown.')
-      const match = raw.match(/\[[\s\S]*\]/)
+      const raw = await aiAsk(prompt, 'Return only a raw JSON array. No markdown. No explanation. No code fences.')
+      // strip markdown code fences if present
+      const clean = raw.replace(/```[a-z]*\n?/gi, '').trim()
+      const match = clean.match(/\[[\s\S]*\]/)
       if (match) {
         const parsed = JSON.parse(match[0])
-        setSentences(parsed.slice(0, count))
-        setGenerated(true)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setSentences(parsed.slice(0, count))
+          setGenerated(true)
+        } else {
+          setError('الاستجابة كانت فارغة — حاولي مرة ثانية')
+        }
+      } else {
+        setError('تعذّر تحليل الاستجابة — حاولي مرة ثانية')
       }
-    } catch { }
+    } catch (e) {
+      setError('خطأ في الاتصال: ' + (e?.message || 'unknown'))
+    }
     setLoading(false)
   }
 
@@ -1583,6 +1592,7 @@ Return ONLY a JSON array, no extra text:
               {loading ? '⏳ جارٍ التوليد...' : '✨ توليد تمرين جديد'}
             </button>
           </div>
+          {error && <div style={{ color: '#dc2626', fontSize: '.83rem', marginBottom: 10, padding: '6px 10px', background: '#fef2f2', borderRadius: 8 }}>⚠️ {error}</div>}
           {generated && sentences.length > 0 && (
             <>
               <div className="el-detective-desc">اضغط على الكلمة الخاطئة في كل جملة:</div>
