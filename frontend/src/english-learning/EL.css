@@ -1573,3 +1573,15 @@
   flex-shrink: 0;
 }
 .el-app .el-install-btn:hover { opacity: .88; }
+.el-app .el-install-dismiss {
+  border: 1.5px solid #c084fc;
+  background: transparent;
+  color: #7e22ce;
+  border-radius: 8px;
+  padding: 7px 10px;
+  cursor: pointer;
+  font-size: .85rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.el-app.el-dark .el-install-dismiss { color: #d8b4fe; border-color: #a855f7; }

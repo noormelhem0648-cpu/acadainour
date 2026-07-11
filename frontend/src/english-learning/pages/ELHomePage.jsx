@@ -10,6 +10,9 @@ function usePWAInstall() {
     window.matchMedia('(display-mode: standalone)').matches ||
     window.navigator.standalone === true
   )
+  const [dismissed, setDismissed] = useState(
+    () => !!localStorage.getItem('el_pwa_dismissed')
+  )
   useEffect(() => {
     const handler = e => { e.preventDefault(); setPrompt(e) }
     window.addEventListener('beforeinstallprompt', handler)
@@ -17,13 +20,20 @@ function usePWAInstall() {
     return () => window.removeEventListener('beforeinstallprompt', handler)
   }, [])
   const install = async () => {
-    if (!prompt) return
-    prompt.prompt()
-    const { outcome } = await prompt.userChoice
-    if (outcome === 'accepted') setInstalled(true)
-    setPrompt(null)
+    if (prompt) {
+      prompt.prompt()
+      const { outcome } = await prompt.userChoice
+      if (outcome === 'accepted') setInstalled(true)
+      setPrompt(null)
+    }
   }
-  return { canInstall: !!prompt && !installed, installed, install }
+  const dismiss = () => {
+    localStorage.setItem('el_pwa_dismissed', '1')
+    setDismissed(true)
+  }
+  // Show banner if: not installed, not dismissed, and not already standalone
+  const showBanner = !installed && !dismissed
+  return { showBanner, hasNativePrompt: !!prompt, install, dismiss }
 }
 
 function useOnlineStatus() {
@@ -229,7 +239,8 @@ export default function ELHomePage({ darkMode, setDarkMode }) {
   const navigate = useNavigate()
   const progress = useProgress()
   const online = useOnlineStatus()
-  const { canInstall, install } = usePWAInstall()
+  const { showBanner, hasNativePrompt, install, dismiss } = usePWAInstall()
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
   const [showQuiz, setShowQuiz] = useState(() => Math.random() < 0.25)
   const [showWotd, setShowWotd] = useState(true)
   const dueCount = progress.dueWords?.().length || 0
@@ -326,14 +337,22 @@ export default function ELHomePage({ darkMode, setDarkMode }) {
           </div>
 
           {/* PWA Install Banner */}
-          {canInstall && (
+          {showBanner && (
             <div className="el-install-banner">
               <span className="el-install-icon">📲</span>
               <div className="el-install-text">
                 <div className="el-install-title">ثبّتي التطبيق على هاتفك</div>
-                <div className="el-install-sub">يعمل بدون إنترنت — مجاناً تماماً</div>
+                {isIOS
+                  ? <div className="el-install-sub">اضغطي زر المشاركة ← "Add to Home Screen"</div>
+                  : <div className="el-install-sub">يعمل بدون إنترنت — مجاناً تماماً</div>
+                }
               </div>
-              <button className="el-install-btn" onClick={install}>تثبيت</button>
+              <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                {hasNativePrompt && !isIOS && (
+                  <button className="el-install-btn" onClick={install}>تثبيت</button>
+                )}
+                <button className="el-install-dismiss" onClick={dismiss}>✕</button>
+              </div>
             </div>
           )}
 
