@@ -1533,27 +1533,32 @@ function GrammarDetective({ day }) {
       : difficulty === 'medium'
       ? 'intermediate mistakes: wrong tense form, misused preposition, or article error'
       : 'advanced mistakes: subtle conditional or perfect tense confusion'
-    const prompt = `Generate exactly ${count} English sentences. Each sentence must have exactly ONE grammar mistake.
+    const prompt = `Generate exactly ${count} English sentences, each with ONE grammar mistake.
 Difficulty: ${diffDesc}.
-Topic area: ${patterns}. ${vocab ? `Try to use some of these words: ${vocab}.` : ''}
+Topic: ${patterns}. ${vocab ? `Use some of: ${vocab}.` : ''}
 
-Respond with ONLY a raw JSON array (no markdown, no code block, no explanation):
-[{"text":"...","error":"wrong word","fix":"correct word","hint":"Arabic hint"}]`
+Use EXACTLY this format for each sentence (repeat the block ${count} times):
+SENTENCE: [the sentence with the mistake]
+ERROR: [wrong word or phrase]
+FIX: [correct version]
+HINT: [شرح عربي قصير]
+---`
     try {
-      const raw = await aiAsk(prompt, 'Return only a raw JSON array. No markdown. No explanation. No code fences.')
-      // strip markdown code fences if present
-      const clean = raw.replace(/```[a-z]*\n?/gi, '').trim()
-      const match = clean.match(/\[[\s\S]*\]/)
-      if (match) {
-        const parsed = JSON.parse(match[0])
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setSentences(parsed.slice(0, count))
-          setGenerated(true)
-        } else {
-          setError('الاستجابة كانت فارغة — حاولي مرة ثانية')
+      const raw = await aiAsk(prompt, 'Output only the labeled blocks. No intro, no numbering, no extra text.')
+      // Parse line-based format
+      const blocks = raw.split('---').map(b => b.trim()).filter(Boolean)
+      const parsed = blocks.map(block => {
+        const get = (label) => {
+          const m = block.match(new RegExp(`${label}:\\s*(.+)`, 'i'))
+          return m ? m[1].trim() : ''
         }
+        return { text: get('SENTENCE'), error: get('ERROR'), fix: get('FIX'), hint: get('HINT') }
+      }).filter(s => s.text && s.error)
+      if (parsed.length > 0) {
+        setSentences(parsed.slice(0, count))
+        setGenerated(true)
       } else {
-        setError('تعذّر تحليل الاستجابة — حاولي مرة ثانية')
+        setError('لم تُولَّد جمل — حاولي مرة ثانية')
       }
     } catch (e) {
       setError('خطأ في الاتصال: ' + (e?.message || 'unknown'))
@@ -1704,7 +1709,6 @@ Rules:
       </button>
       {open && (
         <>
-          <div className="el-debate-topic">📌 موضوع النقاش: {topic}</div>
           {!stance ? (
             <div className="el-debate-stance">
               <button className="el-debate-stance-btn" onClick={() => startDebate('for')}>👍 أنا مع الفكرة</button>
