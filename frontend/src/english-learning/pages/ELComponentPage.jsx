@@ -348,7 +348,7 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
           <div className="el-content-panel">
             <div className="el-comp-body">
               {componentId === 'vocab'     && <VocabComp day={day} levelId={levelId} dayId={dayId} progress={progress} setAvatarState={setAvatarState} setBuddyMessages={setBuddyMessages} />}
-              {componentId === 'grammar'   && <GrammarComp day={day} setBuddyMessages={setBuddyMessages} setAvatarState={setAvatarState} />}
+              {componentId === 'grammar'   && <GrammarComp day={day} levelId={levelId} setBuddyMessages={setBuddyMessages} setAvatarState={setAvatarState} />}
               {componentId === 'reading'   && <ReadingComp day={day} levelId={levelId} dayId={dayId} setAvatarState={setAvatarState} setBuddyMessages={setBuddyMessages} />}
               {componentId === 'listening' && <ListeningComp day={day} setAvatarState={setAvatarState} setBuddyMessages={setBuddyMessages} />}
               {componentId === 'shadowing' && <ShadowingComp day={day} />}
@@ -538,7 +538,7 @@ function VocabComp({ day, levelId, dayId, progress }) {
       {/* Teacher Corner + new features */}
       <TeacherCorner words={v.words} dayTitle={day.title} />
       <FillGapExercise words={v.words} allLearnedWords={progress.hardWords} />
-      <VocabStoryGen words={v.words} dayTitle={day.title} allLearnedWords={progress.hardWords} />
+      <VocabStoryGen words={v.words} dayTitle={day.title} levelId={levelId} allLearnedWords={progress.hardWords} />
     </div>
   )
 }
@@ -750,7 +750,12 @@ NOTE: one short Arabic explanation`
         {exchange.map((e, i) => (
           <div key={i}>
             <div className={`el-roleplay-line ${e.role}`}>
-              {e.role === 'buddy' && <button className="el-speak-btn" onClick={() => speak(e.text)} style={{ marginLeft: 4 }}>🔊</button>}
+              {e.role === 'buddy' && (
+                <>
+                  <button className="el-speak-btn" onClick={() => speak(e.text)} style={{ marginLeft: 4 }}>🔊</button>
+                  <button className="el-speak-btn" onClick={() => window.speechSynthesis.cancel()} style={{ marginLeft: 2 }}>⏹</button>
+                </>
+              )}
               <span className="el-roleplay-text">{e.text}</span>
             </div>
             {e.role === 'buddy' && e.correction && (
@@ -862,9 +867,8 @@ function DragSentence({ question, answer }) {
 }
 
 /* ─── Grammar ─── */
-function GrammarComp({ day, setBuddyMessages, setAvatarState }) {
+function GrammarComp({ day, levelId, setBuddyMessages, setAvatarState }) {
   const [shown, setShown] = useState({})
-  const [rolePlay, setRolePlay] = useState(false)
   const { grammar: g } = day
 
   return (
@@ -913,8 +917,8 @@ function GrammarComp({ day, setBuddyMessages, setAvatarState }) {
       ))}
 
       <GrammarPatternFlashcards patterns={g.patterns} />
-      <GrammarDetective day={day} />
-      <DebateMode day={day} />
+      <GrammarDetective day={day} levelId={levelId} />
+      <DebateMode day={day} levelId={levelId} />
     </div>
   )
 }
@@ -1637,7 +1641,16 @@ Respond with ONLY a raw JSON array (no markdown, no code block, no explanation):
 }
 
 /* ─── Debate Mode ─── */
-function DebateMode({ day }) {
+const LEVEL_LANG = {
+  1: { cefr: 'A1', desc: 'Use VERY simple English only. Short sentences. Basic vocabulary (colors, family, numbers). No complex words.' },
+  2: { cefr: 'A2', desc: 'Use simple everyday English. Short clear sentences. Common words only.' },
+  3: { cefr: 'B1', desc: 'Use intermediate English. Normal sentences. Avoid academic or rare vocabulary.' },
+  4: { cefr: 'B2', desc: 'Use upper-intermediate English. Some complex sentences allowed.' },
+  5: { cefr: 'C1', desc: 'Use advanced English with rich vocabulary and complex structures.' },
+  6: { cefr: 'C2', desc: 'Use sophisticated English. Complex arguments, nuanced language.' },
+}
+
+function DebateMode({ day, levelId }) {
   const [open, setOpen] = useState(false)
   const [stance, setStance] = useState(null)
   const [msgs, setMsgs] = useState([])
@@ -1646,18 +1659,25 @@ function DebateMode({ day }) {
   const endRef = useRef(null)
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [msgs])
 
+  const lvl = LEVEL_LANG[Number(levelId)] || LEVEL_LANG[3]
   const topic = `"${day.title}" — هل هذا الموضوع مهم في حياتنا اليومية؟`
+  const vocab = day.vocabulary?.words?.slice(0, 8).map(w => w.word).join(', ') || ''
+
+  const buildSys = (stance) => `You are a debate partner for an English learner at CEFR level ${lvl.cefr}.
+Language rule: ${lvl.desc}
+Topic: "${day.title}". The student argues ${stance === 'for' ? 'FOR' : 'AGAINST'} this topic. You argue the OPPOSITE side.
+Rules:
+- Keep your response to 2 sentences MAX
+- Use only vocabulary appropriate for ${lvl.cefr} level${vocab ? `. Today's lesson words (use some): ${vocab}` : ''}
+- After each student argument, start with [STRONG] or [WEAK] then one short Arabic sentence of feedback
+- Never use words the student wouldn't know at ${lvl.cefr}`
 
   const startDebate = async (chosenStance) => {
     setStance(chosenStance)
     setMsgs([])
     setLoading(true)
     try {
-      const sys = `You are a sharp academic debater. The topic is: "${day.title}".
-The student will argue ${chosenStance === 'for' ? 'FOR' : 'AGAINST'} this topic. You argue the OPPOSITE side strongly.
-Keep each response to 2-3 sentences max. After each student argument, rate it: [STRONG] or [WEAK] and explain why in Arabic briefly.
-Use vocabulary from today's lesson naturally. Challenge the student to use better language.`
-      const debateReply = await aiAsk('Start the debate with your opening argument.', sys)
+      const debateReply = await aiAsk('Start the debate with your opening argument.', buildSys(chosenStance))
       setMsgs([{ role: 'ai', text: debateReply || 'Let us begin...' }])
     } catch { setMsgs([{ role: 'ai', text: 'تعذّر الاتصال.' }]) }
     finally { setLoading(false) }
@@ -1670,9 +1690,8 @@ Use vocabulary from today's lesson naturally. Challenge the student to use bette
     setMsgs(history)
     setLoading(true)
     try {
-      const sys = `You are a sharp academic debater arguing AGAINST the student on: "${day.title}". Rate their argument [STRONG] or [WEAK] first, then counter-argue in 2-3 sentences. Brief Arabic feedback.`
       const histForAI = history.slice(0,-1).map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.text }))
-      const debArg = await aiAsk(userText, sys, histForAI)
+      const debArg = await aiAsk(userText, buildSys(stance), histForAI)
       setMsgs(h => [...h, { role: 'ai', text: debArg || '...' }])
     } catch { setMsgs(h => [...h, { role: 'ai', text: 'تعذّر الاتصال.' }]) }
     finally { setLoading(false) }
@@ -1796,7 +1815,7 @@ function AILiveReaction({ score }) {
 }
 
 /* ─── Vocabulary Story Generator ─── */
-function VocabStoryGen({ words, dayTitle, allLearnedWords = [] }) {
+function VocabStoryGen({ words, dayTitle, levelId, allLearnedWords = [] }) {
   const [open, setOpen] = useState(false)
   const [genre, setGenre] = useState('حوار حياة يومية')
   const [lines, setLines] = useState([])   // [{speaker, text}]
@@ -1812,11 +1831,12 @@ function VocabStoryGen({ words, dayTitle, allLearnedWords = [] }) {
     setUsedWords([])
     const wordList = words.slice(0, 10).map(w => w.word).join(', ')
     try {
+      const lvl = LEVEL_LANG[Number(levelId)] || LEVEL_LANG[3]
       const prompt = isDialogue
         ? `Write a short dialogue (6-8 exchanges) between two people named Sarah and Mark. Use these English words naturally: ${wordList}. Format EXACTLY like this, one line per turn:\nSarah: ...\nMark: ...\nSarah: ...\nNo extra text before or after.`
         : `Write a short ${genre} (5-7 sentences) using these English words naturally: ${wordList}. Format as a dialogue between a narrator and characters when possible. Each paragraph on its own line. English only.`
       const raw = await aiAsk(prompt,
-        `You are a creative English writer for language learners. Topic: ${dayTitle}. Use ALL given words. Follow the format exactly.`)
+        `You are a creative English writer for language learners at CEFR level ${lvl.cefr}. ${lvl.desc} Topic: ${dayTitle}. Use ALL given words. Follow the format exactly.`)
       if (!raw) { setLines([{ speaker: '', text: 'الخادم لم يُرجع نصاً. جربي مرة أخرى.' }]); return }
       // Parse lines
       const parsed = raw.split('\n').filter(l => l.trim()).map(l => {
@@ -1862,12 +1882,26 @@ function VocabStoryGen({ words, dayTitle, allLearnedWords = [] }) {
           </button>
           {lines.length > 0 && (
             <>
+              <div style={{ display: 'flex', gap: 8, margin: '10px 0 4px' }}>
+                <button className="el-speak-btn" style={{ fontSize: '.85rem', padding: '4px 12px', borderRadius: 8 }}
+                  onClick={() => {
+                    window.speechSynthesis.cancel()
+                    const fullText = lines.map(l => l.speaker ? `${l.speaker}: ${l.text}` : l.text).join('. ')
+                    const u = new SpeechSynthesisUtterance(fullText)
+                    u.lang = 'en-US'; u.rate = 0.85
+                    window.speechSynthesis.speak(u)
+                  }}>🔊 اقرأ القصة</button>
+                <button className="el-speak-btn" style={{ fontSize: '.85rem', padding: '4px 12px', borderRadius: 8 }}
+                  onClick={() => window.speechSynthesis.cancel()}>⏹ أوقف</button>
+              </div>
               <div className="el-story-dialogue">
                 {lines.map((l, i) => (
                   <div key={i} className={`el-story-line${l.speaker ? ' has-speaker' : ''}`}
                     style={{ '--speaker-color': SPEAKER_COLORS[l.speaker] || '#6366f1' }}>
                     {l.speaker && <span className="el-story-speaker">{l.speaker}</span>}
                     <span className="el-story-line-text">{highlightLine(l.text)}</span>
+                    <button className="el-speak-btn" style={{ marginRight: 6, flexShrink: 0 }}
+                      onClick={() => { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(l.text); u.lang='en-US'; u.rate=0.85; window.speechSynthesis.speak(u) }}>🔊</button>
                   </div>
                 ))}
               </div>
