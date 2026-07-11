@@ -91,14 +91,14 @@ Day vocabulary focus: ${topic.focusWords.join(', ')}
 Student's level: ${levelId} - Day ${dayId}: ${day?.title || ''}
 
 RULES:
-1. Stay completely in character as ${topic.aiRole}. Respond naturally as this character.
-2. Keep responses conversational and short (2-4 sentences max).
-3. After the student speaks, continue the roleplay naturally AND add a brief feedback line in Arabic:
-   "💬 ملاحظة: [brief constructive note about their English — vocabulary use, grammar, or naturalness]"
-4. Encourage use of today's vocabulary: ${topic.focusWords.join(', ')}
-5. If they use a focus word correctly, acknowledge it enthusiastically in character.
-6. Do NOT break character except for the feedback line.
-7. After 6-8 exchanges, naturally wrap up the scene.`
+1. Stay completely in character as ${topic.aiRole}. Keep responses short (2-3 sentences).
+2. Encourage use of today's vocabulary: ${topic.focusWords.join(', ')}
+3. After your in-character response, check the student's last message for grammar/spelling mistakes.
+4. Output EXACTLY in this format (no deviation):
+REPLY: your in-character response here
+ERROR: the wrong word or phrase the student wrote (or "none" if correct)
+FIX: the correct version
+NOTE: one short Arabic explanation`
 
     try {
       const res = await fetch(`${API}/english-tutor/stream`, {
@@ -128,20 +128,35 @@ RULES:
             const chunk = line.slice(6)
             if (chunk === '[DONE]') break
             full += chunk
+            // Show streaming text — extract REPLY part if available, else show raw
+            const streamReply = full.match(/REPLY:\s*(.+?)(?=\nERROR:|$)/s)
+            const displayText = streamReply ? streamReply[1].trim() : full.replace(/^REPLY:\s*/i, '')
             setMessages(prev => {
               const copy = [...prev]
-              copy[copy.length - 1] = { role: 'ai', content: full, typing: false }
+              copy[copy.length - 1] = { role: 'ai', content: displayText, typing: false }
               return copy
             })
           }
         }
       }
 
-      // Extract just the in-character part for TTS (before the feedback line)
-      const ttsText = full.split('💬')[0].trim()
-      if (ttsEnabled && ttsText) {
+      // Parse structured response
+      const replyMatch = full.match(/REPLY:\s*(.+?)(?=\nERROR:|$)/s)
+      const errorMatch = full.match(/ERROR:\s*(.+?)(?=\nFIX:|$)/s)
+      const fixMatch   = full.match(/FIX:\s*(.+?)(?=\nNOTE:|$)/s)
+      const noteMatch  = full.match(/NOTE:\s*(.+?)$/s)
+      const replyText = replyMatch ? replyMatch[1].trim() : full.split('💬')[0].trim() || full
+      const correction = errorMatch && errorMatch[1].trim().toLowerCase() !== 'none'
+        ? { error: errorMatch[1].trim(), fix: fixMatch?.[1].trim() || '', note: noteMatch?.[1].trim() || '' }
+        : null
+      setMessages(prev => {
+        const copy = [...prev]
+        copy[copy.length - 1] = { role: 'ai', content: replyText, correction, typing: false }
+        return copy
+      })
+      if (ttsEnabled && replyText) {
         setTtsPlaying(true)
-        speakText(ttsText, () => setTtsPlaying(false))
+        speakText(replyText, () => setTtsPlaying(false))
       }
 
       // Calculate rough reaction score based on input length and vocabulary use
@@ -260,25 +275,25 @@ RULES:
                     {msg.typing ? (
                       <span className="el-typing-dots"><span /><span /><span /></span>
                     ) : (
-                      <div className="el-rp-bubble-text">
-                        {msg.content.split('💬').map((part, pi) => (
-                          <span key={pi} className={pi === 1 ? 'el-rp-feedback' : ''}>
-                            {pi === 1 ? '💬' + part : part}
-                          </span>
-                        ))}
-                      </div>
+                      <div className="el-rp-bubble-text">{msg.content}</div>
                     )}
                     {msg.role === 'ai' && msg.content && !msg.typing && (
                       <button
                         className="el-rp-tts-btn"
                         onClick={() => {
-                          const t = msg.content.split('💬')[0].trim()
                           if (ttsPlaying) { stopTTS(); setTtsPlaying(false) }
-                          else { setTtsPlaying(true); speakText(t, () => setTtsPlaying(false)) }
+                          else { setTtsPlaying(true); speakText(msg.content, () => setTtsPlaying(false)) }
                         }}
                       >
                         {ttsPlaying ? '⏹' : '🔊'}
                       </button>
+                    )}
+                    {msg.role === 'ai' && msg.correction && (
+                      <div className="el-rp-correction-wrap" style={{ marginTop: 8 }}>
+                        <div className="el-rp-correction-error">❌ {msg.correction.error}</div>
+                        <div className="el-rp-correction-fix">✅ {msg.correction.fix}</div>
+                        {msg.correction.note && <div className="el-rp-correction-note">{msg.correction.note}</div>}
+                      </div>
                     )}
                   </div>
                   {msg.role === 'user' && <div className="el-rp-avatar user">👤</div>}
