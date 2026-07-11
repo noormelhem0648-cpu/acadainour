@@ -573,17 +573,14 @@ function TeacherCorner({ words, dayTitle }) {
 
   const wordList = words.map((w, i) => `${i + 1}. ${w.word} (${w.arabic}) — ${w.ipa}`).join('\n')
 
-  const systemPrompt = `أنت أستاذ لغة إنجليزية خبير ومتحمس. درس اليوم: "${dayTitle}".
-قائمة مفردات الدرس:
-${wordList}
+  const systemPrompt = `أنت أستاذ لغة إنجليزية. درس اليوم: "${dayTitle}". كلمات الدرس: ${wordList}
 
-قواعد التعامل:
-- تحدث مع الطالب بالعربية إلا إذا طلب الإنجليزية
-- اشرح الكلمات بأمثلة حية وقصص تُساعد على الحفظ
-- إذا أخطأ الطالب في الفهم، صحّحه بلطف واعطِه مثالاً أوضح
-- إذا سألك كيف يحفظ كلمة صعبة، اعطِه تقنية مجانسة أو قصة مرتبطة
-- يمكنك الإشارة لأي كلمة من القائمة أعلاه بتفصيل كامل
-- اجعل الجلسة ممتعة وليست مملة`
+قواعد صارمة للرد:
+- الرد بالعربية دائماً ما لم يطلب الطالب الإنجليزية
+- اجعل ردك قصيراً ومركزاً: 3-5 نقاط كحد أقصى
+- استخدم نقاط واضحة (•) وليس فقرات طويلة
+- مثال واحد فقط بالإنجليزية مع ترجمته
+- لا تتجاوز 120 كلمة في الرد الواحد`
 
   const send = async () => {
     if (!input.trim() || loading) return
@@ -623,7 +620,17 @@ ${wordList}
             {msgs.map((m, i) => (
               <div key={i} className={`el-tc-msg ${m.role}`}>
                 {m.role === 'assistant' && <span className="el-tc-avatar">👨‍🏫</span>}
-                <span className="el-tc-text">{m.content}</span>
+                <span className="el-tc-text">
+                  {m.role === 'assistant'
+                    ? m.content.split('\n').filter(l => l.trim()).map((line, li) => {
+                        const isBullet = /^[-•*]\s/.test(line.trim())
+                        const clean = line.replace(/^[-•*]\s/, '').replace(/\*\*(.*?)\*\*/g, '$1')
+                        return isBullet
+                          ? <div key={li} style={{ display:'flex', gap:6, marginBottom:4 }}><span style={{color:'var(--el-accent)',fontWeight:700,flexShrink:0}}>•</span><span>{clean}</span></div>
+                          : <div key={li} style={{ marginBottom: li < m.content.split('\n').length - 1 ? 6 : 0 }}>{clean}</div>
+                      })
+                    : m.content}
+                </span>
               </div>
             ))}
             {loading && <div className="el-tc-msg assistant"><span className="el-tc-avatar">👨‍🏫</span><span className="el-buddy-typing"><span/><span/><span/></span></div>}
