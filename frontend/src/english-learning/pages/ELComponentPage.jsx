@@ -352,7 +352,7 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
               {componentId === 'vocab'     && <VocabComp day={day} levelId={levelId} dayId={dayId} progress={progress} setAvatarState={setAvatarState} setBuddyMessages={setBuddyMessages} />}
               {componentId === 'grammar'   && <GrammarComp day={day} levelId={levelId} setBuddyMessages={setBuddyMessages} setAvatarState={setAvatarState} />}
               {componentId === 'reading'   && <ReadingComp day={day} levelId={levelId} dayId={dayId} setAvatarState={setAvatarState} setBuddyMessages={setBuddyMessages} />}
-              {componentId === 'listening' && <ListeningComp day={day} setAvatarState={setAvatarState} setBuddyMessages={setBuddyMessages} />}
+              {componentId === 'listening' && <ListeningComp day={day} levelId={levelId} dayId={dayId} setAvatarState={setAvatarState} setBuddyMessages={setBuddyMessages} />}
               {componentId === 'shadowing' && <ShadowingComp day={day} />}
               {componentId === 'writing'   && <WritingComp day={day} levelId={levelId} dayId={dayId} navigate={navigate} setBuddyMessages={setBuddyMessages} setBuddyInput={setBuddyInput} setAvatarState={setAvatarState} />}
             </div>
@@ -1365,6 +1365,9 @@ ARABIC3: [Arabic translation]`,
   )
 }
 
+/* ─── Listening word targets per level ─── */
+const LISTENING_WORDS = { 1: 45, 2: 85, 3: 130, 4: 175, 5: 215, 6: 260 }
+
 /* ─── Listening Speed Control ─── */
 function ListeningSpeedControl({ text }) {
   const [rate, setRate] = useState(1)
@@ -1399,87 +1402,284 @@ function ListeningSpeedControl({ text }) {
 }
 
 /* ─── Listening ─── */
-function ListeningComp({ day }) {
-  const [answers, setAnswers] = useState({})
-  const [checked, setChecked] = useState(false)
-  const [score, setScore]     = useState(null)
-  const [playingKey, trigger] = useTTS()
+function ListeningComp({ day, levelId, dayId }) {
   const { listening: l } = day
+  const textCacheKey = `el-listen-text-${levelId}-${dayId}`
+  const qCacheKey    = `el-listen-q-${levelId}-${dayId}`
 
-  // split on either '___' or '_____' (flexible)
-  const parts = l.fillText.split(/_{3,}/)
+  const cefrMap = { 1:'A1', 2:'A2', 3:'B1', 4:'B2', 5:'C1', 6:'C2' }
+  const cefr = cefrMap[levelId] || 'A1'
+
+  const [listenText, setListenText] = useState(() => {
+    try { return localStorage.getItem(textCacheKey) || l.text } catch { return l.text }
+  })
+  const [textLoading, setTextLoading]   = useState(false)
+  const [showText, setShowText]         = useState(false)
+  const [questions, setQuestions]       = useState(() => {
+    try { const c = localStorage.getItem(qCacheKey); return c ? JSON.parse(c) : [] } catch { return [] }
+  })
+  const [qLoading, setQLoading]         = useState(false)
+  const [answers, setAnswers]           = useState({})
+  const [checked, setChecked]           = useState(false)
+  const [score, setScore]               = useState(null)
+
+  // Generate longer listening text
+  useEffect(() => {
+    const target = LISTENING_WORDS[levelId] || 85
+    const cached = localStorage.getItem(textCacheKey)
+    if (cached) { setListenText(cached); return }
+    const wordCount = l.text.trim().split(/\s+/).length
+    if (wordCount >= target * 0.8) return
+    const vocabList = (day.vocabulary?.words || []).map(w => w.word).join(', ')
+    setTextLoading(true)
+    aiAsk(
+      `Write a natural English listening passage for ${cefr} level students.
+Topic: "${day.title}". Use these words naturally: ${vocabList}.
+Requirements:
+- Approximately ${target} words
+- Written as spoken dialogue OR a short narration (natural spoken style, not written essay)
+- Vocabulary strictly appropriate for ${cefr} — simple for A1/A2, complex for C1/C2
+- For A1/A2: short simple sentences, everyday topics
+- For B1/B2: moderate complexity, some idioms
+- For C1/C2: nuanced language, complex ideas
+- Write ONLY the passage text, no title, no labels`,
+      'You are an EFL listening material author. Return ONLY the passage text.'
+    ).then(text => {
+      if (text && text.length > 30) {
+        const t = text.trim()
+        setListenText(t)
+        localStorage.setItem(textCacheKey, t)
+      }
+    }).catch(() => {}).finally(() => setTextLoading(false))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [levelId, dayId])
+
+  // Generate questions once text is ready
+  useEffect(() => {
+    if (questions.length > 0) return
+    if (!listenText || listenText === l.text) return
+    generateQuestions(listenText)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listenText])
+
+  const generateQuestions = async (text) => {
+    setQLoading(true)
+    try {
+      const raw = await aiAsk(
+        `Based on this listening passage for ${cefr} level:
+"${text}"
+
+Create 10 mixed comprehension questions. Use EXACTLY this format:
+
+TYPE: MCQ
+Q: [question]
+A: [option]
+B: [option]
+C: [option]
+D: [option]
+CORRECT: [A/B/C/D]
+---
+TYPE: TF
+Q: [true or false statement]
+CORRECT: [TRUE/FALSE]
+---
+TYPE: FILL
+Q: [sentence with ___ for the missing word]
+CORRECT: [the missing word]
+---
+
+Generate a mix: 4 MCQ + 3 TF + 3 FILL. Total = 10. No extra text.`,
+        'You are an EFL test writer. Use only the labeled format. Generate exactly 10 questions.'
+      )
+      const blocks = (raw || '').split('---').map(b => b.trim()).filter(Boolean)
+      const parsed = blocks.map(block => {
+        const get = (label) => { const m = block.match(new RegExp(`^${label}:\\s*(.+)`, 'im')); return m ? m[1].trim() : '' }
+        const type = get('TYPE').toUpperCase()
+        const q = get('Q')
+        if (!q) return null
+        if (type === 'MCQ') {
+          const opts = [get('A'), get('B'), get('C'), get('D')].filter(Boolean)
+          const correctLetter = get('CORRECT').toUpperCase()
+          const correctIdx = ['A','B','C','D'].indexOf(correctLetter)
+          if (correctIdx === -1 || opts.length < 2) return null
+          return { type: 'MCQ', q, options: opts, correct: correctIdx }
+        }
+        if (type === 'TF') {
+          const c = get('CORRECT').toUpperCase()
+          if (c !== 'TRUE' && c !== 'FALSE') return null
+          return { type: 'TF', q, correct: c }
+        }
+        if (type === 'FILL') {
+          return { type: 'FILL', q, correct: get('CORRECT') }
+        }
+        return null
+      }).filter(Boolean)
+      if (parsed.length > 0) {
+        setQuestions(parsed)
+        localStorage.setItem(qCacheKey, JSON.stringify(parsed))
+      }
+    } catch { }
+    setQLoading(false)
+  }
 
   const checkAnswers = () => {
     let correct = 0
-    l.blanks.forEach((b, i) => {
-      if (answers[i]?.toLowerCase().trim() === b.blank.toLowerCase()) correct++
+    questions.forEach((q, i) => {
+      const ans = answers[i]
+      if (q.type === 'MCQ' && ans === q.correct) correct++
+      else if (q.type === 'TF' && ans === q.correct) correct++
+      else if (q.type === 'FILL' && typeof ans === 'string' && ans.toLowerCase().trim() === q.correct.toLowerCase().trim()) correct++
     })
-    setScore({ correct, total: l.blanks.length, pct: Math.round((correct / l.blanks.length) * 100) })
+    const total = questions.length
+    setScore({ correct, total, pct: Math.round((correct / total) * 100) })
     setChecked(true)
   }
 
   const retry = () => { setAnswers({}); setChecked(false); setScore(null) }
 
+  const allAnswered = questions.length > 0 && questions.every((_, i) => answers[i] !== undefined && answers[i] !== '')
+
   return (
     <div className="el-section">
       <div className="el-listening-context">🎬 السياق: {l.context}</div>
 
-      <div className="el-full-text-box">
-        <div className="el-full-text-label">النص الكامل — استمع أولاً:</div>
-        <div className="el-full-text">{l.text}</div>
-        <ListeningSpeedControl text={l.text} />
-      </div>
-
-      <div className="el-dictation-title">✏️ امْلأ الفراغات</div>
-      <div className="el-fill-blanks">
-        {parts.map((part, i) => (
-          <span key={i}>
-            <span>{part}</span>
-            {i < l.blanks.length && (() => {
-              const isCorrect = checked && answers[i]?.toLowerCase().trim() === l.blanks[i].blank.toLowerCase()
-              const isWrong   = checked && !isCorrect
-              return (
-                <span className="el-blank-wrap">
-                  <input
-                    className={'el-blank-input' + (isCorrect ? ' correct' : isWrong ? ' wrong' : '')}
-                    value={answers[i] || ''}
-                    onChange={e => setAnswers(a => ({ ...a, [i]: e.target.value }))}
-                    onKeyDown={e => { if (e.key === 'Enter') { const next = document.querySelectorAll('.el-blank-input')[i+1]; next?.focus() } }}
-                    disabled={checked}
-                    placeholder="___"
-                    size={Math.max(6, (l.blanks[i].blank.length + 2))}
-                  />
-                  {isCorrect && <span className="el-blank-icon">✅</span>}
-                  {isWrong   && <span className="el-blank-icon">❌ <em className="el-blank-correct">{l.blanks[i].blank}</em></span>}
-                </span>
-              )
-            })()}
-          </span>
-        ))}
-      </div>
-
-      {score && (
-        <div className={`el-score-banner ${score.pct === 100 ? 'perfect' : score.pct >= 70 ? 'good' : 'retry'}`}>
-          {score.pct === 100
-            ? `🎉 ممتاز! أجبت على كل الفراغات بشكل صحيح (${score.total}/${score.total})`
-            : score.pct >= 70
-              ? `👍 جيد جداً — ${score.correct}/${score.total} صحيحة (${score.pct}%)`
-              : `💪 ${score.correct}/${score.total} صحيحة — راجع الفراغات الحمراء وحاول مجدداً`
-          }
+      {/* Audio player area */}
+      <div className="el-listen-player-box">
+        <div className="el-listen-player-top">
+          <div className="el-listen-player-title">🎧 {day.title}</div>
+          <button
+            className={`el-listen-text-btn${showText ? ' active' : ''}`}
+            onClick={() => setShowText(v => !v)}
+          >
+            📄 {showText ? 'إخفاء النص' : 'إظهار النص'}
+          </button>
         </div>
-      )}
-
-      <div className="el-dictation-btns">
-        {!checked
-          ? <button className="el-nav-btn primary" onClick={checkAnswers}
-              disabled={Object.keys(answers).length === 0}>
-              ✅ تحقق من الإجابات
-            </button>
-          : <button className="el-nav-btn" onClick={retry}>🔄 حاول مرة ثانية</button>
-        }
+        {textLoading && (
+          <div style={{ color: 'var(--el-muted)', fontSize: '.82rem', padding: '8px 0' }}>⏳ يولّد نصاً مناسباً لمستواك...</div>
+        )}
+        {showText && (
+          <div className="el-listen-text-reveal">{listenText}</div>
+        )}
+        <ListeningSpeedControl text={listenText} />
       </div>
 
-      {score && <AILiveReaction score={score} />}
+      {/* Questions */}
+      <div className="el-listen-questions-title">
+        📝 أسئلة الاستماع
+        {qLoading && <span style={{ fontSize: '.78rem', color: 'var(--el-muted)', marginRight: 8 }}>⏳ يولّد الأسئلة...</span>}
+        {!qLoading && questions.length === 0 && listenText && (
+          <button className="el-nav-btn" style={{ fontSize: '.78rem', marginRight: 8 }} onClick={() => generateQuestions(listenText)}>
+            توليد الأسئلة
+          </button>
+        )}
+      </div>
+
+      {questions.map((q, i) => {
+        const ans = answers[i]
+        return (
+          <div key={i} className="el-listen-q-block">
+            <div className="el-listen-q-num">{i + 1}</div>
+            <div className="el-listen-q-body">
+              {/* MCQ */}
+              {q.type === 'MCQ' && (
+                <>
+                  <div className="el-listen-q-text">{q.q}</div>
+                  <div className="el-listen-mcq-opts">
+                    {q.options.map((opt, oi) => {
+                      const chosen = ans === oi
+                      const isCorrect = checked && oi === q.correct
+                      const isWrong   = checked && chosen && oi !== q.correct
+                      return (
+                        <button
+                          key={oi}
+                          className={`el-listen-mcq-opt${chosen ? ' chosen' : ''}${isCorrect ? ' correct' : ''}${isWrong ? ' wrong' : ''}`}
+                          onClick={() => !checked && setAnswers(a => ({ ...a, [i]: oi }))}
+                          disabled={checked}
+                        >
+                          <span className="el-listen-mcq-circle">{['A','B','C','D'][oi]}</span>
+                          {opt}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {checked && <div className="el-listen-q-explain">✅ الإجابة: {['A','B','C','D'][q.correct]} — {q.options[q.correct]}</div>}
+                </>
+              )}
+              {/* True/False */}
+              {q.type === 'TF' && (
+                <>
+                  <div className="el-listen-q-text">{q.q}</div>
+                  <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+                    {['TRUE', 'FALSE'].map(val => {
+                      const chosen = ans === val
+                      const isCorrect = checked && val === q.correct
+                      const isWrong   = checked && chosen && val !== q.correct
+                      return (
+                        <button
+                          key={val}
+                          className={`el-listen-tf-btn${chosen ? ' chosen' : ''}${isCorrect ? ' correct' : ''}${isWrong ? ' wrong' : ''}`}
+                          onClick={() => !checked && setAnswers(a => ({ ...a, [i]: val }))}
+                          disabled={checked}
+                        >
+                          {val === 'TRUE' ? '✓ صحيح' : '✗ خطأ'}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {checked && <div className="el-listen-q-explain">✅ الإجابة: {q.correct === 'TRUE' ? 'صحيح' : 'خطأ'}</div>}
+                </>
+              )}
+              {/* Fill in the blank */}
+              {q.type === 'FILL' && (
+                <>
+                  <div className="el-listen-q-text">
+                    {q.q.split('___').map((part, pi, arr) => (
+                      <span key={pi}>
+                        {part}
+                        {pi < arr.length - 1 && (
+                          <input
+                            className={`el-blank-input${checked ? (answers[i]?.toLowerCase().trim() === q.correct.toLowerCase().trim() ? ' correct' : ' wrong') : ''}`}
+                            value={ans || ''}
+                            onChange={e => !checked && setAnswers(a => ({ ...a, [i]: e.target.value }))}
+                            placeholder="___"
+                            size={Math.max(8, q.correct.length + 2)}
+                            disabled={checked}
+                          />
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                  {checked && <div className="el-listen-q-explain">✅ الإجابة: {q.correct}</div>}
+                </>
+              )}
+            </div>
+          </div>
+        )
+      })}
+
+      {questions.length > 0 && (
+        <>
+          {score && (
+            <div className={`el-score-banner ${score.pct === 100 ? 'perfect' : score.pct >= 70 ? 'good' : 'retry'}`}>
+              {score.pct === 100
+                ? `🎉 ممتاز! أجبت على كل الأسئلة بشكل صحيح (${score.total}/${score.total})`
+                : score.pct >= 70
+                  ? `👍 جيد جداً — ${score.correct}/${score.total} صحيحة (${score.pct}%)`
+                  : `💪 ${score.correct}/${score.total} صحيحة — استمع مجدداً وحاول`
+              }
+            </div>
+          )}
+          <div className="el-dictation-btns">
+            {!checked
+              ? <button className="el-nav-btn primary" onClick={checkAnswers} disabled={!allAnswered}>
+                  ✅ تحقق من الإجابات
+                </button>
+              : <button className="el-nav-btn" onClick={retry}>🔄 حاول مرة ثانية</button>
+            }
+          </div>
+          {score && <AILiveReaction score={score} />}
+        </>
+      )}
     </div>
   )
 }
