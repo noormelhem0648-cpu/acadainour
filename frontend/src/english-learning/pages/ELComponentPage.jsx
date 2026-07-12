@@ -1168,8 +1168,9 @@ function RSVPReader({ text, onClose }) {
 }
 
 /* ─── Reading ─── */
+const READING_WORDS = { 1: 50, 2: 100, 3: 150, 4: 200, 5: 280, 6: 350 }
+
 function ReadingComp({ day, levelId, dayId }) {
-  const [activeIdx, setActiveIdx] = useState(null)
   const [playingKey, trigger] = useTTS()
   const [lookup, setLookup] = useState(null)
   const [hlColor, setHlColor] = useState('yellow')
@@ -1179,11 +1180,46 @@ function ReadingComp({ day, levelId, dayId }) {
   const [scrollPct, setScrollPct] = useState(0)
   const { reading: r } = day
   const hlKey = `hl-${levelId}-${dayId}`
+  const passageCacheKey = `el-passage-${levelId}-${dayId}`
+
+  const [passage, setPassage] = useState(() => {
+    try { return localStorage.getItem(passageCacheKey) || r.passage } catch { return r.passage }
+  })
+  const [passageLoading, setPassageLoading] = useState(false)
 
   const [highlights, setHighlights] = useState(() => {
     try { return JSON.parse(localStorage.getItem(hlKey) || '[]') } catch { return [] }
   })
   const saveHL = (arr) => { setHighlights(arr); localStorage.setItem(hlKey, JSON.stringify(arr)) }
+
+  // Generate longer AI passage if current one is too short
+  useEffect(() => {
+    const target = READING_WORDS[levelId] || 100
+    const cached = localStorage.getItem(passageCacheKey)
+    if (cached) { setPassage(cached); return }
+    const wordCount = r.passage.trim().split(/\s+/).length
+    if (wordCount >= target * 0.8) return // already long enough
+    const vocabList = (day.vocabulary?.words || []).map(w => w.word).join(', ')
+    const cefrMap = { 1: 'A1', 2: 'A2', 3: 'B1', 4: 'B2', 5: 'C1', 6: 'C2' }
+    const cefr = cefrMap[levelId] || 'A1'
+    setPassageLoading(true)
+    aiAsk(
+      `Write an English reading passage for ${cefr} level students. Topic: "${day.title}". Use these vocabulary words naturally: ${vocabList}.
+Requirements:
+- Exactly around ${target} words
+- ALL vocabulary must be appropriate for ${cefr} level — simple and clear for lower levels, sophisticated for higher
+- Natural, interesting story/article style
+- Short sentences for A1/A2, longer complex sentences for B1-C2
+- Write ONLY the passage text, no title, no labels`,
+      `You are an EFL textbook writer. Write natural English passages at the exact CEFR level requested. Return ONLY the passage text.`
+    ).then(text => {
+      if (text && text.length > 50) {
+        setPassage(text.trim())
+        localStorage.setItem(passageCacheKey, text.trim())
+      }
+    }).catch(() => {}).finally(() => setPassageLoading(false))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [levelId, dayId])
 
   // reading progress bar
   useEffect(() => {
@@ -1209,10 +1245,9 @@ function ReadingComp({ day, levelId, dayId }) {
 
   return (
     <div className="el-section el-reading-section" ref={sectionRef}>
-      {/* thin progress bar */}
       <div className="el-reading-prog-bar"><div style={{ width: scrollPct + '%' }} /></div>
 
-      {rsvp && <RSVPReader text={r.passage} onClose={() => setRsvp(false)} />}
+      {rsvp && <RSVPReader text={passage} onClose={() => setRsvp(false)} />}
 
       {lookup && (
         <WordLookupPopup
@@ -1222,7 +1257,7 @@ function ReadingComp({ day, levelId, dayId }) {
           onClose={() => setLookup(null)}
         />
       )}
-      {/* Highlight toolbar */}
+
       <div className="el-hl-toolbar">
         <span className="el-hl-label">🖊️ تظليل:</span>
         {Object.entries(HIGHLIGHT_COLORS).map(([k, v]) => (
@@ -1242,7 +1277,14 @@ function ReadingComp({ day, levelId, dayId }) {
         </button>
       </div>
 
-      <div className="el-lookup-hint">💡 انقر مزدوجاً للبحث · حدّد نصاً وسيُظلَّل تلقائياً</div>
+      <div className="el-lookup-hint">💡 انقر على أي كلمة لمعناها · حدّد نصاً وسيُظلَّل تلقائياً</div>
+
+      {passageLoading && (
+        <div style={{ textAlign: 'center', padding: '16px', color: 'var(--el-muted)', fontSize: '.85rem' }}>
+          ⏳ يولّد نصاً مناسباً لمستواك...
+        </div>
+      )}
+
       <div
         className="el-reading-passage"
         ref={passageRef}
@@ -1251,7 +1293,6 @@ function ReadingComp({ day, levelId, dayId }) {
           const sel = window.getSelection()
           const txt = sel?.toString().trim()
           if (!txt || txt.length < 2) return
-          const passage = r.passage
           const idx = passage.indexOf(txt)
           if (idx === -1) return
           const newHL = [...highlights, { start: idx, end: idx + txt.length, color: hlColor }]
@@ -1259,42 +1300,67 @@ function ReadingComp({ day, levelId, dayId }) {
           sel.removeAllRanges()
         }}
       >
-        <HighlightedText text={r.passage} highlights={highlights} />
+        <HighlightedText text={passage} highlights={highlights} />
         <div className="el-tts-pair" style={{ marginTop: 10 }}>
-          <TTSBtn text={r.passage} lang="en-US" ttsKey="passage-us" playingKey={playingKey} trigger={trigger} label="US استمع" />
-          <TTSBtn text={r.passage} lang="en-GB" ttsKey="passage-gb" playingKey={playingKey} trigger={trigger} label="UK استمع" />
+          <TTSBtn text={passage} lang="en-US" ttsKey="passage-us" playingKey={playingKey} trigger={trigger} label="US استمع" />
+          <TTSBtn text={passage} lang="en-GB" ttsKey="passage-gb" playingKey={playingKey} trigger={trigger} label="UK استمع" />
         </div>
       </div>
 
-      <div className="el-breakdown-title">📖 تفكيك سطر بسطر</div>
-      <div className="el-breakdown-list">
-        {r.breakdown.map((b, i) => (
-          <div key={i} className={'el-breakdown-item' + (activeIdx === i ? ' open' : '')}>
-            <button className="el-breakdown-sentence" onClick={() => setActiveIdx(activeIdx === i ? null : i)}>
-              <span>{b.sentence}</span>
-              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                <button className="el-speak-btn" onClick={e => { e.stopPropagation(); speak(b.sentence) }}>🔊</button>
-                <span className="el-expand-icon">{activeIdx === i ? '▲' : '▼'}</span>
-              </div>
-            </button>
-            {activeIdx === i && (
-              <div className="el-breakdown-detail">
-                <div className="el-word-chips">
-                  {b.words.map((w, wi) => (
-                    <span key={wi} className="el-word-chip" onClick={() => speak(w.w)} style={{ cursor: 'pointer' }}>
-                      <span className="el-chip-en">{w.w}</span>
-                      <span className="el-chip-ar">{w.ar}</span>
-                    </span>
-                  ))}
-                </div>
-                <div className="el-breakdown-meaning">💬 {b.meaning}</div>
-              </div>
-            )}
+      <KeySentences passage={passage} />
+      <ReadingComprehensionQuiz passage={passage} />
+    </div>
+  )
+}
+
+/* ─── Key Sentences ─── */
+function KeySentences({ passage }) {
+  const [sentences, setSentences] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [loaded, setLoaded] = useState(false)
+
+  const generate = async () => {
+    if (loaded) return
+    setLoading(true)
+    try {
+      const raw = await aiAsk(
+        `From this passage, pick the 3 most useful and interesting sentences that a language learner should memorize:
+
+"${passage}"
+
+Reply in EXACTLY this format (3 sentences only, no extra text):
+SENTENCE1: [first sentence from the passage]
+ARABIC1: [Arabic translation]
+SENTENCE2: [second sentence]
+ARABIC2: [Arabic translation]
+SENTENCE3: [third sentence]
+ARABIC3: [Arabic translation]`,
+        'You are an EFL teacher. Extract key sentences and translate them. Use only the labeled format.'
+      )
+      const get = (label) => { const m = raw.match(new RegExp(`${label}:\\s*(.+)`, 'i')); return m ? m[1].trim() : '' }
+      const result = [1, 2, 3].map(n => ({ en: get(`SENTENCE${n}`), ar: get(`ARABIC${n}`) })).filter(s => s.en)
+      setSentences(result)
+      setLoaded(true)
+    } catch { }
+    setLoading(false)
+  }
+
+  useEffect(() => { generate() }, [passage]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!loaded && !loading) return null
+  return (
+    <div className="el-key-sentences">
+      <div className="el-key-sentences-title">⭐ أهم الجمل المفيدة</div>
+      {loading && <div style={{ color: 'var(--el-muted)', fontSize: '.82rem', padding: '8px 0' }}>⏳ يختار أفضل الجمل...</div>}
+      {sentences.map((s, i) => (
+        <div key={i} className="el-key-sentence-item">
+          <div className="el-key-sentence-en">
+            {s.en}
+            <button className="el-speak-btn" style={{ marginRight: 6 }} onClick={() => speak(s.en)}>🔊</button>
           </div>
-        ))}
-      </div>
-      <ReadingComprehensionQuiz passage={r.passage} />
-      <ReadingBookmarks />
+          <div className="el-key-sentence-ar">{s.ar}</div>
+        </div>
+      ))}
     </div>
   )
 }
@@ -2123,9 +2189,30 @@ function ReadingComprehensionQuiz({ passage }) {
     if (questions.length) { setOpen(true); return }
     setLoading(true)
     try {
-      const qRaw = await aiAsk(`Passage: "${passage.slice(0, 600)}"\n\nCreate 4 MCQ questions as JSON: [{"q":"...","options":["a","b","c","d"],"correct":0,"explanation":"Arabic explanation"}]. JSON only.`, 'Reply ONLY with a valid JSON array.')
-      const txt = (qRaw || '[]').replace(/```json|```/g,'').trim()
-      try { setQuestions(JSON.parse(txt)) } catch { setQuestions([]) }
+      const raw = await aiAsk(
+        `Passage: "${passage.slice(0, 700)}"
+
+Create 4 multiple-choice comprehension questions. Use EXACTLY this format (no extra text):
+Q: [question text]
+A: [option a]
+B: [option b]
+C: [option c]
+D: [option d]
+CORRECT: [A or B or C or D]
+EXPLAIN: [Arabic explanation why]
+---`,
+        'You are an EFL teacher creating comprehension questions. Use only the labeled format.'
+      )
+      const blocks = (raw || '').split('---').map(b => b.trim()).filter(Boolean)
+      const parsed = blocks.map(block => {
+        const get = (label) => { const m = block.match(new RegExp(`^${label}:\\s*(.+)`, 'im')); return m ? m[1].trim() : '' }
+        const correctLetter = get('CORRECT').toUpperCase()
+        const opts = [get('A'), get('B'), get('C'), get('D')]
+        const correctIdx = ['A','B','C','D'].indexOf(correctLetter)
+        if (!get('Q') || correctIdx === -1) return null
+        return { q: get('Q'), options: opts, correct: correctIdx, explanation: get('EXPLAIN') }
+      }).filter(Boolean)
+      setQuestions(parsed.slice(0, 4))
       setOpen(true)
     } catch { } finally { setLoading(false) }
   }

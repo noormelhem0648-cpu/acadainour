@@ -1657,3 +1657,10 @@
 .el-wp-tts:hover { background: var(--el-accent); color: #fff; }
 .el-wp-example { font-style: italic; color: var(--el-text2); font-size: .8rem; border-top: 1px solid var(--el-border); padding-top: 6px; margin-top: 4px; }
 .el-wp-loading { color: var(--el-muted); font-size: .82rem; text-align: center; padding: 8px; }
+
+/* ── Key Sentences ── */
+.el-key-sentences { margin-top: 20px; padding: 14px 16px; background: var(--el-bg2); border-radius: 12px; border: 1.5px solid var(--el-accent); }
+.el-key-sentences-title { font-weight: 700; font-size: .95rem; color: var(--el-accent); margin-bottom: 12px; }
+.el-key-sentence-item { padding: 10px 12px; background: var(--el-bg3); border-radius: 8px; margin-bottom: 8px; }
+.el-key-sentence-en { font-weight: 600; color: var(--el-text); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.el-key-sentence-ar { font-size: .85rem; color: var(--el-muted); direction: rtl; }
