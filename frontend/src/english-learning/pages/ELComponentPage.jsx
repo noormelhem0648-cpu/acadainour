@@ -2,6 +2,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { getDay, COMPONENTS } from '../data/curriculum'
 import { useProgress, XP_VALUES } from '../hooks/useProgress'
+import WordLookupProvider from '../components/WordLookup'
 import '../EL.css'
 
 const EL = '/english-learning'
@@ -322,6 +323,7 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
 
   return (
     <div className={`el-app${darkMode ? ' el-dark' : ''}`}>
+      <WordLookupProvider>
       {showXP && <XPPopAnimation amount={XP_VALUES[componentId] || 15} onDone={() => setShowXP(false)} />}
       <div className="el-page el-comp-page">
         <header className="el-top-bar">
@@ -388,6 +390,7 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
           )}
         </div>
       </div>
+      </WordLookupProvider>
     </div>
   )
 }
@@ -555,14 +558,29 @@ function TeacherCorner({ words, dayTitle }) {
 
   const wordList = words.map((w, i) => `${i + 1}. ${w.word} (${w.arabic}) — ${w.ipa}`).join('\n')
 
-  const systemPrompt = `أنت أستاذ لغة إنجليزية مباشر وموجز. درس اليوم: "${dayTitle}". كلمات الدرس: ${wordList}
+  const systemPrompt = `أنت أستاذ لغة إنجليزية متمرس ومتخصص. درس اليوم: "${dayTitle}". كلمات الدرس: ${wordList}
 
-قواعد الرد — اتبعها حرفياً:
-- الرد بالعربية فقط ما لم يُطلب غير ذلك
-- 3 نقاط بالحد الأقصى، كل نقطة سطر واحد
-- مثال إنجليزي واحد فقط إذا لزم
-- ممنوع: فقرات طويلة، مقدمات، خواتيم، عبارات مثل "هاي إجابة عامة" أو "من معرفة أكاديمية"
-- ابدأ مباشرة بالنقطة الأولى بدون ترحيب`
+أسلوب الرد:
+- اشرح بالعربية بشكل تفصيلي ومفيد
+- استخدم هذا الهيكل دائماً:
+
+**📌 الشرح:**
+[شرح مفصّل للنقطة المطلوبة]
+
+**📖 أمثلة:**
+[مثال إنجليزي أول] — [معناه بالعربي]
+[مثال إنجليزي ثاني] — [معناه بالعربي]
+
+**💡 ملاحظة مهمة:**
+[نصيحة أو قاعدة مهمة]
+
+**⚠️ أخطاء شائعة:**
+[خطأ شائع] ✗ / [الصواب] ✓
+
+- إذا سُئلت عن كلمة: أعطِ المعنى، النطق، الجذر، المرادفات، والأضداد
+- إذا سُئلت عن قاعدة: اشرح متى تُستخدم، والصيغ المختلفة
+- لا تختصر على حساب الفائدة
+- لا تضف مقدمات أو خواتيم زائدة`
 
   const send = async () => {
     if (!input.trim() || loading) return
@@ -605,11 +623,19 @@ function TeacherCorner({ words, dayTitle }) {
                 <span className="el-tc-text">
                   {m.role === 'assistant'
                     ? m.content.split('\n').filter(l => l.trim()).map((line, li) => {
+                        const isHeader = /^\*\*[📌📖💡⚠️]/.test(line.trim())
                         const isBullet = /^[-•*]\s/.test(line.trim())
-                        const clean = line.replace(/^[-•*]\s/, '').replace(/\*\*(.*?)\*\*/g, '$1')
-                        return isBullet
-                          ? <div key={li} style={{ display:'flex', gap:6, marginBottom:4 }}><span style={{color:'var(--el-accent)',fontWeight:700,flexShrink:0}}>•</span><span>{clean}</span></div>
-                          : <div key={li} style={{ marginBottom: li < m.content.split('\n').length - 1 ? 6 : 0 }}>{clean}</div>
+                        const clean = line
+                          .replace(/^[-•*]\s/, '')
+                          .replace(/\*\*(.*?)\*\*/g, '$1')
+                          .trim()
+                        if (isHeader) return (
+                          <div key={li} style={{ fontWeight:700, color:'var(--el-accent)', marginTop:10, marginBottom:4, fontSize:'.9rem' }}>{clean}</div>
+                        )
+                        if (isBullet) return (
+                          <div key={li} style={{ display:'flex', gap:6, marginBottom:4 }}><span style={{color:'var(--el-accent)',fontWeight:700,flexShrink:0}}>•</span><span>{clean}</span></div>
+                        )
+                        return <div key={li} style={{ marginBottom:4 }}>{clean}</div>
                       })
                     : m.content}
                 </span>
@@ -866,6 +892,98 @@ function DragSentence({ question, answer }) {
   )
 }
 
+/* ─── Grammar Pattern with AI expansion ─── */
+function GrammarPattern({ p, pi, day }) {
+  const [expanded, setExpanded] = useState(false)
+  const [expandedText, setExpandedText] = useState('')
+  const [expandLoading, setExpandLoading] = useState(false)
+
+  const expand = async () => {
+    if (expandedText) { setExpanded(e => !e); return }
+    setExpanded(true)
+    setExpandLoading(true)
+    const prompt = `اشرح قاعدة "${p.name}" في اللغة الإنجليزية بشكل تفصيلي كامل. اتبع هذا الهيكل بالضبط:
+
+**📌 ما هي القاعدة؟**
+[شرح مفصّل بالعربية — لا يقل عن 50 كلمة]
+
+**🕐 متى نستخدمها؟**
+[متى وكيف نستخدم هذه القاعدة]
+
+**🔑 الكلمات الدلالية:**
+[كلمات تدل على استخدام هذه القاعدة]
+
+**✅ المثبت (Affirmative):**
+[صيغة] → [مثال]
+[مثال آخر]
+
+**❌ النفي (Negative):**
+[صيغة] → [مثال]
+
+**❓ السؤال (Question):**
+[صيغة] → [مثال]
+
+**🔍 أسئلة WH:**
+[مثال]
+
+**⚠️ أخطاء شائعة:**
+✗ [خطأ] → ✓ [الصواب]
+✗ [خطأ] → ✓ [الصواب]
+
+**💡 نصائح:**
+[نصيحة مهمة]`
+
+    try {
+      const text = await aiAsk(prompt, `أنت معلم لغة إنجليزية محترف. درس اليوم: ${day.title}. اشرح القاعدة بشكل تعليمي مفصّل.`)
+      setExpandedText(text)
+    } catch {
+      setExpandedText('تعذّر تحميل الشرح التفصيلي.')
+    }
+    setExpandLoading(false)
+  }
+
+  const renderMarkdown = (text) => text.split('\n').filter(l => l.trim()).map((line, li) => {
+    const isHeader = /^\*\*[📌🕐🔑✅❌❓🔍⚠️💡]/.test(line.trim())
+    const isBullet = /^[-•*✗✓]\s/.test(line.trim())
+    const clean = line.replace(/^\*\*/, '').replace(/\*\*$/, '').replace(/\*\*(.*?)\*\*/g, '$1').trim()
+    if (isHeader) return <div key={li} style={{ fontWeight:700, color:'var(--el-accent)', marginTop:12, marginBottom:4, fontSize:'.9rem', borderBottom:'1px solid var(--el-border)', paddingBottom:2 }}>{clean}</div>
+    if (isBullet) return <div key={li} style={{ display:'flex', gap:6, marginBottom:3, paddingRight:8 }}><span style={{flexShrink:0,color:'var(--el-muted)'}}>•</span><span>{clean}</span></div>
+    return <div key={li} style={{ marginBottom:4 }}>{clean}</div>
+  })
+
+  return (
+    <div className="el-grammar-block">
+      <h3 className="el-grammar-name">{p.name}</h3>
+      <div className="el-grammar-explain">{p.explanation}</div>
+      <div className="el-formula-box">
+        <span className="el-formula-label">الصيغة:</span>
+        <code className="el-formula">{p.formula}</code>
+      </div>
+      <div className="el-examples-list">
+        {p.examples.map((ex, i) => (
+          <div key={i} className="el-example-item">
+            ✦ {ex}
+            <button className="el-speak-btn" onClick={() => speak(ex)} style={{ marginRight: 6 }}>🔊</button>
+          </div>
+        ))}
+      </div>
+      <button
+        className="el-nav-btn"
+        style={{ marginTop: 10, fontSize: '.82rem', background: expanded ? 'var(--el-bg3)' : undefined }}
+        onClick={expand}
+        disabled={expandLoading}
+      >
+        {expandLoading ? '⏳ يحمّل الشرح...' : expanded ? '🔼 إخفاء الشرح التفصيلي' : '📚 شرح تفصيلي + جميع الصيغ'}
+      </button>
+      {expanded && expandedText && (
+        <div className="el-grammar-expanded" style={{ marginTop: 10, padding: '12px 14px', background: 'var(--el-bg3)', borderRadius: 10, fontSize: '.87rem', lineHeight: 1.7 }}>
+          {renderMarkdown(expandedText)}
+        </div>
+      )}
+    </div>
+  )
+}
+
 /* ─── Grammar ─── */
 function GrammarComp({ day, levelId, setBuddyMessages, setAvatarState }) {
   const [shown, setShown] = useState({})
@@ -874,21 +992,10 @@ function GrammarComp({ day, levelId, setBuddyMessages, setAvatarState }) {
   return (
     <div className="el-section">
       {g.patterns.map((p, pi) => (
-        <div key={pi} className="el-grammar-block">
-          <h3 className="el-grammar-name">{p.name}</h3>
-          <div className="el-grammar-explain">{p.explanation}</div>
-          <div className="el-formula-box">
-            <span className="el-formula-label">الصيغة:</span>
-            <code className="el-formula">{p.formula}</code>
-          </div>
-          <div className="el-examples-list">
-            {p.examples.map((ex, i) => (
-              <div key={i} className="el-example-item">
-                ✦ {ex}
-                <button className="el-speak-btn" onClick={() => speak(ex)} style={{ marginRight: 6 }}>🔊</button>
-              </div>
-            ))}
-          </div>
+        <GrammarPattern key={pi} p={p} pi={pi} day={day} />
+      ))}
+      {g.patterns.map((p, pi) => (
+        <div key={`ex-${pi}`} className="el-grammar-block" style={{ marginTop: 0, paddingTop: 0, borderTop: 'none' }}>
           <div className="el-exercises-title">📝 تمارين — صحّح بنفسك</div>
           {p.exercises.map((ex, i) => {
             const isDrag = /رتّب/.test(ex.question) && /\(/.test(ex.question)
@@ -1568,7 +1675,9 @@ HINT: [شرح عربي قصير]
   const handleWord = (sIdx, wIdx, word, sentence) => {
     const key = `${sIdx}_${wIdx}`
     if (clicked[key]) return
-    const isError = word.toLowerCase().replace(/[.,!?]/, '').includes(sentence.error.toLowerCase().split(' ')[0])
+    const cleanWord = word.toLowerCase().replace(/[.,!?'"]/g, '')
+    const errorWords = sentence.error.toLowerCase().split(/\s+/).map(w => w.replace(/[.,!?'"]/g, ''))
+    const isError = errorWords.some(ew => cleanWord === ew || cleanWord.includes(ew) || ew.includes(cleanWord))
     setClicked(c => ({ ...c, [key]: isError ? 'right' : 'wrong' }))
   }
 

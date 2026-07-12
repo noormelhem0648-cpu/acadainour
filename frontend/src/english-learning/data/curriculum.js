@@ -49,12 +49,12 @@ export const LEVELS = [
 ]
 
 export const COMPONENTS = [
-  { id: 'vocab',     icon: '🔤', label: 'المفردات والصوتيات',      labelEn: 'Vocabulary & Phonetics' },
-  { id: 'grammar',   icon: '📐', label: 'القواعد والمحادثة',        labelEn: 'Grammar & Conversation' },
-  { id: 'reading',   icon: '📖', label: 'القراءة والتحليل',          labelEn: 'Reading & Breakdown' },
-  { id: 'listening', icon: '🎧', label: 'الاستماع والإملاء',          labelEn: 'Listening & Dictation' },
-  { id: 'shadowing', icon: '🎙️', label: 'الشادونج والنطق',           labelEn: 'Shadowing & Fluency' },
-  { id: 'writing',   icon: '✍️', label: 'الكتابة والمحادثة الحية', labelEn: 'Writing & AI Chat' },
+  { id: 'vocab',     icon: '🔤', label: 'مفردات',      labelEn: 'Vocabulary & Phonetics' },
+  { id: 'grammar',   icon: '📐', label: 'قواعد',        labelEn: 'Grammar & Conversation' },
+  { id: 'reading',   icon: '📖', label: 'قراءة',          labelEn: 'Reading & Breakdown' },
+  { id: 'listening', icon: '🎧', label: 'استماع',          labelEn: 'Listening & Dictation' },
+  { id: 'shadowing', icon: '🎙️', label: 'شادونج',           labelEn: 'Shadowing & Fluency' },
+  { id: 'writing',   icon: '✍️', label: 'الكتابة', labelEn: 'Writing & AI Chat' },
 ]
 
 export function getDay(levelId, dayId) {

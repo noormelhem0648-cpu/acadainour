@@ -1632,3 +1632,28 @@
 .el-app .el-pronrec-feedback.match { color: var(--el-green); font-weight: 700; font-size: 1rem; }
 .el-app .el-pronrec-feedback.close { color: #b45309; }
 .el-app .el-pronrec-feedback.tryagain { color: var(--el-red); }
+
+/* ── Word Lookup Popup ── */
+.el-word-popup {
+  background: var(--el-bg2);
+  border: 1.5px solid var(--el-accent);
+  border-radius: 12px;
+  padding: 10px 14px;
+  min-width: 200px;
+  max-width: 280px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.18);
+  font-size: .85rem;
+  line-height: 1.6;
+  pointer-events: auto;
+}
+.el-wp-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.el-wp-word { font-weight: 800; font-size: 1rem; color: var(--el-accent); }
+.el-wp-pos { font-size: .72rem; background: var(--el-bg3); border-radius: 4px; padding: 1px 6px; color: var(--el-muted); }
+.el-wp-close { margin-left: auto; background: none; border: none; cursor: pointer; color: var(--el-muted); font-size: .9rem; padding: 0 2px; }
+.el-wp-arabic { font-size: 1rem; font-weight: 700; color: var(--el-text); margin-bottom: 4px; }
+.el-wp-ipa { font-family: monospace; color: var(--el-muted); font-size: .8rem; margin-bottom: 6px; }
+.el-wp-tts-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px; }
+.el-wp-tts { background: var(--el-bg3); border: 1px solid var(--el-border); border-radius: 8px; padding: 4px 10px; font-size: .78rem; cursor: pointer; text-align: left; color: var(--el-text); }
+.el-wp-tts:hover { background: var(--el-accent); color: #fff; }
+.el-wp-example { font-style: italic; color: var(--el-text2); font-size: .8rem; border-top: 1px solid var(--el-border); padding-top: 6px; margin-top: 4px; }
+.el-wp-loading { color: var(--el-muted); font-size: .82rem; text-align: center; padding: 8px; }
