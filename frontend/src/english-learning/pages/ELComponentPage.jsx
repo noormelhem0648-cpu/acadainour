@@ -1874,6 +1874,64 @@ CORRECTION: [الكلمة/العبارة الخاطئة] → [الصواب] | Re
 }
 
 /* ─── Grammar Detective ─── */
+function parseDetectiveSentences(raw, count) {
+  if (!raw) return []
+  const results = []
+
+  // Strategy 1: numbered blocks with WRONG/ERROR/FIX/HINT labels
+  const numberedBlocks = raw.split(/\n(?=\d+\.)/).filter(Boolean)
+  for (const block of numberedBlocks) {
+    const get = (label) => {
+      const m = block.match(new RegExp(`${label}:\\s*(.+)`, 'i'))
+      return m ? m[1].trim().replace(/^["']|["']$/g, '') : ''
+    }
+    const text = get('WRONG')
+    const error = get('ERROR')
+    const fix = get('FIX')
+    const hint = get('HINT')
+    if (text && error) results.push({ text, error, fix: fix || error, hint: hint || '' })
+  }
+  if (results.length >= 1) return results.slice(0, count)
+
+  // Strategy 2: flat SENTENCE/ERROR/FIX/HINT blocks separated by ---
+  const dashBlocks = raw.split(/---+/).map(b => b.trim()).filter(Boolean)
+  for (const block of dashBlocks) {
+    const get = (label) => {
+      const m = block.match(new RegExp(`${label}:\\s*(.+)`, 'i'))
+      return m ? m[1].trim().replace(/^["']|["']$/g, '') : ''
+    }
+    const text = get('SENTENCE') || get('WRONG')
+    const error = get('ERROR')
+    const fix = get('FIX')
+    const hint = get('HINT')
+    if (text && error) results.push({ text, error, fix: fix || error, hint: hint || '' })
+  }
+  if (results.length >= 1) return results.slice(0, count)
+
+  // Strategy 3: line-by-line scan — look for lines with clear ERROR/FIX labels
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean)
+  let current = {}
+  for (const line of lines) {
+    const wm = line.match(/^(?:WRONG|SENTENCE):\s*(.+)/i)
+    const em = line.match(/^ERROR:\s*(.+)/i)
+    const fm = line.match(/^FIX:\s*(.+)/i)
+    const hm = line.match(/^HINT:\s*(.+)/i)
+    if (wm) { if (current.text && current.error) results.push(current); current = { text: wm[1].trim(), error: '', fix: '', hint: '' } }
+    else if (em && current.text) current.error = em[1].trim()
+    else if (fm && current.text) current.fix = fm[1].trim()
+    else if (hm && current.text) current.hint = hm[1].trim()
+  }
+  if (current.text && current.error) results.push(current)
+  if (results.length >= 1) return results.slice(0, count)
+
+  // Strategy 4: extract numbered English sentences — assume each is a "mistake" sentence
+  const sentMatches = [...raw.matchAll(/\d+[\.\)]\s+([A-Z][^.!?]*[.!?])/g)]
+  for (const m of sentMatches) {
+    results.push({ text: m[1].trim(), error: '?', fix: '?', hint: 'ابحثي عن الخطأ النحوي' })
+  }
+  return results.slice(0, count)
+}
+
 function GrammarDetective({ day }) {
   const [open, setOpen] = useState(false)
   const [difficulty, setDifficulty] = useState('medium')
@@ -1901,39 +1959,39 @@ function GrammarDetective({ day }) {
     const patterns = day.grammar?.patterns?.map(p => p.name).join(', ') || 'general grammar'
     const vocab = day.vocabulary?.words?.slice(0, 8).map(w => w.word).join(', ') || ''
     const diffDesc = difficulty === 'easy'
-      ? 'simple mistakes: subject-verb agreement or basic tense errors'
+      ? 'subject-verb agreement or basic tense (he go, she are, I is)'
       : difficulty === 'medium'
-      ? 'intermediate mistakes: wrong tense form, misused preposition, or article error'
-      : 'advanced mistakes: subtle conditional or perfect tense confusion'
-    const prompt = `Generate exactly ${count} English sentences, each with ONE grammar mistake.
-Difficulty: ${diffDesc}.
-Topic: ${patterns}. ${vocab ? `Use some of: ${vocab}.` : ''}
+      ? 'wrong tense form, misused preposition, or wrong article'
+      : 'subtle conditional, perfect tense, or passive voice confusion'
 
-Use EXACTLY this format for each sentence (repeat the block ${count} times):
-SENTENCE: [the sentence with the mistake]
-ERROR: [wrong word or phrase]
-FIX: [correct version]
-HINT: [شرح عربي قصير]
----`
+    const prompt = `I need ${count} English sentences each with exactly ONE grammar mistake. Grammar topic: ${patterns}. ${vocab ? `Words to use: ${vocab}.` : ''}
+Mistake type: ${diffDesc}.
+
+Reply with ONLY this numbered list, nothing else:
+
+1. WRONG: [sentence with mistake here]
+   ERROR: [the wrong word or phrase]
+   FIX: [correct word or phrase]
+   HINT: [سبب الخطأ بالعربي]
+
+2. WRONG: [sentence with mistake here]
+   ERROR: [the wrong word or phrase]
+   FIX: [correct word or phrase]
+   HINT: [سبب الخطأ بالعربي]
+
+(continue for all ${count} sentences)`
+
     try {
-      const raw = await aiAsk(prompt, 'Output only the labeled blocks. No intro, no numbering, no extra text.')
-      // Parse line-based format
-      const blocks = raw.split('---').map(b => b.trim()).filter(Boolean)
-      const parsed = blocks.map(block => {
-        const get = (label) => {
-          const m = block.match(new RegExp(`${label}:\\s*(.+)`, 'i'))
-          return m ? m[1].trim() : ''
-        }
-        return { text: get('SENTENCE'), error: get('ERROR'), fix: get('FIX'), hint: get('HINT') }
-      }).filter(s => s.text && s.error)
+      const raw = await aiAsk(prompt, `You are a grammar exercise generator. Generate exactly ${count} numbered grammar sentences following the WRONG/ERROR/FIX/HINT format strictly. No extra explanation.`)
+      const parsed = parseDetectiveSentences(raw, count)
       if (parsed.length > 0) {
-        setSentences(parsed.slice(0, count))
+        setSentences(parsed)
         setGenerated(true)
       } else {
-        setError('لم تُولَّد جمل — حاولي مرة ثانية')
+        setError('تعذّر تحليل الرد — حاولي مرة ثانية')
       }
     } catch (e) {
-      setError('خطأ في الاتصال: ' + (e?.message || 'unknown'))
+      setError('خطأ في الاتصال')
     }
     setLoading(false)
   }
