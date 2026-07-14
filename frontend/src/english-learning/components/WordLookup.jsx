@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 const API = 'https://acadai-backend-avvo.onrender.com'
 
 async function lookupWord(word) {
-  const token = localStorage.getItem('acadai_token')
+  const token = localStorage.getItem('noura_token')
   const headers = { 'Content-Type': 'application/json' }
   if (token) headers['Authorization'] = `Bearer ${token}`
   const prompt = `Give a concise dictionary entry for the English word: "${word}"

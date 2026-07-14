@@ -24,9 +24,9 @@ import ELReviewPage from "./english-learning/pages/ELReviewPage";
 function App() {
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("theme") === "dark");
   const [user, setUser] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("acadai_user")); } catch { return null; }
+    try { return JSON.parse(localStorage.getItem("noura_user")); } catch { return null; }
   });
-  const [token, setToken] = useState(() => localStorage.getItem("acadai_token") || null);
+  const [token, setToken] = useState(() => localStorage.getItem("noura_token") || null);
 
   useEffect(() => {
     if (darkMode) {
@@ -46,8 +46,8 @@ function App() {
   const handleLogout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem("acadai_token");
-    localStorage.removeItem("acadai_user");
+    localStorage.removeItem("noura_token");
+    localStorage.removeItem("noura_user");
   };
 
   const themeProps = { darkMode, setDarkMode, user, token, onLogout: handleLogout };

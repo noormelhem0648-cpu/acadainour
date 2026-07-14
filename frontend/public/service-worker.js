@@ -1,4 +1,4 @@
-const CACHE = 'acadai-el-v3';
+const CACHE = 'noura-ai-el-v3';
 
 self.addEventListener('install', e => {
   self.skipWaiting();

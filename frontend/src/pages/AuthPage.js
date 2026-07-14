@@ -40,8 +40,8 @@ export default function AuthPage({ onLogin }) {
       });
       const data = await res.json();
       if (!res.ok) { setError(data.detail || "Something went wrong."); setLoading(false); return; }
-      localStorage.setItem("acadai_token", data.token);
-      localStorage.setItem("acadai_user", JSON.stringify(data.user));
+      localStorage.setItem("noura_token", data.token);
+      localStorage.setItem("noura_user", JSON.stringify(data.user));
       onLogin(data.user, data.token);
     } catch {
       setError("Connection error. Please try again.");

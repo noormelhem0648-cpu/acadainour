@@ -10,7 +10,7 @@ const EL = '/english-learning'
 
 /* ── Non-streaming AI call for structured data ── */
 async function aiAsk(message, systemPrompt) {
-  const token = localStorage.getItem('acadai_token')
+  const token = localStorage.getItem('noura_token')
   const headers = { 'Content-Type': 'application/json' }
   if (token) headers['Authorization'] = `Bearer ${token}`
   const res = await fetch(`${API}/english-tutor/stream`, {

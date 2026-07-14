@@ -1,7 +1,7 @@
 {
-  "name": "smart-student-assistant-frontend",
+  "name": "noura-ai-frontend",
   "version": "1.0.0",
-  "description": "Smart Student Assistant N — AI-powered learning platform",
+  "description": "Noura AI — AI-powered English learning platform",
   "private": true,
   "dependencies": {
     "react": "^18.2.0",

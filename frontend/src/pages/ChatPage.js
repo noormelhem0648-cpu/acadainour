@@ -123,7 +123,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
   // Load saved chats from localStorage
   useEffect(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem(`acadai_chats_${subjectCode}`) || "[]");
+      const saved = JSON.parse(localStorage.getItem(`noura_chats_${subjectCode}`) || "[]");
       setSavedChats(saved);
     } catch (e) {}
   }, [subjectCode]);
@@ -140,7 +140,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
       });
     }
     try {
-      const saved = JSON.parse(localStorage.getItem(`acadai_chats_${subjectCode}`) || "[]");
+      const saved = JSON.parse(localStorage.getItem(`noura_chats_${subjectCode}`) || "[]");
       const existing = saved.findIndex(c => c.id === chatId);
       const chatData = {
         id: chatId,
@@ -151,7 +151,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
       if (existing >= 0) saved[existing] = chatData;
       else saved.unshift(chatData);
       const trimmed = saved.slice(0, 20);
-      localStorage.setItem(`acadai_chats_${subjectCode}`, JSON.stringify(trimmed));
+      localStorage.setItem(`noura_chats_${subjectCode}`, JSON.stringify(trimmed));
       setSavedChats(trimmed);
     } catch (e) {}
   }, [messages, subjectCode]);
@@ -176,9 +176,9 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
 
   const deleteChat = (chatId) => {
     try {
-      const saved = JSON.parse(localStorage.getItem(`acadai_chats_${subjectCode}`) || "[]");
+      const saved = JSON.parse(localStorage.getItem(`noura_chats_${subjectCode}`) || "[]");
       const filtered = saved.filter(c => c.id !== chatId);
-      localStorage.setItem(`acadai_chats_${subjectCode}`, JSON.stringify(filtered));
+      localStorage.setItem(`noura_chats_${subjectCode}`, JSON.stringify(filtered));
       setSavedChats(filtered);
     } catch (e) {}
   };
@@ -304,8 +304,8 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
 
   // If the token is invalid/expired, log the user out to re-authenticate.
   const handleAuthExpired = () => {
-    localStorage.removeItem("acadai_token");
-    localStorage.removeItem("acadai_user");
+    localStorage.removeItem("noura_token");
+    localStorage.removeItem("noura_user");
     alert("انتهت جلستك — سجّل دخول من جديد 🔑\nYour session expired — please log in again.");
     if (onLogout) onLogout();
     else window.location.reload();

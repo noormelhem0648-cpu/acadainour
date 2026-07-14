@@ -9,7 +9,7 @@ const EL = '/english-learning'
 const BACKEND = 'https://acadai-backend-avvo.onrender.com'
 
 const authHeaders = () => {
-  const t = localStorage.getItem('acadai_token')
+  const t = localStorage.getItem('noura_token')
   return t
     ? { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` }
     : { 'Content-Type': 'application/json' }
