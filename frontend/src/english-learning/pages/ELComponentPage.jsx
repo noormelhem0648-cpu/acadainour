@@ -620,7 +620,17 @@ function TeacherCorner({ words, dayTitle }) {
           {msgs.length === 0 && (
             <div className="el-teacher-suggestions">
               {['ما معنى أول كلمة؟', 'كيف أحفظ الكلمات؟', 'هل يمكنك شرح كلمة صعبة؟'].map(q => (
-                <button key={q} className="el-suggestion-chip" onClick={() => { setInput(q); }}>
+                <button key={q} className="el-suggestion-chip" onClick={async () => {
+                  if (loading) return
+                  setMsgs(prev => [...prev, { role: 'user', content: q }])
+                  setLoading(true)
+                  try {
+                    const reply = await aiAsk(q, systemPrompt, msgs)
+                    setMsgs(prev => [...prev, { role: 'assistant', content: reply || '...' }])
+                  } catch {
+                    setMsgs(prev => [...prev, { role: 'assistant', content: 'تعذّر الاتصال.' }])
+                  } finally { setLoading(false) }
+                }}>
                   {q}
                 </button>
               ))}
@@ -1143,7 +1153,6 @@ function RSVPReader({ text, onClose }) {
 }
 
 /* ─── Reading ─── */
-const READING_WORDS = { 1: 50, 2: 100, 3: 150, 4: 200, 5: 280, 6: 350 }
 
 function ReadingComp({ day, levelId, dayId }) {
   const [playingKey, trigger] = useTTS()
@@ -1218,7 +1227,7 @@ function ReadingComp({ day, levelId, dayId }) {
         </button>
       </div>
 
-      <div className="el-lookup-hint">💡 انقر على أي كلمة لمعناها · حدّد نصاً وسيُظلَّل تلقائياً</div>
+      <div className="el-lookup-hint">💡 انقر مزدوجاً على أي كلمة لمعناها · حدّد نصاً للتظليل</div>
 
       <div
         className="el-reading-passage"
@@ -1243,6 +1252,7 @@ function ReadingComp({ day, levelId, dayId }) {
       </div>
 
       <KeySentences passage={passage} />
+      <ReadingBookmarks />
     </div>
   )
 }
@@ -1250,7 +1260,8 @@ function ReadingComp({ day, levelId, dayId }) {
 /* ─── Key Sentences ─── */
 function KeySentences({ passage }) {
   const sentences = (passage || '')
-    .split(/(?<=[.!?])\s+/)
+    .replace(/([.!?])\s+/g, '$1\x00')
+    .split('\x00')
     .map(s => s.trim())
     .filter(s => s.length > 25 && s.length < 200 && /[a-zA-Z]/.test(s))
     .slice(0, 3)
@@ -1272,7 +1283,6 @@ function KeySentences({ passage }) {
 }
 
 /* ─── Listening word targets per level ─── */
-const LISTENING_WORDS = { 1: 45, 2: 85, 3: 130, 4: 175, 5: 215, 6: 260 }
 
 /* ─── Listening Speed Control ─── */
 function ListeningSpeedControl({ text }) {
@@ -1318,15 +1328,16 @@ function ListeningComp({ day, levelId, dayId }) {
     return [
       // TF questions
       { type: 'TF', q: sentences[0] ? `True or False: "${sentences[0]}"` : 'The text is about daily life.', correct: 'TRUE' },
-      { type: 'TF', q: sentences[1] ? `True or False: The passage mentions "${wordList[0] || 'school'}"` : 'This is a short text.', correct: 'TRUE' },
+      { type: 'TF', q: sentences[1] ? `True or False: The passage mentions "pizza"` : 'This is a short text.', correct: 'FALSE' },
       // Fill blanks
       ...(sentences.slice(0, 3).map((sent) => {
-        const words = sent.split(' ').filter(w => w.length > 3)
-        const target = words[Math.floor(words.length / 2)] || 'the'
+        const words = sent.split(' ').filter(w => w.length > 3 && /[a-zA-Z]/.test(w))
+        const rawTarget = words[Math.floor(words.length / 2)] || 'good'
+        const target = rawTarget.replace(/[^a-zA-Z]/g, '') || 'good'
         return {
           type: 'FILL',
-          q: sent.replace(new RegExp(`\\b${target}\\b`, 'i'), '___'),
-          correct: target.replace(/[^a-zA-Z]/g, ''),
+          q: sent.replace(new RegExp(`\\b${rawTarget.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i'), '___'),
+          correct: target,
         }
       })),
       // MCQ
@@ -1354,8 +1365,8 @@ function ListeningComp({ day, levelId, dayId }) {
       },
       {
         type: 'TF',
-        q: sentences[2] ? `True or False: "${sentences[2]}"` : 'The passage has more than one sentence.',
-        correct: 'TRUE',
+        q: 'True or False: The passage is written in French.',
+        correct: 'FALSE',
       },
       {
         type: 'MCQ',
@@ -1368,18 +1379,20 @@ function ListeningComp({ day, levelId, dayId }) {
         ],
         correct: 0,
       },
-      sentences.length > 3
-        ? (() => {
-            const sent = sentences[3]
-            const words = sent.split(' ').filter(w => w.length > 3)
-            const target = words[0] || 'the'
-            return { type: 'FILL', q: sent.replace(new RegExp(`\\b${target}\\b`, 'i'), '___'), correct: target.replace(/[^a-zA-Z]/g, '') }
-          })()
-        : { type: 'FILL', q: `I ___ English every day.`, correct: 'study' },
+      (() => {
+        if (sentences.length > 3) {
+          const sent = sentences[3]
+          const words = sent.split(' ').filter(w => w.length > 3 && /[a-zA-Z]/.test(w))
+          const rawTarget = words[0] || 'good'
+          const target = rawTarget.replace(/[^a-zA-Z]/g, '') || 'good'
+          return { type: 'FILL', q: sent.replace(new RegExp(`\\b${rawTarget.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i'), '___'), correct: target }
+        }
+        return { type: 'FILL', q: `I ___ English every day.`, correct: 'study' }
+      })(),
       {
         type: 'TF',
-        q: `True or False: This text is written in English.`,
-        correct: 'TRUE',
+        q: `True or False: This passage is about cooking recipes.`,
+        correct: 'FALSE',
       },
       {
         type: 'MCQ',
@@ -1564,9 +1577,11 @@ function ShadowingComp({ day }) {
         ))}
       </div>
 
-      <a href={s.youtubeUrl} target="_blank" rel="noopener noreferrer" className="el-yt-btn">
-        ▶ افتح YouTube للتدريب
-      </a>
+      {s.youtubeUrl && (
+        <a href={s.youtubeUrl} target="_blank" rel="noopener noreferrer" className="el-yt-btn">
+          ▶ افتح YouTube للتدريب
+        </a>
+      )}
 
       <DialoguePartner day={day} />
     </div>
@@ -1821,11 +1836,13 @@ function GrammarDetective({ day }) {
   const handleWord = (sIdx, wIdx, word, sentence) => {
     const key = `${sIdx}_${wIdx}`
     if (clicked[key]) return
+    if (sentence.error === 'none') {
+      setClicked(c => ({ ...c, [key]: 'wrong' }))
+      return
+    }
     const cleanWord = word.toLowerCase().replace(/[.,!?'"]/g, '')
     const errorWords = sentence.error.toLowerCase().split(/\s+/).map(w => w.replace(/[.,!?'"]/g, ''))
-    const isError = sentence.error === 'none'
-      ? false
-      : errorWords.some(ew => cleanWord === ew || (ew.length > 3 && cleanWord.includes(ew)))
+    const isError = errorWords.some(ew => cleanWord === ew || (ew.length > 3 && cleanWord.includes(ew)) || (cleanWord.length > 3 && ew.includes(cleanWord)))
     setClicked(c => ({ ...c, [key]: isError ? 'right' : 'wrong' }))
   }
 
@@ -1859,11 +1876,11 @@ function GrammarDetective({ day }) {
           </div>
           {generated && sentences.length > 0 && (
             <>
-              <div className="el-detective-desc">اضغط على الكلمة الخاطئة في كل جملة:</div>
+              <div className="el-detective-desc">اضغط على الكلمة الخاطئة في كل جملة (بعض الجمل قد تكون صحيحة!):</div>
               {sentences.map((s, sIdx) => {
                 const words = s.text.split(' ')
                 const foundAll = s.error === 'none'
-                  ? Object.values(clicked).filter((v, k) => String(k).startsWith(`${sIdx}_`)).length > 0
+                  ? Object.entries(clicked).filter(([k]) => k.startsWith(`${sIdx}_`)).length > 0
                   : Object.entries(clicked).some(([k, v]) => k.startsWith(`${sIdx}_`) && v === 'right')
                 return (
                   <div key={sIdx} className="el-detective-sentence">
@@ -1881,11 +1898,22 @@ function GrammarDetective({ day }) {
                         )
                       })}
                     </div>
+                    {s.error === 'none' && !foundAll && !revealed[sIdx] && (
+                      <button
+                        className="el-nav-btn"
+                        style={{ marginTop: 8, padding: '4px 10px', fontSize: '.78rem', background: '#f0fdf4', borderColor: '#86efac', color: '#15803d' }}
+                        onClick={() => setClicked(c => ({ ...c, [`${sIdx}_correct`]: 'right' }))}
+                      >
+                        ✅ هذه الجملة صحيحة (لا خطأ)
+                      </button>
+                    )}
                     {foundAll ? (
                       <div className="el-detective-result found">
-                        ✅ الخطأ: <strong>{s.error}</strong> ← الصواب: <strong>{s.fix}</strong> — {s.hint}
+                        {s.error === 'none'
+                          ? `✅ صحيح! هذه الجملة صحيحة تماماً — ${s.hint}`
+                          : `✅ الخطأ: ${s.error} ← الصواب: ${s.fix} — ${s.hint}`}
                       </div>
-                    ) : (
+                    ) : !revealed[sIdx] && s.error !== 'none' && (
                       <button
                         className="el-nav-btn"
                         style={{ marginTop: 8, padding: '4px 12px', fontSize: '.78rem' }}
@@ -1944,7 +1972,13 @@ function WritingUpgrade({ text }) {
       {loading && level && !result[level] && <div style={{ textAlign: 'center', color: 'var(--el-muted)', padding: 10 }}>⏳ يُحسّن النص...</div>}
       {level && result[level] && (
         <div>
-          <div className="el-upgrade-label">📝 النص المُحسَّن ({level.toUpperCase()}):</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <div className="el-upgrade-label" style={{ margin: 0 }}>📝 النص المُحسَّن ({level.toUpperCase()}):</div>
+            <button className="el-nav-btn" style={{ fontSize: '.75rem', padding: '2px 10px' }}
+              onClick={() => navigator.clipboard?.writeText(result[level])}>
+              📋 نسخ
+            </button>
+          </div>
           <div className="el-upgrade-result">{result[level]}</div>
         </div>
       )}
@@ -1957,8 +1991,8 @@ function AILiveReaction({ score }) {
   const reactions = [
     { min: 100, emoji: '🎉', text: 'واو! نتيجة مثالية! أنت تستمع بأذن موسيقار!', color: '#dcfce7', border: '#16a34a' },
     { min: 70,  emoji: '😊', text: 'أحسنت! أداء ممتاز — فقط بعض الكلمات تحتاج مزيداً من التركيز.', color: '#dbeafe', border: '#3b82f6' },
-    { min: 40,  emoji: '💪', text: 'جيد! الاستماع مهارة تتطور — استمع مرة أخرى للمقاطع الصعبة.', color: '#fef3c7', border: '#f59e0b' },
-    { min: 0,   emoji: '🤗', text: 'لا بأس! كل خطأ درس. استمع مرة ثانية ببطء وركّز على البداية.', color: '#fee2e2', border: '#ef4444' },
+    { min: 40,  emoji: '💪', text: 'جيد! هذا المستوى جيد — راجع الأسئلة الخاطئة وحاول مجدداً.', color: '#fef3c7', border: '#f59e0b' },
+    { min: 0,   emoji: '🤗', text: 'لا بأس! كل خطأ درس مهم. راجع النص جيداً وأعد المحاولة.', color: '#fee2e2', border: '#ef4444' },
   ]
   const r = reactions.find(rx => score.pct >= rx.min) || reactions[reactions.length - 1]
   return (
@@ -2125,11 +2159,12 @@ function VocabStoryGen({ words, dayTitle, levelId, allLearnedWords = [] }) {
                   </div>
                 ))}
               </div>
-              {usedWords.length > 0 && (
-                <div className="el-story-words-used">
-                  ✅ الكلمات المستخدمة: {usedWords.map((w, i) => <strong key={i}>{w}{i < usedWords.length-1 ? '، ' : ''}</strong>)}
-                </div>
-              )}
+              <div className="el-story-words-used">
+                {usedWords.length > 0
+                  ? <>✅ الكلمات المستخدمة: {usedWords.map((w, i) => <strong key={i}>{w}{i < usedWords.length-1 ? '، ' : ''}</strong>)}</>
+                  : <span style={{ color: 'var(--el-muted)', fontSize: '.82rem' }}>لم تُستخدم كلمات اليوم مباشرةً في هذه القصة — جرّب نوعاً آخر!</span>
+                }
+              </div>
             </>
           )}
         </>
@@ -2156,7 +2191,7 @@ function FillGapExercise({ words, allLearnedWords = [] }) {
   return (
     <div className="el-fillgap-section">
       <button className="el-roleplay-toggle" style={{ background:'#f0fdf4', borderColor:'#86efac', color:'#15803d', marginBottom: open ? 14 : 0 }} onClick={() => setOpen(o => !o)}>
-        {open ? 'اغلق التمرين' : 'Fill-the-Gap — اكمل الفراغ من كلمات اليوم'}
+        {open ? 'أغلق التمرين' : 'Fill-the-Gap — أكمل الفراغ من كلمات اليوم'}
       </button>
       {open && (
         <>
@@ -2164,6 +2199,11 @@ function FillGapExercise({ words, allLearnedWords = [] }) {
             <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
               <button className={`el-family-chip${!useAll ? ' active' : ''}`} onClick={() => { setUseAll(false); setAnswers({}); setChecked(false) }}>كلمات اليوم</button>
               <button className={`el-family-chip${useAll ? ' active' : ''}`} onClick={() => { setUseAll(true); setAnswers({}); setChecked(false) }}>كل كلماتي ({allLearnedWords.length})</button>
+            </div>
+          )}
+          {sentences.length === 0 && (
+            <div style={{ textAlign: 'center', color: 'var(--el-muted)', padding: '12px 0', fontSize: '.85rem' }}>
+              لا توجد جمل كافية لهذا التمرين. حاول مع "كل كلماتي" إذا كنت قد تعلّمت كلمات سابقة.
             </div>
           )}
           {sentences.map((s, i) => {
@@ -2187,7 +2227,7 @@ function FillGapExercise({ words, allLearnedWords = [] }) {
           <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
             {!checked
               ? <button className="el-nav-btn primary" onClick={() => setChecked(true)} disabled={!Object.keys(answers).length}>تحقق</button>
-              : <><div className="el-fillgap-score">{score === sentences.length ? 'ممتاز! كل الاجابات صحيحة' : `${score} / ${sentences.length} صحيحة`}</div><button className="el-nav-btn" onClick={() => { setAnswers({}); setChecked(false) }}>مرة اخرى</button></>
+              : <><div className="el-fillgap-score">{score === sentences.length ? 'ممتاز! كل الإجابات صحيحة ✅' : `${score} / ${sentences.length} صحيحة`}</div><button className="el-nav-btn" onClick={() => { setAnswers({}); setChecked(false) }}>مرة أخرى</button></>
             }
           </div>
         </>
@@ -2259,7 +2299,7 @@ function GrammarPatternFlashcards({ patterns }) {
   return (
     <div className="el-gflash-section">
       <button className="el-roleplay-toggle" style={{ background:'#ede9fe', borderColor:'#a78bfa', color:'#5b21b6', marginBottom: open ? 14 : 0 }} onClick={() => setOpen(o => !o)}>
-        {open ? 'اغلق بطاقات القواعد' : 'Grammar Flashcards — احفظ القاعدة بالبطاقة'}
+        {open ? 'أغلق بطاقات القواعد' : 'Grammar Flashcards — احفظ القاعدة بالبطاقة'}
       </button>
       {open && (
         <div className="el-gflash-wrap">
@@ -2287,31 +2327,41 @@ function GrammarPatternFlashcards({ patterns }) {
 }
 
 /* ─── Writing Prompt Generator ─── */
+const WRITING_PROMPTS_BANK = [
+  [
+    { level: 'B1', prompt: 'Write 3 sentences describing your daily routine using simple present tense.' },
+    { level: 'B2', prompt: 'Write a short paragraph (80-100 words) about a challenge you faced and how you solved it.' },
+    { level: 'C2', prompt: 'Write a critical analysis (150+ words) comparing two different perspectives on modern technology in education.' },
+  ],
+  [
+    { level: 'B1', prompt: 'Write 3 sentences about your favorite place and why you like it.' },
+    { level: 'B2', prompt: 'Describe a memorable event from your life in a well-structured paragraph.' },
+    { level: 'C2', prompt: 'Discuss the ethical implications of artificial intelligence in healthcare using academic language.' },
+  ],
+  [
+    { level: 'B1', prompt: 'Write about what you did last weekend using past tense.' },
+    { level: 'B2', prompt: 'Write a formal email to a colleague explaining why you will be absent from a meeting.' },
+    { level: 'C2', prompt: 'Evaluate the statement: "Social media has done more harm than good to society." Use evidence and counterarguments.' },
+  ],
+  [
+    { level: 'B1', prompt: 'Describe your ideal home in 3 sentences.' },
+    { level: 'B2', prompt: 'Write about a skill you want to learn and explain how you plan to achieve it.' },
+    { level: 'C2', prompt: 'Argue for or against the proposition that globalization has eroded cultural identity.' },
+  ],
+]
+
 function WritingPromptCard({ dayTitle }) {
-  const [prompts, setPrompts] = useState([])
-  const [loading, setLoading] = useState(false)
-
-  const generate = async () => {
-    setLoading(true)
-    try {
-      const wpRaw = await aiAsk(`Topic: "${dayTitle}". Write 3 writing prompts as JSON: [{"level":"B1","prompt":"..."},{"level":"B2","prompt":"..."},{"level":"C2","prompt":"..."}]. JSON only.`, 'Reply ONLY with a JSON array.')
-      const txt = (wpRaw || '[]').replace(/```json|```/g,'').trim()
-      try { setPrompts(JSON.parse(txt)) } catch { setPrompts([
-        { level: 'B1', prompt: `Write 3 sentences about ${dayTitle}.` },
-        { level: 'B2', prompt: `Write a short paragraph discussing ${dayTitle}.` },
-        { level: 'C2', prompt: `Write a critical analysis of ${dayTitle} using academic language.` }
-      ]) }
-    } catch { } finally { setLoading(false) }
-  }
-
-  const colors = { B1:'#22c55e', B2:'#3b82f6', C2:'#8b5cf6' }
+  const [idx, setIdx] = useState(() => Math.floor(Math.random() * WRITING_PROMPTS_BANK.length))
+  const prompts = WRITING_PROMPTS_BANK[idx]
+  const colors = { B1: '#22c55e', B2: '#3b82f6', C2: '#8b5cf6' }
 
   return (
     <div className="el-wprompt-section">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <div style={{ fontWeight: 700, fontSize: '.88rem' }}>افكار للكتابة</div>
-        <button className="el-nav-btn" style={{ fontSize: '.78rem', padding: '4px 10px' }} onClick={generate} disabled={loading}>
-          {loading ? '...' : 'افكار جديدة'}
+        <div style={{ fontWeight: 700, fontSize: '.88rem' }}>أفكار للكتابة</div>
+        <button className="el-nav-btn" style={{ fontSize: '.78rem', padding: '4px 10px' }}
+          onClick={() => setIdx(i => (i + 1) % WRITING_PROMPTS_BANK.length)}>
+          أفكار جديدة
         </button>
       </div>
       {prompts.map((p, i) => (
