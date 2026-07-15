@@ -47,6 +47,16 @@ async function aiAsk(userMessage, systemPrompt, history = []) {
   return full
 }
 
+/* ─── Inline Markdown renderer ─── */
+function renderInlineMd(text) {
+  if (!text) return null
+  // Split on **...** bold markers
+  const parts = text.split(/\*\*(.*?)\*\*/g)
+  return parts.map((part, i) =>
+    i % 2 === 1 ? <strong key={i}>{part}</strong> : <span key={i}>{part}</span>
+  )
+}
+
 /* ─── TTS: dual accent (US / GB) with visual state ─── */
 let _ttsActive = null   // tracks the currently-playing utterance key
 
@@ -892,69 +902,14 @@ function DragSentence({ question, answer }) {
   )
 }
 
-/* ─── Grammar Pattern with AI expansion ─── */
+/* ─── Grammar Pattern ─── */
 function GrammarPattern({ p, pi, day }) {
   const [expanded, setExpanded] = useState(false)
-  const [expandedText, setExpandedText] = useState('')
-  const [expandLoading, setExpandLoading] = useState(false)
-
-  const expand = async () => {
-    if (expandedText) { setExpanded(e => !e); return }
-    setExpanded(true)
-    setExpandLoading(true)
-    const prompt = `اشرح قاعدة "${p.name}" في اللغة الإنجليزية بشكل تفصيلي كامل. اتبع هذا الهيكل بالضبط:
-
-**📌 ما هي القاعدة؟**
-[شرح مفصّل بالعربية — لا يقل عن 50 كلمة]
-
-**🕐 متى نستخدمها؟**
-[متى وكيف نستخدم هذه القاعدة]
-
-**🔑 الكلمات الدلالية:**
-[كلمات تدل على استخدام هذه القاعدة]
-
-**✅ المثبت (Affirmative):**
-[صيغة] → [مثال]
-[مثال آخر]
-
-**❌ النفي (Negative):**
-[صيغة] → [مثال]
-
-**❓ السؤال (Question):**
-[صيغة] → [مثال]
-
-**🔍 أسئلة WH:**
-[مثال]
-
-**⚠️ أخطاء شائعة:**
-✗ [خطأ] → ✓ [الصواب]
-✗ [خطأ] → ✓ [الصواب]
-
-**💡 نصائح:**
-[نصيحة مهمة]`
-
-    try {
-      const text = await aiAsk(prompt, `أنت معلم لغة إنجليزية محترف. درس اليوم: ${day.title}. اشرح القاعدة بشكل تعليمي مفصّل.`)
-      setExpandedText(text)
-    } catch {
-      setExpandedText('تعذّر تحميل الشرح التفصيلي.')
-    }
-    setExpandLoading(false)
-  }
-
-  const renderMarkdown = (text) => text.split('\n').filter(l => l.trim()).map((line, li) => {
-    const isHeader = /^\*\*[📌🕐🔑✅❌❓🔍⚠️💡]/.test(line.trim())
-    const isBullet = /^[-•*✗✓]\s/.test(line.trim())
-    const clean = line.replace(/^\*\*/, '').replace(/\*\*$/, '').replace(/\*\*(.*?)\*\*/g, '$1').trim()
-    if (isHeader) return <div key={li} style={{ fontWeight:700, color:'var(--el-accent)', marginTop:12, marginBottom:4, fontSize:'.9rem', borderBottom:'1px solid var(--el-border)', paddingBottom:2 }}>{clean}</div>
-    if (isBullet) return <div key={li} style={{ display:'flex', gap:6, marginBottom:3, paddingRight:8 }}><span style={{flexShrink:0,color:'var(--el-muted)'}}>•</span><span>{clean}</span></div>
-    return <div key={li} style={{ marginBottom:4 }}>{clean}</div>
-  })
 
   return (
     <div className="el-grammar-block">
       <h3 className="el-grammar-name">{p.name}</h3>
-      <div className="el-grammar-explain">{p.explanation}</div>
+      <div className="el-grammar-explain">{renderInlineMd(p.explanation)}</div>
       <div className="el-formula-box">
         <span className="el-formula-label">الصيغة:</span>
         <code className="el-formula">{p.formula}</code>
@@ -962,22 +917,42 @@ function GrammarPattern({ p, pi, day }) {
       <div className="el-examples-list">
         {p.examples.map((ex, i) => (
           <div key={i} className="el-example-item">
-            ✦ {ex}
-            <button className="el-speak-btn" onClick={() => speak(ex)} style={{ marginRight: 6 }}>🔊</button>
+            ✦ {renderInlineMd(ex)}
+            <button className="el-speak-btn" onClick={() => speak(ex.replace(/\*\*/g,''))} style={{ marginRight: 6 }}>🔊</button>
           </div>
         ))}
       </div>
       <button
         className="el-nav-btn"
         style={{ marginTop: 10, fontSize: '.82rem', background: expanded ? 'var(--el-bg3)' : undefined }}
-        onClick={expand}
-        disabled={expandLoading}
+        onClick={() => setExpanded(e => !e)}
       >
-        {expandLoading ? '⏳ يحمّل الشرح...' : expanded ? '🔼 إخفاء الشرح التفصيلي' : '📚 شرح تفصيلي + جميع الصيغ'}
+        {expanded ? '🔼 إخفاء الصيغ' : '📚 جميع الصيغ والأمثلة'}
       </button>
-      {expanded && expandedText && (
-        <div className="el-grammar-expanded" style={{ marginTop: 10, padding: '12px 14px', background: 'var(--el-bg3)', borderRadius: 10, fontSize: '.87rem', lineHeight: 1.7 }}>
-          {renderMarkdown(expandedText)}
+      {expanded && (
+        <div className="el-grammar-expanded" style={{ marginTop: 10, padding: '12px 14px', background: 'var(--el-bg3)', borderRadius: 10, fontSize: '.87rem', lineHeight: 1.8 }}>
+          <div style={{ fontWeight: 700, color: 'var(--el-accent)', marginBottom: 8, fontSize: '.9rem' }}>📌 الصيغة الكاملة</div>
+          <div style={{ marginBottom: 10, padding: '8px 12px', background: 'var(--el-bg2)', borderRadius: 8, fontFamily: 'monospace' }}>{p.formula}</div>
+
+          <div style={{ fontWeight: 700, color: 'var(--el-accent)', marginBottom: 6, fontSize: '.9rem' }}>✅ أمثلة</div>
+          {p.examples.map((ex, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
+              <span style={{ color: 'var(--el-accent)', flexShrink: 0 }}>•</span>
+              <span>{renderInlineMd(ex)}</span>
+              <button className="el-speak-btn" onClick={() => speak(ex.replace(/\*\*/g,''))} style={{ flexShrink: 0 }}>🔊</button>
+            </div>
+          ))}
+
+          {p.exercises && p.exercises.length > 0 && (
+            <>
+              <div style={{ fontWeight: 700, color: 'var(--el-accent)', margin: '10px 0 6px', fontSize: '.9rem' }}>📝 نماذج تمارين</div>
+              {p.exercises.slice(0, 2).map((ex, i) => (
+                <div key={i} style={{ marginBottom: 4, paddingRight: 8, color: 'var(--el-muted)', fontSize: '.83rem' }}>
+                  ❓ {ex.question}
+                </div>
+              ))}
+            </>
+          )}
         </div>
       )}
     </div>
@@ -1180,46 +1155,12 @@ function ReadingComp({ day, levelId, dayId }) {
   const [scrollPct, setScrollPct] = useState(0)
   const { reading: r } = day
   const hlKey = `hl-${levelId}-${dayId}`
-  const passageCacheKey = `el-passage-${levelId}-${dayId}`
-
-  const [passage, setPassage] = useState(() => {
-    try { return localStorage.getItem(passageCacheKey) || r.passage } catch { return r.passage }
-  })
-  const [passageLoading, setPassageLoading] = useState(false)
+  const passage = r.passage
 
   const [highlights, setHighlights] = useState(() => {
     try { return JSON.parse(localStorage.getItem(hlKey) || '[]') } catch { return [] }
   })
   const saveHL = (arr) => { setHighlights(arr); localStorage.setItem(hlKey, JSON.stringify(arr)) }
-
-  // Generate longer AI passage if current one is too short
-  useEffect(() => {
-    const target = READING_WORDS[levelId] || 100
-    const cached = localStorage.getItem(passageCacheKey)
-    if (cached) { setPassage(cached); return }
-    const wordCount = r.passage.trim().split(/\s+/).length
-    if (wordCount >= target * 0.8) return // already long enough
-    const vocabList = (day.vocabulary?.words || []).map(w => w.word).join(', ')
-    const cefrMap = { 1: 'A1', 2: 'A2', 3: 'B1', 4: 'B2', 5: 'C1', 6: 'C2' }
-    const cefr = cefrMap[levelId] || 'A1'
-    setPassageLoading(true)
-    aiAsk(
-      `Write an English reading passage for ${cefr} level students. Topic: "${day.title}". Use these vocabulary words naturally: ${vocabList}.
-Requirements:
-- Exactly around ${target} words
-- ALL vocabulary must be appropriate for ${cefr} level — simple and clear for lower levels, sophisticated for higher
-- Natural, interesting story/article style
-- Short sentences for A1/A2, longer complex sentences for B1-C2
-- Write ONLY the passage text, no title, no labels`,
-      `You are an EFL textbook writer. Write natural English passages at the exact CEFR level requested. Return ONLY the passage text.`
-    ).then(text => {
-      if (text && text.length > 50) {
-        setPassage(text.trim())
-        localStorage.setItem(passageCacheKey, text.trim())
-      }
-    }).catch(() => {}).finally(() => setPassageLoading(false))
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [levelId, dayId])
 
   // reading progress bar
   useEffect(() => {
@@ -1279,12 +1220,6 @@ Requirements:
 
       <div className="el-lookup-hint">💡 انقر على أي كلمة لمعناها · حدّد نصاً وسيُظلَّل تلقائياً</div>
 
-      {passageLoading && (
-        <div style={{ textAlign: 'center', padding: '16px', color: 'var(--el-muted)', fontSize: '.85rem' }}>
-          ⏳ يولّد نصاً مناسباً لمستواك...
-        </div>
-      )}
-
       <div
         className="el-reading-passage"
         ref={passageRef}
@@ -1308,57 +1243,28 @@ Requirements:
       </div>
 
       <KeySentences passage={passage} />
-      <ReadingComprehensionQuiz passage={passage} />
     </div>
   )
 }
 
 /* ─── Key Sentences ─── */
 function KeySentences({ passage }) {
-  const [sentences, setSentences] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [loaded, setLoaded] = useState(false)
+  const sentences = (passage || '')
+    .split(/(?<=[.!?])\s+/)
+    .map(s => s.trim())
+    .filter(s => s.length > 25 && s.length < 200 && /[a-zA-Z]/.test(s))
+    .slice(0, 3)
 
-  const generate = async () => {
-    if (loaded) return
-    setLoading(true)
-    try {
-      const raw = await aiAsk(
-        `From this passage, pick the 3 most useful and interesting sentences that a language learner should memorize:
-
-"${passage}"
-
-Reply in EXACTLY this format (3 sentences only, no extra text):
-SENTENCE1: [first sentence from the passage]
-ARABIC1: [Arabic translation]
-SENTENCE2: [second sentence]
-ARABIC2: [Arabic translation]
-SENTENCE3: [third sentence]
-ARABIC3: [Arabic translation]`,
-        'You are an EFL teacher. Extract key sentences and translate them. Use only the labeled format.'
-      )
-      const get = (label) => { const m = raw.match(new RegExp(`${label}:\\s*(.+)`, 'i')); return m ? m[1].trim() : '' }
-      const result = [1, 2, 3].map(n => ({ en: get(`SENTENCE${n}`), ar: get(`ARABIC${n}`) })).filter(s => s.en)
-      setSentences(result)
-      setLoaded(true)
-    } catch { }
-    setLoading(false)
-  }
-
-  useEffect(() => { generate() }, [passage]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  if (!loaded && !loading) return null
+  if (!sentences.length) return null
   return (
     <div className="el-key-sentences">
       <div className="el-key-sentences-title">⭐ أهم الجمل المفيدة</div>
-      {loading && <div style={{ color: 'var(--el-muted)', fontSize: '.82rem', padding: '8px 0' }}>⏳ يختار أفضل الجمل...</div>}
       {sentences.map((s, i) => (
         <div key={i} className="el-key-sentence-item">
           <div className="el-key-sentence-en">
-            {s.en}
-            <button className="el-speak-btn" style={{ marginRight: 6 }} onClick={() => speak(s.en)}>🔊</button>
+            {s}
+            <button className="el-speak-btn" style={{ marginRight: 6 }} onClick={() => speak(s)}>🔊</button>
           </div>
-          <div className="el-key-sentence-ar">{s.ar}</div>
         </div>
       ))}
     </div>
@@ -1404,123 +1310,96 @@ function ListeningSpeedControl({ text }) {
 /* ─── Listening ─── */
 function ListeningComp({ day, levelId, dayId }) {
   const { listening: l } = day
-  const textCacheKey = `el-listen-text-${levelId}-${dayId}`
-  const qCacheKey    = `el-listen-q-${levelId}-${dayId}`
 
-  const cefrMap = { 1:'A1', 2:'A2', 3:'B1', 4:'B2', 5:'C1', 6:'C2' }
-  const cefr = cefrMap[levelId] || 'A1'
+  const buildQuestions = (text) => {
+    const sentences = text.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 15)
+    const wordList = text.match(/\b[A-Z][a-z]+\b/g) || ['morning', 'happy', 'time']
 
-  const [listenText, setListenText] = useState(() => {
-    try { return localStorage.getItem(textCacheKey) || l.text } catch { return l.text }
-  })
-  const [textLoading, setTextLoading]   = useState(false)
-  const [showText, setShowText]         = useState(false)
-  const [questions, setQuestions]       = useState(() => {
-    try { const c = localStorage.getItem(qCacheKey); return c ? JSON.parse(c) : [] } catch { return [] }
-  })
-  const [qLoading, setQLoading]         = useState(false)
-  const [answers, setAnswers]           = useState({})
-  const [checked, setChecked]           = useState(false)
-  const [score, setScore]               = useState(null)
-
-  // Generate longer listening text
-  useEffect(() => {
-    const target = LISTENING_WORDS[levelId] || 85
-    const cached = localStorage.getItem(textCacheKey)
-    if (cached) { setListenText(cached); return }
-    const wordCount = l.text.trim().split(/\s+/).length
-    if (wordCount >= target * 0.8) return
-    const vocabList = (day.vocabulary?.words || []).map(w => w.word).join(', ')
-    setTextLoading(true)
-    aiAsk(
-      `Write a natural English listening passage for ${cefr} level students.
-Topic: "${day.title}". Use these words naturally: ${vocabList}.
-Requirements:
-- Approximately ${target} words
-- Written as spoken dialogue OR a short narration (natural spoken style, not written essay)
-- Vocabulary strictly appropriate for ${cefr} — simple for A1/A2, complex for C1/C2
-- For A1/A2: short simple sentences, everyday topics
-- For B1/B2: moderate complexity, some idioms
-- For C1/C2: nuanced language, complex ideas
-- Write ONLY the passage text, no title, no labels`,
-      'You are an EFL listening material author. Return ONLY the passage text.'
-    ).then(text => {
-      if (text && text.length > 30) {
-        const t = text.trim()
-        setListenText(t)
-        localStorage.setItem(textCacheKey, t)
-      }
-    }).catch(() => {}).finally(() => setTextLoading(false))
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [levelId, dayId])
-
-  // Generate questions once text is ready
-  useEffect(() => {
-    if (questions.length > 0) return
-    if (!listenText || listenText === l.text) return
-    generateQuestions(listenText)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listenText])
-
-  const generateQuestions = async (text) => {
-    setQLoading(true)
-    try {
-      const raw = await aiAsk(
-        `Based on this listening passage for ${cefr} level:
-"${text}"
-
-Create 10 mixed comprehension questions. Use EXACTLY this format:
-
-TYPE: MCQ
-Q: [question]
-A: [option]
-B: [option]
-C: [option]
-D: [option]
-CORRECT: [A/B/C/D]
----
-TYPE: TF
-Q: [true or false statement]
-CORRECT: [TRUE/FALSE]
----
-TYPE: FILL
-Q: [sentence with ___ for the missing word]
-CORRECT: [the missing word]
----
-
-Generate a mix: 4 MCQ + 3 TF + 3 FILL. Total = 10. No extra text.`,
-        'You are an EFL test writer. Use only the labeled format. Generate exactly 10 questions.'
-      )
-      const blocks = (raw || '').split('---').map(b => b.trim()).filter(Boolean)
-      const parsed = blocks.map(block => {
-        const get = (label) => { const m = block.match(new RegExp(`^${label}:\\s*(.+)`, 'im')); return m ? m[1].trim() : '' }
-        const type = get('TYPE').toUpperCase()
-        const q = get('Q')
-        if (!q) return null
-        if (type === 'MCQ') {
-          const opts = [get('A'), get('B'), get('C'), get('D')].filter(Boolean)
-          const correctLetter = get('CORRECT').toUpperCase()
-          const correctIdx = ['A','B','C','D'].indexOf(correctLetter)
-          if (correctIdx === -1 || opts.length < 2) return null
-          return { type: 'MCQ', q, options: opts, correct: correctIdx }
+    return [
+      // TF questions
+      { type: 'TF', q: sentences[0] ? `True or False: "${sentences[0]}"` : 'The text is about daily life.', correct: 'TRUE' },
+      { type: 'TF', q: sentences[1] ? `True or False: The passage mentions "${wordList[0] || 'school'}"` : 'This is a short text.', correct: 'TRUE' },
+      // Fill blanks
+      ...(sentences.slice(0, 3).map((sent) => {
+        const words = sent.split(' ').filter(w => w.length > 3)
+        const target = words[Math.floor(words.length / 2)] || 'the'
+        return {
+          type: 'FILL',
+          q: sent.replace(new RegExp(`\\b${target}\\b`, 'i'), '___'),
+          correct: target.replace(/[^a-zA-Z]/g, ''),
         }
-        if (type === 'TF') {
-          const c = get('CORRECT').toUpperCase()
-          if (c !== 'TRUE' && c !== 'FALSE') return null
-          return { type: 'TF', q, correct: c }
-        }
-        if (type === 'FILL') {
-          return { type: 'FILL', q, correct: get('CORRECT') }
-        }
-        return null
-      }).filter(Boolean)
-      if (parsed.length > 0) {
-        setQuestions(parsed)
-        localStorage.setItem(qCacheKey, JSON.stringify(parsed))
-      }
-    } catch { }
-    setQLoading(false)
+      })),
+      // MCQ
+      {
+        type: 'MCQ',
+        q: 'What is the main topic of the passage?',
+        options: [
+          day.title || 'English lesson',
+          'Sports and games',
+          'Cooking recipes',
+          'Travel destinations',
+        ],
+        correct: 0,
+      },
+      {
+        type: 'MCQ',
+        q: `Which word appears in the passage?`,
+        options: [
+          wordList[0] || 'morning',
+          'volcano',
+          'satellite',
+          'microscope',
+        ],
+        correct: 0,
+      },
+      {
+        type: 'TF',
+        q: sentences[2] ? `True or False: "${sentences[2]}"` : 'The passage has more than one sentence.',
+        correct: 'TRUE',
+      },
+      {
+        type: 'MCQ',
+        q: 'What type of text is this?',
+        options: [
+          'A short English passage',
+          'A scientific report',
+          'A legal document',
+          'A cooking recipe',
+        ],
+        correct: 0,
+      },
+      sentences.length > 3
+        ? (() => {
+            const sent = sentences[3]
+            const words = sent.split(' ').filter(w => w.length > 3)
+            const target = words[0] || 'the'
+            return { type: 'FILL', q: sent.replace(new RegExp(`\\b${target}\\b`, 'i'), '___'), correct: target.replace(/[^a-zA-Z]/g, '') }
+          })()
+        : { type: 'FILL', q: `I ___ English every day.`, correct: 'study' },
+      {
+        type: 'TF',
+        q: `True or False: This text is written in English.`,
+        correct: 'TRUE',
+      },
+      {
+        type: 'MCQ',
+        q: `How would you describe the language level of this passage?`,
+        options: [
+          `Level ${['A1','A2','B1','B2','C1','C2'][levelId-1] || 'A1'} — ${['beginner','elementary','intermediate','upper-intermediate','advanced','mastery'][levelId-1] || 'beginner'}`,
+          'C2 — mastery level',
+          'A1 — complete beginner',
+          'B2 — upper intermediate',
+        ],
+        correct: 0,
+      },
+    ].flat().filter(q => typeof q === 'object' && q.type).slice(0, 10)
   }
+
+  const [questions] = useState(() => buildQuestions(l.text))
+  const [answers, setAnswers] = useState({})
+  const [checked, setChecked] = useState(false)
+  const [score, setScore] = useState(null)
+  const [showText, setShowText] = useState(false)
 
   const checkAnswers = () => {
     let correct = 0
@@ -1528,7 +1407,7 @@ Generate a mix: 4 MCQ + 3 TF + 3 FILL. Total = 10. No extra text.`,
       const ans = answers[i]
       if (q.type === 'MCQ' && ans === q.correct) correct++
       else if (q.type === 'TF' && ans === q.correct) correct++
-      else if (q.type === 'FILL' && typeof ans === 'string' && ans.toLowerCase().trim() === q.correct.toLowerCase().trim()) correct++
+      else if (q.type === 'FILL' && typeof ans === 'string' && ans.toLowerCase().trim() === (q.correct || '').toLowerCase().trim()) correct++
     })
     const total = questions.length
     setScore({ correct, total, pct: Math.round((correct / total) * 100) })
@@ -1536,14 +1415,12 @@ Generate a mix: 4 MCQ + 3 TF + 3 FILL. Total = 10. No extra text.`,
   }
 
   const retry = () => { setAnswers({}); setChecked(false); setScore(null) }
-
-  const allAnswered = questions.length > 0 && questions.every((_, i) => answers[i] !== undefined && answers[i] !== '')
+  const allAnswered = questions.every((_, i) => answers[i] !== undefined && answers[i] !== '')
 
   return (
     <div className="el-section">
       <div className="el-listening-context">🎬 السياق: {l.context}</div>
 
-      {/* Audio player area */}
       <div className="el-listen-player-box">
         <div className="el-listen-player-top">
           <div className="el-listen-player-title">🎧 {day.title}</div>
@@ -1554,25 +1431,11 @@ Generate a mix: 4 MCQ + 3 TF + 3 FILL. Total = 10. No extra text.`,
             📄 {showText ? 'إخفاء النص' : 'إظهار النص'}
           </button>
         </div>
-        {textLoading && (
-          <div style={{ color: 'var(--el-muted)', fontSize: '.82rem', padding: '8px 0' }}>⏳ يولّد نصاً مناسباً لمستواك...</div>
-        )}
-        {showText && (
-          <div className="el-listen-text-reveal">{listenText}</div>
-        )}
-        <ListeningSpeedControl text={listenText} />
+        {showText && <div className="el-listen-text-reveal">{l.text}</div>}
+        <ListeningSpeedControl text={l.text} />
       </div>
 
-      {/* Questions */}
-      <div className="el-listen-questions-title">
-        📝 أسئلة الاستماع
-        {qLoading && <span style={{ fontSize: '.78rem', color: 'var(--el-muted)', marginRight: 8 }}>⏳ يولّد الأسئلة...</span>}
-        {!qLoading && questions.length === 0 && listenText && (
-          <button className="el-nav-btn" style={{ fontSize: '.78rem', marginRight: 8 }} onClick={() => generateQuestions(listenText)}>
-            توليد الأسئلة
-          </button>
-        )}
-      </div>
+      <div className="el-listen-questions-title">📝 أسئلة الاستماع</div>
 
       {questions.map((q, i) => {
         const ans = answers[i]
@@ -1580,18 +1443,16 @@ Generate a mix: 4 MCQ + 3 TF + 3 FILL. Total = 10. No extra text.`,
           <div key={i} className="el-listen-q-block">
             <div className="el-listen-q-num">{i + 1}</div>
             <div className="el-listen-q-body">
-              {/* MCQ */}
               {q.type === 'MCQ' && (
                 <>
                   <div className="el-listen-q-text">{q.q}</div>
                   <div className="el-listen-mcq-opts">
-                    {q.options.map((opt, oi) => {
+                    {(q.options || []).map((opt, oi) => {
                       const chosen = ans === oi
                       const isCorrect = checked && oi === q.correct
                       const isWrong   = checked && chosen && oi !== q.correct
                       return (
-                        <button
-                          key={oi}
+                        <button key={oi}
                           className={`el-listen-mcq-opt${chosen ? ' chosen' : ''}${isCorrect ? ' correct' : ''}${isWrong ? ' wrong' : ''}`}
                           onClick={() => !checked && setAnswers(a => ({ ...a, [i]: oi }))}
                           disabled={checked}
@@ -1602,21 +1463,19 @@ Generate a mix: 4 MCQ + 3 TF + 3 FILL. Total = 10. No extra text.`,
                       )
                     })}
                   </div>
-                  {checked && <div className="el-listen-q-explain">✅ الإجابة: {['A','B','C','D'][q.correct]} — {q.options[q.correct]}</div>}
+                  {checked && <div className="el-listen-q-explain">✅ الإجابة: {['A','B','C','D'][q.correct]} — {(q.options||[])[q.correct]}</div>}
                 </>
               )}
-              {/* True/False */}
               {q.type === 'TF' && (
                 <>
                   <div className="el-listen-q-text">{q.q}</div>
                   <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-                    {['TRUE', 'FALSE'].map(val => {
+                    {['TRUE','FALSE'].map(val => {
                       const chosen = ans === val
                       const isCorrect = checked && val === q.correct
                       const isWrong   = checked && chosen && val !== q.correct
                       return (
-                        <button
-                          key={val}
+                        <button key={val}
                           className={`el-listen-tf-btn${chosen ? ' chosen' : ''}${isCorrect ? ' correct' : ''}${isWrong ? ' wrong' : ''}`}
                           onClick={() => !checked && setAnswers(a => ({ ...a, [i]: val }))}
                           disabled={checked}
@@ -1629,20 +1488,19 @@ Generate a mix: 4 MCQ + 3 TF + 3 FILL. Total = 10. No extra text.`,
                   {checked && <div className="el-listen-q-explain">✅ الإجابة: {q.correct === 'TRUE' ? 'صحيح' : 'خطأ'}</div>}
                 </>
               )}
-              {/* Fill in the blank */}
               {q.type === 'FILL' && (
                 <>
                   <div className="el-listen-q-text">
-                    {q.q.split('___').map((part, pi, arr) => (
+                    {(q.q || '').split('___').map((part, pi, arr) => (
                       <span key={pi}>
                         {part}
                         {pi < arr.length - 1 && (
                           <input
-                            className={`el-blank-input${checked ? (answers[i]?.toLowerCase().trim() === q.correct.toLowerCase().trim() ? ' correct' : ' wrong') : ''}`}
+                            className={`el-blank-input${checked ? (String(answers[i]||'').toLowerCase().trim() === String(q.correct||'').toLowerCase().trim() ? ' correct' : ' wrong') : ''}`}
                             value={ans || ''}
                             onChange={e => !checked && setAnswers(a => ({ ...a, [i]: e.target.value }))}
                             placeholder="___"
-                            size={Math.max(8, q.correct.length + 2)}
+                            size={Math.max(8, String(q.correct||'').length + 2)}
                             disabled={checked}
                           />
                         )}
@@ -1657,29 +1515,23 @@ Generate a mix: 4 MCQ + 3 TF + 3 FILL. Total = 10. No extra text.`,
         )
       })}
 
-      {questions.length > 0 && (
-        <>
-          {score && (
-            <div className={`el-score-banner ${score.pct === 100 ? 'perfect' : score.pct >= 70 ? 'good' : 'retry'}`}>
-              {score.pct === 100
-                ? `🎉 ممتاز! أجبت على كل الأسئلة بشكل صحيح (${score.total}/${score.total})`
-                : score.pct >= 70
-                  ? `👍 جيد جداً — ${score.correct}/${score.total} صحيحة (${score.pct}%)`
-                  : `💪 ${score.correct}/${score.total} صحيحة — استمع مجدداً وحاول`
-              }
-            </div>
-          )}
-          <div className="el-dictation-btns">
-            {!checked
-              ? <button className="el-nav-btn primary" onClick={checkAnswers} disabled={!allAnswered}>
-                  ✅ تحقق من الإجابات
-                </button>
-              : <button className="el-nav-btn" onClick={retry}>🔄 حاول مرة ثانية</button>
-            }
-          </div>
-          {score && <AILiveReaction score={score} />}
-        </>
+      {score && (
+        <div className={`el-score-banner ${score.pct === 100 ? 'perfect' : score.pct >= 70 ? 'good' : 'retry'}`}>
+          {score.pct === 100
+            ? `🎉 ممتاز! أجبت على كل الأسئلة بشكل صحيح (${score.total}/${score.total})`
+            : score.pct >= 70
+              ? `👍 جيد جداً — ${score.correct}/${score.total} صحيحة (${score.pct}%)`
+              : `💪 ${score.correct}/${score.total} صحيحة — استمع مجدداً وحاول`
+          }
+        </div>
       )}
+      <div className="el-dictation-btns">
+        {!checked
+          ? <button className="el-nav-btn primary" onClick={checkAnswers} disabled={!allAnswered}>✅ تحقق من الإجابات</button>
+          : <button className="el-nav-btn" onClick={retry}>🔄 حاول مرة ثانية</button>
+        }
+      </div>
+      {score && <AILiveReaction score={score} />}
     </div>
   )
 }
@@ -1874,62 +1726,68 @@ CORRECTION: [الكلمة/العبارة الخاطئة] → [الصواب] | Re
 }
 
 /* ─── Grammar Detective ─── */
-function parseDetectiveSentences(raw, count) {
-  if (!raw) return []
-  const results = []
-
-  // Strategy 1: numbered blocks with WRONG/ERROR/FIX/HINT labels
-  const numberedBlocks = raw.split(/\n(?=\d+\.)/).filter(Boolean)
-  for (const block of numberedBlocks) {
-    const get = (label) => {
-      const m = block.match(new RegExp(`${label}:\\s*(.+)`, 'i'))
-      return m ? m[1].trim().replace(/^["']|["']$/g, '') : ''
-    }
-    const text = get('WRONG')
-    const error = get('ERROR')
-    const fix = get('FIX')
-    const hint = get('HINT')
-    if (text && error) results.push({ text, error, fix: fix || error, hint: hint || '' })
-  }
-  if (results.length >= 1) return results.slice(0, count)
-
-  // Strategy 2: flat SENTENCE/ERROR/FIX/HINT blocks separated by ---
-  const dashBlocks = raw.split(/---+/).map(b => b.trim()).filter(Boolean)
-  for (const block of dashBlocks) {
-    const get = (label) => {
-      const m = block.match(new RegExp(`${label}:\\s*(.+)`, 'i'))
-      return m ? m[1].trim().replace(/^["']|["']$/g, '') : ''
-    }
-    const text = get('SENTENCE') || get('WRONG')
-    const error = get('ERROR')
-    const fix = get('FIX')
-    const hint = get('HINT')
-    if (text && error) results.push({ text, error, fix: fix || error, hint: hint || '' })
-  }
-  if (results.length >= 1) return results.slice(0, count)
-
-  // Strategy 3: line-by-line scan — look for lines with clear ERROR/FIX labels
-  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean)
-  let current = {}
-  for (const line of lines) {
-    const wm = line.match(/^(?:WRONG|SENTENCE):\s*(.+)/i)
-    const em = line.match(/^ERROR:\s*(.+)/i)
-    const fm = line.match(/^FIX:\s*(.+)/i)
-    const hm = line.match(/^HINT:\s*(.+)/i)
-    if (wm) { if (current.text && current.error) results.push(current); current = { text: wm[1].trim(), error: '', fix: '', hint: '' } }
-    else if (em && current.text) current.error = em[1].trim()
-    else if (fm && current.text) current.fix = fm[1].trim()
-    else if (hm && current.text) current.hint = hm[1].trim()
-  }
-  if (current.text && current.error) results.push(current)
-  if (results.length >= 1) return results.slice(0, count)
-
-  // Strategy 4: extract numbered English sentences — assume each is a "mistake" sentence
-  const sentMatches = [...raw.matchAll(/\d+[\.\)]\s+([A-Z][^.!?]*[.!?])/g)]
-  for (const m of sentMatches) {
-    results.push({ text: m[1].trim(), error: '?', fix: '?', hint: 'ابحثي عن الخطأ النحوي' })
-  }
-  return results.slice(0, count)
+const DETECTIVE_BANK = {
+  easy: [
+    { text: 'She go to the market every Friday.', error: 'go', fix: 'goes', hint: 'مع she/he/it نضيف s للفعل في المضارع البسيط' },
+    { text: 'They is very happy today.', error: 'is', fix: 'are', hint: 'مع they نستخدم are وليس is' },
+    { text: "He don't like cold weather.", error: "don't", fix: "doesn't", hint: 'مع he/she/it نستخدم does not وليس do not' },
+    { text: 'I am go to school now.', error: 'am go', fix: 'am going', hint: 'المضارع المستمر يحتاج فعل + ing' },
+    { text: 'We was at the park yesterday.', error: 'was', fix: 'were', hint: 'مع we/they/you نستخدم were في الماضي' },
+    { text: 'She have a beautiful cat.', error: 'have', fix: 'has', hint: 'مع she/he/it نستخدم has وليس have' },
+    { text: 'The childrens are playing outside.', error: 'childrens', fix: 'children', hint: 'children جمع غير منتظم ولا نضيف s' },
+    { text: 'He work at a big hospital.', error: 'work', fix: 'works', hint: 'مع he نضيف s للفعل في المضارع' },
+    { text: 'My sister and me went to the park.', error: 'me', fix: 'I', hint: 'نستخدم I كفاعل وليس me' },
+    { text: 'There is many students in the class.', error: 'is', fix: 'are', hint: 'مع الجمع نستخدم are وليس is' },
+    { text: "She don't wants to eat vegetables.", error: "don't wants", fix: "doesn't want", hint: "مع she نستخدم doesn't وبعدها المصدر بدون s" },
+    { text: 'I am have a good idea.', error: 'am have', fix: 'have', hint: 'لا نضع am قبل have في المضارع البسيط' },
+    { text: 'He is more tall than his brother.', error: 'more tall', fix: 'taller', hint: 'الصفات القصيرة نضيف er وليس more' },
+    { text: 'Yesterday I go to the cinema.', error: 'go', fix: 'went', hint: 'في الماضي نستخدم went وليس go' },
+    { text: 'She can sings very well.', error: 'sings', fix: 'sing', hint: 'بعد can نستخدم المصدر بدون s' },
+    { text: 'This are my favourite shoes.', error: 'are', fix: 'is', hint: 'مع this نستخدم is' },
+    { text: 'We goed to the beach last summer.', error: 'goed', fix: 'went', hint: 'go فعل شاذ — ماضيه went وليس goed' },
+    { text: 'She is more prettier than her sister.', error: 'more prettier', fix: 'prettier', hint: 'لا نستخدم more مع الصفات التي تنتهي بـ er' },
+    { text: 'I have saw that movie before.', error: 'saw', fix: 'seen', hint: 'بعد have نستخدم التصريف الثالث (seen وليس saw)' },
+    { text: "He don't never eat meat.", error: "don't never", fix: "doesn't ever", hint: 'لا يصح استخدام نفيين معاً في الإنجليزية' },
+  ],
+  medium: [
+    { text: 'I have went to Paris last year.', error: 'went', fix: 'been', hint: 'بعد have نستخدم التصريف الثالث (been وليس went)' },
+    { text: 'She is working here since 2020.', error: 'is working', fix: 'has been working', hint: 'مع since نستخدم المضارع التام المستمر' },
+    { text: 'I look forward to hear from you.', error: 'hear', fix: 'hearing', hint: 'بعد look forward to نستخدم الفعل + ing' },
+    { text: 'He suggested to take a break.', error: 'to take', fix: 'taking', hint: 'بعد suggest نستخدم الفعل + ing وليس to + infinitive' },
+    { text: 'The meeting was attended by hundred people.', error: 'hundred', fix: 'hundreds of', hint: 'مع الأعداد الكبيرة غير المحددة نستخدم hundreds of' },
+    { text: 'I am used to wake up early.', error: 'wake', fix: 'waking', hint: 'بعد be used to نستخدم الفعل + ing' },
+    { text: 'She explained me the problem.', error: 'explained me', fix: 'explained the problem to me', hint: 'explain لا يأخذ مفعولاً به مباشراً للشخص' },
+    { text: 'I wish I can speak better English.', error: 'can', fix: 'could', hint: 'بعد wish نستخدم الماضي البسيط للتعبير عن الأمنية' },
+    { text: 'He told that he was tired.', error: 'told', fix: 'said', hint: 'said + that — told يحتاج مفعولاً به (told me that)' },
+    { text: 'Despite of the rain, they went out.', error: 'Despite of', fix: 'Despite', hint: 'despite لا يتبعها of — نقول despite the rain' },
+    { text: 'The news are shocking today.', error: 'are', fix: 'is', hint: 'news اسم غير معدود يؤخذ معه is' },
+    { text: 'I have been knowing her for years.', error: 'have been knowing', fix: 'have known', hint: 'الأفعال الحالية (stative verbs) لا تُستخدم بالمستمر' },
+    { text: 'She made me to feel uncomfortable.', error: 'to feel', fix: 'feel', hint: 'بعد make + مفعول به نستخدم المصدر بدون to' },
+    { text: 'We discussed about the project yesterday.', error: 'about', fix: '', hint: 'discuss لا يحتاج about — نقول discuss the project' },
+    { text: 'He is very good in English.', error: 'in', fix: 'at', hint: 'نقول good at وليس good in' },
+    { text: 'I prefer tea than coffee.', error: 'than', fix: 'to', hint: 'نقول prefer...to وليس prefer...than' },
+    { text: 'By the time she arrived, he already left.', error: 'left', fix: 'had already left', hint: 'الحدث الذي انتهى قبل حدث آخر يستخدم Past Perfect' },
+    { text: 'She is very interesting in history.', error: 'interesting', fix: 'interested', hint: 'interested = مهتم (للشخص)، interesting = مثير للاهتمام (للشيء)' },
+    { text: 'We need less chairs for the meeting.', error: 'less', fix: 'fewer', hint: 'less للمواد غير المعدودة، fewer للمعدودة مثل chairs' },
+    { text: 'He apologized for arrive late.', error: 'arrive', fix: 'arriving', hint: 'بعد حروف الجر نستخدم الفعل + ing' },
+  ],
+  hard: [
+    { text: 'Had I known earlier, I would have told you.', error: 'none', fix: 'Correct!', hint: 'هذه الجملة صحيحة — الشرطي المقلوب بدون if' },
+    { text: 'The data shows that unemployment have risen.', error: 'have', fix: 'has', hint: 'data كلمة جمع لكن في الإنجليزي الرسمي الحديث تؤخذ معها is/has' },
+    { text: 'It is important that he attends the meeting.', error: 'attends', fix: 'attend', hint: 'بعد It is important that نستخدم subjunctive (المصدر بلا s)' },
+    { text: 'She would have went if she had known.', error: 'went', fix: 'gone', hint: 'بعد would have نستخدم التصريف الثالث (gone)' },
+    { text: 'The committee have not yet reached their decision.', error: 'none', fix: 'Correct (British English)!', hint: 'في البريطانية الأسماء الجمعية تأخذ have — صحيح!' },
+    { text: 'Scarcely had she sat down when the phone rang.', error: 'none', fix: 'Correct!', hint: 'هذا التقديم الأسلوبي صحيح' },
+    { text: 'I am not used to live in cold weather.', error: 'live', fix: 'living', hint: 'be used to + verb-ing — وليس to + infinitive' },
+    { text: 'The number of students are increasing each year.', error: 'are', fix: 'is', hint: 'The number of + جمع يتبعه فعل مفرد' },
+    { text: 'No sooner did she arrived than it started to rain.', error: 'arrived', fix: 'arrive', hint: 'بعد No sooner did نستخدم المصدر (base form)' },
+    { text: 'He denied to have taken the money.', error: 'to have taken', fix: 'having taken', hint: 'deny يتبعه verb-ing وليس to-infinitive' },
+    { text: 'This is one of the most unique buildings I have seen.', error: 'most unique', fix: 'most remarkable', hint: 'unique معناها فريد بالمطلق — لا يقبل التدرج' },
+    { text: 'I regret to inform you that your application was rejected.', error: 'none', fix: 'Correct!', hint: 'regret to do = أتأسف على إخبارك — صحيح تماماً' },
+    { text: 'She suggested that we would meet earlier.', error: 'would meet', fix: 'meet', hint: 'بعد suggest + that نستخدم subjunctive (base form) بدون would' },
+    { text: 'Providing that you work hard, you shall succeed.', error: 'none', fix: 'Correct!', hint: 'providing that = بشرط أن — صحيح في الإنجليزية الرسمية' },
+    { text: 'The police is investigating the incident.', error: 'is', fix: 'are', hint: 'police اسم جمع دائماً — يؤخذ معه are/were' },
+  ],
 }
 
 function GrammarDetective({ day }) {
@@ -1939,61 +1797,25 @@ function GrammarDetective({ day }) {
   const [sentences, setSentences] = useState([])
   const [clicked, setClicked] = useState({})
   const [revealed, setRevealed] = useState({})
-  const [loading, setLoading] = useState(false)
   const [generated, setGenerated] = useState(false)
-  const [error, setError] = useState('')
 
   const LEVELS = [
-    { key: 'easy', label: '🟢 سهل' },
+    { key: 'easy',   label: '🟢 سهل' },
     { key: 'medium', label: '🟡 متوسط' },
-    { key: 'hard', label: '🔴 صعب' },
+    { key: 'hard',   label: '🔴 صعب' },
   ]
 
-  const generate = async () => {
-    setLoading(true)
-    setSentences([])
+  const generate = () => {
+    const pool = [...(DETECTIVE_BANK[difficulty] || DETECTIVE_BANK.medium)]
+    // Shuffle and pick `count` exercises
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]]
+    }
+    setSentences(pool.slice(0, count))
     setClicked({})
     setRevealed({})
-    setGenerated(false)
-    setError('')
-    const patterns = day.grammar?.patterns?.map(p => p.name).join(', ') || 'general grammar'
-    const vocab = day.vocabulary?.words?.slice(0, 8).map(w => w.word).join(', ') || ''
-    const diffDesc = difficulty === 'easy'
-      ? 'subject-verb agreement or basic tense (he go, she are, I is)'
-      : difficulty === 'medium'
-      ? 'wrong tense form, misused preposition, or wrong article'
-      : 'subtle conditional, perfect tense, or passive voice confusion'
-
-    const prompt = `I need ${count} English sentences each with exactly ONE grammar mistake. Grammar topic: ${patterns}. ${vocab ? `Words to use: ${vocab}.` : ''}
-Mistake type: ${diffDesc}.
-
-Reply with ONLY this numbered list, nothing else:
-
-1. WRONG: [sentence with mistake here]
-   ERROR: [the wrong word or phrase]
-   FIX: [correct word or phrase]
-   HINT: [سبب الخطأ بالعربي]
-
-2. WRONG: [sentence with mistake here]
-   ERROR: [the wrong word or phrase]
-   FIX: [correct word or phrase]
-   HINT: [سبب الخطأ بالعربي]
-
-(continue for all ${count} sentences)`
-
-    try {
-      const raw = await aiAsk(prompt, `You are a grammar exercise generator. Generate exactly ${count} numbered grammar sentences following the WRONG/ERROR/FIX/HINT format strictly. No extra explanation.`)
-      const parsed = parseDetectiveSentences(raw, count)
-      if (parsed.length > 0) {
-        setSentences(parsed)
-        setGenerated(true)
-      } else {
-        setError('تعذّر تحليل الرد — حاولي مرة ثانية')
-      }
-    } catch (e) {
-      setError('خطأ في الاتصال')
-    }
-    setLoading(false)
+    setGenerated(true)
   }
 
   const handleWord = (sIdx, wIdx, word, sentence) => {
@@ -2001,7 +1823,9 @@ Reply with ONLY this numbered list, nothing else:
     if (clicked[key]) return
     const cleanWord = word.toLowerCase().replace(/[.,!?'"]/g, '')
     const errorWords = sentence.error.toLowerCase().split(/\s+/).map(w => w.replace(/[.,!?'"]/g, ''))
-    const isError = errorWords.some(ew => cleanWord === ew || cleanWord.includes(ew) || ew.includes(cleanWord))
+    const isError = sentence.error === 'none'
+      ? false
+      : errorWords.some(ew => cleanWord === ew || (ew.length > 3 && cleanWord.includes(ew)))
     setClicked(c => ({ ...c, [key]: isError ? 'right' : 'wrong' }))
   }
 
@@ -2029,17 +1853,18 @@ Reply with ONLY this numbered list, nothing else:
                   onClick={() => setCount(n)}>{n}</button>
               ))}
             </div>
-            <button className="el-nav-btn primary" style={{ marginTop: 8 }} onClick={generate} disabled={loading}>
-              {loading ? '⏳ جارٍ التوليد...' : '✨ توليد تمرين جديد'}
+            <button className="el-nav-btn primary" style={{ marginTop: 8 }} onClick={generate}>
+              ✨ توليد تمرين جديد
             </button>
           </div>
-          {error && <div style={{ color: '#dc2626', fontSize: '.83rem', marginBottom: 10, padding: '6px 10px', background: '#fef2f2', borderRadius: 8 }}>⚠️ {error}</div>}
           {generated && sentences.length > 0 && (
             <>
               <div className="el-detective-desc">اضغط على الكلمة الخاطئة في كل جملة:</div>
               {sentences.map((s, sIdx) => {
                 const words = s.text.split(' ')
-                const foundAll = Object.entries(clicked).some(([k, v]) => k.startsWith(`${sIdx}_`) && v === 'right')
+                const foundAll = s.error === 'none'
+                  ? Object.values(clicked).filter((v, k) => String(k).startsWith(`${sIdx}_`)).length > 0
+                  : Object.entries(clicked).some(([k, v]) => k.startsWith(`${sIdx}_`) && v === 'right')
                 return (
                   <div key={sIdx} className="el-detective-sentence">
                     <div className="el-detective-text">
@@ -2058,13 +1883,21 @@ Reply with ONLY this numbered list, nothing else:
                     </div>
                     {foundAll ? (
                       <div className="el-detective-result found">
-                        ✅ الصواب: <strong>{s.fix}</strong> — {s.hint}
+                        ✅ الخطأ: <strong>{s.error}</strong> ← الصواب: <strong>{s.fix}</strong> — {s.hint}
                       </div>
                     ) : (
-                      <button className="el-nav-btn" style={{ marginTop: 8, padding: '4px 12px', fontSize: '.78rem' }}
-                        onClick={() => setRevealed(r => ({ ...r, [sIdx]: true }))}>
-                        {revealed[sIdx] ? `💡 الخطأ: "${s.error}" → "${s.fix}" — ${s.hint}` : '💡 أرني الخطأ'}
+                      <button
+                        className="el-nav-btn"
+                        style={{ marginTop: 8, padding: '4px 12px', fontSize: '.78rem' }}
+                        onClick={() => setRevealed(r => ({ ...r, [sIdx]: true }))}
+                      >
+                        💡 أظهر الإجابة
                       </button>
+                    )}
+                    {revealed[sIdx] && !foundAll && (
+                      <div className="el-detective-result">
+                        الخطأ: <strong>{s.error}</strong> ← الصواب: <strong>{s.fix}</strong> — {s.hint}
+                      </div>
                     )}
                   </div>
                 )
@@ -2137,49 +1970,105 @@ function AILiveReaction({ score }) {
 }
 
 /* ─── Vocabulary Story Generator ─── */
-const LEVEL_LANG = {
-  1: { cefr: 'A1', desc: 'Use VERY simple English only. Short sentences. Basic vocabulary. No complex words.' },
-  2: { cefr: 'A2', desc: 'Use simple everyday English. Short clear sentences. Common words only.' },
-  3: { cefr: 'B1', desc: 'Use intermediate English. Normal sentences. Avoid academic or rare vocabulary.' },
-  4: { cefr: 'B2', desc: 'Use upper-intermediate English. Some complex sentences allowed.' },
-  5: { cefr: 'C1', desc: 'Use advanced English with rich vocabulary and complex structures.' },
-  6: { cefr: 'C2', desc: 'Use sophisticated English. Complex arguments, nuanced language.' },
+const STORY_BANK = {
+  'حوار حياة يومية': [
+    [
+      { speaker: 'Sarah', text: 'Good morning, Mark! How was your weekend?' },
+      { speaker: 'Mark', text: "It was great! I went to the park with my family. What about you?" },
+      { speaker: 'Sarah', text: 'I stayed home. I cooked a big dinner and watched a movie.' },
+      { speaker: 'Mark', text: 'That sounds relaxing. Are you ready for the meeting today?' },
+      { speaker: 'Sarah', text: 'Almost! I just need to review my notes. I feel a little nervous.' },
+      { speaker: 'Mark', text: "Don't worry. You always do a great job. Let's go in together." },
+    ],
+    [
+      { speaker: 'Sarah', text: 'Excuse me, do you know where the library is?' },
+      { speaker: 'Mark', text: 'Yes! Go straight, then turn left at the traffic light.' },
+      { speaker: 'Sarah', text: 'How far is it from here?' },
+      { speaker: 'Mark', text: "About ten minutes on foot. It's next to the post office." },
+      { speaker: 'Sarah', text: 'Thank you so much! You are very helpful.' },
+      { speaker: 'Mark', text: 'No problem! Have a nice day.' },
+    ],
+    [
+      { speaker: 'Sarah', text: 'Hi Mark! What are you having for lunch?' },
+      { speaker: 'Mark', text: 'I ordered a sandwich and a coffee. The food here is delicious.' },
+      { speaker: 'Sarah', text: 'I agree! I usually have a salad, but today I want something warm.' },
+      { speaker: 'Mark', text: 'You should try the soup. It is really good in cold weather.' },
+      { speaker: 'Sarah', text: 'That is a great idea. I will order that!' },
+      { speaker: 'Mark', text: 'Good choice. Enjoy your meal!' },
+    ],
+  ],
+  'قصة مغامرة': [
+    [
+      { speaker: 'Narrator', text: 'It was a dark and stormy night when Sarah and Mark heard a strange sound outside.' },
+      { speaker: 'Sarah', text: 'Did you hear that? Something is moving in the garden!' },
+      { speaker: 'Mark', text: 'I will go and check. Wait here.' },
+      { speaker: 'Narrator', text: 'Mark opened the door slowly. He looked outside carefully.' },
+      { speaker: 'Mark', text: "It is just a cat! A small black cat. It is sitting by the door." },
+      { speaker: 'Sarah', text: 'Oh! The poor thing looks cold. Let us bring it inside.' },
+      { speaker: 'Narrator', text: 'They gave the cat some milk and a warm blanket. That night, they found a new friend.' },
+    ],
+    [
+      { speaker: 'Narrator', text: "Sarah found an old map while cleaning the attic of her grandmother's house." },
+      { speaker: 'Sarah', text: 'Mark, look at this! It says there is hidden treasure near the old oak tree.' },
+      { speaker: 'Mark', text: 'Are you serious? Let us go and find it right now!' },
+      { speaker: 'Narrator', text: 'They grabbed their bags and ran to the garden. The old oak tree stood at the corner.' },
+      { speaker: 'Sarah', text: 'Look! There is a small box under the roots.' },
+      { speaker: 'Mark', text: 'Open it! What is inside?' },
+      { speaker: 'Narrator', text: 'Inside, they found old photographs and letters — the real treasure of family memories.' },
+    ],
+  ],
+  'تقرير إخباري': [
+    [
+      { speaker: 'Reporter', text: 'Good evening. Tonight we cover a special story from the local community.' },
+      { speaker: 'Narrator', text: 'The city opened a new public park today, bringing joy to hundreds of families.' },
+      { speaker: 'Reporter', text: 'The park includes a playground, a walking trail, and a small café.' },
+      { speaker: 'Narrator', text: 'The mayor said this park is a gift to the people of the city.' },
+      { speaker: 'Reporter', text: 'Families from across the neighborhood came to enjoy the opening day celebrations.' },
+      { speaker: 'Narrator', text: 'Local children were the happiest — they now have a safe and beautiful place to play.' },
+    ],
+    [
+      { speaker: 'Reporter', text: 'Breaking news: scientists have discovered a new species of colorful butterfly.' },
+      { speaker: 'Narrator', text: 'The butterfly was found in a tropical forest and has bright blue and green wings.' },
+      { speaker: 'Reporter', text: 'Researchers say this discovery shows that nature still holds many secrets.' },
+      { speaker: 'Narrator', text: 'The team spent three years studying the forest before making this exciting find.' },
+      { speaker: 'Reporter', text: 'The new species has been named after the lead scientist, Dr. Maria Chen.' },
+    ],
+  ],
+  'قصة رومانسية': [
+    [
+      { speaker: 'Sarah', text: 'I cannot believe we met here again. This is our favorite café.' },
+      { speaker: 'Mark', text: 'Some places have a special feeling. I think this one brought us together.' },
+      { speaker: 'Sarah', text: 'Do you remember the first time we sat at this table?' },
+      { speaker: 'Mark', text: 'Of course! You spilled your coffee and I tried to help but made it worse.' },
+      { speaker: 'Sarah', text: 'We laughed for an hour! I knew then that you were someone special.' },
+      { speaker: 'Mark', text: 'And here we are, years later, still laughing at the same table.' },
+    ],
+    [
+      { speaker: 'Sarah', text: 'I got your letter. Did you really mean everything you wrote?' },
+      { speaker: 'Mark', text: 'Every single word. I have wanted to say those things for a long time.' },
+      { speaker: 'Sarah', text: 'I did not know you felt this way. You always seemed so calm.' },
+      { speaker: 'Mark', text: 'I was nervous! Writing a letter felt easier than saying it in person.' },
+      { speaker: 'Sarah', text: 'Well, I am glad you did. Your words made me very happy.' },
+      { speaker: 'Mark', text: 'Really? Then maybe we could have dinner together this weekend?' },
+      { speaker: 'Sarah', text: 'I would love that.' },
+    ],
+  ],
 }
 
 function VocabStoryGen({ words, dayTitle, levelId, allLearnedWords = [] }) {
   const [open, setOpen] = useState(false)
   const [genre, setGenre] = useState('حوار حياة يومية')
-  const [lines, setLines] = useState([])   // [{speaker, text}]
-  const [loading, setLoading] = useState(false)
+  const [lines, setLines] = useState([])
   const [usedWords, setUsedWords] = useState([])
 
-  const genres = ['حوار حياة يومية', 'قصة مغامرة', 'تقرير إخباري', 'قصة رومانسية']
-  const isDialogue = genre === 'حوار حياة يومية' || genre === 'قصة رومانسية'
+  const genres = Object.keys(STORY_BANK)
 
-  const generate = async () => {
-    setLoading(true)
-    setLines([])
-    setUsedWords([])
-    const wordList = words.slice(0, 10).map(w => w.word).join(', ')
-    try {
-      const lvl = LEVEL_LANG[Number(levelId)] || LEVEL_LANG[3]
-      const prompt = isDialogue
-        ? `Write a short dialogue (6-8 exchanges) between two people named Sarah and Mark. Use these English words naturally: ${wordList}. Format EXACTLY like this, one line per turn:\nSarah: ...\nMark: ...\nSarah: ...\nNo extra text before or after.`
-        : `Write a short ${genre} (5-7 sentences) using these English words naturally: ${wordList}. Format as a dialogue between a narrator and characters when possible. Each paragraph on its own line. English only.`
-      const raw = await aiAsk(prompt,
-        `You are a creative English writer for language learners at CEFR level ${lvl.cefr}. ${lvl.desc} Topic: ${dayTitle}. Use ALL given words. Follow the format exactly.`)
-      if (!raw) { setLines([{ speaker: '', text: 'الخادم لم يُرجع نصاً. جربي مرة أخرى.' }]); return }
-      // Parse lines
-      const parsed = raw.split('\n').filter(l => l.trim()).map(l => {
-        const m = l.match(/^([A-Za-z؀-ۿ]+):\s*(.+)$/)
-        return m ? { speaker: m[1], text: m[2] } : { speaker: '', text: l.trim() }
-      })
-      setLines(parsed)
-      const allText = raw.toLowerCase()
-      setUsedWords(words.filter(w => allText.includes(w.word.toLowerCase())).map(w => w.word))
-    } catch (e) {
-      setLines([{ speaker: '', text: 'تعذّر إنشاء القصة. (' + (e?.message || '') + ')' }])
-    } finally { setLoading(false) }
+  const generate = () => {
+    const bank = STORY_BANK[genre] || STORY_BANK['حوار حياة يومية']
+    const chosen = bank[Math.floor(Math.random() * bank.length)]
+    setLines(chosen)
+    const allText = chosen.map(l => l.text).join(' ').toLowerCase()
+    setUsedWords(words.filter(w => allText.includes(w.word.toLowerCase())).map(w => w.word))
   }
 
   const highlightLine = (text) => {
@@ -2193,12 +2082,12 @@ function VocabStoryGen({ words, dayTitle, levelId, allLearnedWords = [] }) {
     )
   }
 
-  const SPEAKER_COLORS = { Sarah: '#c9858a', Mark: '#3b82f6', Narrator: '#16a34a' }
+  const SPEAKER_COLORS = { Sarah: '#c9858a', Mark: '#3b82f6', Narrator: '#16a34a', Reporter: '#7c3aed' }
 
   return (
     <div className="el-story-section">
       <button className="el-roleplay-toggle" style={{ marginBottom: open ? 14 : 0 }} onClick={() => setOpen(o => !o)}>
-        📖 {open ? 'إغلاق مولّد القصص' : 'Vocabulary Story Generator — تعلّم الكلمات بمحادثة'}
+        📖 {open ? 'إغلاق مولّد القصص' : 'Vocabulary Story — تعلّم الكلمات بمحادثة'}
       </button>
       {open && (
         <>
@@ -2208,8 +2097,8 @@ function VocabStoryGen({ words, dayTitle, levelId, allLearnedWords = [] }) {
               <button key={g} className={`el-story-setting-btn${genre === g ? ' active' : ''}`} onClick={() => setGenre(g)}>{g}</button>
             ))}
           </div>
-          <button className="el-nav-btn primary" onClick={generate} disabled={loading}>
-            {loading ? '⏳ يكتب...' : '✨ اكتب لي قصة'}
+          <button className="el-nav-btn primary" onClick={generate}>
+            ✨ اعرض قصة
           </button>
           {lines.length > 0 && (
             <>
@@ -2217,7 +2106,7 @@ function VocabStoryGen({ words, dayTitle, levelId, allLearnedWords = [] }) {
                 <button className="el-speak-btn" style={{ fontSize: '.85rem', padding: '4px 12px', borderRadius: 8 }}
                   onClick={() => {
                     window.speechSynthesis.cancel()
-                    const fullText = lines.map(l => l.speaker ? `${l.speaker}: ${l.text}` : l.text).join('. ')
+                    const fullText = lines.map(l => l.speaker ? `${l.speaker} says: ${l.text}` : l.text).join('. ')
                     const u = new SpeechSynthesisUtterance(fullText)
                     u.lang = 'en-US'; u.rate = 0.85
                     window.speechSynthesis.speak(u)
@@ -2431,86 +2320,6 @@ function WritingPromptCard({ dayTitle }) {
           <span className="el-wprompt-text">{p.prompt}</span>
         </div>
       ))}
-    </div>
-  )
-}
-
-/* ─── Reading Comprehension Quiz ─── */
-function ReadingComprehensionQuiz({ passage }) {
-  const [open, setOpen] = useState(false)
-  const [questions, setQuestions] = useState([])
-  const [answers, setAnswers] = useState({})
-  const [checked, setChecked] = useState(false)
-  const [loading, setLoading] = useState(false)
-
-  const generate = async () => {
-    if (questions.length) { setOpen(true); return }
-    setLoading(true)
-    try {
-      const raw = await aiAsk(
-        `Passage: "${passage.slice(0, 700)}"
-
-Create 4 multiple-choice comprehension questions. Use EXACTLY this format (no extra text):
-Q: [question text]
-A: [option a]
-B: [option b]
-C: [option c]
-D: [option d]
-CORRECT: [A or B or C or D]
-EXPLAIN: [Arabic explanation why]
----`,
-        'You are an EFL teacher creating comprehension questions. Use only the labeled format.'
-      )
-      const blocks = (raw || '').split('---').map(b => b.trim()).filter(Boolean)
-      const parsed = blocks.map(block => {
-        const get = (label) => { const m = block.match(new RegExp(`^${label}:\\s*(.+)`, 'im')); return m ? m[1].trim() : '' }
-        const correctLetter = get('CORRECT').toUpperCase()
-        const opts = [get('A'), get('B'), get('C'), get('D')]
-        const correctIdx = ['A','B','C','D'].indexOf(correctLetter)
-        if (!get('Q') || correctIdx === -1) return null
-        return { q: get('Q'), options: opts, correct: correctIdx, explanation: get('EXPLAIN') }
-      }).filter(Boolean)
-      setQuestions(parsed.slice(0, 4))
-      setOpen(true)
-    } catch { } finally { setLoading(false) }
-  }
-
-  const score = questions.filter((q, i) => answers[i] === q.correct).length
-
-  return (
-    <div style={{ marginTop: 16 }}>
-      <button className="el-nav-btn primary" onClick={generate} disabled={loading}>
-        {loading ? 'يولد الاسئلة...' : 'اختبار فهم المقروء (AI)'}
-      </button>
-      {open && questions.length > 0 && (
-        <div className="el-rcquiz-wrap">
-          {questions.map((q, i) => (
-            <div key={i} className="el-rcquiz-q">
-              <div className="el-rcquiz-qtext">{i+1}. {q.q}</div>
-              <div className="el-rcquiz-options">
-                {(q.options || []).map((opt, oi) => {
-                  const isCorrect = checked && oi === q.correct
-                  const isWrong = checked && answers[i] === oi && oi !== q.correct
-                  return (
-                    <button key={oi}
-                      className={`el-rcquiz-opt${isCorrect ? ' correct' : isWrong ? ' wrong' : answers[i] === oi ? ' chosen' : ''}`}
-                      onClick={() => !checked && setAnswers(a => ({ ...a, [i]: oi }))}
-                    >{opt}</button>
-                  )
-                })}
-              </div>
-              {checked && <div className="el-rcquiz-explain">{q.explanation}</div>}
-            </div>
-          ))}
-          {!checked
-            ? <button className="el-nav-btn primary" onClick={() => setChecked(true)} disabled={Object.keys(answers).length < questions.length}>تحقق</button>
-            : <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <div className="el-rcquiz-score">{score}/{questions.length}</div>
-                <button className="el-nav-btn" onClick={() => { setChecked(false); setAnswers({}) }}>مرة اخرى</button>
-              </div>
-          }
-        </div>
-      )}
     </div>
   )
 }
