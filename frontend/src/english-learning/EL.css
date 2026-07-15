@@ -1693,3 +1693,24 @@
 .el-listen-tf-btn.correct { border-color: #22c55e; background: rgba(34,197,94,.12); color: #16a34a; }
 .el-listen-tf-btn.wrong   { border-color: #ef4444; background: rgba(239,68,68,.1);  color: #dc2626; }
 .el-listen-q-explain { margin-top: 8px; font-size: .8rem; color: #16a34a; background: rgba(34,197,94,.08); border-radius: 7px; padding: 6px 10px; }
+
+
+/* ── Shadowing Sentences (5-sentence practice) ── */
+.el-shadow-sentences-title { font-weight: 700; font-size: .97rem; color: var(--el-text); margin: 22px 0 4px; display: flex; align-items: center; gap: 8px; }
+.el-shadow-sentences-desc { font-size: .8rem; color: var(--el-muted); margin-bottom: 14px; }
+.el-shadow-sentences-list { display: flex; flex-direction: column; gap: 12px; }
+.el-shadow-sentence-card { display: flex; gap: 12px; padding: 14px; background: var(--el-bg2); border-radius: 12px; border: 1.5px solid var(--el-border); }
+.el-shadow-sent-num { min-width: 28px; height: 28px; border-radius: 50%; background: var(--el-accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .82rem; flex-shrink: 0; margin-top: 2px; }
+.el-shadow-sent-body { flex: 1; min-width: 0; }
+.el-shadow-sent-text { font-size: .95rem; font-weight: 600; color: var(--el-text); direction: ltr; text-align: left; margin-bottom: 10px; line-height: 1.5; }
+.el-shadow-sent-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.el-shadow-play-btn { padding: 6px 14px; border-radius: 8px; border: 1.5px solid var(--el-accent); background: var(--el-bg3); color: var(--el-accent); font-size: .82rem; cursor: pointer; font-weight: 600; transition: all .15s; }
+.el-shadow-play-btn.playing { background: var(--el-accent); color: #fff; }
+.el-shadow-play-btn:hover { background: var(--el-accent); color: #fff; }
+.el-shadow-rec-btn { padding: 6px 14px; border-radius: 8px; border: 1.5px solid #6366f1; background: var(--el-bg3); color: #6366f1; font-size: .82rem; cursor: pointer; font-weight: 600; transition: all .15s; }
+.el-shadow-rec-btn.recording { background: #6366f1; color: #fff; animation: pulse 1s infinite; }
+.el-shadow-rec-btn:hover { background: #6366f1; color: #fff; }
+.el-shadow-result { margin-top: 8px; font-size: .82rem; padding: 6px 10px; border-radius: 8px; direction: ltr; text-align: left; }
+.el-shadow-result.perfect { background: rgba(34,197,94,.1); color: #16a34a; border: 1px solid #86efac; }
+.el-shadow-result.close   { background: rgba(251,191,36,.1); color: #b45309; border: 1px solid #fcd34d; }
+.el-shadow-result.retry   { background: rgba(239,68,68,.08); color: #dc2626; border: 1px solid #fca5a5; }

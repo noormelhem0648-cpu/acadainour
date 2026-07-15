@@ -47,30 +47,29 @@ EXAMPLE: [one short example sentence using the word]`
 export default function WordLookupProvider({ children }) {
   const [popup, setPopup] = useState(null) // {x, y, word, data, loading}
   const popupRef = useRef(null)
-  const pendingRef = useRef(null)
+  const currentWordRef = useRef(null) // tracks current popup word without stale closure
 
-  const closePopup = useCallback(() => setPopup(null), [])
+  const closePopup = useCallback(() => { setPopup(null); currentWordRef.current = null }, [])
 
   useEffect(() => {
     const handleClick = async (e) => {
-      // Close if clicking inside popup
+      // Clicks inside the popup bubble up — ignore them
       if (popupRef.current?.contains(e.target)) return
-      // Close if clicking outside
-      if (popup) { closePopup(); return }
 
       const el = e.target
-      // Only trigger on text nodes inside el-app
-      if (!el.closest('.el-app')) return
-      // Skip buttons, inputs, etc.
-      if (['BUTTON', 'INPUT', 'TEXTAREA', 'A', 'SELECT'].includes(el.tagName)) return
 
-      // Get the word under click
+      // Outside el-app or on interactive elements → close any open popup
+      if (!el.closest('.el-app') || ['BUTTON', 'INPUT', 'TEXTAREA', 'A', 'SELECT'].includes(el.tagName)) {
+        setPopup(null); currentWordRef.current = null
+        return
+      }
+
+      // Extract the word under the click
       const selection = window.getSelection()
       let word = ''
       if (selection && selection.toString().trim().length > 0) {
         word = selection.toString().trim().split(/\s+/)[0]
       } else {
-        // Get word from text node at click position
         const range = document.caretRangeFromPoint?.(e.clientX, e.clientY)
         if (range) {
           const node = range.startContainer
@@ -86,25 +85,35 @@ export default function WordLookupProvider({ children }) {
         }
       }
 
-      if (!word || word.length < 2 || !/^[a-zA-Z]/.test(word)) return
+      if (!word || word.length < 2 || !/^[a-zA-Z]/.test(word)) {
+        // Clicked on non-word area — close popup
+        setPopup(null); currentWordRef.current = null
+        return
+      }
+
+      // Clicking the same word again toggles the popup closed
+      if (currentWordRef.current === word) { closePopup(); return }
 
       const x = Math.min(e.clientX, window.innerWidth - 240)
       const y = e.clientY + window.scrollY
 
+      // Show loading popup immediately (first click always works)
+      currentWordRef.current = word
       setPopup({ x, y, word, data: null, loading: true })
 
-      if (pendingRef.current) clearTimeout(pendingRef.current)
       try {
         const data = await lookupWord(word)
         setPopup(prev => prev?.word === word ? { ...prev, data, loading: false } : prev)
       } catch {
-        setPopup(prev => prev?.word === word ? { ...prev, data: { word, arabic: '...', ipa: '', us: '', uk: '', pos: '', example: '' }, loading: false } : prev)
+        setPopup(prev => prev?.word === word
+          ? { ...prev, data: { word, arabic: 'تعذّر البحث — حاول مجدداً', ipa: '', us: '', uk: '', pos: '', example: '' }, loading: false }
+          : prev)
       }
     }
 
     document.addEventListener('click', handleClick)
     return () => document.removeEventListener('click', handleClick)
-  }, [popup, closePopup])
+  }, [closePopup]) // stable — no popup in deps, use ref instead
 
   return (
     <>

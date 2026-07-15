@@ -363,7 +363,7 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
               {componentId === 'grammar'   && <GrammarComp day={day} levelId={levelId} setBuddyMessages={setBuddyMessages} setAvatarState={setAvatarState} />}
               {componentId === 'reading'   && <ReadingComp day={day} levelId={levelId} dayId={dayId} setAvatarState={setAvatarState} setBuddyMessages={setBuddyMessages} />}
               {componentId === 'listening' && <ListeningComp day={day} levelId={levelId} dayId={dayId} setAvatarState={setAvatarState} setBuddyMessages={setBuddyMessages} />}
-              {componentId === 'shadowing' && <ShadowingComp day={day} />}
+              {componentId === 'shadowing' && <ShadowingComp day={day} levelId={levelId} />}
               {componentId === 'writing'   && <WritingComp day={day} levelId={levelId} dayId={dayId} navigate={navigate} setBuddyMessages={setBuddyMessages} setBuddyInput={setBuddyInput} setAvatarState={setAvatarState} />}
             </div>
 
@@ -1549,9 +1549,157 @@ function ListeningComp({ day, levelId, dayId }) {
   )
 }
 
+/* ─── Shadowing sentences bank — 5 topic-matched sentences per CEFR level ─── */
+const SHADOWING_TOPICS = [
+  {
+    keywords: ['present simple', 'daily routine', 'habits', 'everyday', 'يومي', 'عادات'],
+    sentences: {
+      A1: ["I wake up at seven every morning.", "She drinks coffee before work.", "We eat lunch at school.", "He walks to the park every day.", "They sleep early on weekdays."],
+      A2: ["I usually take the bus to work.", "She always checks her phone in the morning.", "He never skips breakfast on weekdays.", "We sometimes go for a walk after dinner.", "They often watch TV in the evening."],
+      B1: ["I tend to spend my evenings reading rather than watching TV.", "She usually prepares her clothes the night before work.", "He rarely misses his morning jog, even in bad weather.", "We generally have a team meeting every Monday morning.", "They always make sure to recycle their household waste."],
+      B2: ["I consistently prioritize sleep over late-night socializing.", "She habitually reviews her to-do list before starting her workday.", "He invariably checks the weather forecast before planning outdoor activities.", "We routinely conduct performance reviews at the end of each quarter.", "They persistently maintain healthy eating habits despite busy schedules."],
+      C1: ["I've made it a point to dedicate at least an hour each day to professional development.", "She meticulously organizes her schedule to balance work commitments and personal wellbeing.", "He unfailingly adheres to a disciplined morning routine that sets the tone for his entire day.", "We systematically evaluate our processes to ensure continuous improvement across all departments.", "They conscientiously monitor their carbon footprint as part of a broader commitment to sustainability."],
+      C2: ["I've cultivated the discipline of deliberate practice, allocating focused blocks of time to skill acquisition rather than passive consumption.", "She orchestrates her professional and personal responsibilities with the precision of a conductor, ensuring neither domain encroaches upon the other.", "He has internalized the philosophy that consistency, however modest, compounds into extraordinary outcomes over time.", "We have institutionalized a culture of reflective practice, wherein team members regularly interrogate assumptions underlying their decisions.", "They navigate the inherent tensions between efficiency and creativity by establishing clear boundaries between structured work and open-ended exploration."],
+    }
+  },
+  {
+    keywords: ['past simple', 'past tense', 'history', 'last', 'yesterday', 'ماضي', 'أمس'],
+    sentences: {
+      A1: ["I went to school yesterday.", "She ate lunch at home.", "We played football last Sunday.", "He watched a film last night.", "They walked to the park."],
+      A2: ["I visited my grandmother last weekend.", "She bought a new dress for the party.", "He forgot his keys at home this morning.", "We spent the afternoon at the beach.", "They decided to take a different route home."],
+      B1: ["I spent last summer travelling through several European countries.", "She graduated from university three years ago with a degree in engineering.", "He quit his job last year and started his own small business.", "We moved to a new apartment after our lease expired.", "They cancelled the event due to unexpectedly poor weather conditions."],
+      B2: ["I embarked on a solo backpacking trip across Southeast Asia in my early twenties.", "She pursued her passion for photography despite initial resistance from her family.", "He negotiated a significant pay rise after demonstrating consistent high performance.", "We restructured the entire team following the departure of our senior manager.", "They launched the product ahead of schedule, catching competitors completely off guard."],
+      C1: ["I undertook an intensive language immersion programme, which fundamentally transformed my approach to communication.", "She championed a major organizational restructuring initiative that significantly improved operational efficiency.", "He navigated a particularly complex legal dispute with remarkable composure and strategic acumen.", "We overhauled our entire supply chain infrastructure in response to unprecedented global disruptions.", "They spearheaded a community-led initiative that successfully revitalized a neglected urban neighbourhood."],
+      C2: ["I immersed myself in primary historical sources, which irrevocably altered my understanding of the events in question.", "She orchestrated a diplomatic resolution to what had seemed an intractable institutional conflict.", "He distinguished himself through a series of meticulously executed strategic manoeuvres that redefined the competitive landscape.", "We dismantled entrenched bureaucratic structures that had impeded innovation for decades.", "They confronted the fundamental contradictions inherent in the prevailing paradigm and proposed a coherent alternative framework."],
+    }
+  },
+  {
+    keywords: ['present perfect', 'experience', 'have been', 'have done', 'تجربة', 'خبرة'],
+    sentences: {
+      A1: ["I have eaten pizza before.", "She has visited London.", "We have seen that film.", "He has learned ten words.", "They have played this game."],
+      A2: ["I have never been to Japan before.", "She has already finished her homework.", "He has just arrived at the station.", "We have visited three countries this year.", "They have eaten at that restaurant twice."],
+      B1: ["I have always wanted to learn how to play the guitar.", "She has recently started taking evening classes in Spanish.", "He has worked in the same company for over a decade.", "We have made significant progress on the project this month.", "They have never experienced such extreme weather conditions before."],
+      B2: ["I have accumulated a wealth of experience working across multiple industries over the years.", "She has consistently demonstrated the ability to perform under significant pressure.", "He has successfully completed several challenging projects despite limited resources.", "We have developed a robust framework for managing cross-cultural communication within the team.", "They have maintained an impressive track record of delivering results on time and within budget."],
+      C1: ["I have devoted considerable effort to understanding the nuanced interplay between cultural context and linguistic expression.", "She has built an enviable professional reputation through years of meticulous attention to detail.", "He has grappled with some of the most complex ethical dilemmas facing practitioners in his field.", "We have cultivated an environment where intellectual curiosity and rigorous analytical thinking are actively encouraged.", "They have pioneered an approach that seamlessly integrates quantitative analysis with qualitative insight."],
+      C2: ["I have spent years interrogating the fundamental assumptions that underpin conventional approaches to this discipline.", "She has forged an intellectual legacy defined by its uncompromising commitment to empirical rigour and conceptual clarity.", "He has traversed the full spectrum of human experience, emerging with a perspective that transcends conventional disciplinary boundaries.", "We have painstakingly assembled a body of evidence that challenges the prevailing orthodoxy with considerable force.", "They have sustained a remarkable trajectory of innovation, consistently anticipating shifts in the landscape before they materialize."],
+    }
+  },
+  {
+    keywords: ['future', 'going to', 'will', 'plan', 'مستقبل', 'خطط'],
+    sentences: {
+      A1: ["I will drink water now.", "She is going to study tonight.", "We will go to the park.", "He will call you later.", "They are going to cook dinner."],
+      A2: ["I am going to start a new course next month.", "She will probably arrive before noon.", "He is planning to move to a bigger apartment.", "We will meet at the café at three o'clock.", "They are not going to attend the meeting tomorrow."],
+      B1: ["I am planning to take a gap year before starting university.", "She will likely apply for a promotion at the end of this year.", "He is going to renovate his house over the summer break.", "We will probably need to hire additional staff for the upcoming project.", "They are not going to extend the contract under the current terms."],
+      B2: ["I intend to pursue postgraduate studies in environmental science in the near future.", "She is set to assume a leadership role within the organization following the restructuring.", "He will inevitably face significant challenges as he transitions into a senior management position.", "We are poised to expand into new markets once the regulatory approvals come through.", "They will need to fundamentally rethink their strategy if they are to remain competitive."],
+      C1: ["I am committed to making a meaningful contribution to the field over the course of my career.", "She is preparing to undertake a comprehensive review of the existing policy framework.", "He will be spearheading a major initiative to modernize the organization's digital infrastructure.", "We are positioned to capitalize on emerging opportunities as the market continues to evolve.", "They will inevitably confront the ethical implications of their technological decisions in the years ahead."],
+      C2: ["I am resolved to dedicate my professional energies to bridging the gap between theoretical insight and practical application.", "She is poised to reshape the intellectual landscape of her discipline through a series of groundbreaking contributions.", "He will, in all probability, be remembered as one of the defining voices of his generation in this field.", "We are on the cusp of a paradigm shift that will fundamentally redefine our understanding of the subject.", "They will need to contend with the profound structural changes that are already reshaping the global order."],
+    }
+  },
+  {
+    keywords: ['travel', 'transport', 'airport', 'journey', 'سفر', 'رحلة', 'مطار'],
+    sentences: {
+      A1: ["I go by bus to school.", "She takes the train to work.", "We fly to visit family.", "He likes to travel by car.", "They walk to the market."],
+      A2: ["I usually book my tickets online a few weeks in advance.", "She prefers to travel by train when the distance is not too great.", "He always packs light when he travels for business.", "We arrived at the airport two hours before departure.", "They took a taxi from the hotel to the city centre."],
+      B1: ["I find long-haul flights exhausting, but the destinations always make the journey worthwhile.", "She navigated the busy airport terminal with impressive efficiency.", "He missed his connecting flight due to an unexpected delay at customs.", "We explored the city by bicycle, which turned out to be the best decision of the trip.", "They encountered some difficulties at the border but eventually resolved the situation."],
+      B2: ["I prefer off-peak travel to avoid the inevitable crowds and inflated prices.", "She meticulously researched local transport options before arriving in an unfamiliar city.", "He managed to secure a last-minute upgrade by politely inquiring at the check-in desk.", "We traversed the length of the country by rail, which afforded us spectacular views of the landscape.", "They encountered unexpected logistical challenges that tested their ability to adapt under pressure."],
+      C1: ["I have developed a highly efficient approach to navigating international travel, minimizing disruption and maximizing productivity.", "She consistently identifies the most cost-effective and environmentally responsible travel options available.", "He handled the bureaucratic complexities of international travel with characteristic patience and resourcefulness.", "We coordinated a complex multi-city itinerary that required meticulous planning across multiple time zones.", "They leveraged their extensive travel experience to advise clients on navigating unfamiliar cultural and logistical terrain."],
+      C2: ["I regard travel not merely as physical displacement but as a profound opportunity for cognitive and cultural recalibration.", "She approaches each journey with the intellectual curiosity of an anthropologist and the organizational discipline of a seasoned professional.", "He has traversed some of the world's most challenging terrains, emerging from each experience with heightened resilience and expanded perspective.", "We regard international mobility as an indispensable component of our organizational culture and strategic vision.", "They have cultivated a global network of relationships that would have been inconceivable without their commitment to sustained international engagement."],
+    }
+  },
+  {
+    keywords: ['food', 'cooking', 'restaurant', 'eat', 'meal', 'طعام', 'أكل', 'مطعم', 'طبخ'],
+    sentences: {
+      A1: ["I like pizza very much.", "She cooks rice every day.", "We eat lunch at one o'clock.", "He drinks juice in the morning.", "They love chocolate ice cream."],
+      A2: ["I usually cook simple meals at home during the week.", "She ordered a salad and a glass of water at the restaurant.", "He tried sushi for the first time and enjoyed it.", "We always share dessert when we go out for dinner.", "They prefer homemade food to takeaway meals."],
+      B1: ["I have developed a passion for cooking authentic dishes from different cuisines.", "She recommended a small restaurant near the market that serves excellent local food.", "He follows a vegetarian diet and always checks the menu carefully before ordering.", "We decided to try a cooking class together during our holiday.", "They spent the entire afternoon preparing a traditional meal for the family gathering."],
+      B2: ["I find that cooking from scratch is both more economical and more rewarding than relying on convenience food.", "She has a remarkable talent for improvising delicious meals from whatever ingredients happen to be available.", "He studied the local culinary traditions in considerable depth before writing his food blog.", "We sourced all our ingredients from local farmers, which significantly enhanced the quality of the final dish.", "They transformed a straightforward recipe into an extraordinary dining experience through careful attention to presentation and flavour."],
+      C1: ["I believe that culinary traditions serve as a powerful lens through which to examine the cultural values and historical experiences of a society.", "She approaches food photography with the same meticulous attention to composition and lighting that characterizes her broader artistic practice.", "He has developed an encyclopedic knowledge of global cuisines, which he attributes to years of deliberate exploration and open-minded experimentation.", "We designed the menu to reflect the rich diversity of regional culinary traditions, ensuring that each dish told a compelling story.", "They have successfully repositioned their restaurant as a destination for discerning diners seeking authentic, sustainably sourced cuisine."],
+      C2: ["I regard the act of cooking as a form of applied philosophy — a daily negotiation between tradition and innovation, constraint and creativity.", "She has articulated a compelling vision for a culinary culture that prioritizes ecological sustainability without compromising gastronomic excellence.", "He occupies a unique position at the intersection of anthropology and gastronomy, using food as a vehicle for exploring the deepest questions of human identity.", "We have cultivated a supply chain that is as ethically rigorous as it is logistically sophisticated, setting a new benchmark for the industry.", "They have challenged the conventional wisdom surrounding fine dining, demonstrating that accessibility and excellence need not be mutually exclusive."],
+    }
+  },
+  {
+    keywords: ['work', 'job', 'career', 'office', 'business', 'عمل', 'وظيفة', 'مهنة'],
+    sentences: {
+      A1: ["I work in an office.", "She is a doctor.", "We start work at eight.", "He teaches English at school.", "They work from home today."],
+      A2: ["I applied for a new job last week.", "She works as a nurse at the local hospital.", "He has a meeting with his manager every Monday.", "We finish work at five o'clock on Fridays.", "They are looking for experienced candidates to join the team."],
+      B1: ["I am considering a career change after spending five years in the same role.", "She manages a small team of five people and finds it both challenging and rewarding.", "He was promoted to senior manager after demonstrating exceptional leadership skills.", "We collaborated with colleagues from three different countries on this project.", "They are currently recruiting for a number of positions across various departments."],
+      B2: ["I have deliberately cultivated a diverse professional skill set to remain adaptable in a rapidly changing job market.", "She negotiated a flexible working arrangement that allows her to balance her professional and personal responsibilities more effectively.", "He demonstrated exceptional crisis management skills when the project encountered significant unforeseen obstacles.", "We implemented a comprehensive staff development programme that has measurably improved team performance.", "They restructured the entire department to improve efficiency and reduce unnecessary duplication of effort."],
+      C1: ["I have consistently advocated for a more humane and sustainable approach to organizational management.", "She has distinguished herself as a transformational leader who inspires those around her to perform at the highest level.", "He navigated the complex political dynamics of a large multinational organization with considerable skill and diplomacy.", "We established a culture of psychological safety that enabled team members to share ideas without fear of judgment or reprisal.", "They pioneered a hybrid working model that has since been adopted as best practice across the wider industry."],
+      C2: ["I have dedicated my career to challenging the prevailing assumptions that underpin conventional approaches to organizational leadership.", "She embodies the rare combination of visionary thinking and operational precision that distinguishes truly exceptional leaders.", "He has carved out a distinctive intellectual niche at the confluence of organizational behaviour, ethics, and strategic management.", "We have constructed an organizational culture that values intellectual courage, ethical integrity, and collaborative innovation in equal measure.", "They have redefined the boundaries of what is achievable within a constrained resource environment through visionary leadership and rigorous execution."],
+    }
+  },
+  {
+    keywords: ['conditional', 'if', 'unless', 'wish', 'شرطي', 'لو', 'إذا'],
+    sentences: {
+      A1: ["If I am tired, I sleep early.", "She drinks water if she is thirsty.", "We stay home if it rains.", "He calls me if he needs help.", "If you are hungry, eat something."],
+      A2: ["If I have free time tomorrow, I will visit my friend.", "She will be happy if she passes her exam.", "He will call you if he arrives late.", "We will cancel the trip if the weather is bad.", "If you study hard, you will improve your English."],
+      B1: ["If I had more time, I would learn a musical instrument.", "She would travel more often if flights were not so expensive.", "He would apply for the position if he felt more confident about his qualifications.", "We would have finished earlier if we had started on time.", "If they had listened more carefully, they would have avoided the misunderstanding."],
+      B2: ["If I were in a position to make that decision, I would prioritize long-term sustainability over short-term profit.", "She would have handled the situation differently had she been fully aware of all the relevant facts.", "He might have pursued a different career path had circumstances been more favourable early in his life.", "We would not have encountered these difficulties had we conducted a more thorough risk assessment at the outset.", "If they had invested more heavily in staff development, they would not be facing such significant retention challenges now."],
+      C1: ["Were I to reconsider my approach, I would place considerably greater emphasis on stakeholder engagement from the very beginning.", "Had she anticipated the scale of the disruption, she would have put far more robust contingency plans in place.", "Should the situation deteriorate further, we will have no alternative but to seek external mediation.", "Had we secured adequate funding at an earlier stage, the project would have been completed well within the original timeframe.", "Were they to adopt a more collaborative approach, the prospects for a mutually satisfactory resolution would improve considerably."],
+      C2: ["Were one to examine the counterfactual with the benefit of hindsight, it becomes apparent that a fundamentally different strategic approach was both available and preferable.", "Had the organization possessed the foresight to anticipate these structural shifts, it might have positioned itself considerably more advantageously.", "Should the proposed reforms fail to achieve the intended outcomes, the consequences for institutional credibility would be severe and potentially irreversible.", "Had a more rigorous evidence base been established prior to the intervention, many of the subsequent difficulties could have been anticipated and mitigated.", "Were the fundamental assumptions underlying the current framework subjected to more sustained critical scrutiny, their inherent fragility would become immediately apparent."],
+    }
+  },
+]
+
+// Default level sentences when no topic matches
+const SHADOWING_DEFAULT = {
+  A1: ["Hello! My name is Sara.", "I go to school every day.", "She has a cat and a dog.", "We eat breakfast together.", "The sun is bright today."],
+  A2: ["I enjoy spending time with my family on weekends.", "She usually takes the bus to work in the morning.", "He is learning English because he wants to travel.", "We often have lunch at the small café near the office.", "They like going for a walk after dinner every evening."],
+  B1: ["I have been studying English for about three years now.", "She decided to apply for a new job after feeling bored with her current one.", "He finds it helpful to read English articles every morning before starting work.", "We managed to finish the project on time despite having very limited resources.", "They moved to a new city last year and are slowly getting used to the lifestyle."],
+  B2: ["I have noticed significant improvements in my fluency since I started speaking English every day.", "She believes that consistent practice, rather than occasional intensive study, is the key to language acquisition.", "He approached the negotiation with a clear strategy and managed to secure highly favourable terms.", "We restructured our daily schedule to allow for more focused, uninterrupted periods of deep work.", "They collaborated effectively across different time zones by establishing clear communication protocols from the start."],
+  C1: ["I am convinced that the most effective language learners approach the process with a combination of discipline, curiosity, and genuine intellectual engagement.", "She has developed a remarkably nuanced understanding of the cultural subtext embedded in everyday English conversation.", "He consistently demonstrates the ability to articulate complex ideas with both precision and elegance across a variety of contexts.", "We have established a shared understanding that excellence requires not merely technical competence but also creative thinking and interpersonal sensitivity.", "They have cultivated a learning environment in which ambiguity is embraced rather than avoided, fostering deeper cognitive engagement."],
+  C2: ["I regard linguistic mastery not as a destination to be reached but as an ongoing process of refinement, requiring sustained intellectual humility.", "She navigates the subtle gradations of register, tone, and pragmatic implication with the assurance of a native speaker of long standing.", "He constructs his arguments with a clarity and economy of expression that belies the considerable complexity of the ideas he is articulating.", "We have arrived at a shared understanding that the highest form of communication transcends the mere transmission of information to encompass the cultivation of genuine understanding.", "They engage with the language at a level that reveals not merely proficiency but a deep internalization of the cultural and intellectual traditions from which it emerges."],
+}
+
+const LEVEL_CEFR = { '1': 'A1', '2': 'A2', '3': 'B1', '4': 'B2', '5': 'C1', '6': 'C2' }
+
+function getShadowingSentences(dayTitle, levelId) {
+  const cefr = LEVEL_CEFR[String(levelId)] || 'A1'
+  const title = (dayTitle || '').toLowerCase()
+  for (const topic of SHADOWING_TOPICS) {
+    if (topic.keywords.some(k => title.includes(k.toLowerCase()))) {
+      return topic.sentences[cefr] || SHADOWING_DEFAULT[cefr]
+    }
+  }
+  return SHADOWING_DEFAULT[cefr]
+}
+
 /* ─── Shadowing ─── */
-function ShadowingComp({ day }) {
+function ShadowingComp({ day, levelId }) {
   const { shadowing: s } = day
+  const [playingIdx, setPlayingIdx] = useState(null)
+  const [recorded, setRecorded] = useState({})
+  const [recording, setRecording] = useState(null)
+  const recognitionRef = useRef(null)
+  const sentences = getShadowingSentences(day.title, levelId)
+
+  const playSentence = (text, idx) => {
+    window.speechSynthesis.cancel()
+    if (playingIdx === idx) { setPlayingIdx(null); return }
+    setPlayingIdx(idx)
+    const u = new SpeechSynthesisUtterance(text)
+    u.lang = 'en-US'; u.rate = 0.82
+    u.onend = () => setPlayingIdx(null)
+    u.onerror = () => setPlayingIdx(null)
+    window.speechSynthesis.speak(u)
+  }
+
+  const startRecord = (idx) => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SR) { alert('المتصفح لا يدعم التسجيل الصوتي'); return }
+    if (recording === idx) { recognitionRef.current?.stop(); setRecording(null); return }
+    const r = new SR()
+    r.lang = 'en-US'; r.interimResults = false
+    r.onresult = e => {
+      const heard = e.results[0][0].transcript || ''
+      setRecorded(prev => ({ ...prev, [idx]: heard }))
+    }
+    r.onerror = () => setRecording(null)
+    r.onend = () => setRecording(null)
+    recognitionRef.current = r
+    setRecording(idx)
+    r.start()
+  }
 
   return (
     <div className="el-section">
@@ -1575,6 +1723,50 @@ function ShadowingComp({ day }) {
             <div className="el-step-text">{step}</div>
           </div>
         ))}
+      </div>
+
+      <div className="el-shadow-sentences-title">🗣️ تدرّب على هذه الجمل الخمس — كرّر خلف الصوت</div>
+      <div className="el-shadow-sentences-desc">استمع → كرّر → سجّل صوتك → قارن</div>
+      <div className="el-shadow-sentences-list">
+        {sentences.map((sent, i) => {
+          const match = recorded[i]
+          const isCorrect = match && match.toLowerCase().replace(/[^a-z ]/g, '') === sent.toLowerCase().replace(/[^a-z ]/g, '')
+          const isClose = match && !isCorrect && sent.toLowerCase().split(' ').filter(w => match.toLowerCase().includes(w)).length >= Math.ceil(sent.split(' ').length * 0.6)
+          return (
+            <div key={i} className="el-shadow-sentence-card">
+              <div className="el-shadow-sent-num">{i + 1}</div>
+              <div className="el-shadow-sent-body">
+                <div className="el-shadow-sent-text">{sent}</div>
+                <div className="el-shadow-sent-btns">
+                  <button
+                    className={`el-shadow-play-btn${playingIdx === i ? ' playing' : ''}`}
+                    onClick={() => playSentence(sent, i)}
+                    title="استمع"
+                  >
+                    {playingIdx === i ? '⏹ أوقف' : '🔊 استمع'}
+                  </button>
+                  <button
+                    className={`el-shadow-rec-btn${recording === i ? ' recording' : ''}`}
+                    onClick={() => startRecord(i)}
+                    title="سجّل"
+                  >
+                    {recording === i ? '⏹ أوقف التسجيل' : '🎤 سجّل'}
+                  </button>
+                </div>
+                {match && (
+                  <div className={`el-shadow-result${isCorrect ? ' perfect' : isClose ? ' close' : ' retry'}`}>
+                    {isCorrect
+                      ? '✅ ممتاز! النطق صحيح'
+                      : isClose
+                        ? `👍 قريب جداً — سمعنا: "${match}"`
+                        : `🔄 حاول مجدداً — سمعنا: "${match}"`
+                    }
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        })}
       </div>
 
       {s.youtubeUrl && (
