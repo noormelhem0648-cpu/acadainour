@@ -57,54 +57,13 @@ function renderInlineMd(text) {
   )
 }
 
-/* ─── TTS: high-quality voice selection with US/GB accent ─── */
+/* ─── TTS engine — user-selected voice from localStorage ─── */
 let _ttsActive = null
-let _voiceCache = {}  // { 'en-US': Voice, 'en-GB': Voice }
+let _voiceCache = {}  // cleared when user changes voice
 
-// Priority-ordered list of natural/neural voices — checked by substring match
-const VOICE_PRIORITY = {
-  'en-US': [
-    // Microsoft Neural (Windows 10/11 + Edge/Chrome) — best quality
-    'Aria Online (Natural)',
-    'Jenny Online (Natural)',
-    'Guy Online (Natural)',
-    'Ana Online (Natural)',
-    'Davis Online (Natural)',
-    'Emma Online (Natural)',
-    'Eric Online (Natural)',
-    'Michelle Online (Natural)',
-    'Roger Online (Natural)',
-    'Steffan Online (Natural)',
-    // Microsoft standard (still good)
-    'Microsoft Aria',
-    'Microsoft Jenny',
-    'Microsoft David',
-    'Microsoft Mark',
-    'Microsoft Zira',
-    // Google (Chrome built-in)
-    'Google US English',
-    // macOS
-    'Samantha',
-    'Alex',
-    'Ava',
-    'Allison',
-    'Susan',
-  ],
-  'en-GB': [
-    'Libby Online (Natural)',
-    'Maisie Online (Natural)',
-    'Ryan Online (Natural)',
-    'Sonia Online (Natural)',
-    'Thomas Online (Natural)',
-    'Microsoft Libby',
-    'Microsoft Maisie',
-    'Microsoft Ryan',
-    'Microsoft Sonia',
-    'Google UK English Female',
-    'Google UK English Male',
-    'Daniel',
-    'Kate',
-  ],
+const VOICE_FALLBACK_PRIORITY = {
+  'en-US': ['Aria Online (Natural)','Jenny Online (Natural)','Guy Online (Natural)','Ana Online (Natural)','Davis Online (Natural)','Emma Online (Natural)','Eric Online (Natural)','Michelle Online (Natural)','Roger Online (Natural)','Steffan Online (Natural)','Microsoft Aria','Microsoft Jenny','Microsoft David','Microsoft Mark','Microsoft Zira','Google US English','Samantha','Alex','Ava'],
+  'en-GB': ['Libby Online (Natural)','Maisie Online (Natural)','Ryan Online (Natural)','Sonia Online (Natural)','Thomas Online (Natural)','Microsoft Libby','Microsoft Maisie','Microsoft Ryan','Microsoft Sonia','Google UK English Female','Google UK English Male','Daniel','Kate'],
 }
 
 function pickBestVoice(lang) {
@@ -112,27 +71,29 @@ function pickBestVoice(lang) {
   const voices = window.speechSynthesis.getVoices()
   if (!voices.length) return null
 
-  const priorities = VOICE_PRIORITY[lang] || []
-  // 1st pass: exact priority match
-  for (const name of priorities) {
+  // 1st: use the voice the user explicitly chose
+  const savedName = localStorage.getItem(lang === 'en-GB' ? 'noura_voice_uk' : 'noura_voice_us')
+  if (savedName) {
+    const saved = voices.find(v => v.name === savedName)
+    if (saved) { _voiceCache[lang] = saved; return saved }
+  }
+
+  // 2nd: smart priority fallback
+  for (const name of (VOICE_FALLBACK_PRIORITY[lang] || [])) {
     const v = voices.find(v => v.name.includes(name))
     if (v) { _voiceCache[lang] = v; return v }
   }
-  // 2nd pass: any online/neural voice for this lang
-  const online = voices.find(v =>
-    v.lang.startsWith(lang.split('-')[0]) &&
-    (v.name.toLowerCase().includes('online') || v.name.toLowerCase().includes('natural') || v.name.toLowerCase().includes('neural'))
-  )
+  // 3rd: any online/natural voice for this language
+  const online = voices.find(v => v.lang.startsWith(lang.split('-')[0]) && (v.name.toLowerCase().includes('online') || v.name.toLowerCase().includes('natural')))
   if (online) { _voiceCache[lang] = online; return online }
-  // 3rd pass: any voice matching the language code
+  // last resort
   const fallback = voices.find(v => v.lang === lang) || voices.find(v => v.lang.startsWith(lang.split('-')[0]))
   if (fallback) { _voiceCache[lang] = fallback }
   return fallback || null
 }
 
-// Pre-warm voice cache when voices load (async in some browsers)
 if (typeof window !== 'undefined' && window.speechSynthesis) {
-  const preload = () => { pickBestVoice('en-US'); pickBestVoice('en-GB') }
+  const preload = () => { _voiceCache = {}; pickBestVoice('en-US'); pickBestVoice('en-GB') }
   if (window.speechSynthesis.getVoices().length > 0) preload()
   else window.speechSynthesis.addEventListener('voiceschanged', preload)
 }
@@ -141,27 +102,126 @@ function speak(text, onStart, onEnd, lang = 'en-US') {
   if (!window.speechSynthesis) return
   window.speechSynthesis.cancel()
   _ttsActive = null
-
   const u = new SpeechSynthesisUtterance(text)
   u.lang = lang
-  // Natural voices sound better at slightly higher rate; robotic ones need slower
   const voice = pickBestVoice(lang)
   if (voice) {
     u.voice = voice
-    const isNatural = voice.name.toLowerCase().includes('online') ||
-                      voice.name.toLowerCase().includes('natural') ||
-                      voice.name.toLowerCase().includes('neural') ||
-                      voice.name.toLowerCase().includes('google')
+    const isNatural = /online|natural|neural|google/i.test(voice.name)
     u.rate = isNatural ? (lang === 'en-GB' ? 0.9 : 0.92) : (lang === 'en-GB' ? 0.8 : 0.82)
   } else {
-    u.rate = lang === 'en-GB' ? 0.8 : 0.82
+    u.rate = 0.85
   }
-
   _ttsActive = text
   if (onStart) u.onstart = onStart
   u.onend  = () => { _ttsActive = null; if (onEnd) onEnd() }
   u.onerror = () => { _ttsActive = null; if (onEnd) onEnd() }
   window.speechSynthesis.speak(u)
+}
+
+/* ─── Voice Selector Modal ─── */
+function VoiceSelector({ onClose }) {
+  const [voices, setVoices] = useState([])
+  const [selectedUS, setSelectedUS] = useState(() => localStorage.getItem('noura_voice_us') || '')
+  const [selectedUK, setSelectedUK] = useState(() => localStorage.getItem('noura_voice_uk') || '')
+  const [tab, setTab] = useState('us')
+
+  useEffect(() => {
+    const load = () => {
+      const all = window.speechSynthesis.getVoices()
+      setVoices(all.filter(v => v.lang.startsWith('en')))
+    }
+    if (window.speechSynthesis.getVoices().length > 0) load()
+    window.speechSynthesis.addEventListener('voiceschanged', load)
+    return () => window.speechSynthesis.removeEventListener('voiceschanged', load)
+  }, [])
+
+  const usVoices = voices.filter(v => v.lang === 'en-US' || v.lang.startsWith('en-US')).sort((a, b) => {
+    const score = v => /online|natural|neural/i.test(v.name) ? 0 : /google/i.test(v.name) ? 1 : 2
+    return score(a) - score(b)
+  })
+  const ukVoices = voices.filter(v => v.lang === 'en-GB' || v.lang.startsWith('en-GB')).sort((a, b) => {
+    const score = v => /online|natural|neural/i.test(v.name) ? 0 : /google/i.test(v.name) ? 1 : 2
+    return score(a) - score(b)
+  })
+
+  const preview = (v) => {
+    window.speechSynthesis.cancel()
+    const u = new SpeechSynthesisUtterance("Hello! This is how I sound. I'm your English learning assistant.")
+    u.voice = v; u.lang = v.lang; u.rate = /online|natural/i.test(v.name) ? 0.92 : 0.85
+    window.speechSynthesis.speak(u)
+  }
+
+  const badge = (v) => {
+    if (/online|natural|neural/i.test(v.name)) return <span className="el-voice-badge natural">⭐ طبيعي</span>
+    if (/google/i.test(v.name)) return <span className="el-voice-badge google">🔵 Google</span>
+    return <span className="el-voice-badge std">🔧 قياسي</span>
+  }
+
+  const save = () => {
+    localStorage.setItem('noura_voice_us', selectedUS)
+    localStorage.setItem('noura_voice_uk', selectedUK)
+    localStorage.setItem('noura_voice_setup', '1')
+    _voiceCache = {}
+    window.speechSynthesis.cancel()
+    onClose()
+  }
+
+  const currentVoices = tab === 'us' ? usVoices : ukVoices
+  const currentSelected = tab === 'us' ? selectedUS : selectedUK
+  const setSelected = tab === 'us' ? setSelectedUS : setSelectedUK
+
+  return (
+    <div className="el-voice-overlay" onClick={e => { if (e.target === e.currentTarget) { window.speechSynthesis.cancel(); onClose() } }}>
+      <div className="el-voice-modal">
+        <div className="el-voice-header">
+          <span className="el-voice-title">🎙️ اختر صوت المساعد</span>
+          <button className="el-voice-close" onClick={() => { window.speechSynthesis.cancel(); onClose() }}>✕</button>
+        </div>
+        <p className="el-voice-subtitle">اضغط ▶ لسماع أي صوت، ثم اختره — يُحفظ ويُستخدم في كل التطبيق</p>
+
+        <div className="el-voice-tabs">
+          <button className={`el-voice-tab${tab === 'us' ? ' active' : ''}`} onClick={() => setTab('us')}>🇺🇸 أمريكي (US)</button>
+          <button className={`el-voice-tab${tab === 'uk' ? ' active' : ''}`} onClick={() => setTab('uk')}>🇬🇧 بريطاني (UK)</button>
+        </div>
+
+        <div className="el-voice-list">
+          {currentVoices.length === 0 && (
+            <div className="el-voice-empty">
+              لا توجد أصوات متاحة — تأكد من استخدام Chrome أو Edge على Windows
+            </div>
+          )}
+          {currentVoices.map(v => (
+            <div
+              key={v.name}
+              className={`el-voice-item${currentSelected === v.name ? ' selected' : ''}`}
+              onClick={() => setSelected(v.name)}
+            >
+              <div className="el-voice-item-left">
+                <div className="el-voice-item-check">{currentSelected === v.name ? '✓' : ''}</div>
+                <div>
+                  <div className="el-voice-item-name">{v.name}</div>
+                  <div className="el-voice-item-lang">{v.lang}</div>
+                </div>
+                {badge(v)}
+              </div>
+              <button className="el-voice-preview-btn" onClick={e => { e.stopPropagation(); preview(v) }}>▶ استمع</button>
+            </div>
+          ))}
+        </div>
+
+        <div className="el-voice-footer">
+          {currentSelected && (
+            <div className="el-voice-current">✅ محدد: <strong>{currentSelected}</strong></div>
+          )}
+          <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
+            <button className="el-nav-btn primary" onClick={save}>💾 حفظ وتطبيق</button>
+            <button className="el-nav-btn" onClick={() => { window.speechSynthesis.cancel(); onClose() }}>تخطي</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 /* hook for components: returns [playingKey, triggerSpeak] */
@@ -385,6 +445,7 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
   const [avatarState, setAvatarState] = useState('idle')
   const [buddyOpen, setBuddyOpen] = useState(true)
   const [showXP, setShowXP] = useState(false)
+  const [showVoicePicker, setShowVoicePicker] = useState(() => !localStorage.getItem('noura_voice_setup'))
 
   if (!day || !comp) return <div className="el-app"><div className="el-page"><p style={{ padding: 32 }}>Not found.</p></div></div>
 
@@ -414,11 +475,13 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
     <div className={`el-app${darkMode ? ' el-dark' : ''}`}>
       <WordLookupProvider>
       {showXP && <XPPopAnimation amount={XP_VALUES[componentId] || 15} onDone={() => setShowXP(false)} />}
+      {showVoicePicker && <VoiceSelector onClose={() => setShowVoicePicker(false)} />}
       <div className="el-page el-comp-page">
         <header className="el-top-bar">
           <button className="el-icon-btn" onClick={() => navigate(`${EL}/level/${levelId}/day/${dayId}`)}>←</button>
           <span className="el-top-bar-title">{comp.icon} {comp.labelEn}</span>
           <div style={{ display: 'flex', gap: 6 }}>
+            <button className="el-icon-btn" onClick={() => setShowVoicePicker(true)} title="اختر الصوت">🎙️</button>
             <button className={'el-icon-btn' + (buddyOpen ? ' active' : '')} onClick={() => setBuddyOpen(b => !b)} title="Study Buddy">🤖</button>
             <button className="el-icon-btn" onClick={() => setDarkMode(!darkMode)}>{darkMode ? '☀️' : '🌙'}</button>
           </div>
