@@ -45,16 +45,41 @@ function stopTTS() {
   _activeSynth = null
 }
 
+const _RP_VOICE_PRIORITY = [
+  'Aria Online (Natural)', 'Jenny Online (Natural)', 'Guy Online (Natural)',
+  'Ana Online (Natural)', 'Emma Online (Natural)', 'Eric Online (Natural)',
+  'Michelle Online (Natural)', 'Roger Online (Natural)',
+  'Microsoft Aria', 'Microsoft Jenny', 'Microsoft David',
+  'Google US English', 'Samantha', 'Alex', 'Ava',
+]
+let _rpVoiceCache = null
+function getBestVoice() {
+  if (_rpVoiceCache) return _rpVoiceCache
+  const voices = window.speechSynthesis.getVoices()
+  for (const name of _RP_VOICE_PRIORITY) {
+    const v = voices.find(v => v.name.includes(name))
+    if (v) { _rpVoiceCache = v; return v }
+  }
+  const online = voices.find(v => v.lang.startsWith('en') && (v.name.toLowerCase().includes('online') || v.name.toLowerCase().includes('natural')))
+  if (online) { _rpVoiceCache = online; return online }
+  return voices.find(v => v.lang === 'en-US') || null
+}
+
 function speakText(text, onEnd) {
   if (!window.speechSynthesis) { onEnd?.(); return }
   stopTTS()
   const u = new SpeechSynthesisUtterance(text)
-  u.lang = 'en-US'; u.rate = 0.88
-  const voices = window.speechSynthesis.getVoices()
-  const v = voices.find(v => v.lang === 'en-US' && !v.name.includes('Google')) || voices.find(v => v.lang === 'en-US')
-  if (v) u.voice = v
+  u.lang = 'en-US'
+  const voice = getBestVoice()
+  if (voice) {
+    u.voice = voice
+    const isNatural = voice.name.toLowerCase().includes('online') || voice.name.toLowerCase().includes('natural') || voice.name.toLowerCase().includes('google')
+    u.rate = isNatural ? 0.93 : 0.85
+  } else {
+    u.rate = 0.85
+  }
   _activeSynth = u
-  u.onend = () => { _activeSynth = null; onEnd?.() }
+  u.onend  = () => { _activeSynth = null; onEnd?.() }
   u.onerror = () => { _activeSynth = null; onEnd?.() }
   window.speechSynthesis.speak(u)
 }

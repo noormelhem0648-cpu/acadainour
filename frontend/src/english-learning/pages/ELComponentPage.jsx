@@ -57,8 +57,85 @@ function renderInlineMd(text) {
   )
 }
 
-/* ─── TTS: dual accent (US / GB) with visual state ─── */
-let _ttsActive = null   // tracks the currently-playing utterance key
+/* ─── TTS: high-quality voice selection with US/GB accent ─── */
+let _ttsActive = null
+let _voiceCache = {}  // { 'en-US': Voice, 'en-GB': Voice }
+
+// Priority-ordered list of natural/neural voices — checked by substring match
+const VOICE_PRIORITY = {
+  'en-US': [
+    // Microsoft Neural (Windows 10/11 + Edge/Chrome) — best quality
+    'Aria Online (Natural)',
+    'Jenny Online (Natural)',
+    'Guy Online (Natural)',
+    'Ana Online (Natural)',
+    'Davis Online (Natural)',
+    'Emma Online (Natural)',
+    'Eric Online (Natural)',
+    'Michelle Online (Natural)',
+    'Roger Online (Natural)',
+    'Steffan Online (Natural)',
+    // Microsoft standard (still good)
+    'Microsoft Aria',
+    'Microsoft Jenny',
+    'Microsoft David',
+    'Microsoft Mark',
+    'Microsoft Zira',
+    // Google (Chrome built-in)
+    'Google US English',
+    // macOS
+    'Samantha',
+    'Alex',
+    'Ava',
+    'Allison',
+    'Susan',
+  ],
+  'en-GB': [
+    'Libby Online (Natural)',
+    'Maisie Online (Natural)',
+    'Ryan Online (Natural)',
+    'Sonia Online (Natural)',
+    'Thomas Online (Natural)',
+    'Microsoft Libby',
+    'Microsoft Maisie',
+    'Microsoft Ryan',
+    'Microsoft Sonia',
+    'Google UK English Female',
+    'Google UK English Male',
+    'Daniel',
+    'Kate',
+  ],
+}
+
+function pickBestVoice(lang) {
+  if (_voiceCache[lang]) return _voiceCache[lang]
+  const voices = window.speechSynthesis.getVoices()
+  if (!voices.length) return null
+
+  const priorities = VOICE_PRIORITY[lang] || []
+  // 1st pass: exact priority match
+  for (const name of priorities) {
+    const v = voices.find(v => v.name.includes(name))
+    if (v) { _voiceCache[lang] = v; return v }
+  }
+  // 2nd pass: any online/neural voice for this lang
+  const online = voices.find(v =>
+    v.lang.startsWith(lang.split('-')[0]) &&
+    (v.name.toLowerCase().includes('online') || v.name.toLowerCase().includes('natural') || v.name.toLowerCase().includes('neural'))
+  )
+  if (online) { _voiceCache[lang] = online; return online }
+  // 3rd pass: any voice matching the language code
+  const fallback = voices.find(v => v.lang === lang) || voices.find(v => v.lang.startsWith(lang.split('-')[0]))
+  if (fallback) { _voiceCache[lang] = fallback }
+  return fallback || null
+}
+
+// Pre-warm voice cache when voices load (async in some browsers)
+if (typeof window !== 'undefined' && window.speechSynthesis) {
+  const preload = () => { pickBestVoice('en-US'); pickBestVoice('en-GB') }
+  if (window.speechSynthesis.getVoices().length > 0) preload()
+  else window.speechSynthesis.addEventListener('voiceschanged', preload)
+}
 
 function speak(text, onStart, onEnd, lang = 'en-US') {
   if (!window.speechSynthesis) return
@@ -66,21 +143,23 @@ function speak(text, onStart, onEnd, lang = 'en-US') {
   _ttsActive = null
 
   const u = new SpeechSynthesisUtterance(text)
-  u.lang  = lang
-  u.rate  = lang === 'en-GB' ? 0.82 : 0.85
-
-  // pick a matching voice when available
-  const voices = window.speechSynthesis.getVoices()
-  const preferred = voices.find(v =>
-    lang === 'en-GB'
-      ? v.lang === 'en-GB' || v.name.toLowerCase().includes('british') || v.name.includes('UK')
-      : v.lang === 'en-US' || v.name.toLowerCase().includes('american') || v.name.includes('US')
-  )
-  if (preferred) u.voice = preferred
+  u.lang = lang
+  // Natural voices sound better at slightly higher rate; robotic ones need slower
+  const voice = pickBestVoice(lang)
+  if (voice) {
+    u.voice = voice
+    const isNatural = voice.name.toLowerCase().includes('online') ||
+                      voice.name.toLowerCase().includes('natural') ||
+                      voice.name.toLowerCase().includes('neural') ||
+                      voice.name.toLowerCase().includes('google')
+    u.rate = isNatural ? (lang === 'en-GB' ? 0.9 : 0.92) : (lang === 'en-GB' ? 0.8 : 0.82)
+  } else {
+    u.rate = lang === 'en-GB' ? 0.8 : 0.82
+  }
 
   _ttsActive = text
   if (onStart) u.onstart = onStart
-  u.onend = () => { _ttsActive = null; if (onEnd) onEnd() }
+  u.onend  = () => { _ttsActive = null; if (onEnd) onEnd() }
   u.onerror = () => { _ttsActive = null; if (onEnd) onEnd() }
   window.speechSynthesis.speak(u)
 }
