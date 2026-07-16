@@ -1,5 +1,6 @@
 ﻿import { useNavigate } from 'react-router-dom'
 import { API_BASE as BACKEND } from '../../config'
+import { readSSEStream } from '../utils/stream'
 import { useEffect, useRef, useState } from 'react'
 import { LEVELS } from '../data/curriculum'
 import { useProgress, ALL_BADGES, XP_VALUES } from '../hooks/useProgress'
@@ -18,7 +19,7 @@ function VocabGrowthChart({ darkMode }) {
     ctx.clearRect(0, 0, W, H)
 
     // Collect words learned per day from SM-2 data
-    const smData = JSON.parse(localStorage.getItem('el_sm2') || '{}')
+    const smData = JSON.parse(localStorage.getItem('english_sm2') || '{}')
     const byDate = {}
     Object.values(smData).forEach(w => {
       if (w.lastReview) {
@@ -218,14 +219,13 @@ export default function ELProgressPage({ darkMode, setDarkMode }) {
   const progress = useProgress()
   const skills = progress.skillProgress()
   const earnedBadges = progress.getEarnedBadges()
+  const MS_PER_DAY = 86_400_000
   const weeklyXP = (progress.xpData.history || [])
-    .filter(h => Date.now() - h.date < 7 * 24 * 3600 * 1000)
+    .filter(h => Date.now() - h.date < 7 * MS_PER_DAY)
     .reduce((s, h) => s + h.amount, 0)
 
   const totalSections = 6 * 30 * 6 + 35 * 6 // all levels × days × components
-  const doneSections = Object.values(
-    JSON.parse(localStorage.getItem('english_progress') || '{}')
-  ).filter(Boolean).length
+  const doneSections = Object.values(progress.isDone).filter(Boolean).length
 
   // Check for 100% completed level
   const [certLevel, setCertLevel] = useState(() => {
@@ -357,7 +357,7 @@ export default function ELProgressPage({ darkMode, setDarkMode }) {
           </div>
 
           {/* Weekly AI Report */}
-          <WeeklyReport xpData={progress.xpData} streak={progress.streak} skills={skills} earnedBadges={earnedBadges} />
+          <WeeklyReport xpData={progress.xpData} streak={progress.streak} skills={skills} earnedBadges={earnedBadges} weeklyXP={weeklyXP} />
 
           <button className="el-nav-btn" style={{ marginTop: 32 }} onClick={() => navigate(EL)}>
             ← الرئيسية
@@ -369,14 +369,10 @@ export default function ELProgressPage({ darkMode, setDarkMode }) {
 }
 
 /* ─── Weekly AI Report Card ─── */
-function WeeklyReport({ xpData, streak, skills, earnedBadges }) {
+function WeeklyReport({ xpData, streak, skills, earnedBadges, weeklyXP }) {
   const [report, setReport] = useState('')
   const [loading, setLoading] = useState(false)
   const [generated, setGenerated] = useState(false)
-
-  const weeklyXP = (xpData.history || [])
-    .filter(h => Date.now() - h.date < 7 * 24 * 3600 * 1000)
-    .reduce((s, h) => s + h.amount, 0)
 
   const topSkill = Object.entries(skills).sort((a, b) => b[1] - a[1])[0]
   const weakSkill = Object.entries(skills).sort((a, b) => a[1] - b[1])[0]
@@ -393,21 +389,18 @@ function WeeklyReport({ xpData, streak, skills, earnedBadges }) {
 - Weakest skill: ${skillNames[weakSkill?.[0]]} (${weakSkill?.[1]}%)
 - Badges earned: ${earnedBadges.length}`
 
-      const res = await fetch(`${BACKEND}/api/chat`, {
+      const token = localStorage.getItem('noura_token')
+      const headers = { 'Content-Type': 'application/json' }
+      if (token) headers['Authorization'] = `Bearer ${token}`
+      const systemPrompt = `أنت مدرب لغة إنجليزية شخصي. بناءً على إحصائيات الطالب الأسبوعية، اكتب تقريراً شخصياً دافئاً وتحفيزياً باللغة العربية في 3-4 جمل قصيرة: ابدأ بتقييم أداء الأسبوع، سلّط الضوء على نقطة قوة، اقترح تركيزاً للأسبوع القادم، ثم اختم بجملة تحفيزية. الأسلوب شخصي وحار.`
+      const res = await fetch(`${BACKEND}/english-tutor/stream`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [{ role: 'user', content: context }],
-          system: `أنت مدرب لغة إنجليزية شخصي. بناءً على إحصائيات الطالب الأسبوعية، اكتب تقريراً شخصياً دافئاً وتحفيزياً باللغة العربية في 3-4 جمل قصيرة:
-1. ابدأ بتقييم أداء الأسبوع
-2. سلّط الضوء على نقطة قوة واحدة
-3. اقترح تركيز واحد للأسبوع القادم
-4. ختم بجملة تحفيزية.
-اجعل الأسلوب شخصياً وحارً، كأنك تعرف الطالب شخصياً.`
-        })
+        headers,
+        body: JSON.stringify({ message: context, history: [], subject_info: systemPrompt })
       })
-      const data = await res.json()
-      setReport(data.response || data.message || '')
+      if (!res.ok) throw new Error('server')
+      const text = await readSSEStream(res.body.getReader())
+      setReport(text || '')
       setGenerated(true)
     } catch { setReport('تعذّر إنشاء التقرير. تحقق من الاتصال.'); setGenerated(true) }
     finally { setLoading(false) }

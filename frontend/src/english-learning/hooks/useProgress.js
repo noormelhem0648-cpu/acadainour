@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { LEVELS } from '../data/curriculum'
 
 const STORAGE_KEY      = 'english_progress'
 const HARD_WORDS_KEY   = 'english_hard_words'
@@ -155,14 +156,10 @@ export function useProgress() {
   /* ── skill percentages for radar chart ── */
   const skillProgress = useCallback(() => {
     const comps = ['vocab', 'grammar', 'reading', 'listening', 'shadowing', 'writing']
-    const levels = [
-      { id: 'A1', days: 30 }, { id: 'A2', days: 30 }, { id: 'B1', days: 30 },
-      { id: 'B2', days: 30 }, { id: 'C1', days: 35 }, { id: 'C2', days: 30 },
-    ]
     const totals = Object.fromEntries(comps.map(c => [c, 0]))
     const done = Object.fromEntries(comps.map(c => [c, 0]))
-    for (const lv of levels) {
-      for (let d = 1; d <= lv.days; d++) {
+    for (const lv of LEVELS) {
+      for (let d = 1; d <= lv.totalDays; d++) {
         for (const c of comps) {
           totals[c]++
           if (progress[`${lv.id}-${d}-${c}`]) done[c]++
@@ -249,7 +246,8 @@ export function useProgress() {
     const today = todayStr()
     setStreak(prev => {
       if (prev.lastDate === today) return prev
-      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
+      const MS_PER_DAY = 86_400_000
+      const yesterday = new Date(Date.now() - MS_PER_DAY).toISOString().slice(0, 10)
       const current = prev.lastDate === yesterday ? prev.current + 1 : 1
       const longest = Math.max(prev.longest || 0, current)
       const history = [...(prev.history || []).slice(-89), today]
@@ -274,13 +272,17 @@ export function useProgress() {
 
   /* ── badges ── */
   const checkBadges = useCallback(() => {
-    // We'll do a light check — badges are re-derived on render
-    // Just trigger a state update for display
+    // Persist newly earned badge IDs so the badge count is stable across sessions
     setBadges(prev => {
-      const saved = loadBadges()
-      return saved
+      const earned = getEarnedBadges()
+      const earnedIds = earned.map(b => b.id)
+      const merged = [...new Set([...prev, ...earnedIds])]
+      if (merged.length !== prev.length) {
+        localStorage.setItem(BADGES_KEY, JSON.stringify(merged))
+      }
+      return merged
     })
-  }, [])
+  }, [getEarnedBadges])
 
   const getEarnedBadges = useCallback((currentState) => {
     const context = {

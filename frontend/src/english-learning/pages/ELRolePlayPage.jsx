@@ -1,5 +1,6 @@
 ﻿import { useState, useRef, useEffect, useCallback } from 'react'
 import { API_BASE as API } from '../../config'
+import { authHeaders } from '../utils/auth'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getDay } from '../data/curriculum'
 import { getRolePlayTopic } from '../data/roleplay_topics'
@@ -10,11 +11,8 @@ const EL = '/english-learning'
 
 /* ── Non-streaming AI call for structured data ── */
 async function aiAsk(message, systemPrompt) {
-  const token = localStorage.getItem('noura_token')
-  const headers = { 'Content-Type': 'application/json' }
-  if (token) headers['Authorization'] = `Bearer ${token}`
   const res = await fetch(`${API}/english-tutor/stream`, {
-    method: 'POST', headers,
+    method: 'POST', headers: authHeaders(),
     body: JSON.stringify({ message, history: [], subject_info: systemPrompt })
   })
   if (!res.ok) throw new Error(res.status)
@@ -150,10 +148,7 @@ export default function ELRolePlayPage({ darkMode, setDarkMode }) {
     const roleplaySys = `You are ${topic.aiRole}. ${topic.aiPersonality}. Setting: ${topic.setting}.
 Stay completely in character. Keep your response to 1-2 sentences. Encourage use of: ${topic.focusWords.join(', ')}.`
 
-    // C-7 fix: include auth header in streaming roleplay fetch
-    const token = localStorage.getItem('noura_token')
-    const rpHeaders = { 'Content-Type': 'application/json' }
-    if (token) rpHeaders['Authorization'] = `Bearer ${token}`
+    const rpHeaders = authHeaders()
 
     try {
       const res = await fetch(`${API}/english-tutor/stream`, {

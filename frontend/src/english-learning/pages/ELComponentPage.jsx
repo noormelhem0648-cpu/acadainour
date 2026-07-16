@@ -769,7 +769,7 @@ function TeacherCorner({ words, dayTitle }) {
     setInput('')
     setLoading(true)
     try {
-      const aiReply = await aiAsk(userMsg.content, systemPrompt, msgs)
+      const aiReply = await aiAsk(userMsg.content, systemPrompt, msgsRef.current)
       setMsgs(prev => [...prev, { role: 'assistant', content: aiReply || '...' }])
     } catch {
       setMsgs(prev => [...prev, { role: 'assistant', content: 'تعذّر الاتصال. تحقق من الإنترنت.' }])
@@ -898,7 +898,7 @@ function DragSentence({ question, answer }) {
           ? <span className="el-drag-placeholder">اسحب الكلمات هنا أو اضغط عليها...</span>
           : placed.map((w, i) => (
             <span
-              key={i} className="el-drag-chip placed"
+              key={`placed-${w}-${i}`} className="el-drag-chip placed"
               draggable
               onDragStart={e => e.dataTransfer.setData('text/plain', JSON.stringify({ word: w, from: 'placed', idx: i }))}
               onClick={() => moveToBank(w, i)}
@@ -917,7 +917,7 @@ function DragSentence({ question, answer }) {
       >
         {bank.map((w, i) => (
           <span
-            key={i} className="el-drag-chip"
+            key={`bank-${w}-${i}`} className="el-drag-chip"
             draggable
             onDragStart={e => e.dataTransfer.setData('text/plain', JSON.stringify({ word: w, from: 'bank', idx: i }))}
             onClick={() => moveToPlaced(w, i)}

@@ -1,8 +1,9 @@
-﻿import React, { useState, useRef, useEffect, useCallback, useId } from "react";
+﻿import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 
 import { API_BASE as API_URL } from '../config'
+import { setToken } from '../utils/auth'
 
 function isRTL(text) {
   return /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/.test(text);
@@ -128,9 +129,9 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
     } catch (e) {}
   }, [subjectCode]);
 
-  // Auto-save current chat
+  // Auto-save current chat (only when not actively streaming — avoids hundreds of writes)
   useEffect(() => {
-    if (messages.length <= 1) return;
+    if (messages.length <= 1 || loading) return;
     const chatId = messages[0]?.chatId || Date.now();
     if (!messages[0].chatId) {
       setMessages(prev => {
@@ -154,7 +155,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
       localStorage.setItem(`noura_chats_${subjectCode}`, JSON.stringify(trimmed));
       setSavedChats(trimmed);
     } catch (e) {}
-  }, [messages, subjectCode]);
+  }, [messages, subjectCode, loading]);
 
   const startNewChat = () => {
     setMessages([{
@@ -304,7 +305,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
 
   // If the token is invalid/expired, log the user out to re-authenticate.
   const handleAuthExpired = () => {
-    localStorage.removeItem("noura_token");
+    setToken(null);
     localStorage.removeItem("noura_user");
     alert("انتهت جلستك — سجّل دخول من جديد 🔑\nYour session expired — please log in again.");
     if (onLogout) onLogout();

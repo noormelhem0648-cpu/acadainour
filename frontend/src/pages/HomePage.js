@@ -37,7 +37,7 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
   useEffect(() => {
     if (!token) return;
     fetch(`${API_URL}/keys/my`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json()).then(d => setHasKey(d.has_key)).catch(() => {});
+      .then(r => r.json()).then(d => setHasKey(!!d.has_key)).catch(() => setHasKey(false));
   }, [token]);
 
   const submitKey = async () => {
