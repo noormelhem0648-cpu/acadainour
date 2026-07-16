@@ -1,4 +1,5 @@
 ﻿import { useNavigate, useParams } from 'react-router-dom'
+import { API_BASE as BACKEND } from '../../config'
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { getDay, COMPONENTS } from '../data/curriculum'
 import { useProgress, XP_VALUES } from '../hooks/useProgress'
@@ -7,7 +8,6 @@ import { authHeaders } from '../utils/auth'
 import '../EL.css'
 
 const EL = '/english-learning'
-const BACKEND = 'https://acadai-backend-avvo.onrender.com'
 
 /* ─── AI one-shot call via streaming endpoint ─── */
 async function aiAsk(userMessage, systemPrompt, history = []) {

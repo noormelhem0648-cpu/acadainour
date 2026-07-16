@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
-
-const API_URL = "https://acadai-backend-avvo.onrender.com";
+﻿import React, { useState, useEffect } from "react";
+import { API_BASE as API_URL } from '../config'
 
 export default function AuthPage({ onLogin }) {
   // mode: "login" | "register" | "forgot" | "reset"

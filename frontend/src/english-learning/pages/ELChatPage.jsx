@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from 'react'
+﻿import { useState, useRef, useEffect } from 'react'
+import { API_BASE as API } from '../../config'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getDay } from '../data/curriculum'
 import '../EL.css'
 
-const API = 'https://acadai-backend-avvo.onrender.com'
 const EL = '/english-learning'
 
 export default function ELChatPage({ darkMode, setDarkMode }) {

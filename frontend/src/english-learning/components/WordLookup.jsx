@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+﻿import { useState, useEffect, useRef, useCallback } from 'react'
 import { authHeaders } from '../utils/auth'
+import { API_BASE as API } from '../../config'
 
-const API = 'https://acadai-backend-avvo.onrender.com'
 
 async function lookupWord(word, signal) {
   const headers = authHeaders()

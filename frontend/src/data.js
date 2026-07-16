@@ -1,4 +1,5 @@
-export const API_URL = process.env.REACT_APP_API_URL || 'https://acadai-backend-avvo.onrender.com';
+﻿import { API_BASE } from './config'
+export const API_URL = API_BASE
 
 export const SUBJECTS = {
   1: [

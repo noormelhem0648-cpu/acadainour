@@ -1,12 +1,17 @@
 import os
 import json
 import base64
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Depends
+import hashlib
+import time
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Depends, Request
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Optional
 from sqlalchemy.orm import Session
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 from ai_engine import generate_academic_response, generate_academic_response_stream, _add_keys
 from subjects_meta import get_subject_info
@@ -17,7 +22,43 @@ from auth import (
     get_current_user, require_user, require_instructor
 )
 
+# ── Rate limiter (in-memory; swap storage= for Redis in prod) ──
+limiter = Limiter(key_func=get_remote_address)
+
 app = FastAPI(title="Noura AI — Backend")
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# ── Optional Redis cache (graceful fallback to no-cache if Redis unavailable) ──
+_redis = None
+try:
+    import redis as _redis_lib
+    _redis_url = os.getenv("REDIS_URL", "")
+    if _redis_url:
+        _redis = _redis_lib.from_url(_redis_url, decode_responses=True, socket_connect_timeout=2)
+        _redis.ping()
+        print("[Cache] Redis connected.")
+    else:
+        print("[Cache] REDIS_URL not set — running without cache.")
+except Exception as _e:
+    print(f"[Cache] Redis unavailable ({_e}) — running without cache.")
+    _redis = None
+
+def cache_get(key: str):
+    if not _redis:
+        return None
+    try:
+        return _redis.get(key)
+    except Exception:
+        return None
+
+def cache_set(key: str, value: str, ttl: int = 3600):
+    if not _redis:
+        return
+    try:
+        _redis.setex(key, ttl, value)
+    except Exception:
+        pass
 
 # Allowed frontend origins. Extra origins can be added via ALLOWED_ORIGINS env (comma-separated).
 _default_origins = [
@@ -155,7 +196,8 @@ class KeyContributeRequest(BaseModel):
 # ── Auth Endpoints ──────────────────────────────────────────
 
 @app.post("/auth/register")
-def register(req: RegisterRequest, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def register(request: Request, req: RegisterRequest, db: Session = Depends(get_db)):
     if not req.name.strip() or not req.email.strip() or not req.password.strip():
         raise HTTPException(status_code=400, detail="All fields are required.")
     if len(req.password) < 6:
@@ -176,7 +218,8 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
     return {"token": token, "user": {"id": user.id, "name": user.name, "email": user.email, "role": user.role}}
 
 @app.post("/auth/login")
-def login(req: LoginRequest, db: Session = Depends(get_db)):
+@limiter.limit("20/minute")
+def login(request: Request, req: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == req.email.lower().strip()).first()
     if not user or not verify_password(req.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid email or password.")
@@ -184,7 +227,8 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
     return {"token": token, "user": {"id": user.id, "name": user.name, "email": user.email, "role": user.role}}
 
 @app.post("/auth/forgot-password")
-def forgot_password(req: ForgotPasswordRequest, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def forgot_password(request: Request, req: ForgotPasswordRequest, db: Session = Depends(get_db)):
     import secrets, datetime
     email = req.email.lower().strip()
     user = db.query(User).filter(User.email == email).first()
@@ -345,7 +389,8 @@ class EnglishChatRequest(BaseModel):
     subject_info: str = ""  # carries day context + companion system prompt
 
 @app.post("/english-tutor/stream")
-async def english_tutor_stream(req: EnglishChatRequest):
+@limiter.limit("30/minute")
+async def english_tutor_stream(request: Request, req: EnglishChatRequest):
     """Streaming SSE endpoint for the English learning AI companion. No auth needed."""
     if not req.message or len(req.message) > 2000:
         raise HTTPException(status_code=400, detail="Message too short or too long.")
@@ -494,7 +539,9 @@ def delete_restriction(restriction_id: int, user: User = Depends(require_instruc
 
 
 @app.post("/ask")
-async def ask_assistant(request: ChatRequest, user: User = Depends(require_user), db: Session = Depends(get_db)):
+@limiter.limit("20/minute")
+async def ask_assistant(request: Request, body: ChatRequest, user: User = Depends(require_user), db: Session = Depends(get_db)):
+    request = body  # re-alias so the rest of the function body is unchanged
     if not request.message.strip():
         raise HTTPException(status_code=400, detail="Message cannot be empty.")
     _check_message_length(request.message)
@@ -557,7 +604,9 @@ async def ask_assistant(request: ChatRequest, user: User = Depends(require_user)
 
 
 @app.post("/ask/stream")
-async def ask_assistant_stream(request: ChatRequest, user: User = Depends(require_user), db: Session = Depends(get_db)):
+@limiter.limit("20/minute")
+async def ask_assistant_stream(request: Request, body: ChatRequest, user: User = Depends(require_user), db: Session = Depends(get_db)):
+    request = body  # re-alias; fastapi Request is consumed by slowapi before function body
     if not request.message.strip():
         raise HTTPException(status_code=400, detail="Message cannot be empty.")
     _check_message_length(request.message)
@@ -702,7 +751,9 @@ async def upload_and_ask(
 
 
 @app.post("/quiz")
-async def generate_quiz(request: QuizRequest, user: User = Depends(require_user), db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+async def generate_quiz(request: Request, body: QuizRequest, user: User = Depends(require_user), db: Session = Depends(get_db)):
+    request = body
     restriction = _is_subject_blocked(request.subject_code, db, user)
     if restriction:
         return {"quiz": "🔒 هاي المادة محجوبة حالياً من قِبَل الدكتور.", "subject_code": request.subject_code, "blocked": True}

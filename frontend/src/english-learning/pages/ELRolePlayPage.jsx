@@ -1,11 +1,11 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+﻿import { useState, useRef, useEffect, useCallback } from 'react'
+import { API_BASE as API } from '../../config'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getDay } from '../data/curriculum'
 import { getRolePlayTopic } from '../data/roleplay_topics'
 import { useProgress } from '../hooks/useProgress'
 import '../EL.css'
 
-const API = 'https://acadai-backend-avvo.onrender.com'
 const EL = '/english-learning'
 
 /* ── Non-streaming AI call for structured data ── */

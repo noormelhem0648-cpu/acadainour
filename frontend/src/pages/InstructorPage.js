@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = "https://acadai-backend-avvo.onrender.com";
+import { API_BASE as API_URL } from '../config'
 
 export default function InstructorPage({ darkMode, setDarkMode, user, token, onLogout }) {
   const navigate = useNavigate();

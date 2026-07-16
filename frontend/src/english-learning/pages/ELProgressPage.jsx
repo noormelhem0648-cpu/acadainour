@@ -1,10 +1,10 @@
-import { useNavigate } from 'react-router-dom'
+﻿import { useNavigate } from 'react-router-dom'
+import { API_BASE as BACKEND } from '../../config'
 import { useEffect, useRef, useState } from 'react'
 import { LEVELS } from '../data/curriculum'
 import { useProgress, ALL_BADGES, XP_VALUES } from '../hooks/useProgress'
 import '../EL.css'
 
-const BACKEND = 'https://acadai-backend-avvo.onrender.com'
 
 /* ── Vocab Growth Chart ── */
 function VocabGrowthChart({ darkMode }) {

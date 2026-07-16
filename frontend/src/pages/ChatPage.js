@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect, useCallback, useId } from "react";
+﻿import React, { useState, useRef, useEffect, useCallback, useId } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 
-const API_URL = "https://acadai-backend-avvo.onrender.com";
+import { API_BASE as API_URL } from '../config'
 
 function isRTL(text) {
   return /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/.test(text);
