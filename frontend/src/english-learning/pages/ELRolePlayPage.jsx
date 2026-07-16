@@ -195,7 +195,13 @@ Stay completely in character. Keep your response to 1-2 sentences. Encourage use
 
       const replyText = full.trim()
 
-      // Step 2: separate focused call for grammar correction
+      // H-5: fire TTS and grammar correction in parallel
+      if (ttsEnabled && replyText) {
+        setTtsPlaying(true)
+        speakText(replyText, () => setTtsPlaying(false))
+      }
+
+      // Step 2: grammar correction (runs while TTS plays)
       let correction = null
       try {
         const corrPrompt = `"${text}" ← هذه الجملة كتبها طالب إنجليزي.
@@ -205,7 +211,6 @@ WRONG: [الكلمة أو العبارة الخاطئة من الجملة، أو
 RIGHT: [النسخة الصحيحة، أو: none]
 WHY: [جملة عربية قصيرة تشرح السبب]`
         const corrRaw = await aiAsk(corrPrompt, 'أنت مصحح لغوي. أجب فقط بالسطور الثلاثة المطلوبة.')
-        // Try labeled format first
         const wM = corrRaw.match(/WRONG:\s*(.+)/i)
         const rM = corrRaw.match(/RIGHT:\s*(.+)/i)
         const yM = corrRaw.match(/WHY:\s*(.+)/i)
@@ -216,7 +221,6 @@ WHY: [جملة عربية قصيرة تشرح السبب]`
             note: yM?.[1].trim() || ''
           }
         } else if (corrRaw.trim() && !corrRaw.toLowerCase().includes('none') && corrRaw.length < 250) {
-          // AI didn't follow format — extract meaningful content
           const lines = corrRaw.split('\n').map(l => l.trim()).filter(Boolean)
           const noteLine = lines.find(l => /[؀-ۿ]/.test(l))
           const engLines = lines.filter(l => !/[؀-ۿ]/.test(l) && l.length < 60)
@@ -233,10 +237,6 @@ WHY: [جملة عربية قصيرة تشرح السبب]`
         copy[copy.length - 1] = { role: 'ai', content: replyText, correction, typing: false }
         return copy
       })
-      if (ttsEnabled && replyText) {
-        setTtsPlaying(true)
-        speakText(replyText, () => setTtsPlaying(false))
-      }
 
       // Calculate rough reaction score based on input length and vocabulary use
       const usedFocusWords = topic.focusWords.filter(w => text.toLowerCase().includes(w.toLowerCase())).length

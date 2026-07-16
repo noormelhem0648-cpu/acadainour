@@ -261,6 +261,7 @@ function StudyBuddy({ companionPrompt, dayContext, avatarState, setAvatarState, 
   const messagesEndRef = useRef(null)
   const recognitionRef = useRef(null)
   const abortRef = useRef(null)
+  const sendRef = useRef(null)
   const [isListening, setIsListening] = useState(false)
 
   useEffect(() => () => { abortRef.current?.abort(); recognitionRef.current?.stop() }, [])
@@ -334,6 +335,9 @@ function StudyBuddy({ companionPrompt, dayContext, avatarState, setAvatarState, 
     }
   }, [messages, companionPrompt, dayContext, setMessages, setAvatarState, setInputText])
 
+  // H-7: keep sendRef current so voice recognition never uses a stale closure
+  useEffect(() => { sendRef.current = sendMessage }, [sendMessage])
+
   const startVoice = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SpeechRecognition) { alert('المتصفح لا يدعم التعرف على الصوت'); return }
@@ -347,7 +351,7 @@ function StudyBuddy({ companionPrompt, dayContext, avatarState, setAvatarState, 
       setInputText(t)
       setIsListening(false)
       setAvatarState('idle')
-      sendMessage(t)
+      sendRef.current?.(t)  // H-7: always calls the latest version
     }
     r.onerror = () => { setIsListening(false); setAvatarState('idle') }
     r.onend = () => { setIsListening(false); setAvatarState('idle') }
@@ -727,8 +731,10 @@ function TeacherCorner({ words, dayTitle }) {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const endRef = useRef(null)
+  const msgsRef = useRef(msgs) // H-11: always current msgs for chip handlers
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [msgs])
+  useEffect(() => { msgsRef.current = msgs }, [msgs])
 
   const wordList = words.map((w, i) => `${i + 1}. ${w.word} (${w.arabic}) — ${w.ipa}`).join('\n')
 
@@ -786,10 +792,11 @@ function TeacherCorner({ words, dayTitle }) {
               {['ما معنى أول كلمة؟', 'كيف أحفظ الكلمات؟', 'هل يمكنك شرح كلمة صعبة؟'].map(q => (
                 <button key={q} className="el-suggestion-chip" onClick={async () => {
                   if (loading) return
+                  const history = msgsRef.current // H-11: use ref, not stale closure
                   setMsgs(prev => [...prev, { role: 'user', content: q }])
                   setLoading(true)
                   try {
-                    const reply = await aiAsk(q, systemPrompt, msgs)
+                    const reply = await aiAsk(q, systemPrompt, history)
                     setMsgs(prev => [...prev, { role: 'assistant', content: reply || '...' }])
                   } catch {
                     setMsgs(prev => [...prev, { role: 'assistant', content: 'تعذّر الاتصال.' }])
@@ -845,156 +852,7 @@ function TeacherCorner({ words, dayTitle }) {
   )
 }
 
-/* ─── Role-play Mode ─── */
-const ROLEPLAY_SCENARIOS = [
-  { icon: '🍽️', title: 'At a Restaurant', prompt: 'You are a waiter at an upscale restaurant. Greet the customer, take their order, and respond naturally. Use today\'s grammar in your responses.' },
-  { icon: '💼', title: 'Job Interview', prompt: 'You are a professional interviewer. Ask the candidate questions about their experience and skills. Use formal language and grammar structures from today\'s lesson.' },
-  { icon: '🏥', title: 'Doctor\'s Appointment', prompt: 'You are a friendly doctor. Ask the patient about their symptoms, give advice, and use polite formal language throughout.' },
-  { icon: '✈️', title: 'Airport Check-in', prompt: 'You are an airline check-in agent. Help the passenger with their booking, ask about luggage, and handle a minor issue politely.' },
-  { icon: '📚', title: 'Academic Discussion', prompt: 'You are a professor holding a tutorial. Discuss ideas with the student, challenge their thinking, and use academic language from today\'s lesson.' },
-]
-
-function RolePlayMode({ day, setBuddyMessages, setAvatarState }) {
-  const [active, setActive] = useState(false)
-  const [scenario, setScenario] = useState(null)
-  const [exchange, setExchange] = useState([])
-  const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
-  const endRef = useRef(null)
-  const recognitionRef = useRef(null)
-  const [listening, setListening] = useState(false)
-
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [exchange])
-
-  const startScenario = async (sc) => {
-    setScenario(sc)
-    setExchange([])
-    setActive(true)
-    setLoading(true)
-    setAvatarState('speaking')
-    try {
-      const systemPrompt = `${sc.prompt}\n\nAlso naturally incorporate grammar patterns from today's lesson: ${day.grammar?.patterns?.map(p => p.name).join(', ')}. Keep responses short (2-3 sentences). After each exchange, add one brief tip in Arabic about the grammar used, prefixed with "💡 نصيحة:".`
-      const reply = await aiAsk('Start the scenario. Say your opening line.', systemPrompt) || 'Hello! Ready to begin?'
-      setExchange([{ role: 'buddy', text: reply }])
-      speak(reply, null, () => setAvatarState('listening'))
-    } catch { setAvatarState('idle') }
-    finally { setLoading(false) }
-  }
-
-  const sendLine = async () => {
-    if (!input.trim() || loading) return
-    const userLine = input
-    setInput('')
-    const newEx = [...exchange, { role: 'user', text: userLine }]
-    setExchange(newEx)
-    setLoading(true)
-    setAvatarState('thinking')
-    try {
-      const systemPrompt = `${scenario.prompt}
-
-Grammar patterns: ${day.grammar?.patterns?.map(p => p.name).join(', ')}.
-Keep your dialogue response to 1-2 sentences max.
-
-After your dialogue response, on a NEW LINE, check the student's last message for grammar/vocabulary errors.
-Use EXACTLY this format (no extra text):
-REPLY: your dialogue response here
-ERROR: the wrong word or phrase the student used (or "none" if correct)
-FIX: the correct version
-NOTE: one short Arabic explanation`
-      const roleHist = newEx.slice(0,-1).map(e => ({ role: e.role === 'buddy' ? 'assistant' : 'user', content: e.text }))
-      const raw = await aiAsk(userLine, systemPrompt, roleHist) || ''
-      // Parse structured response
-      const replyMatch = raw.match(/REPLY:\s*(.+?)(?=\nERROR:|$)/s)
-      const errorMatch = raw.match(/ERROR:\s*(.+?)(?=\nFIX:|$)/s)
-      const fixMatch   = raw.match(/FIX:\s*(.+?)(?=\nNOTE:|$)/s)
-      const noteMatch  = raw.match(/NOTE:\s*(.+?)$/s)
-      const replyText = replyMatch ? replyMatch[1].trim() : raw
-      const correction = errorMatch && errorMatch[1].trim().toLowerCase() !== 'none'
-        ? { error: errorMatch[1].trim(), fix: fixMatch?.[1].trim() || '', note: noteMatch?.[1].trim() || '' }
-        : null
-      setExchange(prev => [...prev, { role: 'buddy', text: replyText, correction }])
-      speak(replyText, null, () => setAvatarState('listening'))
-    } catch { setAvatarState('idle') }
-    finally { setLoading(false) }
-  }
-
-  const startVoice = () => {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-    if (!SR) { alert('المتصفح لا يدعم التعرف على الصوت'); return }
-    if (listening) { recognitionRef.current?.stop(); return }
-    const r = new SR()
-    r.lang = 'en-US'
-    r.interimResults = false
-    r.onstart = () => { setListening(true); setAvatarState('listening') }
-    r.onresult = e => { setInput(e.results[0][0].transcript); setListening(false) }
-    r.onerror = () => { setListening(false); setAvatarState('idle') }
-    r.onend = () => { setListening(false) }
-    recognitionRef.current = r
-    r.start()
-  }
-
-  if (!active) {
-    return (
-      <div className="el-roleplay-section">
-        <div className="el-roleplay-title">🎭 وضع التمثيل اللغوي — Role-play</div>
-        <div className="el-roleplay-desc">اختر سيناريو وتحدّث مع المساعد كأنه شخص حقيقي. يستخدم قواعد درس اليوم ويُصحّح نطقك وتراكيبك.</div>
-        <div className="el-roleplay-grid">
-          {ROLEPLAY_SCENARIOS.map(sc => (
-            <button key={sc.title} className="el-roleplay-card" onClick={() => startScenario(sc)}>
-              <div className="el-roleplay-icon">{sc.icon}</div>
-              <div className="el-roleplay-name">{sc.title}</div>
-            </button>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className="el-roleplay-active">
-      <div className="el-roleplay-header">
-        <span>{scenario.icon} {scenario.title}</span>
-        <button className="el-nav-btn" style={{ padding: '4px 12px', fontSize: '.8rem' }} onClick={() => setActive(false)}>✕ إنهاء</button>
-      </div>
-      <div className="el-roleplay-exchange">
-        {exchange.map((e, i) => (
-          <div key={i}>
-            <div className={`el-roleplay-line ${e.role}`}>
-              {e.role === 'buddy' && (
-                <>
-                  <button className="el-speak-btn" onClick={() => speak(e.text)} style={{ marginLeft: 4 }}>🔊</button>
-                  <button className="el-speak-btn" onClick={() => window.speechSynthesis.cancel()} style={{ marginLeft: 2 }}>⏹</button>
-                </>
-              )}
-              <span className="el-roleplay-text">{e.text}</span>
-            </div>
-            {e.role === 'buddy' && e.correction && (
-              <div className="el-rp-correction-wrap">
-                <div className="el-rp-correction-error">❌ {e.correction.error}</div>
-                <div className="el-rp-correction-fix">✅ {e.correction.fix}</div>
-                {e.correction.note && <div className="el-rp-correction-note">{e.correction.note}</div>}
-              </div>
-            )}
-          </div>
-        ))}
-        {loading && <div className="el-roleplay-line buddy"><span className="el-buddy-typing"><span/><span/><span/></span></div>}
-        <div ref={endRef} />
-      </div>
-      <div className="el-roleplay-input-row">
-        <input
-          className="el-buddy-input"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && sendLine()}
-          placeholder="ردّك بالإنجليزية..."
-          disabled={loading}
-        />
-        <button className={'el-buddy-mic' + (listening ? ' listening' : '')} onClick={startVoice}>🎤</button>
-        <button className="el-buddy-send" onClick={sendLine} disabled={loading || !input.trim()}>↑</button>
-      </div>
-    </div>
-  )
-}
+/* C-3: RolePlayMode deleted — full role-play lives in ELRolePlayPage.jsx */
 
 /* ─── Drag-and-Drop sentence builder ─── */
 function DragSentence({ question, answer }) {
@@ -1022,7 +880,7 @@ function DragSentence({ question, answer }) {
     const correct = answer.replace(/[.!?,]$/, '').trim().toLowerCase()
     setResult(sentence.toLowerCase() === correct ? 'correct' : 'wrong')
   }
-  const reset = () => { setBank(shuffled); setPlaced([]); setResult(null) }
+  const reset = () => { setBank([...words].sort(() => Math.random() - .5)); setPlaced([]); setResult(null) }
 
   return (
     <div className="el-drag-exercise">
@@ -1416,7 +1274,7 @@ function ReadingComp({ day, levelId, dayId }) {
       </div>
 
       <KeySentences passage={passage} />
-      <ReadingBookmarks />
+      <ReadingBookmarks levelId={levelId} dayId={dayId} />
     </div>
   )
 }
@@ -1995,6 +1853,7 @@ function WritingComp({ day, levelId, dayId, navigate, setBuddyMessages, setBuddy
   })
   const [corrections, setCorrections] = useState({})
   const [checking, setChecking] = useState({})
+  const anyCheckingRef = useRef(false) // H-10: global lock — prevent 6 concurrent AI calls
   const [savedAt, setSavedAt] = useState({})
   const debounceRefs = useRef({})
   const { writing: w } = day
@@ -2018,7 +1877,8 @@ function WritingComp({ day, levelId, dayId, navigate, setBuddyMessages, setBuddy
   }
 
   const checkLive = async (text, idx) => {
-    if (!text.trim() || checking[idx]) return
+    if (!text.trim() || checking[idx] || anyCheckingRef.current) return
+    anyCheckingRef.current = true
     setChecking(c => ({ ...c, [idx]: true }))
     setAvatarState('correcting')
     try {
@@ -2035,6 +1895,7 @@ CORRECTION: [الكلمة/العبارة الخاطئة] → [الصواب] | Re
     } catch {
       setAvatarState('idle')
     } finally {
+      anyCheckingRef.current = false
       setChecking(c => ({ ...c, [idx]: false }))
       setTimeout(() => setAvatarState('idle'), 3000)
     }
@@ -2468,7 +2329,7 @@ function VocabStoryGen({ words, dayTitle, levelId, allLearnedWords = [] }) {
   return (
     <div className="el-story-section">
       <button className="el-roleplay-toggle" style={{ marginBottom: open ? 14 : 0 }} onClick={() => setOpen(o => !o)}>
-        📖 {open ? 'إغلاق مولّد القصص' : 'Vocabulary Story — تعلّم الكلمات بمحادثة'}
+        📖 {open ? 'إغلاق القصص النموذجية' : 'قصص نموذجية — شاهد مفردات اليوم في سياق'}
       </button>
       {open && (
         <>
@@ -2722,8 +2583,8 @@ function WritingPromptCard({ dayTitle }) {
 }
 
 /* ─── Reading Bookmarks ─── */
-function ReadingBookmarks() {
-  const BOOK_KEY = 'el_bookmarks'
+function ReadingBookmarks({ levelId, dayId }) {
+  const BOOK_KEY = `el_bookmarks_${levelId}_${dayId}`
   const loadBM = () => { try { return JSON.parse(localStorage.getItem(BOOK_KEY) || '[]') } catch { return [] } }
   const [bookmarks, setBookmarks] = useState(loadBM)
   const [input, setInput] = useState('')

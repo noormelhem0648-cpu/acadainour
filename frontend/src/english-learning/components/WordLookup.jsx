@@ -48,6 +48,7 @@ export default function WordLookupProvider({ children }) {
   const popupRef = useRef(null)
   const currentWordRef = useRef(null) // tracks current popup word without stale closure
   const lookupAbortRef = useRef(null)
+  const lookupDebounceRef = useRef(null) // H-1: debounce rapid clicks
 
   const closePopup = useCallback(() => { setPopup(null); currentWordRef.current = null }, [])
 
@@ -97,21 +98,24 @@ export default function WordLookupProvider({ children }) {
       const x = Math.min(e.clientX, window.innerWidth - 240)
       const y = e.clientY + window.scrollY
 
-      // Show loading popup immediately (first click always works)
+      // H-1: 300ms debounce — cancel any pending lookup before starting new one
+      clearTimeout(lookupDebounceRef.current)
       lookupAbortRef.current?.abort()
-      lookupAbortRef.current = new AbortController()
       currentWordRef.current = word
       setPopup({ x, y, word, data: null, loading: true })
 
-      try {
-        const data = await lookupWord(word, lookupAbortRef.current.signal)
-        setPopup(prev => prev?.word === word ? { ...prev, data, loading: false } : prev)
-      } catch (e) {
-        if (e.name === 'AbortError') return
-        setPopup(prev => prev?.word === word
-          ? { ...prev, data: { word, arabic: 'تعذّر البحث — حاول مجدداً', ipa: '', us: '', uk: '', pos: '', example: '' }, loading: false }
-          : prev)
-      }
+      lookupDebounceRef.current = setTimeout(async () => {
+        lookupAbortRef.current = new AbortController()
+        try {
+          const data = await lookupWord(word, lookupAbortRef.current.signal)
+          setPopup(prev => prev?.word === word ? { ...prev, data, loading: false } : prev)
+        } catch (e) {
+          if (e.name === 'AbortError') return
+          setPopup(prev => prev?.word === word
+            ? { ...prev, data: { word, arabic: 'تعذّر البحث — حاول مجدداً', ipa: '', us: '', uk: '', pos: '', example: '' }, loading: false }
+            : prev)
+        }
+      }, 300)
     }
 
     document.addEventListener('click', handleClick)
