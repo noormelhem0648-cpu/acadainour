@@ -126,12 +126,19 @@ export default function ELRolePlayPage({ darkMode, setDarkMode }) {
     progress.addXP?.('debateRound')
   }
 
+  const rpAbortRef = useRef(null)
+  useEffect(() => () => rpAbortRef.current?.abort(), [])
+
   const send = useCallback(async () => {
     const text = input.trim()
     if (!text || loading) return
     setInput('')
     stopTTS()
     setTtsPlaying(false)
+
+    rpAbortRef.current?.abort()
+    rpAbortRef.current = new AbortController()
+    const signal = rpAbortRef.current.signal
 
     const userMsg = { role: 'user', content: text }
     const newMessages = [...messages, userMsg]
@@ -143,10 +150,16 @@ export default function ELRolePlayPage({ darkMode, setDarkMode }) {
     const roleplaySys = `You are ${topic.aiRole}. ${topic.aiPersonality}. Setting: ${topic.setting}.
 Stay completely in character. Keep your response to 1-2 sentences. Encourage use of: ${topic.focusWords.join(', ')}.`
 
+    // C-7 fix: include auth header in streaming roleplay fetch
+    const token = localStorage.getItem('noura_token')
+    const rpHeaders = { 'Content-Type': 'application/json' }
+    if (token) rpHeaders['Authorization'] = `Bearer ${token}`
+
     try {
       const res = await fetch(`${API}/english-tutor/stream`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: rpHeaders,
+        signal,
         body: JSON.stringify({
           message: text,
           history: newMessages.slice(-6).map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.content })),
@@ -234,12 +247,14 @@ WHY: [جملة عربية قصيرة تشرح السبب]`
         setTimeout(() => setPhase('review'), 2000)
       }
 
-    } catch {
-      setMessages(prev => {
-        const copy = [...prev]
-        copy[copy.length - 1] = { role: 'ai', content: '⚠️ خطأ في الاتصال — تأكد من الإنترنت وحاول مرة ثانية.', typing: false }
-        return copy
-      })
+    } catch (e) {
+      if (e.name !== 'AbortError') {
+        setMessages(prev => {
+          const copy = [...prev]
+          copy[copy.length - 1] = { role: 'ai', content: '⚠️ خطأ في الاتصال — تأكد من الإنترنت وحاول مرة ثانية.', typing: false }
+          return copy
+        })
+      }
     }
     setLoading(false)
     inputRef.current?.focus()

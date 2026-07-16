@@ -3,17 +3,11 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { getDay, COMPONENTS } from '../data/curriculum'
 import { useProgress, XP_VALUES } from '../hooks/useProgress'
 import WordLookupProvider from '../components/WordLookup'
+import { authHeaders } from '../utils/auth'
 import '../EL.css'
 
 const EL = '/english-learning'
 const BACKEND = 'https://acadai-backend-avvo.onrender.com'
-
-const authHeaders = () => {
-  const t = localStorage.getItem('noura_token')
-  return t
-    ? { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` }
-    : { 'Content-Type': 'application/json' }
-}
 
 /* ─── AI one-shot call via streaming endpoint ─── */
 async function aiAsk(userMessage, systemPrompt, history = []) {
@@ -266,7 +260,10 @@ function StudyBuddy({ companionPrompt, dayContext, avatarState, setAvatarState, 
   const [loading, setLoading] = useState(false)
   const messagesEndRef = useRef(null)
   const recognitionRef = useRef(null)
+  const abortRef = useRef(null)
   const [isListening, setIsListening] = useState(false)
+
+  useEffect(() => () => { abortRef.current?.abort(); recognitionRef.current?.stop() }, [])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -274,6 +271,10 @@ function StudyBuddy({ companionPrompt, dayContext, avatarState, setAvatarState, 
 
   const sendMessage = useCallback(async (text) => {
     if (!text.trim()) return
+    abortRef.current?.abort()
+    abortRef.current = new AbortController()
+    const signal = abortRef.current.signal
+
     const userMsg = { role: 'user', content: text }
     const history = [...messages, userMsg]
     setMessages(prev => [...prev, userMsg, { role: 'assistant', content: '' }])
@@ -286,6 +287,7 @@ function StudyBuddy({ companionPrompt, dayContext, avatarState, setAvatarState, 
       const res = await fetch(`${BACKEND}/english-tutor/stream`, {
         method: 'POST',
         headers: authHeaders(),
+        signal,
         body: JSON.stringify({
           message: text,
           history: history.slice(-8).map(m => ({ role: m.role, content: m.content })),
@@ -319,7 +321,8 @@ function StudyBuddy({ companionPrompt, dayContext, avatarState, setAvatarState, 
         }
       }
       setAvatarState('idle')
-    } catch {
+    } catch (e) {
+      if (e.name === 'AbortError') return
       setMessages(prev => {
         const copy = [...prev]
         copy[copy.length - 1] = { role: 'assistant', content: 'تعذّر الاتصال بالخادم. تأكد من اتصالك بالإنترنت.' }
@@ -445,7 +448,22 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
   const [avatarState, setAvatarState] = useState('idle')
   const [buddyOpen, setBuddyOpen] = useState(true)
   const [showXP, setShowXP] = useState(false)
+  const [donePending, setDonePending] = useState(false)
   const [showVoicePicker, setShowVoicePicker] = useState(() => !localStorage.getItem('noura_voice_setup'))
+
+  // C-4 fix: store nav params in refs so useEffect doesn't need them in deps
+  const doneNavRef = useRef(null)
+  useEffect(() => {
+    if (!donePending || !doneNavRef.current) return
+    const { progressKey, componentId: cId, next } = doneNavRef.current
+    const t = setTimeout(() => {
+      progress.markDone(progressKey)
+      progress.addXP?.(cId)
+      if (next) navigate(next)
+      else navigate(`${EL}/level/${levelId}/day/${dayId}`)
+    }, 1200)
+    return () => clearTimeout(t)
+  }, [donePending]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!day || !comp) return <div className="el-app"><div className="el-page"><p style={{ padding: 32 }}>Not found.</p></div></div>
 
@@ -454,14 +472,14 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
 
   const handleDone = () => {
     if (!done) {
+      const next = COMPONENTS[compIndex + 1]
+      doneNavRef.current = {
+        progressKey,
+        componentId,
+        next: next ? `${EL}/level/${levelId}/day/${dayId}/${next.id}` : null,
+      }
       setShowXP(true)
-      setTimeout(() => {
-        progress.markDone(progressKey)
-        progress.addXP?.(componentId)
-        const next = COMPONENTS[compIndex + 1]
-        if (next) navigate(`${EL}/level/${levelId}/day/${dayId}/${next.id}`)
-        else navigate(`${EL}/level/${levelId}/day/${dayId}`)
-      }, 1200)
+      setDonePending(true)
     } else {
       const next = COMPONENTS[compIndex + 1]
       if (next) navigate(`${EL}/level/${levelId}/day/${dayId}/${next.id}`)
@@ -506,7 +524,7 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
               {componentId === 'reading'   && <ReadingComp day={day} levelId={levelId} dayId={dayId} setAvatarState={setAvatarState} setBuddyMessages={setBuddyMessages} />}
               {componentId === 'listening' && <ListeningComp day={day} levelId={levelId} dayId={dayId} setAvatarState={setAvatarState} setBuddyMessages={setBuddyMessages} />}
               {componentId === 'shadowing' && <ShadowingComp day={day} levelId={levelId} />}
-              {componentId === 'writing'   && <WritingComp day={day} levelId={levelId} dayId={dayId} navigate={navigate} setBuddyMessages={setBuddyMessages} setBuddyInput={setBuddyInput} setAvatarState={setAvatarState} />}
+              {componentId === 'writing'   && <WritingComp day={day} levelId={levelId} dayId={dayId} navigate={navigate} setBuddyMessages={setBuddyMessages} setBuddyInput={setBuddyInput} setAvatarState={setAvatarState} progress={progress} />}
             </div>
 
             <div className="el-comp-footer">
@@ -548,9 +566,13 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
 }
 
 /* ─── Vocabulary ─── */
-function VocabComp({ day, levelId, dayId, progress }) {
+function VocabComp({ day, levelId, dayId, progress, setAvatarState, setBuddyMessages }) {
   const { vocabulary: v } = day
-  const [playingKey, trigger] = useTTS()
+  const [playingKey, triggerBase] = useTTS()
+  const trigger = (text, lang, key) => {
+    setAvatarState?.('speaking')
+    triggerBase(text, lang, key)
+  }
   const [viewMode, setViewMode] = useState('table')   // 'table' | 'cards'
   const [flipped, setFlipped] = useState({})
   const [revealCount, setRevealCount] = useState(5)   // step-by-step reveal
@@ -1465,89 +1487,76 @@ function ListeningComp({ day, levelId, dayId }) {
 
   const buildQuestions = (text) => {
     const sentences = text.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 15)
-    const wordList = text.match(/\b[A-Z][a-z]+\b/g) || ['morning', 'happy', 'time']
+    // C-5 fix: extract real content words for MCQ distractors
+    const allWords = text.match(/\b[a-zA-Z]{4,}\b/g) || []
+    const uniqueWords = [...new Set(allWords.map(w => w.toLowerCase()))]
+      .filter(w => !['that','this','with','have','from','they','were','been','their','when','what','will','your','more','also','into','than','then','some','such','would','could','about','which'].includes(w))
 
-    return [
-      // TF questions
-      { type: 'TF', q: sentences[0] ? `True or False: "${sentences[0]}"` : 'The text is about daily life.', correct: 'TRUE' },
-      { type: 'TF', q: sentences[1] ? `True or False: The passage mentions "pizza"` : 'This is a short text.', correct: 'FALSE' },
-      // Fill blanks
-      ...(sentences.slice(0, 3).map((sent) => {
-        const words = sent.split(' ').filter(w => w.length > 3 && /[a-zA-Z]/.test(w))
-        const rawTarget = words[Math.floor(words.length / 2)] || 'good'
-        const target = rawTarget.replace(/[^a-zA-Z]/g, '') || 'good'
-        return {
-          type: 'FILL',
-          q: sent.replace(new RegExp(`\\b${rawTarget.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i'), '___'),
-          correct: target,
-        }
-      })),
-      // MCQ
-      {
-        type: 'MCQ',
-        q: 'What is the main topic of the passage?',
-        options: [
-          day.title || 'English lesson',
-          'Sports and games',
-          'Cooking recipes',
-          'Travel destinations',
-        ],
-        correct: 0,
-      },
-      {
-        type: 'MCQ',
-        q: `Which word appears in the passage?`,
-        options: [
-          wordList[0] || 'morning',
-          'volcano',
-          'satellite',
-          'microscope',
-        ],
-        correct: 0,
-      },
-      {
-        type: 'TF',
-        q: 'True or False: The passage is written in French.',
-        correct: 'FALSE',
-      },
-      {
-        type: 'MCQ',
-        q: 'What type of text is this?',
-        options: [
-          'A short English passage',
-          'A scientific report',
-          'A legal document',
-          'A cooking recipe',
-        ],
-        correct: 0,
-      },
-      (() => {
-        if (sentences.length > 3) {
-          const sent = sentences[3]
-          const words = sent.split(' ').filter(w => w.length > 3 && /[a-zA-Z]/.test(w))
-          const rawTarget = words[0] || 'good'
-          const target = rawTarget.replace(/[^a-zA-Z]/g, '') || 'good'
-          return { type: 'FILL', q: sent.replace(new RegExp(`\\b${rawTarget.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i'), '___'), correct: target }
-        }
-        return { type: 'FILL', q: `I ___ English every day.`, correct: 'study' }
-      })(),
-      {
-        type: 'TF',
-        q: `True or False: This passage is about cooking recipes.`,
-        correct: 'FALSE',
-      },
-      {
-        type: 'MCQ',
-        q: `How would you describe the language level of this passage?`,
-        options: [
-          `Level ${['A1','A2','B1','B2','C1','C2'][levelId-1] || 'A1'} — ${['beginner','elementary','intermediate','upper-intermediate','advanced','mastery'][levelId-1] || 'beginner'}`,
-          'C2 — mastery level',
-          'A1 — complete beginner',
-          'B2 — upper intermediate',
-        ],
-        correct: 0,
-      },
-    ].flat().filter(q => typeof q === 'object' && q.type).slice(0, 10)
+    const makeFill = (sent) => {
+      const words = sent.split(' ').filter(w => /^[a-zA-Z]{4,}$/.test(w.replace(/[^a-zA-Z]/g, '')))
+      if (!words.length) return null
+      const rawTarget = words[Math.floor(words.length * 0.4)] || words[0]
+      const target = rawTarget.replace(/[^a-zA-Z]/g, '')
+      if (!target) return null
+      const escaped = rawTarget.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const q = sent.replace(new RegExp(`\\b${escaped}\\b`, 'i'), '___')
+      if (!q.includes('___')) return null
+      return { type: 'FILL', q, correct: target }
+    }
+
+    const questions = []
+
+    // TF: use real sentences — the sentence IS in the passage so correct = TRUE
+    if (sentences[0]) questions.push({ type: 'TF', q: `True or False: "${sentences[0].slice(0, 80)}"`, correct: 'TRUE' })
+    if (sentences[2]) questions.push({ type: 'TF', q: `True or False: "${sentences[2].slice(0, 80)}"`, correct: 'TRUE' })
+
+    // FILL: extract real blanks from passage sentences
+    for (const sent of sentences.slice(0, 5)) {
+      if (questions.filter(q => q.type === 'FILL').length >= 3) break
+      const q = makeFill(sent)
+      if (q) questions.push(q)
+    }
+
+    // MCQ: which word appears in the passage
+    const realWord = uniqueWords[0] || 'language'
+    const fakeWords = ['volcano','satellite','cathedral','microscope','asteroid','parliament']
+      .filter(w => !text.toLowerCase().includes(w)).slice(0, 3)
+    if (fakeWords.length === 3) {
+      const opts = [realWord, ...fakeWords]
+      questions.push({ type: 'MCQ', q: 'Which of these words appears in the passage?', options: opts, correct: 0 })
+    }
+
+    // MCQ: second real word vs fakes
+    if (uniqueWords[2]) {
+      const realWord2 = uniqueWords[2]
+      const fakes2 = ['algorithm','combustion','longitude','meridian'].filter(w => !text.toLowerCase().includes(w)).slice(0, 3)
+      if (fakes2.length === 3) {
+        questions.push({ type: 'MCQ', q: 'Which of these words also appears in the passage?', options: [realWord2, ...fakes2], correct: 0 })
+      }
+    }
+
+    // MCQ: main topic (title-based)
+    questions.push({
+      type: 'MCQ',
+      q: 'What is the main topic of this passage?',
+      options: [day.title || 'Daily English', 'Space exploration', 'Ancient history', 'Cooking and recipes'],
+      correct: 0,
+    })
+
+    // TF: one FALSE — a sentence clearly NOT in the passage
+    if (sentences.length >= 2) {
+      const notInText = `${sentences[1].split(' ').slice(0, 4).join(' ')} ... is the only topic discussed.`
+      questions.push({ type: 'TF', q: `True or False: This passage is only about one single idea with no other details.`, correct: sentences.length > 3 ? 'FALSE' : 'TRUE' })
+    }
+
+    // Extra FILL from later sentences
+    for (const sent of sentences.slice(3, 8)) {
+      if (questions.filter(q => q.type === 'FILL').length >= 4) break
+      const q = makeFill(sent)
+      if (q) questions.push(q)
+    }
+
+    return questions.filter(Boolean).slice(0, 10)
   }
 
   const [questions] = useState(() => buildQuestions(l.text))
@@ -1794,9 +1803,11 @@ const SHADOWING_DEFAULT = {
 }
 
 const LEVEL_CEFR = { '1': 'A1', '2': 'A2', '3': 'B1', '4': 'B2', '5': 'C1', '6': 'C2' }
+const CEFR_VALID = new Set(['A1','A2','B1','B2','C1','C2'])
 
 function getShadowingSentences(dayTitle, levelId) {
-  const cefr = LEVEL_CEFR[String(levelId)] || 'A1'
+  const s = String(levelId)
+  const cefr = CEFR_VALID.has(s) ? s : (LEVEL_CEFR[s] || 'A1')
   const title = (dayTitle || '').toLowerCase()
   for (const topic of SHADOWING_TOPICS) {
     if (topic.keywords.some(k => title.includes(k.toLowerCase()))) {
@@ -1813,7 +1824,10 @@ function ShadowingComp({ day, levelId }) {
   const [recorded, setRecorded] = useState({})
   const [recording, setRecording] = useState(null)
   const recognitionRef = useRef(null)
-  const sentences = getShadowingSentences(day.title, levelId)
+  // H-3 fix: use curriculum-authored sentences if available, else fall back to bank
+  const sentences = (s.sentences && s.sentences.length >= 5)
+    ? s.sentences.slice(0, 5)
+    : getShadowingSentences(day.title, levelId)
 
   const playSentence = (text, idx) => {
     window.speechSynthesis.cancel()
@@ -1967,8 +1981,7 @@ function CorrectionDisplay({ corrections, originalText }) {
 }
 
 /* ─── Writing & AI Chat ─── */
-function WritingComp({ day, levelId, dayId, navigate, setBuddyMessages, setBuddyInput, setAvatarState }) {
-  const progress = useProgress()
+function WritingComp({ day, levelId, dayId, navigate, setBuddyMessages, setBuddyInput, setAvatarState, progress }) {
   const draftBase = `${levelId}-${dayId}-writing`
 
   // load saved drafts on mount
@@ -2929,11 +2942,14 @@ export function useStudyTimer() {
   const KEY = 'el_study_time'
   const today = new Date().toISOString().slice(0, 10)
   const loadTimer = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}') } catch { return {} } }
-  const [timerData] = useState(loadTimer)
-  const addTime = (seconds) => {
-    const d = loadTimer(); d[today] = (d[today] || 0) + seconds
-    localStorage.setItem(KEY, JSON.stringify(d))
-  }
+  const [timerData, setTimerData] = useState(loadTimer)
+  const addTime = useCallback((seconds) => {
+    setTimerData(prev => {
+      const next = { ...prev, [today]: (prev[today] || 0) + seconds }
+      localStorage.setItem(KEY, JSON.stringify(next))
+      return next
+    })
+  }, [today])
   const todayMinutes = Math.floor((timerData[today] || 0) / 60)
   const weekMinutes = Math.floor(Object.entries(timerData).filter(([d]) => new Date(d) >= new Date(Date.now() - 7*86400000)).reduce((s,[,v])=>s+v, 0) / 60)
   return { addTime, todayMinutes, weekMinutes, timerData }

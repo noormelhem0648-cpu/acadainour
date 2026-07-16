@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { authHeaders } from '../utils/auth'
 
 const API = 'https://acadai-backend-avvo.onrender.com'
 
-async function lookupWord(word) {
-  const token = localStorage.getItem('noura_token')
-  const headers = { 'Content-Type': 'application/json' }
-  if (token) headers['Authorization'] = `Bearer ${token}`
+async function lookupWord(word, signal) {
+  const headers = authHeaders()
   const prompt = `Give a concise dictionary entry for the English word: "${word}"
 Reply in EXACTLY this format (no extra text):
 ARABIC: [Arabic meaning, 2-4 words max]
@@ -16,7 +15,7 @@ POS: [part of speech: noun/verb/adjective/adverb/etc]
 EXAMPLE: [one short example sentence using the word]`
 
   const res = await fetch(`${API}/english-tutor/stream`, {
-    method: 'POST', headers,
+    method: 'POST', headers, signal,
     body: JSON.stringify({ message: prompt, history: [], subject_info: 'You are a dictionary. Return only the labeled lines, no extra text.' })
   })
   if (!res.ok) throw new Error('lookup failed')
@@ -48,6 +47,7 @@ export default function WordLookupProvider({ children }) {
   const [popup, setPopup] = useState(null) // {x, y, word, data, loading}
   const popupRef = useRef(null)
   const currentWordRef = useRef(null) // tracks current popup word without stale closure
+  const lookupAbortRef = useRef(null)
 
   const closePopup = useCallback(() => { setPopup(null); currentWordRef.current = null }, [])
 
@@ -98,13 +98,16 @@ export default function WordLookupProvider({ children }) {
       const y = e.clientY + window.scrollY
 
       // Show loading popup immediately (first click always works)
+      lookupAbortRef.current?.abort()
+      lookupAbortRef.current = new AbortController()
       currentWordRef.current = word
       setPopup({ x, y, word, data: null, loading: true })
 
       try {
-        const data = await lookupWord(word)
+        const data = await lookupWord(word, lookupAbortRef.current.signal)
         setPopup(prev => prev?.word === word ? { ...prev, data, loading: false } : prev)
-      } catch {
+      } catch (e) {
+        if (e.name === 'AbortError') return
         setPopup(prev => prev?.word === word
           ? { ...prev, data: { word, arabic: 'تعذّر البحث — حاول مجدداً', ipa: '', us: '', uk: '', pos: '', example: '' }, loading: false }
           : prev)
