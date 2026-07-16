@@ -225,7 +225,9 @@ export default function ELProgressPage({ darkMode, setDarkMode }) {
     .reduce((s, h) => s + h.amount, 0)
 
   const totalSections = 6 * 30 * 6 + 35 * 6 // all levels × days × components
-  const doneSections = Object.values(progress.isDone).filter(Boolean).length
+  const doneSections = Object.values(
+    JSON.parse(localStorage.getItem('english_progress') || '{}')
+  ).filter(Boolean).length
 
   // Check for 100% completed level
   const [certLevel, setCertLevel] = useState(() => {

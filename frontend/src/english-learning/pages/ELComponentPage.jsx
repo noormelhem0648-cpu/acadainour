@@ -455,8 +455,15 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
   const [donePending, setDonePending] = useState(false)
   const [showVoicePicker, setShowVoicePicker] = useState(() => !localStorage.getItem('noura_voice_setup'))
 
-  // C-4 fix: store nav params in refs so useEffect doesn't need them in deps
   const doneNavRef = useRef(null)
+
+  // Reset donePending when navigating between components/days (component stays mounted)
+  useEffect(() => {
+    setDonePending(false)
+    doneNavRef.current = null
+  }, [levelId, dayId, componentId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // C-4 fix: fire navigation after XP animation
   useEffect(() => {
     if (!donePending || !doneNavRef.current) return
     const { progressKey, componentId: cId, next } = doneNavRef.current
