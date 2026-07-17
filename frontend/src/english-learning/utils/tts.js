@@ -24,28 +24,44 @@ const PRIORITY = {
 
 let _cache = {}
 
+// Match voices strictly to dialect (en-US vs en-GB) — never mix accents as fallback
+const DIALECT = {
+  'en-US': ['en-US', 'en_US'],
+  'en-GB': ['en-GB', 'en_GB', 'en-AU', 'en_AU'], // AU is closer to GB than US
+}
+function _dialectMatch(v, lang) {
+  return DIALECT[lang]?.some(d => v.lang.startsWith(d)) ?? v.lang === lang
+}
+
 function _pick(lang) {
   if (_cache[lang]) return _cache[lang]
   if (!window.speechSynthesis) return null
   const voices = window.speechSynthesis.getVoices()
   if (!voices.length) return null
 
+  // 1. User's saved preference
   const savedName = localStorage.getItem(lang === 'en-GB' ? KEY_VOICE_UK : KEY_VOICE_US)
   if (savedName) {
     const saved = voices.find(v => v.name === savedName)
     if (saved) { _cache[lang] = saved; return saved }
   }
 
+  // 2. Priority list — dialect-aware (names are dialect-specific so just check presence)
   for (const name of (PRIORITY[lang] || [])) {
     const v = voices.find(v => v.name.includes(name))
     if (v) { _cache[lang] = v; return v }
   }
-  const online = voices.find(v =>
-    v.lang.startsWith(lang.split('-')[0]) && /online|natural|neural/i.test(v.name))
+
+  // 3. Any natural/online voice strictly matching this dialect
+  const online = voices.find(v => _dialectMatch(v, lang) && /online|natural|neural/i.test(v.name))
   if (online) { _cache[lang] = online; return online }
-  const exact = voices.find(v => v.lang === lang)
+
+  // 4. Any voice strictly matching this dialect
+  const exact = voices.find(v => _dialectMatch(v, lang))
   if (exact) { _cache[lang] = exact; return exact }
-  const fallback = voices.find(v => v.lang.startsWith(lang.split('-')[0]))
+
+  // 5. Last resort: any English voice (no accent guarantee, but better than silence)
+  const fallback = voices.find(v => v.lang.startsWith('en'))
   if (fallback) { _cache[lang] = fallback }
   return fallback || null
 }
