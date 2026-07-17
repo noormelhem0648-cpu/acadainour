@@ -24,46 +24,45 @@ const PRIORITY = {
 
 let _cache = {}
 
-// Match voices strictly to dialect (en-US vs en-GB) — never mix accents as fallback
-const DIALECT = {
-  'en-US': ['en-US', 'en_US'],
-  'en-GB': ['en-GB', 'en_GB', 'en-AU', 'en_AU'], // AU is closer to GB than US
-}
-function _dialectMatch(v, lang) {
-  return DIALECT[lang]?.some(d => v.lang.startsWith(d)) ?? v.lang === lang
+// Normalize lang tag for comparison: 'en-GB' → 'en_gb', 'en-US' → 'en_us'
+function _normLang(s) { return s.toLowerCase().replace('-', '_') }
+
+// True only when voice dialect matches exactly (en-US≠en-GB, en-GB-oxendict counts as GB)
+function _isDialect(voice, lang) {
+  const vl = _normLang(voice.lang)
+  const tl = _normLang(lang)
+  return vl === tl || vl.startsWith(tl + '_')
 }
 
 function _pick(lang) {
   if (_cache[lang]) return _cache[lang]
   if (!window.speechSynthesis) return null
   const voices = window.speechSynthesis.getVoices()
-  if (!voices.length) return null
+  if (!voices.length) return null  // don't cache — try again on next call
 
-  // 1. User's saved preference
+  // 1. User's saved preference (set via VoicePicker)
   const savedName = localStorage.getItem(lang === 'en-GB' ? KEY_VOICE_UK : KEY_VOICE_US)
   if (savedName) {
     const saved = voices.find(v => v.name === savedName)
     if (saved) { _cache[lang] = saved; return saved }
   }
 
-  // 2. Priority list — dialect-aware (names are dialect-specific so just check presence)
+  // 2. Best online/natural voice whose lang tag matches this dialect
+  const natural = voices.find(v => _isDialect(v, lang) && /online|natural|neural/i.test(v.name))
+  if (natural) { _cache[lang] = natural; return natural }
+
+  // 3. Any voice whose lang tag matches this dialect
+  const exact = voices.find(v => _isDialect(v, lang))
+  if (exact) { _cache[lang] = exact; return exact }
+
+  // 4. Priority name list (last resort — catches Google/non-standard naming)
   for (const name of (PRIORITY[lang] || [])) {
     const v = voices.find(v => v.name.includes(name))
     if (v) { _cache[lang] = v; return v }
   }
 
-  // 3. Any natural/online voice strictly matching this dialect
-  const online = voices.find(v => _dialectMatch(v, lang) && /online|natural|neural/i.test(v.name))
-  if (online) { _cache[lang] = online; return online }
-
-  // 4. Any voice strictly matching this dialect
-  const exact = voices.find(v => _dialectMatch(v, lang))
-  if (exact) { _cache[lang] = exact; return exact }
-
-  // 5. Last resort: any English voice (no accent guarantee, but better than silence)
-  const fallback = voices.find(v => v.lang.startsWith('en'))
-  if (fallback) { _cache[lang] = fallback }
-  return fallback || null
+  // No matching dialect voice found — return null, u.lang hint may still help the browser
+  return null
 }
 
 function _preload() {
