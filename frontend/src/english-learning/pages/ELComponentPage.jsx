@@ -186,7 +186,7 @@ function useTTS() {
     const k = key || `${lang}:${text.slice(0, 30)}`
     if (playingKey === k) { stopTTS(); setPlayingKey(null); return }
     setPlayingKey(k)
-    speak(text, null, () => setPlayingKey(null), lang)
+    speak(text, lang, null, () => setPlayingKey(null))
   }
   return [playingKey, trigger]
 }
@@ -952,7 +952,7 @@ function GrammarPattern({ p, pi, day }) {
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
               <span style={{ color: 'var(--el-accent)', flexShrink: 0 }}>•</span>
               <span>{renderInlineMd(ex)}</span>
-              <button className="el-speak-btn" onClick={() => speak(ex.replace(/\*\*/g,''))} style={{ flexShrink: 0 }}>🔊</button>
+              <DualSpeak text={ex.replace(/\*\*/g,'')} style={{ flexShrink: 0 }} />
             </div>
           ))}
 

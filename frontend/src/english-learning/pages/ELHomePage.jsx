@@ -86,12 +86,10 @@ function WordOfDaySplash({ onClose }) {
         <div className="el-wotd-arabic">{todayWord.arabic}</div>
         <div className="el-wotd-example">"{todayWord.example}"</div>
         <div className="el-wotd-example-ar">{todayWord.exampleAr}</div>
-        <button
-          className="el-wotd-tts"
-          onClick={() => speak(todayWord.word)}
-        >
-          🔊 استمع
-        </button>
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 8 }}>
+          <button className="el-wotd-tts" onClick={() => speak(todayWord.word, 'en-US')} title="American English">🇺🇸 US</button>
+          <button className="el-wotd-tts" onClick={() => speak(todayWord.word, 'en-GB')} title="British English">🇬🇧 UK</button>
+        </div>
         <button className="el-nav-btn primary" style={{ marginTop: 16, width: '100%' }} onClick={dismiss}>
           حفظت ✓
         </button>

@@ -4,6 +4,17 @@ import { useProgress } from '../hooks/useProgress'
 import { speak } from '../utils/tts'
 import '../EL.css'
 
+function DualSpeakBtns({ word, style }) {
+  return (
+    <span style={{ display: 'inline-flex', gap: 4, ...style }}>
+      <button className="el-speak-btn" style={{ fontSize: '1.1rem' }}
+        onClick={e => { e.stopPropagation(); speak(word, 'en-US') }} title="American English">🇺🇸</button>
+      <button className="el-speak-btn" style={{ fontSize: '1.1rem' }}
+        onClick={e => { e.stopPropagation(); speak(word, 'en-GB') }} title="British English">🇬🇧</button>
+    </span>
+  )
+}
+
 const EL = '/english-learning'
 
 export default function ELReviewPage({ darkMode, setDarkMode }) {
@@ -117,22 +128,14 @@ export default function ELReviewPage({ darkMode, setDarkMode }) {
                     <div className="el-review-level-tag">{card.level} · Day {card.dayId}</div>
                     <div className="el-review-word">{card.word}</div>
                     <div className="el-review-ipa">{card.ipa}</div>
-                    <button
-                      className="el-speak-btn"
-                      style={{ fontSize: '1.4rem', marginTop: 12 }}
-                      onClick={e => { e.stopPropagation(); speak(card.word) }}
-                    >🔊</button>
+                    <DualSpeakBtns word={card.word} style={{ marginTop: 12 }} />
                     <div className="el-review-tap-hint">اضغط للكشف ↩</div>
                   </div>
                   {/* Back */}
                   <div className="el-review-back">
                     <div className="el-review-word-back">{card.word}</div>
                     <div className="el-review-arabic">{card.arabic}</div>
-                    <button
-                      className="el-speak-btn"
-                      style={{ fontSize: '1.1rem', marginTop: 8 }}
-                      onClick={e => { e.stopPropagation(); speak(card.word) }}
-                    >🔊</button>
+                    <DualSpeakBtns word={card.word} style={{ marginTop: 8 }} />
                   </div>
                 </div>
               </div>

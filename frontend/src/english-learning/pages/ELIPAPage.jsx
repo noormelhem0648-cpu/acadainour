@@ -3,6 +3,18 @@ import { useNavigate } from 'react-router-dom'
 import { speak } from '../utils/tts'
 import '../EL.css'
 
+function IpaDualSpeak({ text }) {
+  const word = text.split(',')[0].trim()
+  return (
+    <span style={{ display: 'inline-flex', gap: 3 }} onClick={e => e.stopPropagation()}>
+      <button className="el-speak-btn" style={{ fontSize: '.8rem', padding: '2px 5px' }}
+        onClick={() => speak(word, 'en-US')} title="US">🇺🇸</button>
+      <button className="el-speak-btn" style={{ fontSize: '.8rem', padding: '2px 5px' }}
+        onClick={() => speak(word, 'en-GB')} title="UK">🇬🇧</button>
+    </span>
+  )
+}
+
 const EL = '/english-learning'
 
 /* Common IPA symbols + pronunciation guide */
@@ -111,13 +123,11 @@ export default function ELIPAPage({ darkMode, setDarkMode }) {
                       <div
                         key={i}
                         className="el-ipa-card"
-                        onClick={() => speak(s.example.split(',')[0].trim())}
-                        title={`اضغط للسماع: ${s.example}`}
                       >
                         <div className="el-ipa-symbol" style={{ color: s.color }}>{s.symbol}</div>
                         <div className="el-ipa-arabic">{s.arabic}</div>
                         <div className="el-ipa-example">{s.example}</div>
-                        <div className="el-ipa-listen">🔊</div>
+                        <IpaDualSpeak text={s.example} />
                       </div>
                     ))}
                   </div>
@@ -133,13 +143,11 @@ export default function ELIPAPage({ darkMode, setDarkMode }) {
                       <div
                         key={i}
                         className="el-ipa-card"
-                        onClick={() => speak(s.example.split(',')[0].trim())}
-                        title={`اضغط للسماع: ${s.example}`}
                       >
                         <div className="el-ipa-symbol" style={{ color: s.color }}>{s.symbol}</div>
                         <div className="el-ipa-arabic">{s.arabic}</div>
                         <div className="el-ipa-example">{s.example}</div>
-                        <div className="el-ipa-listen">🔊</div>
+                        <IpaDualSpeak text={s.example} />
                       </div>
                     ))}
                   </div>
@@ -163,8 +171,9 @@ export default function ELIPAPage({ darkMode, setDarkMode }) {
                   <div className="el-ipa-tip-content">
                     <div className="el-ipa-tip-title">{tip.title}</div>
                     <div className="el-ipa-tip-text">{tip.tip}</div>
-                    <div className="el-ipa-tip-example" onClick={() => speak(tip.example.split(',')[0])}>
-                      🔊 {tip.example}
+                    <div className="el-ipa-tip-example" style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                      <span>{tip.example}</span>
+                      <IpaDualSpeak text={tip.example} />
                     </div>
                   </div>
                 </div>
