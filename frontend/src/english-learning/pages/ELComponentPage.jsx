@@ -5,6 +5,7 @@ import { getDay, COMPONENTS } from '../data/curriculum'
 import { useProgress, XP_VALUES } from '../hooks/useProgress'
 import WordLookupProvider from '../components/WordLookup'
 import { authHeaders } from '../utils/auth'
+import { speak, stopTTS, clearVoiceCache, getRate, getPitch, saveRate, savePitch } from '../utils/tts'
 import '../EL.css'
 
 const EL = '/english-learning'
@@ -51,74 +52,14 @@ function renderInlineMd(text) {
   )
 }
 
-/* ─── TTS engine — user-selected voice from localStorage ─── */
-let _ttsActive = null
-let _voiceCache = {}  // cleared when user changes voice
-
-const VOICE_FALLBACK_PRIORITY = {
-  'en-US': ['Aria Online (Natural)','Jenny Online (Natural)','Guy Online (Natural)','Ana Online (Natural)','Davis Online (Natural)','Emma Online (Natural)','Eric Online (Natural)','Michelle Online (Natural)','Roger Online (Natural)','Steffan Online (Natural)','Microsoft Aria','Microsoft Jenny','Microsoft David','Microsoft Mark','Microsoft Zira','Google US English','Samantha','Alex','Ava'],
-  'en-GB': ['Libby Online (Natural)','Maisie Online (Natural)','Ryan Online (Natural)','Sonia Online (Natural)','Thomas Online (Natural)','Microsoft Libby','Microsoft Maisie','Microsoft Ryan','Microsoft Sonia','Google UK English Female','Google UK English Male','Daniel','Kate'],
-}
-
-function pickBestVoice(lang) {
-  if (_voiceCache[lang]) return _voiceCache[lang]
-  const voices = window.speechSynthesis.getVoices()
-  if (!voices.length) return null
-
-  // 1st: use the voice the user explicitly chose
-  const savedName = localStorage.getItem(lang === 'en-GB' ? 'noura_voice_uk' : 'noura_voice_us')
-  if (savedName) {
-    const saved = voices.find(v => v.name === savedName)
-    if (saved) { _voiceCache[lang] = saved; return saved }
-  }
-
-  // 2nd: smart priority fallback
-  for (const name of (VOICE_FALLBACK_PRIORITY[lang] || [])) {
-    const v = voices.find(v => v.name.includes(name))
-    if (v) { _voiceCache[lang] = v; return v }
-  }
-  // 3rd: any online/natural voice for this language
-  const online = voices.find(v => v.lang.startsWith(lang.split('-')[0]) && (v.name.toLowerCase().includes('online') || v.name.toLowerCase().includes('natural')))
-  if (online) { _voiceCache[lang] = online; return online }
-  // last resort
-  const fallback = voices.find(v => v.lang === lang) || voices.find(v => v.lang.startsWith(lang.split('-')[0]))
-  if (fallback) { _voiceCache[lang] = fallback }
-  return fallback || null
-}
-
-if (typeof window !== 'undefined' && window.speechSynthesis) {
-  const preload = () => { _voiceCache = {}; pickBestVoice('en-US'); pickBestVoice('en-GB') }
-  if (window.speechSynthesis.getVoices().length > 0) preload()
-  else window.speechSynthesis.addEventListener('voiceschanged', preload)
-}
-
-function speak(text, onStart, onEnd, lang = 'en-US') {
-  if (!window.speechSynthesis) return
-  window.speechSynthesis.cancel()
-  _ttsActive = null
-  const u = new SpeechSynthesisUtterance(text)
-  u.lang = lang
-  const voice = pickBestVoice(lang)
-  if (voice) {
-    u.voice = voice
-    const isNatural = /online|natural|neural|google/i.test(voice.name)
-    u.rate = isNatural ? (lang === 'en-GB' ? 0.9 : 0.92) : (lang === 'en-GB' ? 0.8 : 0.82)
-  } else {
-    u.rate = 0.85
-  }
-  _ttsActive = text
-  if (onStart) u.onstart = onStart
-  u.onend  = () => { _ttsActive = null; if (onEnd) onEnd() }
-  u.onerror = () => { _ttsActive = null; if (onEnd) onEnd() }
-  window.speechSynthesis.speak(u)
-}
-
 /* ─── Voice Selector Modal ─── */
 function VoiceSelector({ onClose }) {
   const [voices, setVoices] = useState([])
   const [selectedUS, setSelectedUS] = useState(() => localStorage.getItem('noura_voice_us') || '')
   const [selectedUK, setSelectedUK] = useState(() => localStorage.getItem('noura_voice_uk') || '')
   const [tab, setTab] = useState('us')
+  const [rate, setRate] = useState(() => getRate() ?? 0.9)
+  const [pitch, setPitch] = useState(() => getPitch() ?? 1.0)
 
   useEffect(() => {
     const load = () => {
@@ -142,7 +83,7 @@ function VoiceSelector({ onClose }) {
   const preview = (v) => {
     window.speechSynthesis.cancel()
     const u = new SpeechSynthesisUtterance("Hello! This is how I sound. I'm your English learning assistant.")
-    u.voice = v; u.lang = v.lang; u.rate = /online|natural/i.test(v.name) ? 0.92 : 0.85
+    u.voice = v; u.lang = v.lang; u.rate = rate; u.pitch = pitch
     window.speechSynthesis.speak(u)
   }
 
@@ -156,7 +97,9 @@ function VoiceSelector({ onClose }) {
     localStorage.setItem('noura_voice_us', selectedUS)
     localStorage.setItem('noura_voice_uk', selectedUK)
     localStorage.setItem('noura_voice_setup', '1')
-    _voiceCache = {}
+    saveRate(rate)
+    savePitch(pitch)
+    clearVoiceCache()
     window.speechSynthesis.cancel()
     onClose()
   }
@@ -166,11 +109,11 @@ function VoiceSelector({ onClose }) {
   const setSelected = tab === 'us' ? setSelectedUS : setSelectedUK
 
   return (
-    <div className="el-voice-overlay" onClick={e => { if (e.target === e.currentTarget) { window.speechSynthesis.cancel(); onClose() } }}>
+    <div className="el-voice-overlay" onClick={e => { if (e.target === e.currentTarget) { stopTTS(); onClose() } }}>
       <div className="el-voice-modal">
         <div className="el-voice-header">
           <span className="el-voice-title">🎙️ اختر صوت المساعد</span>
-          <button className="el-voice-close" onClick={() => { window.speechSynthesis.cancel(); onClose() }}>✕</button>
+          <button className="el-voice-close" onClick={() => { stopTTS(); onClose() }}>✕</button>
         </div>
         <p className="el-voice-subtitle">اضغط ▶ لسماع أي صوت، ثم اختره — يُحفظ ويُستخدم في كل التطبيق</p>
 
@@ -208,9 +151,27 @@ function VoiceSelector({ onClose }) {
           {currentSelected && (
             <div className="el-voice-current">✅ محدد: <strong>{currentSelected}</strong></div>
           )}
-          <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
+
+          <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: '.82rem', minWidth: 90, color: 'var(--text-muted)' }}>🐢 السرعة 🐇</span>
+              <input type="range" min="0.5" max="1.5" step="0.05" value={rate}
+                onChange={e => setRate(Number(e.target.value))}
+                style={{ flex: 1 }} />
+              <span style={{ fontSize: '.8rem', minWidth: 32, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{rate.toFixed(2)}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: '.82rem', minWidth: 90, color: 'var(--text-muted)' }}>🔈 النبرة 🔊</span>
+              <input type="range" min="0.5" max="2.0" step="0.05" value={pitch}
+                onChange={e => setPitch(Number(e.target.value))}
+                style={{ flex: 1 }} />
+              <span style={{ fontSize: '.8rem', minWidth: 32, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{pitch.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
             <button className="el-nav-btn primary" onClick={save}>💾 حفظ وتطبيق</button>
-            <button className="el-nav-btn" onClick={() => { window.speechSynthesis.cancel(); onClose() }}>تخطي</button>
+            <button className="el-nav-btn" onClick={() => { stopTTS(); onClose() }}>تخطي</button>
           </div>
         </div>
       </div>
@@ -223,7 +184,7 @@ function useTTS() {
   const [playingKey, setPlayingKey] = useState(null)
   const trigger = (text, lang = 'en-US', key) => {
     const k = key || `${lang}:${text.slice(0, 30)}`
-    if (playingKey === k) { window.speechSynthesis.cancel(); setPlayingKey(null); return }
+    if (playingKey === k) { stopTTS(); setPlayingKey(null); return }
     setPlayingKey(k)
     speak(text, null, () => setPlayingKey(null), lang)
   }
@@ -474,7 +435,7 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
       else navigate(`${EL}/level/${levelId}/day/${dayId}`)
     }, 1200)
     return () => clearTimeout(t)
-  }, [donePending]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [donePending, progress]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!day || !comp) return <div className="el-app"><div className="el-page"><p style={{ padding: 32 }}>Not found.</p></div></div>
 
@@ -2095,7 +2056,7 @@ function GrammarDetective({ day }) {
               {sentences.map((s, sIdx) => {
                 const words = s.text.split(' ')
                 const foundAll = s.error === 'none'
-                  ? Object.entries(clicked).filter(([k]) => k.startsWith(`${sIdx}_`)).length > 0
+                  ? !!clicked[`${sIdx}_correct`]
                   : Object.entries(clicked).some(([k, v]) => k.startsWith(`${sIdx}_`) && v === 'right')
                 return (
                   <div key={sIdx} className="el-detective-sentence">

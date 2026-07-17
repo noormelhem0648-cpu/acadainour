@@ -257,33 +257,7 @@ export function useProgress() {
     })
   }, [])
 
-  /* ── XP ── */
-  const addXP = useCallback((type, extra = {}) => {
-    const amount = XP_VALUES[type] || 5
-    setXpData(prev => {
-      const entry = { type, amount, date: Date.now(), ...extra }
-      const history = [...(prev.history || []).slice(-499), entry]
-      const next = { total: (prev.total || 0) + amount, history }
-      localStorage.setItem(XP_KEY, JSON.stringify(next))
-      return next
-    })
-    checkBadges()
-  }, [])
-
   /* ── badges ── */
-  const checkBadges = useCallback(() => {
-    // Persist newly earned badge IDs so the badge count is stable across sessions
-    setBadges(prev => {
-      const earned = getEarnedBadges()
-      const earnedIds = earned.map(b => b.id)
-      const merged = [...new Set([...prev, ...earnedIds])]
-      if (merged.length !== prev.length) {
-        localStorage.setItem(BADGES_KEY, JSON.stringify(merged))
-      }
-      return merged
-    })
-  }, [getEarnedBadges])
-
   const getEarnedBadges = useCallback((currentState) => {
     const context = {
       progress,
@@ -305,6 +279,31 @@ export function useProgress() {
       try { return b.condition(context) } catch { return false }
     })
   }, [progress, streak, xpData, hardWords, notebook])
+
+  const checkBadges = useCallback(() => {
+    setBadges(prev => {
+      const earned = getEarnedBadges()
+      const earnedIds = earned.map(b => b.id)
+      const merged = [...new Set([...prev, ...earnedIds])]
+      if (merged.length !== prev.length) {
+        localStorage.setItem(BADGES_KEY, JSON.stringify(merged))
+      }
+      return merged
+    })
+  }, [getEarnedBadges])
+
+  /* ── XP ── */
+  const addXP = useCallback((type, extra = {}) => {
+    const amount = XP_VALUES[type] || 5
+    setXpData(prev => {
+      const entry = { type, amount, date: Date.now(), ...extra }
+      const history = [...(prev.history || []).slice(-499), entry]
+      const next = { total: (prev.total || 0) + amount, history }
+      localStorage.setItem(XP_KEY, JSON.stringify(next))
+      return next
+    })
+    checkBadges()
+  }, [checkBadges])
 
   /* ── notebook ── */
   const saveNote = useCallback((key, text) => {

@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect, useRef, useCallback } from 'react'
 import { authHeaders } from '../utils/auth'
 import { API_BASE as API } from '../../config'
+import { speak } from '../utils/tts'
 
 
 async function lookupWord(word, signal) {
@@ -150,12 +151,12 @@ export default function WordLookupProvider({ children }) {
               {popup.data?.ipa && <div className="el-wp-ipa">{popup.data.ipa}</div>}
               <div className="el-wp-tts-row">
                 {popup.data?.us && (
-                  <button className="el-wp-tts" onClick={() => { const u = new SpeechSynthesisUtterance(popup.word); u.lang='en-US'; window.speechSynthesis.speak(u) }}>
+                  <button className="el-wp-tts" onClick={() => speak(popup.word, 'en-US')}>
                     🔊 US: {popup.data.us}
                   </button>
                 )}
                 {popup.data?.uk && (
-                  <button className="el-wp-tts" onClick={() => { const u = new SpeechSynthesisUtterance(popup.word); u.lang='en-GB'; window.speechSynthesis.speak(u) }}>
+                  <button className="el-wp-tts" onClick={() => speak(popup.word, 'en-GB')}>
                     🔊 UK: {popup.data.uk}
                   </button>
                 )}

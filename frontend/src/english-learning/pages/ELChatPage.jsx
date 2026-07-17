@@ -16,6 +16,7 @@ export default function ELChatPage({ darkMode, setDarkMode }) {
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef(null)
   const inputRef = useRef(null)
+  const abortRef = useRef(null)
 
   useEffect(() => {
     if (!day) return
@@ -31,6 +32,8 @@ export default function ELChatPage({ darkMode, setDarkMode }) {
   const send = async () => {
     const text = input.trim()
     if (!text || loading) return
+    abortRef.current?.abort()
+    abortRef.current = new AbortController()
     setInput('')
     const userMsg = { role: 'user', content: text }
     setMessages(m => [...m, userMsg])
@@ -43,7 +46,7 @@ export default function ELChatPage({ darkMode, setDarkMode }) {
       const body = {
         message: text,
         history: history.slice(-8).map(m => ({ role: m.role, content: m.content })),
-        subject_info: `English Learning — ${levelId} Day ${dayId}: ${day.title}. SYSTEM: ${day.writing.companionPrompt}
+        subject_info: `English Learning — ${levelId} Day ${dayId}: ${day.title}. SYSTEM: ${day.writing?.companionPrompt || 'Practice English with me.'}
 
 IMPORTANT RULE: If the student asks you to solve their homework, exam, or assignment for them, you MUST refuse clearly and explain that you cannot do that. Instead, offer to help them UNDERSTAND the concepts and guide them step by step. Say something like: "I can't solve the exam for you directly, but I can help you understand each question and guide you to find the answer yourself!" Always stay in the role of a helpful tutor who builds understanding, never a answer-provider.`
       }
@@ -54,7 +57,8 @@ IMPORTANT RULE: If the student asks you to solve their homework, exam, or assign
       const res = await fetch(`${API}/english-tutor/stream`, {
         method: 'POST',
         headers,
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
+        signal: abortRef.current.signal
       })
 
       if (!res.ok) throw new Error('Server error')

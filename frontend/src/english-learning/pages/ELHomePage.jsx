@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { LEVELS, getDay } from '../data/curriculum'
 import { useProgress } from '../hooks/useProgress'
+import { speak } from '../utils/tts'
 import '../EL.css'
 
 function usePWAInstall() {
@@ -87,12 +88,7 @@ function WordOfDaySplash({ onClose }) {
         <div className="el-wotd-example-ar">{todayWord.exampleAr}</div>
         <button
           className="el-wotd-tts"
-          onClick={() => {
-            window.speechSynthesis?.cancel()
-            const u = new SpeechSynthesisUtterance(todayWord.word)
-            u.lang = 'en-US'; u.rate = 0.8
-            window.speechSynthesis?.speak(u)
-          }}
+          onClick={() => speak(todayWord.word)}
         >
           🔊 استمع
         </button>

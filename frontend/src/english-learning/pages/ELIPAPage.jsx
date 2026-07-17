@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { speak } from '../utils/tts'
 import '../EL.css'
 
 const EL = '/english-learning'
@@ -49,14 +50,6 @@ const IPA_GUIDE = [
   { symbol: '/j/', example: 'yes, you', arabic: 'ي', color: '#8b5cf6' },
   { symbol: '/w/', example: 'wet, now', arabic: 'و', color: '#f59e0b' },
 ]
-
-function speak(text) {
-  if (!window.speechSynthesis) return
-  window.speechSynthesis.cancel()
-  const u = new SpeechSynthesisUtterance(text)
-  u.lang = 'en-US'; u.rate = 0.75
-  window.speechSynthesis.speak(u)
-}
 
 export default function ELIPAPage({ darkMode, setDarkMode }) {
   const navigate = useNavigate()

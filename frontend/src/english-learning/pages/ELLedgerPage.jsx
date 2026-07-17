@@ -1,20 +1,10 @@
 import { useNavigate } from 'react-router-dom'
 import { useProgress } from '../hooks/useProgress'
 import { useState, useEffect } from 'react'
+import { speak } from '../utils/tts'
 import '../EL.css'
 
 const EL = '/english-learning'
-
-function speak(text, lang = 'en-US') {
-  if (!window.speechSynthesis) return
-  window.speechSynthesis.cancel()
-  const u = new SpeechSynthesisUtterance(text)
-  u.lang = lang; u.rate = 0.85
-  const voices = window.speechSynthesis.getVoices()
-  const v = voices.find(v => v.lang.startsWith(lang.split('-')[0]))
-  if (v) u.voice = v
-  window.speechSynthesis.speak(u)
-}
 
 const SM2_LABELS = [
   { q: 0, label: 'نسيت تماماً', color: '#dc2626' },

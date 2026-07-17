@@ -1,17 +1,10 @@
 import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useProgress } from '../hooks/useProgress'
+import { speak } from '../utils/tts'
 import '../EL.css'
 
 const EL = '/english-learning'
-
-function speak(text) {
-  if (!window.speechSynthesis) return
-  window.speechSynthesis.cancel()
-  const u = new SpeechSynthesisUtterance(text)
-  u.lang = 'en-US'; u.rate = 0.85
-  window.speechSynthesis.speak(u)
-}
 
 export default function ELReviewPage({ darkMode, setDarkMode }) {
   const navigate = useNavigate()

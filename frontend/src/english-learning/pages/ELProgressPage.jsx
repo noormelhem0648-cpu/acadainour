@@ -224,7 +224,7 @@ export default function ELProgressPage({ darkMode, setDarkMode }) {
     .filter(h => Date.now() - h.date < 7 * MS_PER_DAY)
     .reduce((s, h) => s + h.amount, 0)
 
-  const totalSections = 6 * 30 * 6 + 35 * 6 // all levels × days × components
+  const totalSections = 5 * 30 * 6 + 35 * 6 // levels 1-5 (30 days each) + level 6 (35 days) × 6 components
   const doneSections = Object.values(
     JSON.parse(localStorage.getItem('english_progress') || '{}')
   ).filter(Boolean).length
