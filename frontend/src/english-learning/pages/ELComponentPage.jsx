@@ -5,7 +5,7 @@ import { getDay, COMPONENTS } from '../data/curriculum'
 import { useProgress, XP_VALUES } from '../hooks/useProgress'
 import WordLookupProvider from '../components/WordLookup'
 import { authHeaders } from '../utils/auth'
-import { speak, stopTTS, clearVoiceCache, getRate, getPitch, saveRate, savePitch } from '../utils/tts'
+import { speak, speakAtRate, stopTTS, clearVoiceCache, getRate, getPitch, saveRate, savePitch } from '../utils/tts'
 import '../EL.css'
 
 const EL = '/english-learning'
@@ -206,6 +206,20 @@ function TTSBtn({ text, lang = 'en-US', ttsKey, playingKey, trigger, label }) {
   )
 }
 
+/* Self-contained dual-accent speak buttons — manages its own playing state */
+function DualSpeak({ text, style }) {
+  const [playingKey, trigger] = useTTS()
+  if (!text) return null
+  const kUS = `ds-us:${text.slice(0, 25)}`
+  const kUK = `ds-uk:${text.slice(0, 25)}`
+  return (
+    <span style={{ display: 'inline-flex', gap: 3, verticalAlign: 'middle', ...style }}>
+      <button className={`el-speak-btn${playingKey === kUS ? ' playing' : ''}`} onClick={() => trigger(text, 'en-US', kUS)} title="American English">🇺🇸</button>
+      <button className={`el-speak-btn${playingKey === kUK ? ' playing' : ''}`} onClick={() => trigger(text, 'en-GB', kUK)} title="British English">🇬🇧</button>
+    </span>
+  )
+}
+
 /* ─── Avatar expressions ─── */
 const AVATAR_STATES = {
   idle:      { emoji: '🤖', label: 'جاهز', color: '#c9858a' },
@@ -343,9 +357,8 @@ function StudyBuddy({ companionPrompt, dayContext, avatarState, setAvatarState, 
         {messages.map((m, i) => (
           <div key={i} className={`el-buddy-msg ${m.role}`}>
             {m.role === 'assistant' && (
-              <div style={{ float: 'left', marginLeft: 4, display: 'flex', gap: 3 }}>
-                <button className="el-speak-btn" onClick={() => speak(m.content)} title="استمعي">🔊</button>
-                <button className="el-speak-btn" onClick={() => window.speechSynthesis.cancel()} title="أوقف">⏹</button>
+              <div style={{ float: 'left', marginLeft: 4 }}>
+                <DualSpeak text={m.content} />
               </div>
             )}
             <span className="el-buddy-msg-text">{m.content}</span>
@@ -918,7 +931,7 @@ function GrammarPattern({ p, pi, day }) {
         {p.examples.map((ex, i) => (
           <div key={i} className="el-example-item">
             ✦ {renderInlineMd(ex)}
-            <button className="el-speak-btn" onClick={() => speak(ex.replace(/\*\*/g,''))} style={{ marginRight: 6 }}>🔊</button>
+            <DualSpeak text={ex.replace(/\*\*/g,'')} style={{ marginRight: 6 }} />
           </div>
         ))}
       </div>
@@ -1264,7 +1277,7 @@ function KeySentences({ passage }) {
         <div key={i} className="el-key-sentence-item">
           <div className="el-key-sentence-en">
             {s}
-            <button className="el-speak-btn" style={{ marginRight: 6 }} onClick={() => speak(s)}>🔊</button>
+            <DualSpeak text={s} style={{ marginRight: 6 }} />
           </div>
         </div>
       ))}
@@ -1277,23 +1290,23 @@ function KeySentences({ passage }) {
 /* ─── Listening Speed Control ─── */
 function ListeningSpeedControl({ text }) {
   const [rate, setRate] = useState(1)
+  const [lang, setLang] = useState('en-US')
   const [playing, setPlaying] = useState(false)
   const speeds = [0.6, 0.75, 1, 1.1, 1.25]
   const labels = ['0.6x', '0.75x', '1x', '1.1x', '1.25x']
 
   const play = (r) => {
-    window.speechSynthesis.cancel()
-    if (playing) { setPlaying(false); return }
-    const u = new SpeechSynthesisUtterance(text)
-    u.lang = 'en-US'; u.rate = r
-    u.onend = () => setPlaying(false)
-    u.onerror = () => setPlaying(false)
+    if (playing) { stopTTS(); setPlaying(false); return }
     setPlaying(true)
-    window.speechSynthesis.speak(u)
+    speakAtRate(text, r, lang, () => setPlaying(false))
   }
 
   return (
     <div className="el-speed-control-wrap">
+      <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+        <button className={`el-speed-ctrl-btn${lang === 'en-US' ? ' active' : ''}`} onClick={() => setLang('en-US')}>🇺🇸 US</button>
+        <button className={`el-speed-ctrl-btn${lang === 'en-GB' ? ' active' : ''}`} onClick={() => setLang('en-GB')}>🇬🇧 UK</button>
+      </div>
       <div className="el-speed-control-label">🎚️ سرعة الاستماع:</div>
       <div className="el-speed-control-btns">
         {speeds.map((s, i) => (
@@ -1647,6 +1660,7 @@ function getShadowingSentences(dayTitle, levelId) {
 function ShadowingComp({ day, levelId }) {
   const { shadowing: s } = day
   const [playingIdx, setPlayingIdx] = useState(null)
+  const [shadLang, setShadLang] = useState('en-US')
   const [recorded, setRecorded] = useState({})
   const [recording, setRecording] = useState(null)
   const recognitionRef = useRef(null)
@@ -1656,14 +1670,9 @@ function ShadowingComp({ day, levelId }) {
     : getShadowingSentences(day.title, levelId)
 
   const playSentence = (text, idx) => {
-    window.speechSynthesis.cancel()
-    if (playingIdx === idx) { setPlayingIdx(null); return }
+    if (playingIdx === idx) { stopTTS(); setPlayingIdx(null); return }
     setPlayingIdx(idx)
-    const u = new SpeechSynthesisUtterance(text)
-    u.lang = 'en-US'; u.rate = 0.82
-    u.onend = () => setPlayingIdx(null)
-    u.onerror = () => setPlayingIdx(null)
-    window.speechSynthesis.speak(u)
+    speakAtRate(text, 0.82, shadLang, () => setPlayingIdx(null))
   }
 
   const startRecord = (idx) => {
@@ -1688,7 +1697,7 @@ function ShadowingComp({ day, levelId }) {
       <div className="el-shadowing-chunk-box">
         <div className="el-chunk-label">القالب اللغوي اليوم</div>
         <div className="el-chunk-text">"{s.chunk}"</div>
-        <button className="el-speak-btn" onClick={() => speak(s.chunk)} style={{ fontSize: '1.3rem', margin: '8px auto' }}>🔊 استمع</button>
+        <DualSpeak text={s.chunk} style={{ fontSize: '1.1rem', margin: '8px auto', justifyContent: 'center' }} />
         <div className="el-chunk-native">
           <span className="el-native-label">النطق الأصيل:</span>
           <span className="el-native-form">{s.nativeForm}</span>
@@ -1708,6 +1717,10 @@ function ShadowingComp({ day, levelId }) {
       </div>
 
       <div className="el-shadow-sentences-title">🗣️ تدرّب على هذه الجمل الخمس — كرّر خلف الصوت</div>
+      <div style={{ display: 'flex', gap: 6, margin: '6px 0 2px' }}>
+        <button className={`el-speed-ctrl-btn${shadLang === 'en-US' ? ' active' : ''}`} onClick={() => setShadLang('en-US')}>🇺🇸 US</button>
+        <button className={`el-speed-ctrl-btn${shadLang === 'en-GB' ? ' active' : ''}`} onClick={() => setShadLang('en-GB')}>🇬🇧 UK</button>
+      </div>
       <div className="el-shadow-sentences-desc">استمع → كرّر → سجّل صوتك → قارن</div>
       <div className="el-shadow-sentences-list">
         {sentences.map((sent, i) => {
@@ -2312,17 +2325,10 @@ function VocabStoryGen({ words, dayTitle, levelId, allLearnedWords = [] }) {
           </button>
           {lines.length > 0 && (
             <>
-              <div style={{ display: 'flex', gap: 8, margin: '10px 0 4px' }}>
-                <button className="el-speak-btn" style={{ fontSize: '.85rem', padding: '4px 12px', borderRadius: 8 }}
-                  onClick={() => {
-                    window.speechSynthesis.cancel()
-                    const fullText = lines.map(l => l.speaker ? `${l.speaker} says: ${l.text}` : l.text).join('. ')
-                    const u = new SpeechSynthesisUtterance(fullText)
-                    u.lang = 'en-US'; u.rate = 0.85
-                    window.speechSynthesis.speak(u)
-                  }}>🔊 اقرأ القصة</button>
-                <button className="el-speak-btn" style={{ fontSize: '.85rem', padding: '4px 12px', borderRadius: 8 }}
-                  onClick={() => window.speechSynthesis.cancel()}>⏹ أوقف</button>
+              <div style={{ display: 'flex', gap: 8, margin: '10px 0 4px', flexWrap: 'wrap' }}>
+                <DualSpeak text={lines.map(l => l.speaker ? `${l.speaker} says: ${l.text}` : l.text).join('. ')} />
+                <button className="el-speak-btn" style={{ fontSize: '.85rem', padding: '4px 10px', borderRadius: 8 }}
+                  onClick={() => stopTTS()}>⏹ أوقف</button>
               </div>
               <div className="el-story-dialogue">
                 {lines.map((l, i) => (
@@ -2330,8 +2336,7 @@ function VocabStoryGen({ words, dayTitle, levelId, allLearnedWords = [] }) {
                     style={{ '--speaker-color': SPEAKER_COLORS[l.speaker] || '#6366f1' }}>
                     {l.speaker && <span className="el-story-speaker">{l.speaker}</span>}
                     <span className="el-story-line-text">{highlightLine(l.text)}</span>
-                    <button className="el-speak-btn" style={{ marginRight: 6, flexShrink: 0 }}
-                      onClick={() => { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(l.text); u.lang='en-US'; u.rate=0.85; window.speechSynthesis.speak(u) }}>🔊</button>
+                    <DualSpeak text={l.text} style={{ marginRight: 6, flexShrink: 0 }} />
                   </div>
                 ))}
               </div>
@@ -2650,15 +2655,7 @@ function PronunciationRecorder({ words, allLearnedWords = [] }) {
     r.start()
   }
 
-  const speakWord = (rate=0.7) => {
-    window.speechSynthesis.cancel()
-    const u = new SpeechSynthesisUtterance(selected.word)
-    u.lang='en-US'; u.rate=rate
-    const voices = window.speechSynthesis.getVoices()
-    const v = voices.find(v => v.lang==='en-US')
-    if (v) u.voice = v
-    window.speechSynthesis.speak(u)
-  }
+  const speakWord = (rate, lang = 'en-US') => speakAtRate(selected.word, rate, lang)
 
   return (
     <div className="el-pronrec-section">
@@ -2683,11 +2680,11 @@ function PronunciationRecorder({ words, allLearnedWords = [] }) {
             <div className="el-pronrec-card">
               <div className="el-pronrec-word">{selected.word}</div>
               <div className="el-pronrec-ipa">{selected.ipa}</div>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'center', margin: '8px 0' }}>
-                <button className="el-speak-btn" style={{fontSize:'1rem'}}
-                  onClick={() => speakWord(0.6)}>🔊 بطيء</button>
-                <button className="el-speak-btn" style={{fontSize:'1rem'}}
-                  onClick={() => speakWord(0.9)}>🔊 عادي</button>
+              <div style={{ display: 'flex', gap: 6, justifyContent: 'center', margin: '8px 0', flexWrap: 'wrap' }}>
+                <button className="el-speak-btn" style={{fontSize:'.9rem'}} onClick={() => speakWord(0.6, 'en-US')}>🇺🇸 بطيء</button>
+                <button className="el-speak-btn" style={{fontSize:'.9rem'}} onClick={() => speakWord(0.9, 'en-US')}>🇺🇸 عادي</button>
+                <button className="el-speak-btn" style={{fontSize:'.9rem'}} onClick={() => speakWord(0.6, 'en-GB')}>🇬🇧 بطيء</button>
+                <button className="el-speak-btn" style={{fontSize:'.9rem'}} onClick={() => speakWord(0.9, 'en-GB')}>🇬🇧 عادي</button>
               </div>
               <button className={`el-pronrec-btn${listening?' recording':' record'}`} onClick={record} disabled={listening}>
                 {listening ? '🔴 يسجل — تكلمي الآن...' : '🎤 سجلي نطقك'}

@@ -82,6 +82,24 @@ export function saveRate(v)  { localStorage.setItem(KEY_RATE,  String(v)) }
 export function savePitch(v) { localStorage.setItem(KEY_PITCH, String(v)) }
 
 /**
+ * speakAtRate(text, rate, lang?, onEnd?)
+ * Like speak() but overrides the saved rate — useful for listening/shadowing speed controls.
+ */
+export function speakAtRate(text, rate, lang = 'en-US', onEnd) {
+  if (!window.speechSynthesis) { onEnd?.(); return }
+  stopTTS()
+  const u = new SpeechSynthesisUtterance(text)
+  u.lang = lang
+  const voice = _pick(lang)
+  if (voice) u.voice = voice
+  u.rate  = rate
+  u.pitch = getPitch() ?? 1
+  u.onend   = () => onEnd?.()
+  u.onerror = () => onEnd?.()
+  window.speechSynthesis.speak(u)
+}
+
+/**
  * speak(text, lang?, onStart?, onEnd?)
  * lang defaults to 'en-US'. Applies saved voice, rate, and pitch.
  */
