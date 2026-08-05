@@ -117,20 +117,19 @@ function WordOfDaySplash({ onClose }) {
   )
 }
 
-/* ─── Streak Calendar ─── */
+/* ─── Streak Calendar (7 days) ─── */
 function StreakCalendar({ streak }) {
   const history = streak?.history || []
   const today = new Date().toISOString().slice(0, 10)
+  const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']
 
-  // Build last 35 days grid
-  const days = Array.from({ length: 35 }, (_, i) => {
+  // Build last 7 days
+  const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date()
-    d.setDate(d.getDate() - (34 - i))
+    d.setDate(d.getDate() - (6 - i))
     const ds = d.toISOString().slice(0, 10)
-    return { date: ds, studied: history.includes(ds), isToday: ds === today }
+    return { date: ds, studied: history.includes(ds), isToday: ds === today, dayName: DAY_NAMES[d.getDay()] }
   })
-
-  const weekLabels = ['أحد', 'اثن', 'ثلا', 'أرب', 'خمي', 'جمع', 'سبت']
 
   return (
     <div className="el-streak-section">
@@ -140,18 +139,16 @@ function StreakCalendar({ streak }) {
           <span className="el-streak-count">{streak?.current || 0}</span>
           <span className="el-streak-label">يوم متتالي</span>
         </div>
-        <div className="el-streak-best">
-          أفضل: {streak?.longest || 0} يوم
-        </div>
+        <div className="el-streak-best">أفضل: {streak?.longest || 0} يوم</div>
       </div>
-      <div className="el-streak-grid">
-        {weekLabels.map(l => <div key={l} className="el-streak-week-label">{l}</div>)}
+      <div className="el-streak-7">
         {days.map((d, i) => (
-          <div
-            key={i}
-            className={`el-streak-dot${d.studied ? ' studied' : ''}${d.isToday ? ' today' : ''}`}
-            title={d.date}
-          />
+          <div key={i} className={`el-streak-7-day${d.isToday ? ' today' : ''}`}>
+            <div className="el-streak-7-label">{d.dayName}</div>
+            <div className={`el-streak-7-dot${d.studied ? ' studied' : ''}${d.isToday ? ' today' : ''}`}>
+              {d.studied ? '✓' : ''}
+            </div>
+          </div>
         ))}
       </div>
     </div>
@@ -286,97 +283,10 @@ export default function ELHomePage({ darkMode, setDarkMode }) {
 
         <main className="el-home-main">
 
-          {/* Quick access strips */}
-          <div className="el-quick-strips">
-            {progress.hardWords?.length > 0 && (
-              <button className="el-ledger-strip" onClick={() => navigate(`${EL}/ledger`)}>
-                ⭐ كلماتي الصعبة ({progress.hardWords.length}) ←
-              </button>
-            )}
-            {Object.keys(progress.errors || {}).length > 0 && (
-              <button className="el-ledger-strip errors" onClick={() => navigate(`${EL}/errors`)}>
-                📊 لوحة الأخطاء ←
-              </button>
-            )}
-          </div>
-
-          {/* Streak Calendar */}
+          {/* 1 ── Streak (7 days, full names) */}
           <StreakCalendar streak={progress.streak} />
 
-          {/* XP + Badge summary */}
-          <div className="el-home-stats-row">
-            <div className="el-home-stat" onClick={() => navigate(`${EL}/progress`)}>
-              <span className="el-home-stat-icon">⭐</span>
-              <span className="el-home-stat-num">{progress.xpData?.total || 0}</span>
-              <span className="el-home-stat-label">XP</span>
-            </div>
-            <div className="el-home-stat" onClick={() => navigate(`${EL}/progress`)}>
-              <span className="el-home-stat-icon">🏅</span>
-              <span className="el-home-stat-num">{progress.getEarnedBadges().length}</span>
-              <span className="el-home-stat-label">أوسمة</span>
-            </div>
-            <div className="el-home-stat" onClick={() => navigate(`${EL}/notebook`)}>
-              <span className="el-home-stat-icon">📓</span>
-              <span className="el-home-stat-num">{Object.keys(progress.notebook || {}).length}</span>
-              <span className="el-home-stat-label">ملاحظات</span>
-            </div>
-          </div>
-
-          {/* Daily Challenge */}
-          <DailyChallenge />
-
-          {/* Tool buttons */}
-          <div className="el-home-tools">
-            <button className="el-tool-btn" onClick={() => navigate(`${EL}/progress`)}>
-              <span className="el-tool-icon">📊</span>
-              <span>تقدمي</span>
-            </button>
-            <button className="el-tool-btn" onClick={() => navigate(`${EL}/notebook`)}>
-              <span className="el-tool-icon">📓</span>
-              <span>مذكرتي</span>
-            </button>
-            <button className="el-tool-btn" onClick={() => navigate(`${EL}/ipa`)}>
-              <span className="el-tool-icon">🔤</span>
-              <span>دليل IPA</span>
-            </button>
-            <button className="el-tool-btn" onClick={() => navigate(`${EL}/ledger`)}>
-              <span className="el-tool-icon">⭐</span>
-              <span>كلمات صعبة</span>
-            </button>
-            <div className="el-tool-btn-wrap">
-              <button className="el-tool-btn" onClick={() => navigate(`${EL}/review`)}>
-                <span className="el-tool-icon">🔁</span>
-                <span>مراجعة</span>
-              </button>
-              {dueCount > 0 && <span className="el-review-badge">{dueCount}</span>}
-            </div>
-            <button className="el-tool-btn" onClick={() => navigate(`${EL}/social`)}>
-              <span className="el-tool-icon">👥</span>
-              <span>المجتمع</span>
-            </button>
-          </div>
-
-          {/* PWA Install Banner */}
-          {showBanner && (
-            <div className="el-install-banner">
-              <span className="el-install-icon">📲</span>
-              <div className="el-install-text">
-                <div className="el-install-title">ثبّتي التطبيق على هاتفك</div>
-                {isIOS
-                  ? <div className="el-install-sub">اضغطي زر المشاركة ← "Add to Home Screen"</div>
-                  : <div className="el-install-sub">يعمل بدون إنترنت — مجاناً تماماً</div>
-                }
-              </div>
-              <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                {hasNativePrompt && !isIOS && (
-                  <button className="el-install-btn" onClick={install}>تثبيت</button>
-                )}
-                <button className="el-install-dismiss" onClick={dismiss}>✕</button>
-              </div>
-            </div>
-          )}
-
-          {/* Hero */}
+          {/* 2 ── Hero */}
           <div className="el-hero-block">
             <div className="el-hero-badge">🎓 مجاناً تماماً</div>
             <h1 className="el-hero-title">
@@ -388,7 +298,32 @@ export default function ELHomePage({ darkMode, setDarkMode }) {
             </p>
           </div>
 
-          {/* Levels grid */}
+          {/* 3 ── Community + Hard words (2 big cards) */}
+          <div className="el-home-feature-cards">
+            <button className="el-feature-card community" onClick={() => navigate(`${EL}/social`)}>
+              <span className="el-feature-card-icon">👥</span>
+              <div>
+                <div className="el-feature-card-title">المجتمع</div>
+                <div className="el-feature-card-sub">تواصل مع الطلاب وأنشئ مجموعات دراسة</div>
+              </div>
+            </button>
+            <button className="el-feature-card hardwords" onClick={() => navigate(`${EL}/ledger`)}>
+              <span className="el-feature-card-icon">⭐</span>
+              <div>
+                <div className="el-feature-card-title">
+                  كلماتي الصعبة
+                  {progress.hardWords?.length > 0 && (
+                    <span className="el-feature-card-badge">{progress.hardWords.length}</span>
+                  )}
+                </div>
+                <div className="el-feature-card-sub">
+                  {dueCount > 0 ? `${dueCount} كلمة للمراجعة اليوم` : 'قائمة الكلمات المحفوظة'}
+                </div>
+              </div>
+            </button>
+          </div>
+
+          {/* 4 ── Levels grid */}
           <div className="el-levels-grid">
             {LEVELS.map(lvl => {
               const lp = progress.levelProgress(lvl.id, lvl.totalDays)
@@ -420,7 +355,81 @@ export default function ELHomePage({ darkMode, setDarkMode }) {
             })}
           </div>
 
-          {/* How it works */}
+          {/* 5 ── XP + Badge + Notes stats */}
+          <div className="el-home-stats-row">
+            <div className="el-home-stat" onClick={() => navigate(`${EL}/progress`)}>
+              <span className="el-home-stat-icon">⭐</span>
+              <span className="el-home-stat-num">{progress.xpData?.total || 0}</span>
+              <span className="el-home-stat-label">XP</span>
+            </div>
+            <div className="el-home-stat" onClick={() => navigate(`${EL}/progress`)}>
+              <span className="el-home-stat-icon">🏅</span>
+              <span className="el-home-stat-num">{progress.getEarnedBadges().length}</span>
+              <span className="el-home-stat-label">أوسمة</span>
+            </div>
+            <div className="el-home-stat" onClick={() => navigate(`${EL}/notebook`)}>
+              <span className="el-home-stat-icon">📓</span>
+              <span className="el-home-stat-num">{Object.keys(progress.notebook || {}).length}</span>
+              <span className="el-home-stat-label">ملاحظات</span>
+            </div>
+          </div>
+
+          {/* 6 ── Daily Challenge */}
+          <DailyChallenge />
+
+          {/* 7 ── Tool buttons */}
+          <div className="el-home-tools">
+            <button className="el-tool-btn" onClick={() => navigate(`${EL}/progress`)}>
+              <span className="el-tool-icon">📊</span>
+              <span>تقدمي</span>
+            </button>
+            <button className="el-tool-btn" onClick={() => navigate(`${EL}/notebook`)}>
+              <span className="el-tool-icon">📓</span>
+              <span>مذكرتي</span>
+            </button>
+            <button className="el-tool-btn" onClick={() => navigate(`${EL}/ipa`)}>
+              <span className="el-tool-icon">🔤</span>
+              <span>دليل IPA</span>
+            </button>
+            <div className="el-tool-btn-wrap">
+              <button className="el-tool-btn" onClick={() => navigate(`${EL}/review`)}>
+                <span className="el-tool-icon">🔁</span>
+                <span>مراجعة</span>
+              </button>
+              {dueCount > 0 && <span className="el-review-badge">{dueCount}</span>}
+            </div>
+          </div>
+
+          {/* 8 ── Quick strips (errors dashboard) */}
+          <div className="el-quick-strips">
+            {Object.keys(progress.errors || {}).length > 0 && (
+              <button className="el-ledger-strip errors" onClick={() => navigate(`${EL}/errors`)}>
+                📊 لوحة الأخطاء ←
+              </button>
+            )}
+          </div>
+
+          {/* 9 ── PWA Install Banner */}
+          {showBanner && (
+            <div className="el-install-banner">
+              <span className="el-install-icon">📲</span>
+              <div className="el-install-text">
+                <div className="el-install-title">ثبّت التطبيق على هاتفك</div>
+                {isIOS
+                  ? <div className="el-install-sub">اضغط زر المشاركة ← "Add to Home Screen"</div>
+                  : <div className="el-install-sub">يعمل بدون إنترنت — مجاناً تماماً</div>
+                }
+              </div>
+              <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                {hasNativePrompt && !isIOS && (
+                  <button className="el-install-btn" onClick={install}>تثبيت</button>
+                )}
+                <button className="el-install-dismiss" onClick={dismiss}>✕</button>
+              </div>
+            </div>
+          )}
+
+          {/* 10 ── How it works */}
           <div className="el-how-it-works">
             <h2 className="el-section-title">كيف يعمل النظام؟</h2>
             <div className="el-how-grid">
