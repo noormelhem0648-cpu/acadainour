@@ -8,7 +8,7 @@ import json
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect, Query
+from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect, Query, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError
@@ -401,8 +401,6 @@ def _ws_auth(token: str, db: Session) -> Optional[int]:
     except JWTError:
         return None
 
-
-from fastapi import WebSocketDisconnect
 
 async def websocket_endpoint(ws: WebSocket, user_id: int, token: str = "", db: Session = None):
     if db is None:

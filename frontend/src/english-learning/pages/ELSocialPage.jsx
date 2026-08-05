@@ -89,9 +89,10 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
 
   const [notif, setNotif] = useState(null)  // { text, ok }
 
-  const wsRef      = useRef(null)
+  const wsRef        = useRef(null)
   const msgBottomRef = useRef(null)
   const searchTimer  = useRef(null)
+  const activeChatRef = useRef(null)
 
   // ── Toast ─────────────────────────────────────────────────────
   const toast = (text, ok = true) => {
@@ -125,13 +126,12 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
       try {
         const data = JSON.parse(e.data)
         if (data.type === 'message') {
-          // Append to current chat if open
-          setMessages(prev => {
-            if (prev.length && prev[0]?.chat_id === data.chat_id) return [...prev, data]
-            if (activeChat?.chat_id === data.chat_id) return [...prev, data]
-            return prev
-          })
-          toast(`رسالة جديدة من ${data.sender_name}`, true)
+          // Use ref to avoid stale closure
+          if (activeChatRef.current?.chat_id === data.chat_id) {
+            setMessages(prev => [...prev, data])
+          } else {
+            toast(`رسالة جديدة من ${data.sender_name}`, true)
+          }
         } else if (data.type === 'friend_request') {
           toast(`طلب صداقة من ${data.from.name} 🙋`, true)
           loadFriends()
@@ -166,6 +166,7 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
 
   // ── Open chat ─────────────────────────────────────────────────
   const openChat = useCallback(async (chatId, title) => {
+    activeChatRef.current = { chat_id: chatId, title }
     setActiveChat({ chat_id: chatId, title })
     setMessages([])
     setLoadingMsgs(true)
@@ -454,7 +455,7 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
             <>
               {/* Chat header */}
               <div className="el-social-chat-header">
-                <button className="el-icon-btn" onClick={() => setActiveChat(null)}>←</button>
+                <button className="el-icon-btn" onClick={() => { activeChatRef.current = null; setActiveChat(null) }}>←</button>
                 <Avatar
                   name={activeChat.title}
                   size={36}
