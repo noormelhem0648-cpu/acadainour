@@ -21,6 +21,7 @@ import ELNotebookPage from "./english-learning/pages/ELNotebookPage";
 import ELIPAPage from "./english-learning/pages/ELIPAPage";
 import ELReviewPage from "./english-learning/pages/ELReviewPage";
 import ELSocialPage from "./english-learning/pages/ELSocialPage";
+import ELAccountPage from "./english-learning/pages/ELAccountPage";
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("theme") === "dark");
@@ -85,6 +86,7 @@ function App() {
         <Route path="/english-learning/level/:levelId/day/:dayId/speed" element={<ELSpeedRoundPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
         <Route path="/english-learning/review" element={<ELReviewPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
         <Route path="/english-learning/social" element={<ELSocialPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
+        <Route path="/english-learning/account" element={<ELAccountPage darkMode={darkMode} setDarkMode={setDarkMode} onLogout={handleLogout} />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

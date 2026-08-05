@@ -806,3 +806,51 @@ async def ws_social(ws: FWS, user_id: int, token: str = ""):
         await websocket_endpoint(ws, user_id, token, db)
     finally:
         db.close()
+
+
+# ── Profile / Account endpoints ─────────────────────────────────────
+
+class UpdateProfileRequest(BaseModel):
+    name: Optional[str] = None
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+@app.get("/auth/me")
+def get_profile(me: User = Depends(get_current_user)):
+    return {
+        "id": me.id,
+        "name": me.name,
+        "email": me.email,
+        "role": me.role,
+        "created_at": me.created_at.isoformat() if me.created_at else None,
+    }
+
+@app.put("/auth/me")
+def update_profile(
+    req: UpdateProfileRequest,
+    me: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if req.name and req.name.strip():
+        me.name = req.name.strip()
+        db.commit()
+        db.refresh(me)
+        # Update localStorage token will keep working; name change is cosmetic only
+        return {"id": me.id, "name": me.name, "email": me.email, "role": me.role}
+    raise HTTPException(400, "Name cannot be empty")
+
+@app.put("/auth/me/password")
+def change_password(
+    req: ChangePasswordRequest,
+    me: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if not verify_password(req.current_password, me.hashed_password):
+        raise HTTPException(400, "كلمة المرور الحالية غير صحيحة")
+    if len(req.new_password) < 6:
+        raise HTTPException(400, "كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل")
+    me.hashed_password = hash_password(req.new_password)
+    db.commit()
+    return {"ok": True}
