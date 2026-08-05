@@ -80,9 +80,35 @@ function VoiceSelector({ onClose }) {
     return score(a) - score(b)
   })
 
+  const ACCENT_INFO = {
+    us: {
+      flag: '🇺🇸',
+      title: 'اللهجة الأمريكية — General American',
+      traits: [
+        { sound: '/r/', label: 'حرف R', us: 'يُنطق دائماً في كل مكان — car /kɑːr/', uk: '—' },
+        { sound: '/t/', label: 'حرف T', us: 'يتحوّل لـ D بين حرفين مضغوطين — water = "wader"', uk: '—' },
+        { sound: '/æ/', label: 'حرف A', us: "أوسع وأطول — \"can't\" /kænt/", uk: '—' },
+        { sound: '/ɑː/', label: 'O المفتوحة', us: '"hot" تُنطق /hɑːt/ مع فتح الفم', uk: '—' },
+      ],
+    },
+    uk: {
+      flag: '🇬🇧',
+      title: 'اللهجة البريطانية — RP (Received Pronunciation)',
+      traits: [
+        { sound: '/r/', label: 'حرف R', us: '—', uk: 'لا يُنطق في نهاية الكلمة — car /kɑː/ (بدون R)' },
+        { sound: '/ɑː/', label: 'حرف A الطويل', us: '—', uk: '"can\'t" تُنطق /kɑːnt/ بالـ A الطويلة' },
+        { sound: '/ɒ/', label: 'O المدوّرة', us: '—', uk: '"hot" تُنطق /hɒt/ مع تدوير الشفتين' },
+        { sound: '/juː/', label: 'حرف U', us: '—', uk: '"new/tune" تُنطق بـ /juː/ وضوحاً' },
+      ],
+    },
+  }
+
   const preview = (v) => {
     window.speechSynthesis.cancel()
-    const u = new SpeechSynthesisUtterance("Hello! This is how I sound. I'm your English learning assistant.")
+    const text = tab === 'us'
+      ? "Hello! Water, better, car — that's how I sound in American English."
+      : "Hello! Water, better, car — that's how I sound in British English."
+    const u = new SpeechSynthesisUtterance(text)
     u.voice = v; u.lang = v.lang; u.rate = rate; u.pitch = pitch
     window.speechSynthesis.speak(u)
   }
@@ -120,6 +146,22 @@ function VoiceSelector({ onClose }) {
         <div className="el-voice-tabs">
           <button className={`el-voice-tab${tab === 'us' ? ' active' : ''}`} onClick={() => setTab('us')}>🇺🇸 أمريكي (US)</button>
           <button className={`el-voice-tab${tab === 'uk' ? ' active' : ''}`} onClick={() => setTab('uk')}>🇬🇧 بريطاني (UK)</button>
+        </div>
+
+        {/* Accent info card */}
+        <div className="el-voice-accent-card">
+          <div className="el-voice-accent-title">
+            {ACCENT_INFO[tab].flag} {ACCENT_INFO[tab].title}
+          </div>
+          <div className="el-voice-accent-traits">
+            {ACCENT_INFO[tab].traits.map(t => (
+              <div key={t.sound} className="el-voice-accent-row">
+                <span className="el-voice-accent-sound">{t.sound}</span>
+                <span className="el-voice-accent-label">{t.label}</span>
+                <span className="el-voice-accent-desc">{tab === 'us' ? t.us : t.uk}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="el-voice-list">

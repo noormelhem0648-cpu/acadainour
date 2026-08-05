@@ -2245,3 +2245,52 @@
   .el-streak-7-label { font-size: .6rem; }
   .el-streak-7-dot { width: 28px; height: 28px; }
 }
+
+/* ── Accent info card inside VoiceSelector ── */
+.el-voice-accent-card {
+  margin: 0 16px 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--el-bg3);
+  border: 1px solid var(--el-border);
+}
+.el-voice-accent-title {
+  font-size: .82rem;
+  font-weight: 800;
+  color: var(--el-accent);
+  margin-bottom: 8px;
+  direction: rtl;
+}
+.el-voice-accent-traits {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.el-voice-accent-row {
+  display: grid;
+  grid-template-columns: 48px 100px 1fr;
+  align-items: start;
+  gap: 6px;
+  direction: rtl;
+  font-size: .78rem;
+}
+.el-voice-accent-sound {
+  font-family: monospace;
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--el-accent);
+  background: var(--el-accent-light);
+  border-radius: 5px;
+  padding: 1px 5px;
+  text-align: center;
+  direction: ltr;
+}
+.el-voice-accent-label {
+  font-weight: 700;
+  color: var(--el-text);
+}
+.el-voice-accent-desc {
+  color: var(--el-muted);
+  line-height: 1.4;
+  direction: rtl;
+}
