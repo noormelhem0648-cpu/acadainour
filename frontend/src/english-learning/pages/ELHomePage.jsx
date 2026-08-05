@@ -328,6 +328,10 @@ export default function ELHomePage({ darkMode, setDarkMode }) {
               </button>
               {dueCount > 0 && <span className="el-review-badge">{dueCount}</span>}
             </div>
+            <button className="el-tool-btn" onClick={() => navigate(`${EL}/social`)}>
+              <span className="el-tool-icon">👥</span>
+              <span>المجتمع</span>
+            </button>
           </div>
 
           {/* PWA Install Banner */}

@@ -78,6 +78,45 @@ class Restriction(Base):
     created_at = Column(DateTime, server_default=func.now())
 
 
+# ── Social / Messaging ────────────────────────────────────────────
+
+class Friendship(Base):
+    __tablename__ = "friendships"
+    id = Column(Integer, primary_key=True, index=True)
+    requester_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    addressee_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    status = Column(String(20), default="pending")  # pending / accepted / rejected
+    created_at = Column(DateTime, server_default=func.now())
+
+
+class ChatGroup(Base):
+    __tablename__ = "chat_groups"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    creator_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+    members = relationship("GroupMember", back_populates="group")
+
+
+class GroupMember(Base):
+    __tablename__ = "group_members"
+    id = Column(Integer, primary_key=True, index=True)
+    group_id = Column(Integer, ForeignKey("chat_groups.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    joined_at = Column(DateTime, server_default=func.now())
+    group = relationship("ChatGroup", back_populates="members")
+
+
+class SocialMessage(Base):
+    __tablename__ = "social_messages"
+    id = Column(Integer, primary_key=True, index=True)
+    # dm_{min_id}_{max_id}  or  group_{group_id}
+    chat_id = Column(String(50), nullable=False, index=True)
+    sender_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+
+
 def _migrate():
     """Add new columns to existing tables (create_all does not alter tables)."""
     from sqlalchemy import text
