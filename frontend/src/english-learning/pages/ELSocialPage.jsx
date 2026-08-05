@@ -5,6 +5,7 @@ import '../EL.css'
 
 const EL = '/english-learning'
 const WS_BASE = API_BASE.replace(/^https?/, s => s === 'https' ? 'wss' : 'ws')
+const STUN = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
 
 function useAuth() {
   const user  = (() => { try { return JSON.parse(localStorage.getItem('noura_user')) } catch { return null } })()
@@ -53,7 +54,6 @@ function Avatar({ name, size = 36, online }) {
   )
 }
 
-// ── Time display ──────────────────────────────────────────────────
 function TimeAgo({ iso }) {
   const d = new Date(iso)
   const now = new Date()
@@ -64,43 +64,69 @@ function TimeAgo({ iso }) {
   return <span className="el-social-time">{d.toLocaleDateString('ar')}</span>
 }
 
+const LEVELS = ['a1','a2','b1','b2','c1','c2']
+
 // ── Main component ────────────────────────────────────────────────
 export default function ELSocialPage({ darkMode, setDarkMode }) {
   const navigate = useNavigate()
   const { user, token } = useAuth()
 
-  const [tab, setTab]         = useState('friends')   // friends | groups
+  const [tab, setTab]         = useState('friends')
   const [friends, setFriends] = useState({ accepted: [], pending_in: [], pending_out: [] })
   const [groups, setGroups]   = useState([])
+  const [challenges, setChallenges] = useState([])
   const [search, setSearch]   = useState('')
   const [searchRes, setSearchRes] = useState([])
   const [searching, setSearching] = useState(false)
 
-  const [activeChat, setActiveChat] = useState(null)  // { chat_id, title, type }
-  const [messages, setMessages]     = useState([])
-  const [msgInput, setMsgInput]     = useState('')
-  const [sending, setSending]       = useState(false)
-  const [loadingMsgs, setLoadingMsgs] = useState(false)
+  const [activeChat, setActiveChat]     = useState(null)
+  const [messages, setMessages]         = useState([])
+  const [msgInput, setMsgInput]         = useState('')
+  const [sending, setSending]           = useState(false)
+  const [loadingMsgs, setLoadingMsgs]   = useState(false)
 
   const [newGroupName, setNewGroupName]   = useState('')
   const [showNewGroup, setShowNewGroup]   = useState(false)
   const [addMemberInput, setAddMemberInput] = useState('')
   const [addMemberRes, setAddMemberRes]   = useState([])
 
-  const [notif, setNotif] = useState(null)  // { text, ok }
+  // Challenge state
+  const [showNewChallenge, setShowNewChallenge] = useState(false)
+  const [challengeName, setChallengeName]       = useState('')
+  const [challengeLevel, setChallengeLevel]     = useState('a2')
+  const [challengeDeadline, setChallengeDeadline] = useState('')
+  const [challengeInviteInput, setChallengeInviteInput] = useState('')
+  const [challengeInviteRes, setChallengeInviteRes]     = useState([])
+  const [editingProgress, setEditingProgress]   = useState(null) // challenge id
+
+  // Voice message state
+  const [isRecording, setIsRecording] = useState(false)
+  const mediaRecorderRef = useRef(null)
+  const recordedChunksRef = useRef([])
+
+  // WebRTC call state
+  const [incomingCall, setIncomingCall] = useState(null)  // { from_id, from_name, offer, callType }
+  const [activeCall, setActiveCall]     = useState(null)  // { peer_id, peer_name, callType }
+  const peerConnRef   = useRef(null)
+  const localStreamRef = useRef(null)
+  const remoteVideoRef = useRef(null)
+  const localVideoRef  = useRef(null)
+  const [callMuted, setCallMuted]   = useState(false)
+  const [camOff, setCamOff]         = useState(false)
+
+  const [notif, setNotif] = useState(null)
 
   const wsRef        = useRef(null)
   const msgBottomRef = useRef(null)
   const searchTimer  = useRef(null)
   const activeChatRef = useRef(null)
 
-  // ── Toast ─────────────────────────────────────────────────────
   const toast = (text, ok = true) => {
     setNotif({ text, ok })
-    setTimeout(() => setNotif(null), 3000)
+    setTimeout(() => setNotif(null), 3500)
   }
 
-  // ── Load friends + groups ─────────────────────────────────────
+  // ── Data loaders ──────────────────────────────────────────────
   const loadFriends = useCallback(async () => {
     if (!token) return
     try { setFriends(await api('GET', '/social/friends', token)) } catch {}
@@ -111,10 +137,112 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
     try { setGroups(await api('GET', '/social/groups', token)) } catch {}
   }, [token])
 
+  const loadChallenges = useCallback(async () => {
+    if (!token) return
+    try { setChallenges(await api('GET', '/social/challenges', token)) } catch {}
+  }, [token])
+
   useEffect(() => {
     loadFriends()
     loadGroups()
-  }, [loadFriends, loadGroups])
+    loadChallenges()
+  }, [loadFriends, loadGroups, loadChallenges])
+
+  // ── WebRTC helpers ────────────────────────────────────────────
+  const sendWS = useCallback((payload) => {
+    const ws = wsRef.current
+    if (ws && ws.readyState === 1) ws.send(JSON.stringify(payload))
+  }, [])
+
+  const stopLocalStream = () => {
+    localStreamRef.current?.getTracks().forEach(t => t.stop())
+    localStreamRef.current = null
+  }
+
+  const closePeer = useCallback(() => {
+    peerConnRef.current?.close()
+    peerConnRef.current = null
+    stopLocalStream()
+    setActiveCall(null)
+    setIncomingCall(null)
+    setCallMuted(false)
+    setCamOff(false)
+  }, [])
+
+  const createPeerConn = useCallback((peerId) => {
+    const pc = new RTCPeerConnection(STUN)
+    pc.onicecandidate = e => {
+      if (e.candidate) {
+        sendWS({ type: 'ice_candidate', target_id: peerId, candidate: e.candidate })
+      }
+    }
+    pc.ontrack = e => {
+      if (remoteVideoRef.current) remoteVideoRef.current.srcObject = e.streams[0]
+    }
+    pc.onconnectionstatechange = () => {
+      if (['disconnected','failed','closed'].includes(pc.connectionState)) closePeer()
+    }
+    peerConnRef.current = pc
+    return pc
+  }, [sendWS, closePeer])
+
+  const startCall = useCallback(async (peerId, peerName, callType) => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true, video: callType === 'video',
+      })
+      localStreamRef.current = stream
+      if (localVideoRef.current) localVideoRef.current.srcObject = stream
+
+      const pc = createPeerConn(peerId)
+      stream.getTracks().forEach(t => pc.addTrack(t, stream))
+
+      const offer = await pc.createOffer()
+      await pc.setLocalDescription(offer)
+
+      sendWS({ type: 'call_offer', target_id: peerId, offer, callType })
+      setActiveCall({ peer_id: peerId, peer_name: peerName, callType })
+    } catch (err) {
+      toast('تعذّر الوصول للميكروفون/الكاميرا', false)
+    }
+  }, [createPeerConn, sendWS])
+
+  const acceptCall = useCallback(async () => {
+    if (!incomingCall) return
+    try {
+      const { from_id, from_name, offer, callType } = incomingCall
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true, video: callType === 'video',
+      })
+      localStreamRef.current = stream
+      if (localVideoRef.current) localVideoRef.current.srcObject = stream
+
+      const pc = createPeerConn(from_id)
+      stream.getTracks().forEach(t => pc.addTrack(t, stream))
+
+      await pc.setRemoteDescription(new RTCSessionDescription(offer))
+      const answer = await pc.createAnswer()
+      await pc.setLocalDescription(answer)
+
+      sendWS({ type: 'call_answer', target_id: from_id, answer })
+      setIncomingCall(null)
+      setActiveCall({ peer_id: from_id, peer_name: from_name, callType })
+    } catch (err) {
+      toast('تعذّر قبول المكالمة', false)
+      setIncomingCall(null)
+    }
+  }, [incomingCall, createPeerConn, sendWS])
+
+  const rejectCall = useCallback(() => {
+    if (!incomingCall) return
+    sendWS({ type: 'call_reject', target_id: incomingCall.from_id })
+    setIncomingCall(null)
+  }, [incomingCall, sendWS])
+
+  const endCall = useCallback(() => {
+    if (activeCall) sendWS({ type: 'call_end', target_id: activeCall.peer_id })
+    closePeer()
+  }, [activeCall, sendWS, closePeer])
 
   // ── WebSocket ─────────────────────────────────────────────────
   useEffect(() => {
@@ -123,29 +251,48 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
     wsRef.current = ws
 
     ws.onmessage = e => {
+      if (e.data === 'pong') return
       try {
         const data = JSON.parse(e.data)
-        if (data.type === 'message') {
-          // Use ref to avoid stale closure
+        const { type } = data
+
+        if (type === 'message') {
           if (activeChatRef.current?.chat_id === data.chat_id) {
             setMessages(prev => [...prev, data])
           } else {
             toast(`رسالة جديدة من ${data.sender_name}`, true)
           }
-        } else if (data.type === 'friend_request') {
+        } else if (type === 'friend_request') {
           toast(`طلب صداقة من ${data.from.name} 🙋`, true)
           loadFriends()
-        } else if (data.type === 'friend_accepted') {
+        } else if (type === 'friend_accepted') {
           toast(`${data.by.name} قبل طلب الصداقة ✅`, true)
           loadFriends()
-        } else if (data.type === 'added_to_group') {
+        } else if (type === 'added_to_group') {
           toast(`تمت إضافتك لمجموعة "${data.group.name}" 👥`, true)
           loadGroups()
+        } else if (type === 'challenge_invite') {
+          toast(`دعوة تحدي: "${data.challenge.name}" من ${data.from.name} 🏆`, true)
+          loadChallenges()
+        } else if (type === 'call_offer') {
+          // incoming call
+          const fromId   = data.from_id
+          const fromName = data.from_name || `مستخدم #${fromId}`
+          setIncomingCall({ from_id: fromId, from_name: fromName, offer: data.offer, callType: data.callType || 'audio' })
+        } else if (type === 'call_answer') {
+          // our offer was answered
+          const pc = peerConnRef.current
+          if (pc) pc.setRemoteDescription(new RTCSessionDescription(data.answer)).catch(() => {})
+        } else if (type === 'ice_candidate') {
+          const pc = peerConnRef.current
+          if (pc && data.candidate) pc.addIceCandidate(new RTCIceCandidate(data.candidate)).catch(() => {})
+        } else if (type === 'call_end' || type === 'call_reject') {
+          closePeer()
+          if (type === 'call_reject') toast('رفض المكالمة', false)
         }
       } catch {}
     }
 
-    // Heartbeat ping every 25s to keep WS alive on Render
     const ping = setInterval(() => { if (ws.readyState === 1) ws.send('ping') }, 25000)
     return () => { clearInterval(ping); ws.close() }
   }, [user?.id, token]) // eslint-disable-line
@@ -181,7 +328,7 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
     msgBottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // ── Send message ──────────────────────────────────────────────
+  // ── Send text message ─────────────────────────────────────────
   const sendMsg = async () => {
     if (!msgInput.trim() || !activeChat || sending) return
     setSending(true)
@@ -189,11 +336,51 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
       const msg = await api('POST', '/social/messages', token, {
         chat_id: activeChat.chat_id,
         content: msgInput.trim(),
+        msg_type: 'text',
       })
       setMessages(prev => [...prev, msg])
       setMsgInput('')
     } catch (err) { toast(err.message, false) }
     setSending(false)
+  }
+
+  // ── Voice recording ───────────────────────────────────────────
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      recordedChunksRef.current = []
+      const mr = new MediaRecorder(stream)
+      mr.ondataavailable = e => { if (e.data.size > 0) recordedChunksRef.current.push(e.data) }
+      mr.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop())
+        const blob = new Blob(recordedChunksRef.current, { type: 'audio/webm' })
+        if (blob.size < 100 || !activeChat) return
+        const reader = new FileReader()
+        reader.onloadend = async () => {
+          const base64 = reader.result
+          try {
+            const msg = await api('POST', '/social/messages', token, {
+              chat_id: activeChat.chat_id,
+              content: '🎤 رسالة صوتية',
+              msg_type: 'voice',
+              voice_data: base64,
+            })
+            setMessages(prev => [...prev, msg])
+          } catch (err) { toast(err.message, false) }
+        }
+        reader.readAsDataURL(blob)
+      }
+      mr.start()
+      mediaRecorderRef.current = mr
+      setIsRecording(true)
+    } catch {
+      toast('تعذّر الوصول للميكروفون', false)
+    }
+  }
+
+  const stopRecording = () => {
+    mediaRecorderRef.current?.stop()
+    setIsRecording(false)
   }
 
   // ── Friend actions ────────────────────────────────────────────
@@ -228,9 +415,7 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
     try {
       await api('POST', '/social/groups', token, { name: newGroupName.trim() })
       toast(`تم إنشاء المجموعة "${newGroupName}" 🎉`)
-      setNewGroupName('')
-      setShowNewGroup(false)
-      loadGroups()
+      setNewGroupName(''); setShowNewGroup(false); loadGroups()
     } catch (err) { toast(err.message, false) }
   }
 
@@ -247,9 +432,49 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
     try {
       await api('POST', `/social/groups/${gid}/members`, token, { user_id: uid })
       toast(`تمت إضافة ${name} للمجموعة ✅`)
-      setAddMemberInput('')
-      setAddMemberRes([])
-      loadGroups()
+      setAddMemberInput(''); setAddMemberRes([]); loadGroups()
+    } catch (err) { toast(err.message, false) }
+  }
+
+  // ── Challenge actions ─────────────────────────────────────────
+  const createChallenge = async () => {
+    if (!challengeName.trim()) return
+    try {
+      await api('POST', '/social/challenges', token, {
+        name: challengeName.trim(),
+        goal_level: challengeLevel,
+        deadline: challengeDeadline || null,
+      })
+      toast('تم إنشاء التحدي 🏆')
+      setChallengeName(''); setChallengeDeadline(''); setShowNewChallenge(false)
+      loadChallenges()
+    } catch (err) { toast(err.message, false) }
+  }
+
+  const searchInvite = async q => {
+    setChallengeInviteInput(q)
+    if (!q.trim()) { setChallengeInviteRes([]); return }
+    try {
+      const res = await api('GET', `/social/search?q=${encodeURIComponent(q)}`, token)
+      setChallengeInviteRes(res)
+    } catch {}
+  }
+
+  const inviteToChallenge = async (cid, uid, name) => {
+    try {
+      await api('POST', `/social/challenges/${cid}/invite`, token, { user_id: uid })
+      toast(`تمت دعوة ${name} للتحدي ✅`)
+      setChallengeInviteInput(''); setChallengeInviteRes([])
+    } catch (err) { toast(err.message, false) }
+  }
+
+  const saveProgress = async (cid, pct, share) => {
+    try {
+      await api('PUT', `/social/challenges/${cid}/progress`, token, {
+        progress_pct: pct, share_progress: share,
+      })
+      toast('تم حفظ التقدم ✅')
+      setEditingProgress(null); loadChallenges()
     } catch (err) { toast(err.message, false) }
   }
 
@@ -265,6 +490,60 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
       {/* Toast */}
       {notif && (
         <div className={`el-social-toast${notif.ok ? '' : ' error'}`}>{notif.text}</div>
+      )}
+
+      {/* ── Incoming call overlay ── */}
+      {incomingCall && !activeCall && (
+        <div className="el-call-overlay incoming">
+          <div className="el-call-card">
+            <div className="el-call-ring">📲</div>
+            <div className="el-call-name">{incomingCall.from_name}</div>
+            <div className="el-call-type">{incomingCall.callType === 'video' ? 'مكالمة فيديو' : 'مكالمة صوتية'}</div>
+            <div className="el-call-actions">
+              <button className="el-call-reject" onClick={rejectCall}>✕ رفض</button>
+              <button className="el-call-accept" onClick={acceptCall}>✔ قبول</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Active call overlay ── */}
+      {activeCall && (
+        <div className="el-call-overlay active">
+          {activeCall.callType === 'video' && (
+            <video ref={remoteVideoRef} autoPlay playsInline className="el-call-remote-video" />
+          )}
+          <div className="el-call-info-bar">
+            <span className="el-call-peer-name">{activeCall.peer_name}</span>
+            <span className="el-call-duration-badge">
+              {activeCall.callType === 'video' ? '📹' : '📞'} متصل
+            </span>
+          </div>
+          {activeCall.callType === 'video' && (
+            <video ref={localVideoRef} autoPlay playsInline muted className="el-call-local-video" />
+          )}
+          <div className="el-call-controls">
+            <button
+              className={`el-call-ctrl${callMuted ? ' off' : ''}`}
+              onClick={() => {
+                const enabled = !callMuted
+                localStreamRef.current?.getAudioTracks().forEach(t => { t.enabled = enabled })
+                setCallMuted(!callMuted)
+              }}
+            >{callMuted ? '🔇' : '🎙️'}</button>
+            {activeCall.callType === 'video' && (
+              <button
+                className={`el-call-ctrl${camOff ? ' off' : ''}`}
+                onClick={() => {
+                  const enabled = !camOff
+                  localStreamRef.current?.getVideoTracks().forEach(t => { t.enabled = enabled })
+                  setCamOff(!camOff)
+                }}
+              >{camOff ? '📷' : '🎥'}</button>
+            )}
+            <button className="el-call-ctrl end" onClick={endCall}>📵 إنهاء</button>
+          </div>
+        </div>
       )}
 
       <div className="el-social-layout">
@@ -289,7 +568,6 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
             {searching && <div className="el-social-searching">🔍</div>}
           </div>
 
-          {/* Search results */}
           {searchRes.length > 0 && (
             <div className="el-social-search-results">
               {searchRes.map(u => (
@@ -314,13 +592,16 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
           {/* Tabs */}
           <div className="el-social-tabs">
             <button className={`el-social-tab${tab === 'friends' ? ' active' : ''}`} onClick={() => setTab('friends')}>
-              👥 الأصدقاء
+              👥
               {friends.pending_in.length > 0 && (
                 <span className="el-social-badge red">{friends.pending_in.length}</span>
               )}
             </button>
             <button className={`el-social-tab${tab === 'groups' ? ' active' : ''}`} onClick={() => setTab('groups')}>
-              📢 المجموعات
+              📢
+            </button>
+            <button className={`el-social-tab${tab === 'challenges' ? ' active' : ''}`} onClick={() => setTab('challenges')}>
+              🏆
             </button>
           </div>
 
@@ -328,7 +609,6 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
             {/* ── FRIENDS TAB ── */}
             {tab === 'friends' && (
               <>
-                {/* Pending incoming */}
                 {friends.pending_in.length > 0 && (
                   <div className="el-social-section-label">طلبات الصداقة 🔔</div>
                 )}
@@ -346,7 +626,6 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
                   </div>
                 ))}
 
-                {/* Accepted friends */}
                 {friends.pending_in.length > 0 && friends.accepted.length > 0 && (
                   <div className="el-social-section-label">أصدقاؤك</div>
                 )}
@@ -378,7 +657,6 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
                   )
                 })}
 
-                {/* Pending outgoing */}
                 {friends.pending_out.length > 0 && (
                   <div className="el-social-section-label" style={{ marginTop: 12 }}>طلبات مُرسَلة ⏳</div>
                 )}
@@ -412,14 +690,12 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
                     <button className="el-social-accept-btn" style={{ padding: '6px 14px' }} onClick={createGroup}>إنشاء</button>
                   </div>
                 )}
-
                 {groups.length === 0 && (
                   <div className="el-social-empty">
                     <div style={{ fontSize: '2.5rem' }}>📢</div>
                     <div>أنشئ مجموعة للدراسة مع أصدقائك!</div>
                   </div>
                 )}
-
                 {groups.map(g => (
                   <div
                     key={g.id}
@@ -435,6 +711,63 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
                 ))}
               </>
             )}
+
+            {/* ── CHALLENGES TAB ── */}
+            {tab === 'challenges' && (
+              <>
+                <button className="el-social-new-group-btn" onClick={() => setShowNewChallenge(v => !v)}>
+                  ➕ تحدي جديد
+                </button>
+                {showNewChallenge && (
+                  <div className="el-challenge-create-form">
+                    <input
+                      className="el-social-search"
+                      placeholder="اسم التحدي..."
+                      value={challengeName}
+                      onChange={e => setChallengeName(e.target.value)}
+                    />
+                    <div className="el-challenge-level-row">
+                      {LEVELS.map(l => (
+                        <button
+                          key={l}
+                          className={`el-challenge-level-btn${challengeLevel === l ? ' active' : ''}`}
+                          onClick={() => setChallengeLevel(l)}
+                        >{l.toUpperCase()}</button>
+                      ))}
+                    </div>
+                    <input
+                      type="date"
+                      className="el-social-search"
+                      style={{ fontSize: '.8rem' }}
+                      value={challengeDeadline}
+                      onChange={e => setChallengeDeadline(e.target.value)}
+                    />
+                    <button className="el-social-accept-btn" style={{ padding: '6px 14px' }} onClick={createChallenge}>
+                      إنشاء التحدي 🏆
+                    </button>
+                  </div>
+                )}
+                {challenges.length === 0 && !showNewChallenge && (
+                  <div className="el-social-empty">
+                    <div style={{ fontSize: '2.5rem' }}>🏆</div>
+                    <div>تحدَّ أصدقاءك للوصول لمستوى معين!</div>
+                  </div>
+                )}
+                {challenges.map(c => (
+                  <div
+                    key={c.id}
+                    className={`el-social-group-row${activeChat?.chat_id === c.chat_id ? ' active' : ''}`}
+                    onClick={() => openChat(c.chat_id, `🏆 ${c.name}`)}
+                  >
+                    <div className="el-challenge-badge">{c.goal_level.toUpperCase()}</div>
+                    <div className="el-social-friend-info">
+                      <div className="el-social-friend-name">{c.name}</div>
+                      <div className="el-social-friend-sub">{c.participants.length} مشارك • {c.my_progress}%</div>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         </aside>
 
@@ -444,11 +777,13 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
             <div className="el-social-welcome">
               <div style={{ fontSize: '4rem' }}>💬</div>
               <h2>مرحباً في مجتمع AcadAI!</h2>
-              <p>اختر صديقاً أو مجموعة من القائمة لتبدأ المحادثة</p>
+              <p>اختر صديقاً أو مجموعة أو تحدياً للبدء</p>
               <div className="el-social-welcome-tips">
                 <div className="el-social-tip">🔍 ابحث عن زملائك بالاسم أو الإيميل</div>
                 <div className="el-social-tip">➕ أرسل طلب صداقة وابدأ المحادثة</div>
-                <div className="el-social-tip">📢 أنشئ مجموعة للدراسة الجماعية</div>
+                <div className="el-social-tip">🏆 أنشئ تحدياً وادعُ أصدقاءك</div>
+                <div className="el-social-tip">🎤 أرسل رسائل صوتية بزر الميكروفون</div>
+                <div className="el-social-tip">📹 ابدأ مكالمة فيديو أو صوت من زر المكالمة</div>
               </div>
             </div>
           ) : (
@@ -466,15 +801,36 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
                       })?.online
                     : undefined}
                 />
-                <div>
+                <div style={{ flex: 1 }}>
                   <div className="el-social-chat-title">{activeChat.title}</div>
                   {activeChat.chat_id.startsWith('group_') && (() => {
                     const g = groups.find(x => x.chat_id === activeChat.chat_id)
                     return g ? <div className="el-social-chat-sub">{g.members.length} عضو</div> : null
                   })()}
+                  {activeChat.chat_id.startsWith('challenge_') && (() => {
+                    const c = challenges.find(x => x.chat_id === activeChat.chat_id)
+                    return c ? <div className="el-social-chat-sub">الهدف: {c.goal_level.toUpperCase()} • {c.participants.length} مشارك</div> : null
+                  })()}
                 </div>
 
-                {/* Group: add member panel */}
+                {/* DM: call buttons */}
+                {activeChat.chat_id.startsWith('dm_') && (() => {
+                  const f = friends.accepted.find(f => {
+                    const cid = `dm_${Math.min(user.id,f.id)}_${Math.max(user.id,f.id)}`
+                    return cid === activeChat.chat_id
+                  })
+                  if (!f) return null
+                  return (
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <button className="el-icon-btn" title="مكالمة صوتية"
+                        onClick={() => startCall(f.id, f.name, 'audio')}>📞</button>
+                      <button className="el-icon-btn" title="مكالمة فيديو"
+                        onClick={() => startCall(f.id, f.name, 'video')}>📹</button>
+                    </div>
+                  )
+                })()}
+
+                {/* Group: add member */}
                 {activeChat.chat_id.startsWith('group_') && (() => {
                   const g = groups.find(x => x.chat_id === activeChat.chat_id)
                   if (!g || g.creator_id !== user?.id) return null
@@ -504,7 +860,86 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
                     </div>
                   )
                 })()}
+
+                {/* Challenge: progress + invite */}
+                {activeChat.chat_id.startsWith('challenge_') && (() => {
+                  const c = challenges.find(x => x.chat_id === activeChat.chat_id)
+                  if (!c) return null
+                  return (
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                      <button className="el-icon-btn" title="تحديث تقدمي"
+                        onClick={() => setEditingProgress(c.id === editingProgress ? null : c.id)}>📊</button>
+                      {c.creator_id === user?.id && (
+                        <button className="el-icon-btn" title="دعوة صديق"
+                          onClick={e => { e.stopPropagation(); setChallengeInviteInput('★'); setChallengeInviteRes([]) }}>➕</button>
+                      )}
+                    </div>
+                  )
+                })()}
               </div>
+
+              {/* Challenge: progress editor panel */}
+              {activeChat.chat_id.startsWith('challenge_') && editingProgress !== null && (() => {
+                const c = challenges.find(x => x.chat_id === activeChat.chat_id)
+                if (!c || c.id !== editingProgress) return null
+                return (
+                  <ProgressPanel
+                    challenge={c}
+                    onSave={(pct, share) => saveProgress(c.id, pct, share)}
+                    onClose={() => setEditingProgress(null)}
+                  />
+                )
+              })()}
+
+              {/* Challenge: participants progress bar */}
+              {activeChat.chat_id.startsWith('challenge_') && (() => {
+                const c = challenges.find(x => x.chat_id === activeChat.chat_id)
+                if (!c) return null
+                const visible = c.participants.filter(p => p.progress_pct !== undefined)
+                if (visible.length === 0) return null
+                return (
+                  <div className="el-challenge-progress-panel">
+                    {visible.map(p => (
+                      <div key={p.user_id} className="el-challenge-progress-row">
+                        <span className="el-challenge-progress-name">{p.name}</span>
+                        <div className="el-challenge-progress-bar-wrap">
+                          <div className="el-challenge-progress-fill" style={{ width: `${p.progress_pct}%` }} />
+                        </div>
+                        <span className="el-challenge-progress-pct">{p.progress_pct}%</span>
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()}
+
+              {/* Challenge: invite search */}
+              {activeChat.chat_id.startsWith('challenge_') && challengeInviteInput && (() => {
+                const c = challenges.find(x => x.chat_id === activeChat.chat_id)
+                if (!c || c.creator_id !== user?.id) return null
+                return (
+                  <div className="el-challenge-invite-panel">
+                    <input
+                      className="el-social-search"
+                      placeholder="ابحث عن صديق للدعوة..."
+                      value={challengeInviteInput === '★' ? '' : challengeInviteInput}
+                      onChange={e => searchInvite(e.target.value)}
+                      autoFocus
+                    />
+                    {challengeInviteRes.map(u => (
+                      <div key={u.id} className="el-social-search-row">
+                        <Avatar name={u.name} size={28} />
+                        <div className="el-social-search-info" style={{ flex: 1 }}>
+                          <div className="el-social-search-name">{u.name}</div>
+                        </div>
+                        <button className="el-social-add-btn"
+                          onClick={() => inviteToChallenge(c.id, u.id, u.name)}>دعوة</button>
+                      </div>
+                    ))}
+                    <button style={{ fontSize: '.75rem', color: 'var(--el-muted)', background: 'none', border: 'none', cursor: 'pointer', marginTop: 4 }}
+                      onClick={() => { setChallengeInviteInput(''); setChallengeInviteRes([]) }}>إغلاق ✕</button>
+                  </div>
+                )
+              })()}
 
               {/* Messages */}
               <div className="el-social-messages">
@@ -523,7 +958,11 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
                         <div className="el-social-msg-sender">{m.sender_name}</div>
                       )}
                       <div className="el-social-msg-bubble">
-                        <span className="el-social-msg-text">{m.content}</span>
+                        {m.msg_type === 'voice' && m.voice_data ? (
+                          <audio controls src={m.voice_data} style={{ maxWidth: 220, height: 36 }} />
+                        ) : (
+                          <span className="el-social-msg-text">{m.content}</span>
+                        )}
                         <TimeAgo iso={m.created_at} />
                       </div>
                     </div>
@@ -534,6 +973,14 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
 
               {/* Input */}
               <div className="el-social-input-row">
+                <button
+                  className={`el-social-voice-btn${isRecording ? ' recording' : ''}`}
+                  onMouseDown={startRecording}
+                  onMouseUp={stopRecording}
+                  onTouchStart={startRecording}
+                  onTouchEnd={stopRecording}
+                  title={isRecording ? 'ارفع للإرسال' : 'اضغط مع الإمساك للتسجيل'}
+                >{isRecording ? '⏹' : '🎤'}</button>
                 <input
                   className="el-social-msg-input"
                   placeholder="اكتب رسالة..."
@@ -552,6 +999,30 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
             </>
           )}
         </main>
+      </div>
+    </div>
+  )
+}
+
+// ── Progress editor sub-component ────────────────────────────────
+function ProgressPanel({ challenge, onSave, onClose }) {
+  const [pct, setPct] = useState(challenge.my_progress || 0)
+  const [share, setShare] = useState(challenge.my_share || false)
+  return (
+    <div className="el-challenge-edit-panel">
+      <div className="el-challenge-edit-title">📊 تحديث تقدمي في التحدي</div>
+      <div className="el-challenge-edit-row">
+        <span style={{ minWidth: 36 }}>{pct}%</span>
+        <input type="range" min={0} max={100} value={pct}
+          onChange={e => setPct(Number(e.target.value))} style={{ flex: 1 }} />
+      </div>
+      <label className="el-challenge-share-toggle">
+        <input type="checkbox" checked={share} onChange={e => setShare(e.target.checked)} />
+        <span>السماح للمشاركين برؤية تقدمي</span>
+      </label>
+      <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+        <button className="el-social-accept-btn" onClick={() => onSave(pct, share)}>حفظ</button>
+        <button className="el-social-reject-btn" onClick={onClose}>إلغاء</button>
       </div>
     </div>
   )

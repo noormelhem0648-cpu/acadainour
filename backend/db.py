@@ -110,11 +110,35 @@ class GroupMember(Base):
 class SocialMessage(Base):
     __tablename__ = "social_messages"
     id = Column(Integer, primary_key=True, index=True)
-    # dm_{min_id}_{max_id}  or  group_{group_id}
+    # dm_{min_id}_{max_id}  or  group_{group_id}  or  challenge_{challenge_id}
     chat_id = Column(String(50), nullable=False, index=True)
     sender_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     content = Column(Text, nullable=False)
+    msg_type = Column(String(10), default="text")   # text | voice
+    voice_data = Column(Text, nullable=True)         # base64 audio for voice messages
     created_at = Column(DateTime, server_default=func.now())
+
+
+class Challenge(Base):
+    __tablename__ = "challenges"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(150), nullable=False)
+    goal_level = Column(String(10), nullable=False)   # a1 / a2 / b1 / b2 / c1 / c2
+    creator_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    deadline = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+    participants = relationship("ChallengeParticipant", back_populates="challenge")
+
+
+class ChallengeParticipant(Base):
+    __tablename__ = "challenge_participants"
+    id = Column(Integer, primary_key=True, index=True)
+    challenge_id = Column(Integer, ForeignKey("challenges.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    share_progress = Column(Boolean, default=False)   # user controls visibility
+    progress_pct = Column(Integer, default=0)          # 0-100, self-reported
+    joined_at = Column(DateTime, server_default=func.now())
+    challenge = relationship("Challenge", back_populates="participants")
 
 
 def _migrate():
@@ -125,6 +149,8 @@ def _migrate():
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS daily_date VARCHAR(10) DEFAULT ''",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token VARCHAR(200)",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_expiry TIMESTAMP",
+        "ALTER TABLE social_messages ADD COLUMN IF NOT EXISTS msg_type VARCHAR(10) DEFAULT 'text'",
+        "ALTER TABLE social_messages ADD COLUMN IF NOT EXISTS voice_data TEXT",
     ]
     with engine.begin() as conn:
         for stmt in statements:

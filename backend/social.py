@@ -13,7 +13,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError
 
-from db import get_db, User, Friendship, ChatGroup, GroupMember, SocialMessage
+from db import get_db, User, Friendship, ChatGroup, GroupMember, SocialMessage, Challenge, ChallengeParticipant
 from auth import get_current_user, SECRET_KEY, ALGORITHM
 
 router = APIRouter(prefix="/social", tags=["social"])
@@ -65,6 +65,8 @@ def _msg_dict(m: SocialMessage, sender_name: str) -> dict:
         "sender_id": m.sender_id,
         "sender_name": sender_name,
         "content": m.content,
+        "msg_type": m.msg_type or "text",
+        "voice_data": m.voice_data,
         "created_at": m.created_at.isoformat(),
     }
 
@@ -83,6 +85,20 @@ class AddMemberBody(BaseModel):
 class SendMessageBody(BaseModel):
     chat_id: str
     content: str
+    msg_type: str = "text"    # text | voice
+    voice_data: Optional[str] = None   # base64 audio
+
+class ChallengeCreateBody(BaseModel):
+    name: str
+    goal_level: str
+    deadline: Optional[str] = None    # ISO date string
+
+class ChallengeInviteBody(BaseModel):
+    user_id: int
+
+class ChallengeProgressBody(BaseModel):
+    progress_pct: int
+    share_progress: bool
 
 
 # ── User search ───────────────────────────────────────────────────
@@ -318,6 +334,14 @@ def _assert_chat_access(chat_id: str, me_id: int, db: Session):
         ).first()
         if not m:
             raise HTTPException(403, "Not a member")
+    elif chat_id.startswith("challenge_"):
+        cid = int(chat_id.split("_")[1])
+        p = db.query(ChallengeParticipant).filter(
+            ChallengeParticipant.challenge_id == cid,
+            ChallengeParticipant.user_id == me_id,
+        ).first()
+        if not p:
+            raise HTTPException(403, "Not a participant")
     else:
         raise HTTPException(400, "Invalid chat_id")
 
@@ -361,7 +385,9 @@ async def send_message(
     msg = SocialMessage(
         chat_id=body.chat_id,
         sender_id=me.id,
-        content=body.content.strip(),
+        content=body.content.strip() if body.content else "",
+        msg_type=body.msg_type,
+        voice_data=body.voice_data,
     )
     db.add(msg)
     db.commit()
@@ -384,8 +410,137 @@ async def send_message(
         for mm in members:
             if mm.user_id != me.id:
                 await manager.send(mm.user_id, payload)
+    elif body.chat_id.startswith("challenge_"):
+        cid = int(body.chat_id.split("_")[1])
+        participants = db.query(ChallengeParticipant).filter(
+            ChallengeParticipant.challenge_id == cid
+        ).all()
+        for pp in participants:
+            if pp.user_id != me.id:
+                await manager.send(pp.user_id, payload)
 
     return payload
+
+
+# ── Challenges ───────────────────────────────────────────────────
+
+@router.get("/challenges")
+def list_challenges(
+    me: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    rows = db.query(ChallengeParticipant).filter(ChallengeParticipant.user_id == me.id).all()
+    result = []
+    for p in rows:
+        c = db.query(Challenge).get(p.challenge_id)
+        if not c:
+            continue
+        participants = db.query(ChallengeParticipant).filter(
+            ChallengeParticipant.challenge_id == c.id
+        ).all()
+        parts_out = []
+        for pp in participants:
+            u = db.query(User).get(pp.user_id)
+            if not u:
+                continue
+            entry = {"user_id": pp.user_id, "name": u.name, "joined_at": pp.joined_at.isoformat()}
+            # Only reveal progress if the participant opted in OR it's me
+            if pp.share_progress or pp.user_id == me.id:
+                entry["progress_pct"] = pp.progress_pct
+                entry["share_progress"] = pp.share_progress
+            parts_out.append(entry)
+        result.append({
+            "id": c.id,
+            "name": c.name,
+            "goal_level": c.goal_level,
+            "creator_id": c.creator_id,
+            "deadline": c.deadline.isoformat() if c.deadline else None,
+            "chat_id": f"challenge_{c.id}",
+            "my_progress": p.progress_pct,
+            "my_share": p.share_progress,
+            "participants": parts_out,
+        })
+    return result
+
+
+@router.post("/challenges", status_code=201)
+async def create_challenge(
+    body: ChallengeCreateBody,
+    me: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    deadline_dt = None
+    if body.deadline:
+        try:
+            deadline_dt = datetime.fromisoformat(body.deadline)
+        except ValueError:
+            pass
+    c = Challenge(
+        name=body.name.strip(),
+        goal_level=body.goal_level.lower(),
+        creator_id=me.id,
+        deadline=deadline_dt,
+    )
+    db.add(c)
+    db.flush()
+    db.add(ChallengeParticipant(challenge_id=c.id, user_id=me.id, share_progress=True))
+    db.commit()
+    db.refresh(c)
+    return {"id": c.id, "name": c.name, "chat_id": f"challenge_{c.id}"}
+
+
+@router.post("/challenges/{cid}/invite", status_code=201)
+async def invite_to_challenge(
+    cid: int,
+    body: ChallengeInviteBody,
+    me: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    c = db.query(Challenge).get(cid)
+    if not c:
+        raise HTTPException(404, "Challenge not found")
+    if c.creator_id != me.id:
+        raise HTTPException(403, "Only the creator can invite")
+
+    target = db.query(User).get(body.user_id)
+    if not target:
+        raise HTTPException(404, "User not found")
+
+    exists = db.query(ChallengeParticipant).filter(
+        ChallengeParticipant.challenge_id == cid,
+        ChallengeParticipant.user_id == body.user_id,
+    ).first()
+    if exists:
+        raise HTTPException(409, "Already a participant")
+
+    db.add(ChallengeParticipant(challenge_id=cid, user_id=body.user_id, share_progress=False))
+    db.commit()
+
+    await manager.send(body.user_id, {
+        "type": "challenge_invite",
+        "challenge": {"id": c.id, "name": c.name, "goal_level": c.goal_level, "chat_id": f"challenge_{c.id}"},
+        "from": _user_dict(me),
+    })
+    return {"ok": True}
+
+
+@router.put("/challenges/{cid}/progress")
+def update_challenge_progress(
+    cid: int,
+    body: ChallengeProgressBody,
+    me: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    p = db.query(ChallengeParticipant).filter(
+        ChallengeParticipant.challenge_id == cid,
+        ChallengeParticipant.user_id == me.id,
+    ).first()
+    if not p:
+        raise HTTPException(404, "Not a participant")
+    p.progress_pct = max(0, min(100, body.progress_pct))
+    p.share_progress = body.share_progress
+    db.commit()
+    return {"ok": True}
 
 
 # ── WebSocket ─────────────────────────────────────────────────────
@@ -415,7 +570,18 @@ async def websocket_endpoint(ws: WebSocket, user_id: int, token: str = "", db: S
     await manager.connect(user_id, ws)
     try:
         while True:
-            # Keep connection alive — client sends pings
-            await ws.receive_text()
+            raw = await ws.receive_text()
+            if raw == "ping":
+                continue
+            try:
+                msg = json.loads(raw)
+            except Exception:
+                continue
+            msg_type = msg.get("type", "")
+            # WebRTC call signaling — relay to target peer
+            if msg_type in ("call_offer", "call_answer", "ice_candidate", "call_end", "call_reject"):
+                target_id = msg.get("target_id")
+                if target_id:
+                    await manager.send(int(target_id), {**msg, "from_id": user_id})
     except WebSocketDisconnect:
         manager.disconnect(user_id)
