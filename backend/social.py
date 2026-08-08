@@ -4,9 +4,15 @@ Endpoints: search users, friend requests, group chat, direct messages.
 WebSocket:  /ws/social/{user_id}?token=...  — real-time message delivery.
 """
 
+import base64
 import json
+import os
+import uuid
 from datetime import datetime
 from typing import Optional
+
+import boto3
+from botocore.config import Config
 
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect, Query, status
 from pydantic import BaseModel
@@ -17,6 +23,34 @@ from db import get_db, User, Friendship, ChatGroup, GroupMember, SocialMessage, 
 from auth import get_current_user, SECRET_KEY, ALGORITHM
 
 router = APIRouter(prefix="/social", tags=["social"])
+
+# ── R2 voice upload ───────────────────────────────────────────────
+
+def _r2_client():
+    return boto3.client(
+        "s3",
+        endpoint_url=os.getenv("R2_ENDPOINT"),
+        aws_access_key_id=os.getenv("R2_KEY"),
+        aws_secret_access_key=os.getenv("R2_SECRET"),
+        config=Config(signature_version="s3v4"),
+        region_name="auto",
+    )
+
+def upload_voice(data_base64: str) -> str:
+    """Upload base64 audio to R2, return public URL."""
+    # Strip data URI prefix if present
+    if "," in data_base64:
+        data_base64 = data_base64.split(",", 1)[1]
+    audio_bytes = base64.b64decode(data_base64)
+    key = f"voice/{uuid.uuid4()}.webm"
+    bucket = os.getenv("R2_BUCKET", "acadai-voice")
+    _r2_client().put_object(
+        Bucket=bucket,
+        Key=key,
+        Body=audio_bytes,
+        ContentType="audio/webm",
+    )
+    return f"{os.getenv('R2_PUBLIC_URL')}/{key}"
 
 
 # ── WebSocket connection manager ──────────────────────────────────
@@ -382,12 +416,19 @@ async def send_message(
     if not body.content.strip():
         raise HTTPException(400, "Empty message")
 
+    voice_url = None
+    if body.msg_type == "voice" and body.voice_data:
+        try:
+            voice_url = upload_voice(body.voice_data)
+        except Exception as e:
+            raise HTTPException(500, f"Voice upload failed: {e}")
+
     msg = SocialMessage(
         chat_id=body.chat_id,
         sender_id=me.id,
-        content=body.content.strip() if body.content else "",
+        content=body.content.strip() if body.content else "🎤 رسالة صوتية",
         msg_type=body.msg_type,
-        voice_data=body.voice_data,
+        voice_data=voice_url,   # store URL, not base64
     )
     db.add(msg)
     db.commit()
