@@ -119,6 +119,20 @@ class SocialMessage(Base):
     created_at = Column(DateTime, server_default=func.now())
 
 
+class StudentProgress(Base):
+    __tablename__ = "student_progress"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
+    xp = Column(Integer, default=0)
+    streak_count = Column(Integer, default=0)
+    last_study_date = Column(String(10), default="")   # YYYY-MM-DD
+    hard_words = Column(Text, default="[]")             # JSON array
+    badges = Column(Text, default="[]")                 # JSON array
+    notebook = Column(Text, default="{}")               # JSON object
+    errors = Column(Text, default="[]")                 # JSON array
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+
 class Challenge(Base):
     __tablename__ = "challenges"
     id = Column(Integer, primary_key=True, index=True)

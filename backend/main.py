@@ -16,7 +16,7 @@ from slowapi.errors import RateLimitExceeded
 from ai_engine import generate_academic_response, generate_academic_response_stream, _add_keys
 from subjects_meta import get_subject_info
 from faiss_engine import search
-from db import init_db, get_db, User, Conversation, Message, Restriction, ContributedKey
+from db import init_db, get_db, User, Conversation, Message, Restriction, ContributedKey, StudentProgress
 from auth import (
     hash_password, verify_password, create_access_token,
     get_current_user, require_user, require_instructor
@@ -852,5 +852,59 @@ def change_password(
     if len(req.new_password) < 6:
         raise HTTPException(400, "كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل")
     me.hashed_password = hash_password(req.new_password)
+    db.commit()
+    return {"ok": True}
+
+
+# ── Student Progress Sync ─────────────────────────────────────────
+
+class ProgressSyncRequest(BaseModel):
+    xp: Optional[int] = None
+    streak_count: Optional[int] = None
+    last_study_date: Optional[str] = None
+    hard_words: Optional[str] = None   # JSON string
+    badges: Optional[str] = None       # JSON string
+    notebook: Optional[str] = None     # JSON string
+    errors: Optional[str] = None       # JSON string
+
+@app.get("/progress/me")
+def get_progress(
+    me: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    p = db.query(StudentProgress).filter(StudentProgress.user_id == me.id).first()
+    if not p:
+        return {
+            "xp": 0, "streak_count": 0, "last_study_date": "",
+            "hard_words": "[]", "badges": "[]", "notebook": "{}", "errors": "[]",
+        }
+    return {
+        "xp": p.xp,
+        "streak_count": p.streak_count,
+        "last_study_date": p.last_study_date,
+        "hard_words": p.hard_words,
+        "badges": p.badges,
+        "notebook": p.notebook,
+        "errors": p.errors,
+        "updated_at": p.updated_at.isoformat() if p.updated_at else None,
+    }
+
+@app.put("/progress/me")
+def save_progress(
+    req: ProgressSyncRequest,
+    me: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    p = db.query(StudentProgress).filter(StudentProgress.user_id == me.id).first()
+    if not p:
+        p = StudentProgress(user_id=me.id)
+        db.add(p)
+    if req.xp is not None:             p.xp = req.xp
+    if req.streak_count is not None:   p.streak_count = req.streak_count
+    if req.last_study_date is not None: p.last_study_date = req.last_study_date
+    if req.hard_words is not None:     p.hard_words = req.hard_words
+    if req.badges is not None:         p.badges = req.badges
+    if req.notebook is not None:       p.notebook = req.notebook
+    if req.errors is not None:         p.errors = req.errors
     db.commit()
     return {"ok": True}

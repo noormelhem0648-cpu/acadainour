@@ -22,6 +22,7 @@ import ELIPAPage from "./english-learning/pages/ELIPAPage";
 import ELReviewPage from "./english-learning/pages/ELReviewPage";
 import ELSocialPage from "./english-learning/pages/ELSocialPage";
 import ELAccountPage from "./english-learning/pages/ELAccountPage";
+import { useProgressSync } from "./english-learning/useProgressSync";
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("theme") === "dark");
@@ -29,6 +30,9 @@ function App() {
     try { return JSON.parse(localStorage.getItem("noura_user")); } catch { return null; }
   });
   const [token, setToken] = useState(() => localStorage.getItem("noura_token") || null);
+
+  // Sync student progress across devices
+  useProgressSync();
 
   useEffect(() => {
     if (darkMode) {
