@@ -115,6 +115,7 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
   const [camOff, setCamOff]         = useState(false)
 
   const [notif, setNotif] = useState(null)
+  const [unread, setUnread] = useState({})   // { [chat_id]: count }
 
   const wsRef        = useRef(null)
   const msgBottomRef = useRef(null)
@@ -250,6 +251,11 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
     const ws = new WebSocket(`${WS_BASE}/ws/social/${user.id}?token=${token}`)
     wsRef.current = ws
 
+    ws.onopen = () => {
+      // Reload friends after WS connects to get accurate online status
+      loadFriends()
+    }
+
     ws.onmessage = e => {
       if (e.data === 'pong') return
       try {
@@ -260,6 +266,8 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
           if (activeChatRef.current?.chat_id === data.chat_id) {
             setMessages(prev => [...prev, data])
           } else {
+            // increment unread count for that chat
+            setUnread(prev => ({ ...prev, [data.chat_id]: (prev[data.chat_id] || 0) + 1 }))
             toast(`رسالة جديدة من ${data.sender_name}`, true)
           }
         } else if (type === 'friend_request') {
@@ -315,6 +323,7 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
   const openChat = useCallback(async (chatId, title) => {
     activeChatRef.current = { chat_id: chatId, title }
     setActiveChat({ chat_id: chatId, title })
+    setUnread(prev => ({ ...prev, [chatId]: 0 }))
     setMessages([])
     setLoadingMsgs(true)
     try {
@@ -637,6 +646,7 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
                 )}
                 {friends.accepted.map(f => {
                   const chatId = `dm_${Math.min(user.id, f.id)}_${Math.max(user.id, f.id)}`
+                  const cnt = unread[chatId] || 0
                   return (
                     <div
                       key={f.friendship_id}
@@ -648,6 +658,7 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
                         <div className="el-social-friend-name">{f.name}</div>
                         <div className="el-social-friend-sub">{f.online ? '🟢 متصل' : '⚫ غير متصل'}</div>
                       </div>
+                      {cnt > 0 && <span className="el-social-unread-badge">{cnt}</span>}
                       <button
                         className="el-social-remove-btn"
                         title="إزالة"
@@ -696,19 +707,23 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
                     <div>أنشئ مجموعة للدراسة مع أصدقائك!</div>
                   </div>
                 )}
-                {groups.map(g => (
-                  <div
-                    key={g.id}
-                    className={`el-social-group-row${activeChat?.chat_id === g.chat_id ? ' active' : ''}`}
-                    onClick={() => openChat(g.chat_id, g.name)}
-                  >
-                    <div className="el-social-group-icon">#{g.name[0]?.toUpperCase()}</div>
-                    <div className="el-social-friend-info">
-                      <div className="el-social-friend-name">{g.name}</div>
-                      <div className="el-social-friend-sub">{g.members.length} عضو</div>
+                {groups.map(g => {
+                  const gcnt = unread[g.chat_id] || 0
+                  return (
+                    <div
+                      key={g.id}
+                      className={`el-social-group-row${activeChat?.chat_id === g.chat_id ? ' active' : ''}`}
+                      onClick={() => openChat(g.chat_id, g.name)}
+                    >
+                      <div className="el-social-group-icon">#{g.name[0]?.toUpperCase()}</div>
+                      <div className="el-social-friend-info">
+                        <div className="el-social-friend-name">{g.name}</div>
+                        <div className="el-social-friend-sub">{g.members.length} عضو</div>
+                      </div>
+                      {gcnt > 0 && <span className="el-social-unread-badge">{gcnt}</span>}
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </>
             )}
 
@@ -753,19 +768,23 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
                     <div>تحدَّ أصدقاءك للوصول لمستوى معين!</div>
                   </div>
                 )}
-                {challenges.map(c => (
-                  <div
-                    key={c.id}
-                    className={`el-social-group-row${activeChat?.chat_id === c.chat_id ? ' active' : ''}`}
-                    onClick={() => openChat(c.chat_id, `🏆 ${c.name}`)}
-                  >
-                    <div className="el-challenge-badge">{c.goal_level.toUpperCase()}</div>
-                    <div className="el-social-friend-info">
-                      <div className="el-social-friend-name">{c.name}</div>
-                      <div className="el-social-friend-sub">{c.participants.length} مشارك • {c.my_progress}%</div>
+                {challenges.map(c => {
+                  const ccnt = unread[c.chat_id] || 0
+                  return (
+                    <div
+                      key={c.id}
+                      className={`el-social-group-row${activeChat?.chat_id === c.chat_id ? ' active' : ''}`}
+                      onClick={() => openChat(c.chat_id, `🏆 ${c.name}`)}
+                    >
+                      <div className="el-challenge-badge">{c.goal_level.toUpperCase()}</div>
+                      <div className="el-social-friend-info">
+                        <div className="el-social-friend-name">{c.name}</div>
+                        <div className="el-social-friend-sub">{c.participants.length} مشارك • {c.my_progress}%</div>
+                      </div>
+                      {ccnt > 0 && <span className="el-social-unread-badge">{ccnt}</span>}
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </>
             )}
           </div>
