@@ -105,6 +105,8 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
   const recordedChunksRef = useRef([])
 
   // WebRTC call state
+  const [onlineIds, setOnlineIds] = useState(new Set())   // IDs of currently online friends
+
   const [incomingCall, setIncomingCall] = useState(null)  // { from_id, from_name, offer, callType }
   const [activeCall, setActiveCall]     = useState(null)  // { peer_id, peer_name, callType }
   const peerConnRef   = useRef(null)
@@ -260,22 +262,11 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
         const { type } = data
 
         if (type === 'presence_snapshot') {
-          // Set online status for friends we already loaded
-          const onlineSet = new Set(data.online_ids)
-          setFriends(prev => ({
-            ...prev,
-            accepted: prev.accepted.map(f => ({ ...f, online: onlineSet.has(f.id) }))
-          }))
+          setOnlineIds(new Set(data.online_ids))
         } else if (type === 'user_online') {
-          setFriends(prev => ({
-            ...prev,
-            accepted: prev.accepted.map(f => f.id === data.user_id ? { ...f, online: true } : f)
-          }))
+          setOnlineIds(prev => new Set([...prev, data.user_id]))
         } else if (type === 'user_offline') {
-          setFriends(prev => ({
-            ...prev,
-            accepted: prev.accepted.map(f => f.id === data.user_id ? { ...f, online: false } : f)
-          }))
+          setOnlineIds(prev => { const s = new Set(prev); s.delete(data.user_id); return s })
         } else if (type === 'message') {
           if (activeChatRef.current?.chat_id === data.chat_id) {
             setMessages(prev => [...prev, data])
@@ -667,10 +658,10 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
                       className={`el-social-friend-row${activeChat?.chat_id === chatId ? ' active' : ''}`}
                       onClick={() => openChat(chatId, f.name)}
                     >
-                      <Avatar name={f.name} size={36} online={f.online} />
+                      <Avatar name={f.name} size={36} online={onlineIds.has(f.id)} />
                       <div className="el-social-friend-info">
                         <div className="el-social-friend-name">{f.name}</div>
-                        <div className="el-social-friend-sub">{f.online ? '🟢 متصل' : '⚫ غير متصل'}</div>
+                        <div className="el-social-friend-sub">{onlineIds.has(f.id) ? '🟢 متصل' : '⚫ غير متصل'}</div>
                       </div>
                       {cnt > 0 && <span className="el-social-unread-badge">{cnt}</span>}
                       <button
@@ -828,10 +819,13 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
                   name={activeChat.title}
                   size={36}
                   online={activeChat.chat_id.startsWith('dm_')
-                    ? friends.accepted.find(f => {
-                        const cid = `dm_${Math.min(user.id,f.id)}_${Math.max(user.id,f.id)}`
-                        return cid === activeChat.chat_id
-                      })?.online
+                    ? (() => {
+                        const f = friends.accepted.find(f => {
+                          const cid = `dm_${Math.min(user.id,f.id)}_${Math.max(user.id,f.id)}`
+                          return cid === activeChat.chat_id
+                        })
+                        return f ? onlineIds.has(f.id) : undefined
+                      })()
                     : undefined}
                 />
                 <div style={{ flex: 1 }}>
