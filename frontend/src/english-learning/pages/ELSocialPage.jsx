@@ -250,7 +250,7 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
   // ── WebSocket ─────────────────────────────────────────────────
   useEffect(() => {
     if (!user?.id || !token) return
-    const ws = new WebSocket(`${WS_BASE}/ws/social/${user.id}?token=${token}`)
+    const ws = new WebSocket(`${WS_BASE}/ws/social/${user.id}?token=${encodeURIComponent(token)}`)
     wsRef.current = ws
 
     ws.onopen = () => {}
