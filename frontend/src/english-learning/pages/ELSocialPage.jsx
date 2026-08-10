@@ -546,7 +546,7 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
         </div>
       )}
 
-      <div className="el-social-layout">
+      <div className={`el-social-layout${activeChat ? ' chat-open' : ''}`}>
         {/* ── Sidebar ── */}
         <aside className="el-social-sidebar">
           <header className="el-social-sidebar-header">
