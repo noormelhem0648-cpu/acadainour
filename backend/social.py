@@ -609,6 +609,28 @@ async def websocket_endpoint(ws: WebSocket, user_id: int, token: str = "", db: S
         return
 
     await manager.connect(user_id, ws)
+
+    # Helper: get accepted friend IDs for a user
+    def _friend_ids(uid: int) -> list[int]:
+        rows = db.query(Friendship).filter(
+            ((Friendship.requester_id == uid) | (Friendship.addressee_id == uid)),
+            Friendship.status == "accepted"
+        ).all()
+        return [
+            (r.addressee_id if r.requester_id == uid else r.requester_id)
+            for r in rows
+        ]
+
+    friend_ids = _friend_ids(user_id)
+
+    # Tell the newly connected user which of their friends are online
+    online_now = [fid for fid in friend_ids if fid in manager.online_ids()]
+    await ws.send_json({"type": "presence_snapshot", "online_ids": online_now})
+
+    # Notify accepted friends that this user just came online
+    for fid in friend_ids:
+        await manager.send(fid, {"type": "user_online", "user_id": user_id})
+
     try:
         while True:
             raw = await ws.receive_text()
@@ -626,3 +648,6 @@ async def websocket_endpoint(ws: WebSocket, user_id: int, token: str = "", db: S
                     await manager.send(int(target_id), {**msg, "from_id": user_id})
     except WebSocketDisconnect:
         manager.disconnect(user_id)
+        # Notify friends that this user went offline
+        for fid in friend_ids:
+            await manager.send(fid, {"type": "user_offline", "user_id": user_id})

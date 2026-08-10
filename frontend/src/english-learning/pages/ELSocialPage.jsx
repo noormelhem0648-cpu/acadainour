@@ -251,10 +251,7 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
     const ws = new WebSocket(`${WS_BASE}/ws/social/${user.id}?token=${token}`)
     wsRef.current = ws
 
-    ws.onopen = () => {
-      // Reload friends after WS connects to get accurate online status
-      loadFriends()
-    }
+    ws.onopen = () => {}
 
     ws.onmessage = e => {
       if (e.data === 'pong') return
@@ -262,7 +259,24 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
         const data = JSON.parse(e.data)
         const { type } = data
 
-        if (type === 'message') {
+        if (type === 'presence_snapshot') {
+          // Set online status for friends we already loaded
+          const onlineSet = new Set(data.online_ids)
+          setFriends(prev => ({
+            ...prev,
+            accepted: prev.accepted.map(f => ({ ...f, online: onlineSet.has(f.id) }))
+          }))
+        } else if (type === 'user_online') {
+          setFriends(prev => ({
+            ...prev,
+            accepted: prev.accepted.map(f => f.id === data.user_id ? { ...f, online: true } : f)
+          }))
+        } else if (type === 'user_offline') {
+          setFriends(prev => ({
+            ...prev,
+            accepted: prev.accepted.map(f => f.id === data.user_id ? { ...f, online: false } : f)
+          }))
+        } else if (type === 'message') {
           if (activeChatRef.current?.chat_id === data.chat_id) {
             setMessages(prev => [...prev, data])
           } else {
