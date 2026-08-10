@@ -255,6 +255,13 @@ export default function ELHomePage({ darkMode, setDarkMode }) {
   const [showWotd, setShowWotd] = useState(true)
   const dueCount = progress.dueWords?.().length || 0
 
+  const socialUnread = (() => {
+    try {
+      const obj = JSON.parse(localStorage.getItem('el_social_unread') || '{}')
+      return Object.values(obj).reduce((s, n) => s + n, 0)
+    } catch { return 0 }
+  })()
+
   return (
     <div className={`el-app${darkMode ? ' el-dark' : ''}`}>
       {!online && <div className="el-offline-bar">⚠️ أنتِ غير متصلة بالإنترنت — بعض الميزات لن تعمل</div>}
@@ -300,10 +307,13 @@ export default function ELHomePage({ darkMode, setDarkMode }) {
 
           {/* 3 ── Community + Hard words (2 big cards) */}
           <div className="el-home-feature-cards">
-            <button className="el-feature-card community" onClick={() => navigate(`${EL}/social`)}>
+            <button className="el-feature-card community" onClick={() => navigate(`${EL}/social`)} style={{ position: 'relative' }}>
               <span className="el-feature-card-icon">👥</span>
               <div>
-                <div className="el-feature-card-title">المجتمع</div>
+                <div className="el-feature-card-title">
+                  المجتمع
+                  {socialUnread > 0 && <span className="el-feature-card-badge">{socialUnread}</span>}
+                </div>
                 <div className="el-feature-card-sub">تواصل مع الطلاب وأنشئ مجموعات دراسة</div>
               </div>
             </button>

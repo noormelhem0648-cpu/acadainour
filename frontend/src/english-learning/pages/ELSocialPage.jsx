@@ -117,7 +117,14 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
   const [camOff, setCamOff]         = useState(false)
 
   const [notif, setNotif] = useState(null)
-  const [unread, setUnread] = useState({})   // { [chat_id]: count }
+  const [unread, setUnread] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('el_social_unread') || '{}') } catch { return {} }
+  })
+
+  // Persist unread counts to localStorage so home page badge stays accurate
+  useEffect(() => {
+    localStorage.setItem('el_social_unread', JSON.stringify(unread))
+  }, [unread])
 
   const wsRef        = useRef(null)
   const msgBottomRef = useRef(null)
