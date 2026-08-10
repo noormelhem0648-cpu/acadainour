@@ -589,12 +589,8 @@ def update_challenge_progress(
 def _ws_auth(token: str, db: Session) -> Optional[int]:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
-        if not email:
-            return None
-        u = db.query(User).filter(User.email == email).first()
-        return u.id if u else None
-    except JWTError:
+        return int(payload.get("sub"))
+    except (JWTError, ValueError, TypeError):
         return None
 
 
