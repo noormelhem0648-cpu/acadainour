@@ -2425,3 +2425,21 @@
 }
 @keyframes el-pulse { from { box-shadow: 0 0 0 0 rgba(239,68,68,.5); } to { box-shadow: 0 0 0 8px rgba(239,68,68,0); } }
 
+
+/* ── Delete account form ── */
+.el-acct-delete-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  background: rgba(239,68,68,.06);
+  border: 1.5px solid rgba(239,68,68,.25);
+  border-radius: 12px;
+}
+.el-acct-delete-warning {
+  font-size: .82rem;
+  color: #ef4444;
+  direction: rtl;
+  line-height: 1.5;
+  font-weight: 600;
+}

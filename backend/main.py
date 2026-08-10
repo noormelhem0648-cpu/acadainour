@@ -841,6 +841,33 @@ def update_profile(
         return {"id": me.id, "name": me.name, "email": me.email, "role": me.role}
     raise HTTPException(400, "Name cannot be empty")
 
+@app.delete("/auth/me")
+def delete_account(
+    req: ChangePasswordRequest,
+    me: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if not verify_password(req.current_password, me.hashed_password):
+        raise HTTPException(400, "كلمة المرور غير صحيحة")
+    # Delete all user data
+    from db import StudentProgress, Friendship, GroupMember, SocialMessage, ChallengeParticipant
+    db.query(StudentProgress).filter(StudentProgress.user_id == me.id).delete()
+    db.query(Friendship).filter(
+        (Friendship.requester_id == me.id) | (Friendship.addressee_id == me.id)
+    ).delete()
+    db.query(GroupMember).filter(GroupMember.user_id == me.id).delete()
+    db.query(ChallengeParticipant).filter(ChallengeParticipant.user_id == me.id).delete()
+    db.query(Message).filter(
+        Message.conversation_id.in_(
+            db.query(Conversation.id).filter(Conversation.user_id == me.id)
+        )
+    ).delete(synchronize_session=False)
+    db.query(Conversation).filter(Conversation.user_id == me.id).delete()
+    db.query(ContributedKey).filter(ContributedKey.user_id == me.id).delete()
+    db.delete(me)
+    db.commit()
+    return {"ok": True}
+
 @app.put("/auth/me/password")
 def change_password(
     req: ChangePasswordRequest,

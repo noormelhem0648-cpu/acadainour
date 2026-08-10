@@ -32,6 +32,12 @@ export default function ELAccountPage({ darkMode, setDarkMode, onLogout }) {
   const [confirmPwd, setConfirmPwd] = useState('')
   const [savingPwd, setSavingPwd] = useState(false)
 
+  // Delete account
+  const [showDelete, setShowDelete]   = useState(false)
+  const [deleteEmail, setDeleteEmail] = useState('')
+  const [deletePwd, setDeletePwd]     = useState('')
+  const [deleting, setDeleting]       = useState(false)
+
   const [toast, setToast] = useState(null)
 
   const showToast = (msg, ok = true) => {
@@ -97,6 +103,25 @@ export default function ELAccountPage({ darkMode, setDarkMode, onLogout }) {
     localStorage.removeItem('noura_user')
     if (onLogout) onLogout()
     else window.location.href = '/'
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!deleteEmail || !deletePwd) return showToast('أدخل الإيميل وكلمة المرور', false)
+    if (deleteEmail.trim().toLowerCase() !== (profile?.email || '').toLowerCase())
+      return showToast('الإيميل غير صحيح', false)
+    setDeleting(true)
+    try {
+      const res = await fetch(`${API_BASE}/auth/me`, {
+        method: 'DELETE',
+        headers: authHeaders(token),
+        body: JSON.stringify({ current_password: deletePwd, new_password: '' }),
+      })
+      if (!res.ok) throw new Error((await res.json()).detail)
+      // Clear everything locally
+      localStorage.clear()
+      window.location.href = '/'
+    } catch (e) { showToast(e.message || 'فشل حذف الحساب', false) }
+    setDeleting(false)
   }
 
   // ── Stats from progress ──────────────────────────────────────
@@ -318,6 +343,49 @@ export default function ELAccountPage({ darkMode, setDarkMode, onLogout }) {
               <button className="el-acct-link-btn" onClick={() => navigate(`${EL}/social`)}>👥 المجتمع</button>
               <button className="el-acct-link-btn" onClick={() => navigate('/privacy')}>🔏 سياسة الخصوصية</button>
             </div>
+          </div>
+
+          {/* ── Delete account ── */}
+          <div className="el-acct-section">
+            <div className="el-acct-section-title" style={{ color: '#ef4444' }}>⚠️ منطقة الخطر</div>
+            {!showDelete ? (
+              <button className="el-acct-action-btn danger" onClick={() => setShowDelete(true)}>
+                🗑️ حذف الحساب نهائياً
+              </button>
+            ) : (
+              <div className="el-acct-delete-form">
+                <div className="el-acct-delete-warning">
+                  سيتم حذف حسابك وجميع بياناتك نهائياً ولا يمكن التراجع عن هذا الإجراء.
+                </div>
+                <input
+                  type="email"
+                  className="el-acct-input"
+                  placeholder="أدخل إيميلك للتأكيد"
+                  value={deleteEmail}
+                  onChange={e => setDeleteEmail(e.target.value)}
+                  dir="ltr"
+                />
+                <input
+                  type="password"
+                  className="el-acct-input"
+                  placeholder="أدخل كلمة المرور"
+                  value={deletePwd}
+                  onChange={e => setDeletePwd(e.target.value)}
+                />
+                <div className="el-acct-pwd-actions">
+                  <button
+                    className="el-acct-action-btn danger"
+                    onClick={handleDeleteAccount}
+                    disabled={deleting}
+                  >
+                    {deleting ? 'جار الحذف...' : '🗑️ تأكيد حذف الحساب'}
+                  </button>
+                  <button className="el-acct-cancel-btn" onClick={() => { setShowDelete(false); setDeleteEmail(''); setDeletePwd('') }}>
+                    إلغاء
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ── Logout ── */}
