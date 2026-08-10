@@ -262,10 +262,13 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
         const { type } = data
 
         if (type === 'presence_snapshot') {
+          console.log('[WS] presence_snapshot online_ids:', data.online_ids)
           setOnlineIds(new Set(data.online_ids))
         } else if (type === 'user_online') {
+          console.log('[WS] user_online:', data.user_id)
           setOnlineIds(prev => new Set([...prev, data.user_id]))
         } else if (type === 'user_offline') {
+          console.log('[WS] user_offline:', data.user_id)
           setOnlineIds(prev => { const s = new Set(prev); s.delete(data.user_id); return s })
         } else if (type === 'message') {
           if (activeChatRef.current?.chat_id === data.chat_id) {
