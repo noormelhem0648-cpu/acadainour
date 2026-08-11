@@ -58,11 +58,12 @@ export const A2_DAYS_11_20 = [
       ],
     },
     reading: {
-      passage: "Rania is 28 years old and she has had many exciting experiences. She has travelled to six countries and has tried many different types of food. She has never been skydiving but it is on her bucket list. She has already learned two foreign languages and has just started learning a third. She has met many interesting people in her life. Her greatest achievement is completing a marathon — she has done it twice.",
+      passage: "Omar has always loved adventure. He has travelled to ten countries and has eaten food from all over the world. Last year, he met a famous chef and has since spoken to her several times about his experiences. He has never seen the Northern Lights, but it is at the top of his bucket list. He has just written a travel blog, and it has already received thousands of visitors. Finishing a desert marathon last spring was his greatest achievement — he has never felt so proud.",
       breakdown: [
-        { sentence: 'She has travelled to six countries and has tried many different types of food.', words: [{w:'has travelled',ar:'سافرت'},{w:'has tried',ar:'جرّبت'}], meaning: 'لقد سافرت إلى ست دول وجرّبت أنواعاً مختلفة من الطعام.' },
-        { sentence: 'She has already learned two foreign languages.', words: [{w:'has already learned',ar:'تعلّمت بالفعل'}], meaning: 'تعلّمت بالفعل لغتين أجنبيتين.' },
-        { sentence: 'Her greatest achievement is completing a marathon — she has done it twice.', words: [{w:'achievement',ar:'إنجاز'},{w:'marathon',ar:'ماراثون'},{w:'done it twice',ar:'فعلته مرتين'}], meaning: 'أكبر إنجازاتها هو إتمام الماراثون — فعلته مرتين.' },
+        { sentence: 'He has travelled to ten countries and has eaten food from all over the world.', words: [{w:'has travelled',ar:'سافر'},{w:'has eaten',ar:'أكل'}], meaning: 'لقد سافر إلى عشر دول وأكل طعاماً من كل أنحاء العالم.' },
+        { sentence: 'He has never seen the Northern Lights, but it is at the top of his bucket list.', words: [{w:'has never seen',ar:'لم يرَ قط'},{w:'bucket list',ar:'قائمة الأمنيات'}], meaning: 'لم يرَ الشفق القطبي قط، لكنه في أعلى قائمة أمنياته.' },
+        { sentence: 'He has just written a travel blog, and it has already received thousands of visitors.', words: [{w:'has just written',ar:'كتب للتو'},{w:'has already received',ar:'استقبل بالفعل'}], meaning: 'لقد كتب مدونة سفر للتو، وقد استقبلت بالفعل آلاف الزوار.' },
+        { sentence: 'Finishing a desert marathon last spring was his greatest achievement.', words: [{w:'achievement',ar:'إنجاز'},{w:'marathon',ar:'ماراثون'}], meaning: 'كان إنهاء ماراثون الصحراء في الربيع الماضي أكبر إنجازاته.' },
       ],
     },
     listening: {
@@ -148,11 +149,13 @@ export const A2_DAYS_11_20 = [
       ],
     },
     reading: {
-      passage: "Dear Layla, I know you feel nervous about your English. But I can see that you already have good skills. You should practise speaking every day — even for 10 minutes. You could join an online conversation group. You shouldn't worry too much about mistakes — everyone makes them! I could barely say a sentence in English two years ago, and now I can have full conversations. Be patient and you will improve. With effort, you can achieve your goal. Good luck!",
+      passage: "Sara has a problem — she wants to speak English fluently but feels nervous every time she tries. Her friend Nadia, who is already fluent in three languages, gave her some useful advice. Nadia suggested that Sara should practise every day and recommended listening to English podcasts. 'You have a real talent for languages,' Nadia said. 'Don't worry about mistakes — make the effort and you will improve.' With a clear goal and a patient attitude, Sara began to feel more confident about her ability.",
       breakdown: [
-        { sentence: 'You should practise speaking every day — even for 10 minutes.', words: [{w:'should practise',ar:'يجب أن تتمرن'}], meaning: 'يجب أن تتمرن على التحدث كل يوم — حتى لمدة 10 دقائق.' },
-        { sentence: "I could barely say a sentence in English two years ago.", words: [{w:'could barely',ar:'بالكاد كنت أستطيع'}], meaning: 'بالكاد كنت أستطيع قول جملة بالإنجليزية منذ سنتين.' },
-        { sentence: 'With effort, you can achieve your goal.', words: [{w:'effort',ar:'جهد'},{w:'achieve',ar:'تحقق'}], meaning: 'بالجهد، تستطيع تحقيق هدفك.' },
+        { sentence: 'Sara has a problem — she wants to speak English fluently but feels nervous every time she tries.', words: [{w:'problem',ar:'مشكلة'},{w:'fluently',ar:'بطلاقة'},{w:'nervous',ar:'متوترة'}], meaning: 'سارة لديها مشكلة — تريد التحدث بالإنجليزية بطلاقة لكنها تشعر بالتوتر في كل مرة تحاول.' },
+        { sentence: 'Nadia suggested that Sara should practise every day and recommended listening to English podcasts.', words: [{w:'suggested',ar:'اقترحت'},{w:'should practise',ar:'يجب أن تتمرن'},{w:'recommended',ar:'أوصت'}], meaning: 'اقترحت ناديا أن تتمرن سارة كل يوم وأوصت بالاستماع إلى البودكاست الإنجليزي.' },
+        { sentence: "'You have a real talent for languages,' Nadia said.", words: [{w:'talent',ar:'موهبة'}], meaning: "'لديكِ موهبة حقيقية في اللغات'، قالت ناديا." },
+        { sentence: "Don't worry about mistakes — make the effort and you will improve.", words: [{w:'mistakes',ar:'أخطاء'},{w:'effort',ar:'جهد'},{w:'improve',ar:'تتحسن'}], meaning: 'لا تقلقي من الأخطاء — ابذلي الجهد وستتحسنين.' },
+        { sentence: 'With a clear goal and a patient attitude, Sara began to feel more confident about her ability.', words: [{w:'goal',ar:'هدف'},{w:'patient',ar:'صبور'},{w:'confident',ar:'واثقة'},{w:'ability',ar:'قدرة'}], meaning: 'بهدف واضح وموقف صبور، بدأت سارة تشعر بثقة أكبر في قدرتها.' },
       ],
     },
     listening: {
@@ -238,11 +241,13 @@ export const A2_DAYS_11_20 = [
       ],
     },
     reading: {
-      passage: "Welcome to our language school! Here are the rules. Students must arrive on time for every class. You must not use your phone during lessons. You have to submit homework every week by Friday. You don't have to wear a uniform, but you must dress appropriately. Students must respect their classmates and teachers. The school library is open to all — you don't have to pay to use it. If you break a rule, there may be a penalty. If you follow the rules, you will have a great experience here!",
+      passage: "Karim just started a new job at a busy hospital. He must wear his uniform every day and arrive on time for every shift. It is forbidden to use a personal phone during working hours — this is an important responsibility. He has to register patients and submit reports before each deadline. He doesn't have to stay after 6 PM unless there is an emergency. All staff must respect patients and obey the hospital rules at all times. Anyone who breaks a rule will face a serious penalty.",
       breakdown: [
-        { sentence: 'You must not use your phone during lessons.', words: [{w:'must not',ar:'لا يجوز'}], meaning: 'لا يجوز استخدام الهاتف خلال الدروس.' },
-        { sentence: "You don't have to wear a uniform, but you must dress appropriately.", words: [{w:"don't have to",ar:'لست ملزماً'},{w:'must dress',ar:'يجب أن ترتدي'}], meaning: 'لست ملزماً بارتداء زي موحد، لكن يجب أن تلتزم بالملبس المناسب.' },
-        { sentence: 'You don\'t have to pay to use it.', words: [{w:"don't have to pay",ar:'لست ملزماً بالدفع'}], meaning: 'لست ملزماً بالدفع لاستخدامه.' },
+        { sentence: 'He must wear his uniform every day and arrive on time for every shift.', words: [{w:'must wear',ar:'يجب أن يرتدي'},{w:'uniform',ar:'زي موحد'},{w:'arrive',ar:'يصل'}], meaning: 'يجب أن يرتدي زيّه الموحد كل يوم ويصل في الوقت المحدد لكل وردية.' },
+        { sentence: 'It is forbidden to use a personal phone during working hours — this is an important responsibility.', words: [{w:'forbidden',ar:'محظور'},{w:'responsibility',ar:'مسؤولية'}], meaning: 'يُحظر استخدام الهاتف الشخصي خلال ساعات العمل — فهذه مسؤولية مهمة.' },
+        { sentence: 'He has to register patients and submit reports before each deadline.', words: [{w:'has to register',ar:'يجب أن يسجّل'},{w:'submit',ar:'يسلّم'},{w:'deadline',ar:'موعد نهائي'}], meaning: 'يجب أن يسجّل المرضى ويسلّم التقارير قبل كل موعد نهائي.' },
+        { sentence: "He doesn't have to stay after 6 PM unless there is an emergency.", words: [{w:"doesn't have to",ar:'ليس ملزماً'}], meaning: 'ليس ملزماً بالبقاء بعد الساعة 6 مساءً ما لم تكن هناك حالة طارئة.' },
+        { sentence: 'Anyone who breaks a rule will face a serious penalty.', words: [{w:'penalty',ar:'عقوبة'}], meaning: 'أي شخص يخالف القواعد سيواجه عقوبة صارمة.' },
       ],
     },
     listening: {
@@ -327,11 +332,13 @@ export const A2_DAYS_11_20 = [
       ],
     },
     reading: {
-      passage: "Healthy habits are important for a good life. Experts say we should exercise regularly — at least three times a week. We should usually eat vegetables and fruit daily. We should never skip breakfast because it gives us energy for the day. Most people rarely drink enough water — we should drink 8 glasses daily. It is also important to sleep 7-8 hours every night. Some people occasionally break these habits, but it is good to try to follow them frequently.",
+      passage: "Lena is a very organised person with excellent daily habits. She always drinks a glass of water when she wakes up and usually eats a healthy breakfast every day. She goes for a run three times a week and visits the gym occasionally at the weekend. She rarely eats fast food and never skips her weekly call with her parents. From time to time she reads a new book, and she reviews her monthly expenses and travels abroad annually. Lena believes that good habits, practised regularly, are the secret to a happy life.",
       breakdown: [
-        { sentence: 'We should exercise regularly — at least three times a week.', words: [{w:'regularly',ar:'بانتظام'},{w:'at least',ar:'على الأقل'}], meaning: 'يجب أن نتمرن بانتظام — على الأقل ثلاث مرات في الأسبوع.' },
-        { sentence: 'Most people rarely drink enough water.', words: [{w:'rarely',ar:'نادراً'},{w:'enough',ar:'كافياً'}], meaning: 'معظم الناس نادراً ما يشربون ماءً كافياً.' },
-        { sentence: 'Some people occasionally break these habits.', words: [{w:'occasionally',ar:'أحياناً'},{w:'break habits',ar:'يكسر العادات'}], meaning: 'بعض الناس يكسرون هذه العادات أحياناً.' },
+        { sentence: 'She always drinks a glass of water when she wakes up and usually eats a healthy breakfast every day.', words: [{w:'always',ar:'دائماً'},{w:'usually',ar:'عادةً'},{w:'every day',ar:'كل يوم'}], meaning: 'تشرب دائماً كوباً من الماء عند استيقاظها وعادةً تتناول فطوراً صحياً كل يوم.' },
+        { sentence: 'She goes for a run three times a week and visits the gym occasionally at the weekend.', words: [{w:'three times a week',ar:'ثلاث مرات في الأسبوع'},{w:'occasionally',ar:'أحياناً'}], meaning: 'تذهب للجري ثلاث مرات في الأسبوع وتزور الصالة الرياضية أحياناً في عطلة نهاية الأسبوع.' },
+        { sentence: 'She rarely eats fast food and never skips her weekly call with her parents.', words: [{w:'rarely',ar:'نادراً'},{w:'never',ar:'أبداً'},{w:'weekly',ar:'أسبوعي'}], meaning: 'نادراً ما تأكل الوجبات السريعة ولا تفوّت أبداً مكالمتها الأسبوعية مع والديها.' },
+        { sentence: 'From time to time she reads a new book, and she reviews her monthly expenses and travels abroad annually.', words: [{w:'from time to time',ar:'من وقت لآخر'},{w:'monthly',ar:'شهري'},{w:'annually',ar:'سنوي'}], meaning: 'من وقت لآخر تقرأ كتاباً جديداً، وتراجع نفقاتها الشهرية وتسافر إلى الخارج سنوياً.' },
+        { sentence: 'Lena believes that good habits, practised regularly, are the secret to a happy life.', words: [{w:'habits',ar:'عادات'},{w:'regularly',ar:'بانتظام'}], meaning: 'تؤمن لينا بأن العادات الجيدة، إذا مورست بانتظام، هي سر الحياة السعيدة.' },
       ],
     },
     listening: {
@@ -417,11 +424,13 @@ export const A2_DAYS_11_20 = [
       ],
     },
     reading: {
-      passage: "My university is in the city centre, near the main station. The library is on the second floor, between the cafeteria and the computer lab. Classes start at 8 AM on weekdays. In the evenings, the library closes at 9 PM. There is a coffee shop opposite the main entrance — I always go there between classes. On Fridays, we usually have a free afternoon. I love sitting in the garden behind the main building.",
+      passage: "Last Saturday, Dina met her friends at a café near the central park. The café is on the corner, between the bookshop and the pharmacy. They sat inside at a table in the middle of the room, opposite the large window. Above the door there was a painted sign that said 'Welcome'. They arrived around noon and stayed until evening. On the way home, Dina walked along the river and stopped at the market outside the station entrance. She was home by seven o'clock.",
       breakdown: [
-        { sentence: 'My university is in the city centre, near the main station.', words: [{w:'in the city centre',ar:'في وسط المدينة'},{w:'near',ar:'بالقرب من'}], meaning: 'جامعتي في وسط المدينة، بالقرب من المحطة الرئيسية.' },
-        { sentence: 'The library is on the second floor, between the cafeteria and the computer lab.', words: [{w:'on the second floor',ar:'في الطابق الثاني'},{w:'between',ar:'بين'}], meaning: 'المكتبة في الطابق الثاني، بين الكافيتيريا ومختبر الحاسوب.' },
-        { sentence: 'There is a coffee shop opposite the main entrance.', words: [{w:'opposite',ar:'مقابل'},{w:'main entrance',ar:'المدخل الرئيسي'}], meaning: 'يوجد محل قهوة مقابل المدخل الرئيسي.' },
+        { sentence: 'Last Saturday, Dina met her friends at a café near the central park.', words: [{w:'at',ar:'في / عند'},{w:'near',ar:'قريب من'}], meaning: 'في السبت الماضي، التقت دينا بأصدقائها في مقهى بالقرب من الحديقة المركزية.' },
+        { sentence: 'The café is on the corner, between the bookshop and the pharmacy.', words: [{w:'on the corner',ar:'على الزاوية'},{w:'between',ar:'بين'}], meaning: 'المقهى على الزاوية، بين المكتبة والصيدلية.' },
+        { sentence: 'They sat inside at a table in the middle of the room, opposite the large window.', words: [{w:'inside',ar:'بداخل'},{w:'in the middle',ar:'في المنتصف'},{w:'opposite',ar:'أمام'}], meaning: 'جلسوا بداخل المقهى عند طاولة في منتصف الغرفة، أمام النافذة الكبيرة.' },
+        { sentence: 'On the way home, Dina walked along the river and stopped at the market outside the station entrance.', words: [{w:'along',ar:'على طول'},{w:'outside',ar:'بالخارج'},{w:'entrance',ar:'مدخل'}], meaning: 'في طريق العودة، مشت دينا على طول النهر وتوقفت عند السوق خارج مدخل المحطة.' },
+        { sentence: "She was home by seven o'clock.", words: [{w:'by',ar:'بحلول'}], meaning: 'كانت في المنزل بحلول الساعة السابعة.' },
       ],
     },
     listening: {
@@ -507,11 +516,13 @@ export const A2_DAYS_11_20 = [
       ],
     },
     reading: {
-      passage: "The year is 2040. How do you think the world will change? Scientists believe that electric cars will be everywhere and petrol cars will disappear. Many jobs will probably be done by robots, but new jobs will appear too. Technology will certainly continue to change our lives. Some people think we will communicate more online and less face-to-face. However, I believe people will always need real human connection. Whatever happens, the future will be fascinating.",
+      passage: "Tariq has just been offered an exciting job in another city. He was not certain what to decide at first, but he chose to accept the opportunity. 'I'll support you completely,' his mother said with a smile. 'Things will probably be hard at the start, but you'll succeed eventually.' His friend Sam, however, had doubts. 'Maybe the future will be lonely without us,' Sam joked. But Tariq believes that technology makes it easy to stay close to people he loves, and he promises to visit soon.",
       breakdown: [
-        { sentence: 'Electric cars will be everywhere and petrol cars will disappear.', words: [{w:'everywhere',ar:'في كل مكان'},{w:'disappear',ar:'ستختفي'}], meaning: 'ستكون السيارات الكهربائية في كل مكان وستختفي سيارات البنزين.' },
-        { sentence: 'Many jobs will probably be done by robots.', words: [{w:'probably',ar:'على الأرجح'},{w:'robots',ar:'روبوتات'}], meaning: 'على الأرجح ستنجز روبوتات الكثير من الوظائف.' },
-        { sentence: 'I believe people will always need real human connection.', words: [{w:'believe',ar:'أؤمن'},{w:'human connection',ar:'تواصل بشري'}], meaning: 'أؤمن بأن الناس ستحتاج دائماً إلى تواصل بشري حقيقي.' },
+        { sentence: 'He was not certain what to decide at first, but he chose to accept the opportunity.', words: [{w:'certain',ar:'متأكد'},{w:'decide',ar:'يقرر'},{w:'opportunity',ar:'فرصة'}], meaning: 'لم يكن متأكداً في البداية، لكنه اختار قبول الفرصة.' },
+        { sentence: "'I'll support you completely,' his mother said with a smile.", words: [{w:"I'll support",ar:'سأدعمك'}], meaning: "'سأدعمك تماماً'، قالت أمه بابتسامة." },
+        { sentence: "Things will probably be hard at the start, but you'll succeed eventually.", words: [{w:'probably',ar:'على الأرجح'},{w:'eventually',ar:'في نهاية المطاف'}], meaning: 'على الأرجح ستكون الأمور صعبة في البداية، لكنك ستنجح في نهاية المطاف.' },
+        { sentence: "His friend Sam had doubts.", words: [{w:'doubts',ar:'شكوك'}], meaning: 'كان لدى صديقه سام شكوك.' },
+        { sentence: 'Tariq believes that technology makes it easy to stay close to people he loves, and he promises to visit soon.', words: [{w:'believes',ar:'يؤمن'},{w:'technology',ar:'تكنولوجيا'},{w:'promises',ar:'يعد'},{w:'soon',ar:'قريباً'}], meaning: 'يؤمن طارق بأن التكنولوجيا تجعل البقاء قريباً من أحبائه أمراً سهلاً، ويعد بالزيارة قريباً.' },
       ],
     },
     listening: {
@@ -597,11 +608,14 @@ export const A2_DAYS_11_20 = [
       ],
     },
     reading: {
-      passage: "City life and village life are very different. In cities, there are many job opportunities and facilities. However, cities are often noisy and expensive. Villages, on the other hand, are quieter and more peaceful. Although there are fewer facilities, the quality of life can be higher because the air is cleaner and people are less stressed. Many young people move to cities because they want better careers. However, some later move back to villages since they miss the calm lifestyle. It is difficult to say which is better because it depends on personal priorities.",
+      passage: "Maya wanted to study medicine, but she was also passionate about art. Although she loved science, she found the long study hours very difficult. She worked hard every evening, so she passed all her exams. However, she still felt unsure about her future career. The reason she continued was because her family believed in her. Despite the pressure, she never gave up. Eventually she discovered medical illustration — a field that combines both passions — and, as a result, she is now truly happy in her work.",
       breakdown: [
-        { sentence: 'However, cities are often noisy and expensive.', words: [{w:'however',ar:'ومع ذلك'}], meaning: 'ومع ذلك، المدن غالباً صاخبة وغالية.' },
-        { sentence: 'Although there are fewer facilities, the quality of life can be higher.', words: [{w:'although',ar:'رغم أن'},{w:'fewer',ar:'أقل'}], meaning: 'رغم أن المرافق أقل، يمكن أن تكون جودة الحياة أعلى.' },
-        { sentence: 'Many young people move to cities because they want better careers.', words: [{w:'because',ar:'لأن'},{w:'careers',ar:'مسيرات مهنية'}], meaning: 'كثير من الشباب ينتقلون إلى المدن لأنهم يريدون مسيرات مهنية أفضل.' },
+        { sentence: 'Maya wanted to study medicine, but she was also passionate about art.', words: [{w:'but',ar:'لكن'}], meaning: 'أرادت مايا دراسة الطب، لكنها كانت أيضاً شغوفة بالفن.' },
+        { sentence: 'Although she loved science, she found the long study hours very difficult.', words: [{w:'although',ar:'رغم أن'}], meaning: 'رغم أنها أحبت العلوم، وجدت ساعات الدراسة الطويلة صعبة جداً.' },
+        { sentence: 'She worked hard every evening, so she passed all her exams.', words: [{w:'so',ar:'لذا'}], meaning: 'عملت بجد كل مساء، لذا اجتازت جميع امتحاناتها.' },
+        { sentence: 'However, she still felt unsure about her future career.', words: [{w:'however',ar:'ومع ذلك'}], meaning: 'ومع ذلك، كانت لا تزال غير متأكدة من مسيرتها المهنية المستقبلية.' },
+        { sentence: 'Despite the pressure, she never gave up.', words: [{w:'despite',ar:'بالرغم من'}], meaning: 'بالرغم من الضغط، لم تستسلم أبداً.' },
+        { sentence: 'As a result, she is now truly happy in her work.', words: [{w:'as a result',ar:'ونتيجة لذلك'}], meaning: 'ونتيجة لذلك، هي الآن سعيدة حقاً في عملها.' },
       ],
     },
     listening: {
@@ -687,11 +701,12 @@ export const A2_DAYS_11_20 = [
       ],
     },
     reading: {
-      passage: "Job interviews can feel stressful. Employers often ask Wh- questions: Who are you and what is your background? Where have you worked before? Why do you want this job? How long have you been working in this field? What kind of skills do you have? How do you handle pressure? It is important to prepare your answers in advance. Think about why you are a good candidate. Practise answering out loud so that you feel confident on the day.",
+      passage: "Jenna was preparing carefully for her first job interview. She knew the employer would begin with questions like 'Who are you?' and 'What is your background?' She also prepared answers for 'Where did you study?' and 'Why do you want this position?' During the interview, the manager asked how long she had worked at her previous company and how many languages she spoke. Jenna's responses were clear and well-organised. At the end, she was asked which role she preferred and gave a thoughtful answer that impressed everyone.",
       breakdown: [
-        { sentence: 'Employers often ask Wh- questions.', words: [{w:'employers',ar:'أصحاب العمل'},{w:'Wh- questions',ar:'أسئلة wh'}], meaning: 'أصحاب العمل غالباً يطرحون أسئلة wh.' },
-        { sentence: 'How long have you been working in this field?', words: [{w:'how long',ar:'كم من الوقت'},{w:'field',ar:'مجال'}], meaning: 'كم من الوقت وأنت تعمل في هذا المجال؟' },
-        { sentence: 'Practise answering out loud so that you feel confident on the day.', words: [{w:'out loud',ar:'بصوت عالٍ'},{w:'confident',ar:'واثق'}], meaning: 'تدرّب على الإجابة بصوت عالٍ حتى تشعر بالثقة في اليوم المحدد.' },
+        { sentence: "She knew the employer would begin with questions like 'Who are you?' and 'What is your background?'", words: [{w:'who',ar:'من'},{w:'what',ar:'ما / ماذا'}], meaning: "علمت أن صاحب العمل سيبدأ بأسئلة مثل 'من أنتِ؟' و'ما خلفيتكِ؟'" },
+        { sentence: "She also prepared answers for 'Where did you study?' and 'Why do you want this position?'", words: [{w:'where',ar:'أين'},{w:'why',ar:'لماذا'},{w:'answers',ar:'إجابات'}], meaning: "أعدّت أيضاً إجابات لـ 'أين درستِ؟' و'لماذا تريدين هذا المنصب؟'" },
+        { sentence: 'The manager asked how long she had worked at her previous company and how many languages she spoke.', words: [{w:'how long',ar:'كم من الوقت'},{w:'how many',ar:'كم عدد'}], meaning: 'سأل المدير عن المدة التي عملت فيها في شركتها السابقة وكم عدد اللغات التي تتحدثها.' },
+        { sentence: 'At the end, she was asked which role she preferred and gave a thoughtful answer that impressed everyone.', words: [{w:'interview',ar:'مقابلة'},{w:'which',ar:'أي'},{w:'answer',ar:'إجابة'}], meaning: 'في النهاية، سُئلت عن أي دور تفضّله فأعطت إجابة مدروسة أبهرت الجميع.' },
       ],
     },
     listening: {
@@ -778,11 +793,13 @@ export const A2_DAYS_11_20 = [
       ],
     },
     reading: {
-      passage: "There is a woman in my neighbourhood who everyone admires. She is a teacher who has worked at the local school for twenty years. She is the person who started the community library — a small room that is now full of books. She also runs a programme which helps children who struggle with reading. The programme, which started last year, has already helped over fifty children. She is someone who gives her time without asking for anything in return. People say she is the kind of person that the world needs more of.",
+      passage: "There is a man in our office who is impossible to forget. He has a unique personality and a warm appearance that makes every new colleague feel welcome. The desk that belongs to him is always full of colourful objects and tools that he uses for his creative work. He is the kind of person who can describe any difficult situation with gentle humour. He has a characteristic way of speaking that turns even a dull meeting into something enjoyable. Everyone agrees he is someone that the whole team depends on.",
       breakdown: [
-        { sentence: 'She is a teacher who has worked at the local school for twenty years.', words: [{w:'who has worked',ar:'التي عملت'}], meaning: 'هي معلمة عملت في المدرسة المحلية لعشرين عاماً.' },
-        { sentence: 'She also runs a programme which helps children who struggle with reading.', words: [{w:'which helps',ar:'الذي يساعد'},{w:'who struggle',ar:'الذين يعانون'}], meaning: 'تدير أيضاً برنامجاً يساعد الأطفال الذين يعانون مع القراءة.' },
-        { sentence: 'She is the kind of person that the world needs more of.', words: [{w:'the kind of person that',ar:'نوع الشخص الذي'}], meaning: 'إنها من النوع الذي يحتاجه العالم أكثر.' },
+        { sentence: 'There is a man in our office who is impossible to forget.', words: [{w:'who',ar:'الذي (للأشخاص)'}], meaning: 'يوجد رجل في مكتبنا يستحيل نسيانه.' },
+        { sentence: 'He has a unique personality and a warm appearance that makes every new colleague feel welcome.', words: [{w:'unique',ar:'فريد'},{w:'personality',ar:'شخصية'},{w:'appearance',ar:'مظهر'},{w:'that',ar:'الذي / التي'}], meaning: 'لديه شخصية فريدة ومظهر دافئ يجعل كل زميل جديد يشعر بالترحيب.' },
+        { sentence: 'The desk that belongs to him is always full of colourful objects and tools that he uses for his creative work.', words: [{w:'that belongs',ar:'الذي يخص'},{w:'objects',ar:'أشياء'},{w:'tools',ar:'أدوات'}], meaning: 'المكتب الذي يخصّه مليء دائماً بأشياء ملوّنة وأدوات يستخدمها في عمله الإبداعي.' },
+        { sentence: 'He is the kind of person who can describe any difficult situation with gentle humour.', words: [{w:'who',ar:'الذي'},{w:'describe',ar:'يصف'},{w:'situation',ar:'موقف'}], meaning: 'إنه من النوع الذي يستطيع وصف أي موقف صعب بروح دعابة لطيفة.' },
+        { sentence: 'He has a characteristic way of speaking that turns even a dull meeting into something enjoyable.', words: [{w:'characteristic',ar:'مميّز'},{w:'that',ar:'الذي'}], meaning: 'لديه أسلوب خطاب مميّز يحوّل حتى الاجتماعات المملة إلى شيء ممتع.' },
       ],
     },
     listening: {
@@ -868,11 +885,14 @@ export const A2_DAYS_11_20 = [
       ],
     },
     reading: {
-      passage: "Our choices have real effects on our future. If you eat healthy food, you will feel better. If you exercise regularly, your health will improve. If you don't sleep enough, you will feel tired and unproductive. On a larger scale, if governments don't act on climate change, temperatures will continue to rise. If people use less plastic, there will be less pollution. Unless we change our habits, the world will face serious problems. However, if we work together, real change is possible.",
+      passage: "Ali is studying hard for a very important exam. If he works consistently every day, he will pass and win a great opportunity. However, if he does not sleep enough, stress will cause him to lose focus and he might fail. He knows that every decision has a consequence, so he plans his time carefully. Unless he submits his application by Friday, he will miss the deadline. Imagine the scenario if he gets the scholarship — his whole life will change. In real situations like this, small actions can have a very big effect.",
       breakdown: [
-        { sentence: 'If you eat healthy food, you will feel better.', words: [{w:'If',ar:'إذا'},{w:'will feel',ar:'ستشعر'}], meaning: 'إذا أكلت طعاماً صحياً، ستشعر بشكل أفضل.' },
-        { sentence: "Unless we change our habits, the world will face serious problems.", words: [{w:'unless',ar:'ما لم'},{w:'face',ar:'تواجه'}], meaning: 'ما لم نغيّر عاداتنا، سيواجه العالم مشاكل خطيرة.' },
-        { sentence: 'However, if we work together, real change is possible.', words: [{w:'if we work together',ar:'إذا عملنا معاً'},{w:'possible',ar:'ممكن'}], meaning: 'ومع ذلك، إذا عملنا معاً، فإن التغيير الحقيقي ممكن.' },
+        { sentence: 'If he works consistently every day, he will pass and win a great opportunity.', words: [{w:'if',ar:'إذا'},{w:'pass',ar:'ينجح'},{w:'opportunity',ar:'فرصة'}], meaning: 'إذا عمل بثبات كل يوم، فسينجح ويحصل على فرصة رائعة.' },
+        { sentence: 'If he does not sleep enough, stress will cause him to lose focus and he might fail.', words: [{w:'cause',ar:'يتسبب في'},{w:'fail',ar:'يرسب'}], meaning: 'إذا لم ينَم بما يكفي، فإن التوتر سيتسبب في فقدان تركيزه وقد يرسب.' },
+        { sentence: 'He knows that every decision has a consequence, so he plans his time carefully.', words: [{w:'consequence',ar:'عاقبة / نتيجة'}], meaning: 'يعلم أن لكل قرار عاقبة، لذا يخطّط لوقته بعناية.' },
+        { sentence: 'Unless he submits his application by Friday, he will miss the deadline.', words: [{w:'unless',ar:'ما لم'}], meaning: 'ما لم يقدّم طلبه بحلول يوم الجمعة، سيفوته الموعد النهائي.' },
+        { sentence: 'Imagine the scenario if he gets the scholarship — his whole life will change.', words: [{w:'imagine',ar:'تخيّل'},{w:'scenario',ar:'سيناريو'}], meaning: 'تخيّل السيناريو إذا حصل على المنحة — ستتغيّر حياته بأكملها.' },
+        { sentence: 'In real situations like this, small actions can have a very big effect.', words: [{w:'real',ar:'حقيقي'},{w:'situations',ar:'مواقف'},{w:'effect',ar:'تأثير'}], meaning: 'في مواقف حقيقية كهذه، يمكن أن يكون للأفعال الصغيرة تأثير كبير جداً.' },
       ],
     },
     listening: {

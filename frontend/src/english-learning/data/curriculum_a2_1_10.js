@@ -58,11 +58,11 @@ export const A2_DAYS_1_10 = [
       ],
     },
     reading: {
-      passage: "Sara has a very organised daily routine. She wakes up at 6:30 AM and takes a quick shower. Then she makes breakfast — usually eggs and coffee. She leaves home at 7:45 AM and arrives at work by 8:15. She has lunch with her colleagues at 1 PM. After work, she goes to the gym for an hour. In the evening, she cooks dinner, reads a book, and goes to sleep at 10:30 PM.",
+      passage: "Tom sets his alarm for 6 AM and wakes up early every morning. He takes a quick shower, brushes his teeth, and eats breakfast before 7:30. His commute to the office takes about forty minutes by train. He has a busy schedule with two meetings in the morning and lunch at his desk. After work, he likes to exercise for thirty minutes and then cook a simple dinner. By 10 PM he is ready to sleep — it is a routine he follows every day.",
       breakdown: [
-        { sentence: 'Sara has a very organised daily routine.', words: [{w:'organised',ar:'منظم'},{w:'routine',ar:'روتين'}], meaning: 'لدى سارة روتين يومي منظم جداً.' },
-        { sentence: 'She leaves home at 7:45 AM.', words: [{w:'leaves',ar:'تغادر'},{w:'home',ar:'المنزل'}], meaning: 'تغادر المنزل الساعة 7:45 صباحاً.' },
-        { sentence: 'She goes to the gym for an hour.', words: [{w:'gym',ar:'صالة رياضية'},{w:'hour',ar:'ساعة'}], meaning: 'تذهب إلى الصالة الرياضية لمدة ساعة.' },
+        { sentence: 'Tom sets his alarm for 6 AM and wakes up early every morning.', words: [{w:'alarm',ar:'منبه'},{w:'wakes up',ar:'يستيقظ'},{w:'early',ar:'مبكراً'}], meaning: 'يضبط توم منبهه على السادسة ويستيقظ مبكراً كل يوم.' },
+        { sentence: 'He has a busy schedule with two meetings in the morning and lunch at his desk.', words: [{w:'schedule',ar:'جدول'},{w:'meetings',ar:'اجتماعات'},{w:'lunch',ar:'غداء'}], meaning: 'لديه جدول مشغول مع اجتماعين صباحاً وغداء على مكتبه.' },
+        { sentence: 'After work, he likes to exercise for thirty minutes and then cook a simple dinner.', words: [{w:'exercise',ar:'يتمرن'},{w:'cook',ar:'يطبخ'},{w:'dinner',ar:'عشاء'}], meaning: 'بعد العمل يحب أن يتمرن ثلاثين دقيقة ثم يطبخ عشاءً بسيطاً.' },
       ],
     },
     listening: {
@@ -147,11 +147,11 @@ export const A2_DAYS_1_10 = [
       ],
     },
     reading: {
-      passage: "My apartment is on the third floor. There are two bedrooms, a living room, a kitchen, and a bathroom. In the living room, there is a large sofa and a TV. There aren't any curtains yet — I need to buy some. The kitchen is small but there is enough space to cook. I love my apartment because there is a balcony where I drink my morning coffee.",
+      passage: "Sara just moved into a new apartment on the second floor. The living room has a big sofa, a lamp in the corner, and a window that looks out onto the garden. There are two bedrooms — one has a mirror on the wall and a shelf full of books. The kitchen is small but the bathroom is modern with new furniture. Her neighbour downstairs helped her carry boxes up the stairs on the first day. Sara loves her balcony most of all because she can drink tea and watch the sunset.",
       breakdown: [
-        { sentence: 'There are two bedrooms, a living room, a kitchen, and a bathroom.', words: [{w:'bedrooms',ar:'غرف نوم'},{w:'bathroom',ar:'حمام'}], meaning: 'يوجد غرفتا نوم وغرفة معيشة ومطبخ وحمام.' },
-        { sentence: "There aren't any curtains yet.", words: [{w:"aren't",ar:'لا يوجد'},{w:'curtains',ar:'ستائر'}], meaning: 'لا توجد ستائر حتى الآن.' },
-        { sentence: 'There is a balcony where I drink my morning coffee.', words: [{w:'balcony',ar:'شرفة'},{w:'morning coffee',ar:'قهوة الصباح'}], meaning: 'يوجد شرفة أشرب فيها قهوتي الصباحية.' },
+        { sentence: 'The living room has a big sofa, a lamp in the corner, and a window that looks out onto the garden.', words: [{w:'sofa',ar:'أريكة'},{w:'lamp',ar:'مصباح'},{w:'window',ar:'نافذة'},{w:'garden',ar:'حديقة'}], meaning: 'غرفة المعيشة فيها أريكة كبيرة ومصباح في الزاوية ونافذة تطل على الحديقة.' },
+        { sentence: 'Her neighbour downstairs helped her carry boxes up the stairs on the first day.', words: [{w:'neighbour',ar:'جار'},{w:'stairs',ar:'درج'}], meaning: 'ساعدها جارها في الطابق السفلي على حمل الصناديق عبر الدرج في اليوم الأول.' },
+        { sentence: 'Sara loves her balcony most of all because she can drink tea and watch the sunset.', words: [{w:'balcony',ar:'شرفة'}], meaning: 'تحب سارة شرفتها أكثر من أي شيء لأنها تستطيع شرب الشاي ومشاهدة الغروب.' },
       ],
     },
     listening: {
@@ -237,11 +237,11 @@ export const A2_DAYS_1_10 = [
       ],
     },
     reading: {
-      passage: "Maya is at the supermarket. She needs some bread, rice, and a few apples. She checks her shopping list: milk — there isn't any at home. She picks up a bottle of milk and some cheese. At the checkout, there is a long queue. The cashier tells her there is a discount on vegetables today, so she adds some tomatoes to her trolley. She pays and keeps the receipt.",
+      passage: "Every Saturday, Rania goes to the supermarket with a shopping list and a small budget. She puts bread, rice, and a bottle of milk into her trolley. She also looks for organic vegetables and a packet of cheese for the week. At the checkout, there is a long queue, but the cashier tells her that chicken is on discount today. Rania adds the chicken to her trolley and saves a little money. She always keeps her receipt in case she needs to return anything.",
       breakdown: [
-        { sentence: "She needs some bread, rice, and a few apples.", words: [{w:'some',ar:'بعض'},{w:'a few',ar:'بضعة'}], meaning: 'هي تحتاج بعض الخبز والأرز وبضع تفاحات.' },
-        { sentence: "There isn't any at home.", words: [{w:"isn't any",ar:'لا يوجد'}], meaning: 'لا يوجد شيء في المنزل.' },
-        { sentence: 'There is a discount on vegetables today.', words: [{w:'discount',ar:'خصم'},{w:'vegetables',ar:'خضروات'}], meaning: 'هناك خصم على الخضروات اليوم.' },
+        { sentence: 'She puts bread, rice, and a bottle of milk into her trolley.', words: [{w:'bread',ar:'خبز'},{w:'rice',ar:'أرز'},{w:'bottle',ar:'زجاجة'},{w:'milk',ar:'حليب'},{w:'trolley',ar:'عربة تسوق'}], meaning: 'تضع خبزاً وأرزاً وزجاجة حليب في عربة التسوق.' },
+        { sentence: 'She also looks for organic vegetables and a packet of cheese for the week.', words: [{w:'organic',ar:'عضوي'},{w:'vegetables',ar:'خضروات'},{w:'packet',ar:'علبة'},{w:'cheese',ar:'جبنة'}], meaning: 'تبحث أيضاً عن خضروات عضوية وعلبة جبنة للأسبوع.' },
+        { sentence: 'At the checkout, there is a long queue, but the cashier tells her that chicken is on discount today.', words: [{w:'queue',ar:'طابور'},{w:'cashier',ar:'كاشير'},{w:'chicken',ar:'دجاج'},{w:'discount',ar:'خصم'}], meaning: 'عند الكاشير يوجد طابور طويل، لكن الكاشير يخبرها أن الدجاج بخصم اليوم.' },
       ],
     },
     listening: {
@@ -327,11 +327,12 @@ export const A2_DAYS_1_10 = [
       ],
     },
     reading: {
-      passage: "It is Saturday afternoon. Look at what everyone is doing! Mum is cooking in the kitchen and Dad is watching football on TV. My sister is talking on her phone and my brother is playing video games. I am sitting at my desk and studying English. Our dog is sleeping on the sofa. Outside, our neighbour is washing his car. Everyone is busy!",
+      passage: "It is a sunny Sunday morning in the park. Two friends are sitting on a bench and talking about their week. A man is running along the path with his dog. Nearby, a young woman is listening to music and smiling to herself. Some children are playing near the fountain and laughing loudly. A couple is eating sandwiches and drinking coffee under a tree. At the edge of the park, a student is studying from a book while waiting for the bus.",
       breakdown: [
-        { sentence: 'Mum is cooking in the kitchen and Dad is watching football on TV.', words: [{w:'cooking',ar:'تطبخ'},{w:'watching',ar:'يشاهد'}], meaning: 'أمي تطبخ في المطبخ وأبي يشاهد كرة القدم.' },
-        { sentence: 'I am sitting at my desk and studying English.', words: [{w:'sitting',ar:'جالس'},{w:'studying',ar:'أدرس'}], meaning: 'أنا جالس على مكتبي وأدرس الإنجليزية.' },
-        { sentence: 'Our neighbour is washing his car.', words: [{w:'neighbour',ar:'جار'},{w:'washing',ar:'يغسل'}], meaning: 'جارنا يغسل سيارته.' },
+        { sentence: 'Two friends are sitting on a bench and talking about their week.', words: [{w:'sitting',ar:'جالسان'},{w:'talking',ar:'يتحدثان'}], meaning: 'صديقان جالسان على مقعد ويتحدثان عن أسبوعهما.' },
+        { sentence: 'A young woman is listening to music and smiling to herself.', words: [{w:'listening',ar:'تستمع'},{w:'smiling',ar:'تبتسم'}], meaning: 'شابة تستمع إلى الموسيقى وتبتسم لنفسها.' },
+        { sentence: 'Some children are playing near the fountain and laughing loudly.', words: [{w:'playing',ar:'يلعبون'},{w:'laughing',ar:'يضحكون'}], meaning: 'بعض الأطفال يلعبون بجانب النافذة ويضحكون بصوت عالٍ.' },
+        { sentence: 'A student is studying from a book while waiting for the bus.', words: [{w:'studying',ar:'يدرس'},{w:'waiting',ar:'ينتظر'}], meaning: 'طالب يدرس من كتاب بينما ينتظر الحافلة.' },
       ],
     },
     listening: {
@@ -417,11 +418,11 @@ export const A2_DAYS_1_10 = [
       ],
     },
     reading: {
-      passage: "Layla has exciting plans for next year. She is going to graduate from university in June. After that, she is going to apply for jobs in her field. She is also going to move to a bigger city. Her friend Sara is going to help her find a flat. In the summer, they are both going to travel to Spain together. Layla is going to save money for the trip starting this month.",
+      passage: "Khalid has a big plan for his life this year. He is going to graduate from college in the spring and then apply for a job at a design company. He has an interview next week, so he is going to prepare very carefully. After he starts work, he is going to save money to buy a new laptop. He is also going to learn a new skill online. His family is going to celebrate with him soon, and they are all going to travel together next year.",
       breakdown: [
-        { sentence: 'She is going to graduate from university in June.', words: [{w:'graduate',ar:'تتخرج'},{w:'university',ar:'جامعة'}], meaning: 'ستتخرج من الجامعة في يونيو.' },
-        { sentence: 'She is also going to move to a bigger city.', words: [{w:'move',ar:'تنتقل'},{w:'bigger',ar:'أكبر'}], meaning: 'ستنتقل أيضاً إلى مدينة أكبر.' },
-        { sentence: 'Layla is going to save money for the trip starting this month.', words: [{w:'save',ar:'توفّر'},{w:'trip',ar:'رحلة'}], meaning: 'لينا ستبدأ توفير المال للرحلة هذا الشهر.' },
+        { sentence: 'He is going to graduate from college in the spring and then apply for a job at a design company.', words: [{w:'graduate',ar:'يتخرج'},{w:'apply',ar:'يتقدم'}], meaning: 'سيتخرج من الكلية في الربيع ثم يتقدم لوظيفة في شركة تصميم.' },
+        { sentence: 'He has an interview next week, so he is going to prepare very carefully.', words: [{w:'interview',ar:'مقابلة'},{w:'next week',ar:'الأسبوع القادم'},{w:'prepare',ar:'يجهّز'}], meaning: 'لديه مقابلة الأسبوع القادم لذا سيجهّز نفسه بعناية كبيرة.' },
+        { sentence: 'His family is going to celebrate with him soon, and they are all going to travel together next year.', words: [{w:'celebrate',ar:'يحتفل'},{w:'travel',ar:'يسافر'},{w:'next year',ar:'العام القادم'}], meaning: 'عائلته ستحتفل معه قريباً وسيسافرون معاً العام القادم.' },
       ],
     },
     listening: {
@@ -506,11 +507,11 @@ export const A2_DAYS_1_10 = [
       ],
     },
     reading: {
-      passage: "Last Saturday, Ahmad had a busy day. He woke up at 8 AM and cooked breakfast. Then he cleaned the apartment and walked to the supermarket. He bought vegetables and cooked lunch for his family. In the afternoon, he visited his parents and they talked for two hours. In the evening, he watched a film with his wife. He didn't work that day — he really enjoyed his day off.",
+      passage: "Last weekend, Hana decided to have a quiet day at home. She woke up late and cooked a big breakfast with eggs and toast. Then she cleaned the living room and opened all the windows to let in fresh air. In the afternoon, she walked to the nearby café and talked with an old friend for two hours. They watched the football match on the café TV and really enjoyed it. In the evening, Hana finished a book she started two weeks ago and went to bed early.",
       breakdown: [
-        { sentence: 'He walked to the supermarket.', words: [{w:'walked',ar:'مشى'},{w:'supermarket',ar:'سوبرماركت'}], meaning: 'مشى إلى السوبرماركت.' },
-        { sentence: 'He visited his parents and they talked for two hours.', words: [{w:'visited',ar:'زار'},{w:'talked',ar:'تحدثوا'}], meaning: 'زار والديه وتحدثوا لساعتين.' },
-        { sentence: "He didn't work that day — he really enjoyed his day off.", words: [{w:"didn't work",ar:'لم يعمل'},{w:'enjoyed',ar:'استمتع'}], meaning: 'لم يعمل ذلك اليوم — استمتع حقاً بإجازته.' },
+        { sentence: 'She cleaned the living room and opened all the windows to let in fresh air.', words: [{w:'cleaned',ar:'نظّفت'},{w:'opened',ar:'فتحت'}], meaning: 'نظّفت غرفة المعيشة وفتحت جميع النوافذ لتدخل الهواء النقي.' },
+        { sentence: 'She walked to the nearby café and talked with an old friend for two hours.', words: [{w:'walked',ar:'مشت'},{w:'talked',ar:'تحدثت'}], meaning: 'مشت إلى المقهى القريب وتحدثت مع صديق قديم لساعتين.' },
+        { sentence: 'Hana finished a book she started two weeks ago and went to bed early.', words: [{w:'finished',ar:'أنهت'},{w:'started',ar:'بدأت'},{w:'ago',ar:'منذ'}], meaning: 'أنهت هانا كتاباً بدأته منذ أسبوعين وذهبت للنوم مبكراً.' },
       ],
     },
     listening: {
@@ -596,11 +597,11 @@ export const A2_DAYS_1_10 = [
       ],
     },
     reading: {
-      passage: "Last month, Nadia went on a short trip with her family. They took the train and arrived in the city in two hours. They visited a famous old market where Nadia bought some beautiful scarves. They ate at a wonderful restaurant and drank traditional tea. Nadia saw many interesting places and took lots of photos. She felt very happy and thought the trip was unforgettable.",
+      passage: "Last summer, Yusuf went on a trip to the coast with two old friends. They took the bus and arrived in the afternoon. At the harbour market, Yusuf bought fresh seafood and they ate it together by the sea. One friend told a very funny story and everyone laughed. Yusuf saw a beautiful sunset and took many photos of it. He felt very happy and thought the whole trip was the best he had ever had.",
       breakdown: [
-        { sentence: 'They took the train and arrived in the city in two hours.', words: [{w:'took',ar:'أخذوا'},{w:'arrived',ar:'وصلوا'}], meaning: 'أخذوا القطار ووصلوا للمدينة في ساعتين.' },
-        { sentence: 'Nadia bought some beautiful scarves.', words: [{w:'bought',ar:'اشترت'},{w:'scarves',ar:'أوشحة'}], meaning: 'نادية اشترت بعض الأوشحة الجميلة.' },
-        { sentence: 'She felt very happy and thought the trip was unforgettable.', words: [{w:'felt',ar:'شعرت'},{w:'thought',ar:'اعتقدت'},{w:'unforgettable',ar:'لا تُنسى'}], meaning: 'شعرت بالسعادة الكبيرة واعتقدت أن الرحلة كانت لا تُنسى.' },
+        { sentence: 'They took the bus and arrived in the afternoon.', words: [{w:'took',ar:'أخذوا'},{w:'arrived',ar:'وصلوا'}], meaning: 'أخذوا الحافلة ووصلوا بعد الظهر.' },
+        { sentence: 'Yusuf bought fresh seafood and they ate it together by the sea.', words: [{w:'bought',ar:'اشترى'},{w:'ate',ar:'أكلوا'}], meaning: 'يوسف اشترى مأكولات بحرية طازجة وأكلوها معاً بجانب البحر.' },
+        { sentence: 'He felt very happy and thought the whole trip was the best he had ever had.', words: [{w:'felt',ar:'شعر'},{w:'thought',ar:'اعتقد'}], meaning: 'شعر بسعادة كبيرة واعتقد أن الرحلة كانت الأفضل في حياته.' },
       ],
     },
     listening: {
@@ -686,11 +687,11 @@ export const A2_DAYS_1_10 = [
       ],
     },
     reading: {
-      passage: "Omar has a large family. He loves them very much. His mother calls him every morning and he always talks to her for twenty minutes. His sister lives abroad and he misses her. He has two best friends — Ali and Sami. He met them at university and has known them for years. His boss is very kind and supports him at work. Omar tries to contact all the people he cares about regularly.",
+      passage: "Dina has many important people in her life. Her best friend Lara always supports her and never forgets her birthday — last year she surprised her with a cake and flowers. Dina also has a kind colleague at work; she introduced him to her sister last month and they became friends. Her old classmate from school moved abroad, and Dina misses her very much. She tries to contact her every week. Her boss invited them all to a team dinner last Friday and everyone really enjoyed it.",
       breakdown: [
-        { sentence: 'His mother calls him every morning and he always talks to her.', words: [{w:'calls him',ar:'تتصل به'},{w:'talks to her',ar:'يتحدث معها'}], meaning: 'والدته تتصل به كل صباح وهو دائماً يتحدث معها.' },
-        { sentence: 'He met them at university and has known them for years.', words: [{w:'met them',ar:'قابلهم'},{w:'known them',ar:'يعرفهم'}], meaning: 'قابلهم في الجامعة ويعرفهم منذ سنوات.' },
-        { sentence: 'His boss is very kind and supports him at work.', words: [{w:'supports him',ar:'يدعمه'}], meaning: 'مديره طيب جداً ويدعمه في العمل.' },
+        { sentence: 'Her best friend Lara always supports her and never forgets her birthday.', words: [{w:'supports her',ar:'تدعمها'},{w:'forgets',ar:'تنسى'}], meaning: 'تدعمها صديقتها لارا دائماً ولا تنسى عيد ميلادها أبداً.' },
+        { sentence: 'She introduced him to her sister last month and they became friends.', words: [{w:'introduced',ar:'عرّفت'},{w:'him',ar:'هو (مفعول به)'}], meaning: 'عرّفته على أختها الشهر الماضي وأصبحا صديقين.' },
+        { sentence: 'Her boss invited them all to a team dinner last Friday and everyone really enjoyed it.', words: [{w:'invited',ar:'دعا'},{w:'them',ar:'هم (مفعول به)'}], meaning: 'دعاهم جميعاً مديرها إلى عشاء الجمعة الماضية واستمتع الجميع.' },
       ],
     },
     listening: {
@@ -775,11 +776,11 @@ export const A2_DAYS_1_10 = [
       ],
     },
     reading: {
-      passage: "Lina is choosing between two apartments. The first apartment is bigger and has more rooms, but it is more expensive and further from her work. The second apartment is smaller and cheaper, but it is quieter and closer to public transport. Lina thinks the second flat is more comfortable and the neighbourhood is friendlier. In the end, she decides that a shorter commute is better than a bigger space.",
+      passage: "Karim and his brother Samir are very different. Karim is taller and older, but Samir is faster at running and better at cooking. Their hometown is quieter and cheaper than the capital city, but the capital is more popular and has more opportunities. Last month, Karim moved to the capital because he wanted a bigger flat. He found one that is more comfortable than his old room, even though it is more expensive and further from his family.",
       breakdown: [
-        { sentence: 'The first apartment is bigger but more expensive and further from her work.', words: [{w:'bigger',ar:'أكبر'},{w:'more expensive',ar:'أغلى'},{w:'further',ar:'أبعد'}], meaning: 'الشقة الأولى أكبر لكنها أغلى وأبعد عن عملها.' },
-        { sentence: 'The second apartment is quieter and closer to public transport.', words: [{w:'quieter',ar:'أهدأ'},{w:'closer',ar:'أقرب'}], meaning: 'الشقة الثانية أهدأ وأقرب للمواصلات العامة.' },
-        { sentence: 'She decides that a shorter commute is better than a bigger space.', words: [{w:'shorter commute',ar:'رحلة أقصر'},{w:'bigger space',ar:'مساحة أكبر'}], meaning: 'قرّرت أن الرحلة الأقصر أفضل من المساحة الأكبر.' },
+        { sentence: 'Karim is taller and older, but Samir is faster at running and better at cooking.', words: [{w:'taller',ar:'أطول'},{w:'older',ar:'أكبر سناً'},{w:'faster',ar:'أسرع'},{w:'better',ar:'أفضل'}], meaning: 'كريم أطول وأكبر سناً، لكن سامر أسرع في الجري وأفضل في الطبخ.' },
+        { sentence: 'Their hometown is quieter and cheaper than the capital city, but the capital is more popular.', words: [{w:'quieter',ar:'أهدأ'},{w:'cheaper',ar:'أرخص'},{w:'more popular',ar:'أكثر شعبية'}], meaning: 'بلدتهم الأصلية أهدأ وأرخص من العاصمة، لكن العاصمة أكثر شعبية.' },
+        { sentence: 'He found one that is more comfortable than his old room, even though it is more expensive and further from his family.', words: [{w:'more comfortable',ar:'أكثر راحة'},{w:'more expensive',ar:'أغلى'},{w:'further',ar:'أبعد'}], meaning: 'وجد شقة أكثر راحة من غرفته القديمة رغم أنها أغلى وأبعد عن عائلته.' },
       ],
     },
     listening: {
@@ -866,11 +867,12 @@ export const A2_DAYS_1_10 = [
       ],
     },
     reading: {
-      passage: "Jordan is a fascinating country. Petra is one of the most visited places in the world. The Dead Sea is the lowest point on Earth and the saltiest lake. Wadi Rum is the most beautiful desert landscape many tourists have ever seen. Amman is the biggest city in Jordan and one of the oldest continuously inhabited cities. The people of Jordan are often described as some of the friendliest in the Middle East.",
+      passage: "Every year, the family votes for their favourite holiday memory. Last summer was the hottest they could remember, so they chose a trip to the mountains. The youngest child, little Mira, said it was the most beautiful place she had ever seen. The oldest member, Grandpa Hassan, said the food there was the most delicious in the country. They visited the tallest waterfall in the region, which was also the most popular tourist spot. Everyone agreed it was the best holiday, and the most important thing was being together.",
       breakdown: [
-        { sentence: 'The Dead Sea is the lowest point on Earth and the saltiest lake.', words: [{w:'lowest',ar:'الأخفض'},{w:'saltiest',ar:'الأكثر ملوحة'}], meaning: 'البحر الميت هو أخفض نقطة على الأرض وأكثر البحيرات ملوحة.' },
-        { sentence: 'Wadi Rum is the most beautiful desert landscape many tourists have ever seen.', words: [{w:'most beautiful',ar:'الأجمل'},{w:'desert landscape',ar:'منظر صحراوي'}], meaning: 'وادي رم هو أجمل منظر صحراوي شاهده كثير من السياح.' },
-        { sentence: 'Amman is the biggest city in Jordan.', words: [{w:'biggest',ar:'الأكبر'}], meaning: 'عمّان هي أكبر مدينة في الأردن.' },
+        { sentence: 'The youngest child, little Mira, said it was the most beautiful place she had ever seen.', words: [{w:'the youngest',ar:'الأصغر سناً'},{w:'the most beautiful',ar:'الأجمل'}], meaning: 'الطفلة الأصغر ميرا قالت إنه أجمل مكان رأته في حياتها.' },
+        { sentence: 'Grandpa Hassan said the food there was the most delicious in the country.', words: [{w:'the oldest',ar:'الأكبر سناً'},{w:'the most delicious',ar:'الأشهى'}], meaning: 'الجد حسن قال إن الطعام هناك كان الأشهى في البلاد.' },
+        { sentence: 'They visited the tallest waterfall in the region, which was also the most popular tourist spot.', words: [{w:'the tallest',ar:'الأطول'},{w:'the most popular',ar:'الأكثر شعبية'}], meaning: 'زاروا أطول شلال في المنطقة الذي كان أيضاً أكثر موقع سياحي شعبية.' },
+        { sentence: 'Everyone agreed it was the best holiday, and the most important thing was being together.', words: [{w:'the best',ar:'الأفضل'},{w:'the most important',ar:'الأهم'}], meaning: 'اتفق الجميع على أنها كانت أفضل إجازة والشيء الأهم هو التواجد معاً.' },
       ],
     },
     listening: {

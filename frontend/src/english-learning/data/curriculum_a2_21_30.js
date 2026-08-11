@@ -58,11 +58,13 @@ export const A2_DAYS_21_30 = [
       ],
     },
     reading: {
-      passage: "The Great Wall of China is one of the most amazing structures in the world. It was built over many centuries by millions of workers. It is estimated that the wall stretches for over 21,000 kilometres. Today, it is visited by millions of tourists every year. Many sections of the wall have been restored, but some parts are still damaged. The wall was originally built to protect China from invasions. It is now recognised as a symbol of Chinese history and culture.",
+      passage: "The Eiffel Tower was built in Paris in 1889 and is visited by millions of tourists every year. Many great books were written about it, and postcards of the tower are sold in every shop in the city. The telephone was invented by Alexander Graham Bell, while penicillin was discovered in 1928. Hundreds of films are produced about famous inventions every decade. Last year, a new documentary was announced and all tickets were sold within hours. The old cinema where it was shown was recently painted and repaired for the occasion.",
       breakdown: [
-        { sentence: 'It was built over many centuries by millions of workers.', words: [{w:'was built',ar:'بُني'},{w:'by millions',ar:'من قِبل الملايين'}], meaning: 'بُني على مدى قرون عديدة من قِبل ملايين العمال.' },
-        { sentence: 'It is visited by millions of tourists every year.', words: [{w:'is visited',ar:'يُزار'},{w:'by millions',ar:'من قِبل الملايين'}], meaning: 'يُزار من قِبل ملايين السياح كل عام.' },
-        { sentence: 'It is now recognised as a symbol of Chinese history.', words: [{w:'is recognised',ar:'يُعترف به'},{w:'symbol',ar:'رمز'}], meaning: 'الآن يُعترف به كرمز للتاريخ الصيني.' },
+        { sentence: 'The Eiffel Tower was built in Paris in 1889 and is visited by millions of tourists every year.', words: [{w:'was built',ar:'بُني'},{w:'is visited',ar:'يُزار'}], meaning: 'بُنيَ برج إيفل في باريس عام 1889 ويُزار من ملايين السياح كل عام.' },
+        { sentence: 'Many great books were written about it, and postcards of the tower are sold in every shop.', words: [{w:'were written',ar:'كُتبت'},{w:'are sold',ar:'تُباع'}], meaning: 'كُتبت كتب رائعة كثيرة عنه، وتُباع بطاقاته في كل متجر.' },
+        { sentence: 'The telephone was invented by Alexander Graham Bell, while penicillin was discovered in 1928.', words: [{w:'was invented',ar:'اختُرع'},{w:'was discovered',ar:'اكتُشف'},{w:'by',ar:'بواسطة'}], meaning: 'اختُرع الهاتف بواسطة ألكسندر غراهام بيل، بينما اكتُشف البنسيلين عام 1928.' },
+        { sentence: 'Last year, a new documentary was announced and all tickets were sold within hours.', words: [{w:'was announced',ar:'أُعلن عنه'},{w:'were sold',ar:'بِيعت'}], meaning: 'العام الماضي، أُعلن عن وثائقي جديد وبِيعت جميع التذاكر في غضون ساعات.' },
+        { sentence: 'The old cinema where it was shown was recently painted and repaired for the occasion.', words: [{w:'was painted',ar:'طُليَ'},{w:'repaired',ar:'أُصلح'}], meaning: 'السينما القديمة التي عُرض فيها طُليَت وأُصلحت مؤخراً للمناسبة.' },
       ],
     },
     listening: {
@@ -148,11 +150,13 @@ export const A2_DAYS_21_30 = [
       ],
     },
     reading: {
-      passage: "After the job interview, Sara called her friend to share the news. She said that the interview had gone well. She mentioned that the interviewer asked her about her experience and her plans for the future. The interviewer told her that the company was growing and that there would be many opportunities. Sara said she was nervous at first but that she had felt more confident as the interview continued. Her friend told her that she would definitely get the job. Sara said she would wait for the result and that she was hopeful.",
+      passage: "After the school meeting, Lena called her mother to share what had happened. She said that the teacher had explained the new homework rules clearly. Lena mentioned that a classmate had complained about too much work, but the teacher insisted that it was necessary. Her friend told her that the principal had announced a school trip next month and asked if she wanted to join. Lena admitted that she had forgotten to bring her permission letter. Her mother warned her not to forget it again and promised to help her prepare everything on time.",
       breakdown: [
-        { sentence: 'She said that the interview had gone well.', words: [{w:'had gone well',ar:'سارت بشكل جيد'}], meaning: 'قالت إن المقابلة سارت بشكل جيد.' },
-        { sentence: 'The interviewer told her that the company was growing.', words: [{w:'told her',ar:'أخبرها'},{w:'was growing',ar:'كانت تنمو'}], meaning: 'أخبرها المحاور بأن الشركة كانت تنمو.' },
-        { sentence: 'Her friend told her that she would definitely get the job.', words: [{w:'would get',ar:'ستحصل'},{w:'definitely',ar:'بالتأكيد'}], meaning: 'أخبرتها صديقتها بأنها ستحصل على الوظيفة بالتأكيد.' },
+        { sentence: 'She said that the teacher had explained the new homework rules clearly.', words: [{w:'said',ar:'قالت'},{w:'had explained',ar:'كان قد شرح'}], meaning: 'قالت إن المعلم كان قد شرح القواعد الجديدة للواجبات بوضوح.' },
+        { sentence: 'Lena mentioned that a classmate had complained about too much work, but the teacher insisted that it was necessary.', words: [{w:'mentioned',ar:'ذكرت'},{w:'complained',ar:'شكا'},{w:'insisted',ar:'أصرّ'}], meaning: 'ذكرت لينا أن زميلاً شكا من كثرة العمل، لكن المعلم أصرّ على أنه ضروري.' },
+        { sentence: 'Her friend told her that the principal had announced a school trip next month.', words: [{w:'told her',ar:'أخبرتها'},{w:'had announced',ar:'كان قد أعلن'}], meaning: 'أخبرتها صديقتها أن المدير كان قد أعلن عن رحلة مدرسية الشهر القادم.' },
+        { sentence: 'Lena admitted that she had forgotten to bring her permission letter.', words: [{w:'admitted',ar:'اعترفت'}], meaning: 'اعترفت لينا بأنها نسيت إحضار رسالة الإذن.' },
+        { sentence: 'Her mother warned her not to forget it again and promised to help her prepare everything on time.', words: [{w:'warned',ar:'حذّرتها'},{w:'promised',ar:'وعدت'}], meaning: 'حذّرتها أمها من النسيان مرة أخرى ووعدت بمساعدتها في الإعداد في الوقت المناسب.' },
       ],
     },
     listening: {
@@ -238,11 +242,14 @@ export const A2_DAYS_21_30 = [
       ],
     },
     reading: {
-      passage: "Starting a new language can be tough. There will be moments when you want to give up. When you come across a word you don't know, look it up immediately. Don't put off studying — carry on even on difficult days. Set up a study routine and stick to it. Look forward to small achievements — they add up! If you run out of ideas, find a language partner to go out with and practise. Growing up bilingual is a gift, but learning a language as an adult is a superpower.",
+      passage: "Every morning, Maya wakes up early and puts on her running shoes before the sun rises. She grew up in a small town but set up her own business in the city last year. When she runs out of ideas at work, she goes out for a walk to clear her head. She always turns off her phone during these walks so she can think clearly. One day, she found out that a friend had been looking after her cat while she was away on a trip. Maya looked forward to coming back home every evening, knowing she had carried on despite every challenge.",
       breakdown: [
-        { sentence: 'There will be moments when you want to give up.', words: [{w:'give up',ar:'تستسلم'}], meaning: 'ستكون هناك لحظات تريد فيها الاستسلام.' },
-        { sentence: "When you come across a word you don't know, look it up.", words: [{w:'come across',ar:'يصادف'},{w:'look it up',ar:'ابحث عنها'}], meaning: 'عندما تصادف كلمة لا تعرفها، ابحث عنها.' },
-        { sentence: "If you run out of ideas, find a language partner.", words: [{w:'run out of',ar:'ينفد'}], meaning: 'إذا نفدت أفكارك، اجد شريكاً للغة.' },
+        { sentence: 'Every morning, Maya wakes up early and puts on her running shoes before the sun rises.', words: [{w:'wakes up',ar:'تستيقظ'},{w:'puts on',ar:'ترتدي'}], meaning: 'كل صباح، تستيقظ مايا مبكراً وترتدي حذاءها الرياضي قبل شروق الشمس.' },
+        { sentence: 'She grew up in a small town but set up her own business in the city last year.', words: [{w:'grew up',ar:'كبرت'},{w:'set up',ar:'أسّست'}], meaning: 'كبرت في مدينة صغيرة لكنها أسّست مشروعها الخاص في المدينة العام الماضي.' },
+        { sentence: 'When she runs out of ideas at work, she goes out for a walk to clear her head.', words: [{w:'runs out of',ar:'ينفد منها'},{w:'goes out',ar:'تخرج'}], meaning: 'عندما تنفد أفكارها في العمل، تخرج للمشي لتصفية ذهنها.' },
+        { sentence: 'She always turns off her phone during these walks so she can think clearly.', words: [{w:'turns off',ar:'تطفئ'}], meaning: 'تطفئ دائماً هاتفها خلال هذه النزهات حتى تستطيع التفكير بوضوح.' },
+        { sentence: 'One day, she found out that a friend had been looking after her cat while she was away.', words: [{w:'found out',ar:'اكتشفت'},{w:'looking after',ar:'تعتني بـ'}], meaning: 'ذات يوم، اكتشفت أن صديقة كانت تعتني بقطتها خلال غيابها.' },
+        { sentence: 'Maya looked forward to coming back home every evening, knowing she had carried on despite every challenge.', words: [{w:'looked forward to',ar:'تتطلع إلى'},{w:'come back',ar:'العودة'},{w:'carried on',ar:'واصلت'}], meaning: 'كانت مايا تتطلع إلى العودة إلى المنزل كل مساء، عالمةً أنها واصلت رغم كل تحدٍّ.' },
       ],
     },
     listening: {
@@ -328,11 +335,13 @@ export const A2_DAYS_21_30 = [
       ],
     },
     reading: {
-      passage: "Finding balance in life is not always easy. Many people feel there is too much work and not enough time to relax. Students often say there is too much pressure and not enough support. On the other hand, some people watch too much TV and do not exercise enough. Eating too much unhealthy food causes health problems. Not drinking enough water causes fatigue. The key is to find the right balance — not too much of anything, but enough of everything you need. Life is about making choices that are good enough, not perfect.",
+      passage: "Omar wanted to rent a new flat in the city, but there were too many problems with it. The rooms were too small and there was not enough space for his furniture. The noise from the street was too much to manage, and the rent was too expensive for him to afford. He felt there was too much pressure to decide quickly, and he did not have enough patience to wait for a better option. In the end, he found a place with the right balance of size and price. He finally had enough energy to feel happy about his new home.",
       breakdown: [
-        { sentence: 'Many people feel there is too much work and not enough time to relax.', words: [{w:'too much work',ar:'عمل أكثر من اللازم'},{w:'not enough time',ar:'وقت غير كافٍ'}], meaning: 'كثير من الناس يشعرون بأن العمل أكثر من اللازم والوقت غير كافٍ للراحة.' },
-        { sentence: 'Not drinking enough water causes fatigue.', words: [{w:'not enough water',ar:'ماء غير كافٍ'},{w:'fatigue',ar:'إجهاد'}], meaning: 'عدم شرب ماء كافٍ يسبب الإجهاد.' },
-        { sentence: "Life is about making choices that are good enough, not perfect.", words: [{w:'good enough',ar:'جيد بما يكفي'}], meaning: 'الحياة تتعلق باتخاذ قرارات جيدة بما يكفي، وليس مثالية.' },
+        { sentence: 'The rooms were too small and there was not enough space for his furniture.', words: [{w:'too small',ar:'صغيرة جداً'},{w:'not enough space',ar:'مساحة غير كافية'}], meaning: 'كانت الغرف صغيرة جداً ولم تكن هناك مساحة كافية لأثاثه.' },
+        { sentence: 'The noise from the street was too much to manage, and the rent was too expensive for him to afford.', words: [{w:'too much',ar:'أكثر من اللازم'},{w:'afford',ar:'يتحمّل التكلفة'}], meaning: 'كان الضجيج من الشارع أكثر من اللازم للتعامل معه، والإيجار باهظاً جداً لا يستطيع تحمّله.' },
+        { sentence: 'He felt there was too much pressure to decide quickly, and he did not have enough patience to wait.', words: [{w:'too much pressure',ar:'ضغط أكثر من اللازم'},{w:'enough patience',ar:'صبر كافٍ'}], meaning: 'شعر بأن هناك ضغطاً أكثر من اللازم للقرار السريع، ولم يكن لديه صبر كافٍ للانتظار.' },
+        { sentence: 'In the end, he found a place with the right balance of size and price.', words: [{w:'balance',ar:'توازن'},{w:'size',ar:'حجم'}], meaning: 'في النهاية، وجد مكاناً يحقق التوازن الصحيح بين الحجم والسعر.' },
+        { sentence: 'He finally had enough energy to feel happy about his new home.', words: [{w:'enough energy',ar:'طاقة كافية'}], meaning: 'توفّرت لديه أخيراً طاقة كافية لكي يكون سعيداً بمنزله الجديد.' },
       ],
     },
     listening: {
@@ -419,11 +428,13 @@ export const A2_DAYS_21_30 = [
       ],
     },
     reading: {
-      passage: "Our class has 20 students. All of them are learning English for different reasons. Most students want to travel or work abroad. Some study for university. Neither of the two students who came from France had studied English before. Both of them are now at A2 level after only six months. Each student has a unique story. None of them regrets joining the course. Either the morning or evening session is available — students can choose either option.",
+      passage: "The school held a vote to choose a new after-school activity. Both options — art club and drama club — were popular, and most students could not decide between them. Some students preferred art because it was calm and individual; others liked drama because every lesson was different and exciting. In the end, neither group agreed to drop their choice, so the teachers decided to offer both. Each student could choose either activity, and none of them were disappointed. All of the groups started the following week, and most students agreed it was the best decision the school had ever made.",
       breakdown: [
-        { sentence: 'All of them are learning English for different reasons.', words: [{w:'all of them',ar:'جميعهم'}], meaning: 'جميعهم يتعلمون الإنجليزية لأسباب مختلفة.' },
-        { sentence: 'Neither of the two students had studied English before.', words: [{w:'neither of',ar:'لا أيٌّ من'}], meaning: 'لم يكن أيٌّ من الطالبين قد درس الإنجليزية من قبل.' },
-        { sentence: 'None of them regrets joining the course.', words: [{w:'none of them',ar:'لا أحد منهم'}], meaning: 'لا أحد منهم يندم على الانضمام للدورة.' },
+        { sentence: 'Both options — art club and drama club — were popular, and most students could not decide between them.', words: [{w:'both',ar:'كلاهما'},{w:'most students',ar:'معظم الطلاب'}], meaning: 'كلا الخيارين كانا شائعَين، ومعظم الطلاب لم يستطيعوا الاختيار بينهما.' },
+        { sentence: 'Some students preferred art because it was calm and individual; others liked drama because every lesson was different.', words: [{w:'some',ar:'بعض'},{w:'every',ar:'كل'}], meaning: 'بعض الطلاب فضّلوا الفن لأنه هادئ وفردي؛ وأحبّ آخرون المسرح لأن كل درس كان مختلفاً.' },
+        { sentence: 'Neither group agreed to drop their choice, so the teachers decided to offer both.', words: [{w:'neither',ar:'لا... ولا'},{w:'both',ar:'كلاهما'}], meaning: 'لم توافق أيٌّ من المجموعتين على التخلي عن خيارها، فقرّر المعلمون تقديم كليهما.' },
+        { sentence: 'Each student could choose either activity, and none of them were disappointed.', words: [{w:'each',ar:'كل'},{w:'either',ar:'أيٌّ منهما'},{w:'none',ar:'لا أحد'}], meaning: 'كان بإمكان كل طالب اختيار أيٍّ من النشاطين، ولم يشعر أحد منهم بخيبة الأمل.' },
+        { sentence: 'All of the groups started the following week, and most students agreed it was the best decision.', words: [{w:'all of',ar:'جميع'},{w:'most students',ar:'معظم الطلاب'}], meaning: 'بدأت جميع المجموعات الأسبوع التالي، ووافق معظم الطلاب على أنه كان أفضل قرار.' },
       ],
     },
     listening: {
@@ -511,11 +522,13 @@ export const A2_DAYS_21_30 = [
       ],
     },
     reading: {
-      passage: "Ali is happy with his life, but he has many wishes. He wishes he could travel more — he would love to visit Japan and Brazil. He would prefer a job closer to home so he could spend more time with his family. Right now, he works long hours and wishes he had more free time. He would like to learn to cook — he prefers homemade food to takeaways. Most of all, he wishes he could improve his English faster. But he knows that with effort, dreams become reality.",
+      passage: "Nadia has big dreams for her future. She would like to work as a doctor because her ambition is to help others. She would prefer to study abroad, but she wishes she had more money to afford it. Her ideal lifestyle would be simple — a comfortable home near the sea and a career she loves. She would rather work hard now so she can achieve her goals later. She hopes to make her family proud and imagines the day she will finally reach her dream.",
       breakdown: [
-        { sentence: 'He wishes he could travel more.', words: [{w:'wishes',ar:'يتمنى'},{w:'could travel',ar:'يستطيع السفر'}], meaning: 'يتمنى لو يستطيع السفر أكثر.' },
-        { sentence: "He would prefer a job closer to home.", words: [{w:'would prefer',ar:'يفضّل'}], meaning: 'يفضّل وظيفة أقرب إلى المنزل.' },
-        { sentence: 'He wishes he had more free time.', words: [{w:'wishes he had',ar:'يتمنى لو كان لديه'}], meaning: 'يتمنى لو كان لديه وقت فراغ أكثر.' },
+        { sentence: 'She would like to work as a doctor because her ambition is to help others.', words: [{w:'would like',ar:'تودّ'},{w:'ambition',ar:'طموح'}], meaning: 'تودّ العمل طبيبةً لأن طموحها هو مساعدة الآخرين.' },
+        { sentence: 'She would prefer to study abroad, but she wishes she had more money to afford it.', words: [{w:'would prefer',ar:'تفضّل'},{w:'wishes',ar:'تتمنى'}], meaning: 'تفضّل الدراسة في الخارج، لكنها تتمنى لو كان لديها المزيد من المال لتحمّل تكلفتها.' },
+        { sentence: 'Her ideal lifestyle would be simple — a comfortable home near the sea and a career she loves.', words: [{w:'ideal',ar:'مثالي'},{w:'lifestyle',ar:'أسلوب حياة'},{w:'comfortable',ar:'مريح'},{w:'career',ar:'مسيرة مهنية'}], meaning: 'ستكون حياتها المثالية بسيطة — منزل مريح قرب البحر ومسيرة مهنية تحبها.' },
+        { sentence: 'She would rather work hard now so she can achieve her goals later.', words: [{w:'would rather',ar:'تفضّل'},{w:'achieve',ar:'تحقق'}], meaning: 'تفضّل العمل الجاد الآن حتى تستطيع تحقيق أهدافها لاحقاً.' },
+        { sentence: 'She hopes to make her family proud and imagines the day she will finally reach her dream.', words: [{w:'hopes',ar:'تأمل'},{w:'imagines',ar:'تتخيّل'}], meaning: 'تأمل في إفخار عائلتها وتتخيّل اليوم الذي ستصل فيه إلى حلمها.' },
       ],
     },
     listening: {
@@ -601,11 +614,14 @@ export const A2_DAYS_21_30 = [
       ],
     },
     reading: {
-      passage: "Sami started learning English three years ago. He lived in the UK for one year when he was 20. Since then, he has continued to practise. He has read many books in English, watched hundreds of films, and has attended several online courses. Last month, he took an official exam and passed. He has made enormous progress since he began. This year alone, he has written over fifty journal entries in English. When asked about his secret, he says: 'I have never stopped trying.'",
+      passage: "Layla started her English course in 2022, and since then her life has changed a great deal. Last year, she visited London for the first time and spoke English with real people for a whole week. She has recently started a new job where English is used every day. So far, she has written dozens of emails in English and has read three full novels. She called her teacher yesterday to share the good news. Her teacher asked how long she had been studying, and Layla said she had been learning for three years. At last, all her progress is paying off.",
       breakdown: [
-        { sentence: 'He has continued to practise since then.', words: [{w:'has continued',ar:'واصل'},{w:'since then',ar:'منذ ذلك الحين'}], meaning: 'واصل التمرين منذ ذلك الحين.' },
-        { sentence: 'Last month, he took an official exam and passed.', words: [{w:'last month',ar:'الشهر الماضي'},{w:'took',ar:'أجرى'}], meaning: 'الشهر الماضي، أجرى امتحاناً رسمياً ونجح.' },
-        { sentence: "He has never stopped trying.", words: [{w:'has never stopped',ar:'لم يتوقف أبداً'}], meaning: 'لم يتوقف أبداً عن المحاولة.' },
+        { sentence: 'Layla started her English course in 2022, and since then her life has changed a great deal.', words: [{w:'in 2022',ar:'في عام 2022'},{w:'since then',ar:'منذ ذلك الحين'},{w:'has changed',ar:'تغيّرت'}], meaning: 'بدأت ليلى دورة الإنجليزية في عام 2022، ومنذ ذلك الحين تغيّرت حياتها كثيراً.' },
+        { sentence: 'Last year, she visited London for the first time and spoke English with real people for a whole week.', words: [{w:'last year',ar:'العام الماضي'},{w:'for a whole week',ar:'لمدة أسبوع كامل'}], meaning: 'العام الماضي، زارت لندن لأول مرة وتحدثت بالإنجليزية مع أشخاص حقيقيين لمدة أسبوع كامل.' },
+        { sentence: 'She has recently started a new job where English is used every day.', words: [{w:'recently',ar:'مؤخراً'},{w:'has started',ar:'بدأت'}], meaning: 'بدأت مؤخراً وظيفة جديدة يُستخدم فيها الإنجليزية كل يوم.' },
+        { sentence: 'So far, she has written dozens of emails in English and has read three full novels.', words: [{w:'so far',ar:'حتى الآن'},{w:'has written',ar:'كتبت'},{w:'has read',ar:'قرأت'}], meaning: 'حتى الآن، كتبت عشرات الرسائل بالإنجليزية وقرأت ثلاث روايات كاملة.' },
+        { sentence: 'She called her teacher yesterday to share the good news.', words: [{w:'yesterday',ar:'أمس'}], meaning: 'اتصلت بمعلمتها أمس لتشارك الأخبار السارة.' },
+        { sentence: 'At last, all her progress is paying off.', words: [{w:'at last',ar:'في النهاية'},{w:'progress',ar:'تقدّم'}], meaning: 'في النهاية، كل تقدّمها يؤتي ثماره.' },
       ],
     },
     listening: {
@@ -693,11 +709,14 @@ export const A2_DAYS_21_30 = [
       ],
     },
     reading: {
-      passage: "Last year, I had a very interesting experience. I was travelling alone through a new city when I suddenly realised I had lost my phone. I felt panicked at first. I retraced my steps and, fortunately, found it on a bench in the park where I had been sitting. A kind woman had picked it up and was waiting there. She had noticed it on the bench and decided to wait. In the end, I was so relieved and grateful. It turned out to be a wonderful reminder that most people are kind.",
+      passage: "Once, my friend Karim decided to surprise his family by cooking dinner alone. At first, he felt nervous because he had never cooked for eight people before. Suddenly, he realised he had added too much salt to the soup. Unfortunately, he could not manage to fix it, and the soup tasted terrible. Meanwhile, the rest of the food was turning out beautifully — the rice was perfect. After that, everyone arrived and, fortunately, they laughed about the soup and enjoyed the evening together. In the end, it turned out to be the most memorable and exciting family adventure of the year.",
       breakdown: [
-        { sentence: 'I was travelling alone through a new city when I suddenly realised I had lost my phone.', words: [{w:'was travelling',ar:'كنت أسافر'},{w:'suddenly realised',ar:'أدركت فجأة'},{w:'had lost',ar:'كنت قد فقدت'}], meaning: 'كنت أسافر وحدي عبر مدينة جديدة عندما أدركت فجأة أنني كنت قد فقدت هاتفي.' },
-        { sentence: 'A kind woman had picked it up and was waiting there.', words: [{w:'had picked up',ar:'كانت قد التقطته'},{w:'was waiting',ar:'كانت تنتظر'}], meaning: 'امرأة طيبة كانت قد التقطته وكانت تنتظر هناك.' },
-        { sentence: 'It turned out to be a wonderful reminder that most people are kind.', words: [{w:'turned out',ar:'تبيّن'},{w:'reminder',ar:'تذكير'}], meaning: 'تبيّن أنه كان تذكيراً رائعاً بأن معظم الناس طيبون.' },
+        { sentence: 'At first, he felt nervous because he had never cooked for eight people before.', words: [{w:'at first',ar:'في البداية'},{w:'nervous',ar:'متوتر'}], meaning: 'في البداية، شعر بالتوتر لأنه لم يطبخ قط لثمانية أشخاص من قبل.' },
+        { sentence: 'Suddenly, he realised he had added too much salt to the soup.', words: [{w:'suddenly',ar:'فجأة'},{w:'realised',ar:'أدرك'}], meaning: 'فجأة، أدرك أنه أضاف الكثير من الملح إلى الحساء.' },
+        { sentence: 'Unfortunately, he could not manage to fix it, and the soup tasted terrible.', words: [{w:'unfortunately',ar:'لسوء الحظ'},{w:'manage',ar:'يتمكّن من'}], meaning: 'لسوء الحظ، لم يتمكّن من إصلاح الأمر، وكان طعم الحساء فظيعاً.' },
+        { sentence: 'Meanwhile, the rest of the food was turning out beautifully — the rice was perfect.', words: [{w:'meanwhile',ar:'في هذه الأثناء'},{w:'turning out',ar:'تتضح نتيجتها'}], meaning: 'في هذه الأثناء، كانت نتيجة بقية الطعام رائعة — كان الأرز مثالياً.' },
+        { sentence: 'Fortunately, they laughed about the soup and enjoyed the evening together.', words: [{w:'fortunately',ar:'لحسن الحظ'}], meaning: 'لحسن الحظ، ضحكوا من الحساء واستمتعوا بالسهرة معاً.' },
+        { sentence: 'In the end, it turned out to be the most memorable and exciting family adventure of the year.', words: [{w:'in the end',ar:'في النهاية'},{w:'turned out',ar:'تبيّن'},{w:'memorable',ar:'لا يُنسى'},{w:'adventure',ar:'مغامرة'}], meaning: 'في النهاية، تبيّن أنها كانت أكثر مغامرة عائلية لا تُنسى ومثيرة في السنة.' },
       ],
     },
     listening: {
@@ -783,11 +802,13 @@ export const A2_DAYS_21_30 = [
       ],
     },
     reading: {
-      passage: "The world is facing many serious challenges. Climate change is perhaps the biggest — rising temperatures are causing more extreme weather events. Air pollution in cities is affecting people's health, particularly their lungs and hearts. Technology has helped in many ways: medical technology has saved lives, and renewable energy is growing. However, technology also has negative effects. Social media can cause stress and mental health problems. Smartphones mean people spend too much time on screens. I believe that both individuals and governments must work together to find solutions. Small actions — like recycling, using less plastic, and exercising more — can make a real difference.",
+      passage: "Many people today are worried about the environment and their health. Air pollution in big cities is a serious problem that affects everyone, and climate change is making it worse every year. Doctors say that too much screen time and social media can cause stress and damage mental health. However, technology can also be part of the solution — renewable energy is reducing pollution, and modern medicine is fighting disease more effectively than ever. We must all become more aware of the global impact of our choices. Small steps like choosing to exercise, recycle, and support local businesses can make a real difference.",
       breakdown: [
-        { sentence: 'Rising temperatures are causing more extreme weather events.', words: [{w:'rising temperatures',ar:'ارتفاع درجات الحرارة'},{w:'extreme weather',ar:'طقس متطرف'}], meaning: 'ارتفاع درجات الحرارة يتسبب في أحداث جوية متطرفة أكثر.' },
-        { sentence: 'Technology has helped in many ways: medical technology has saved lives.', words: [{w:'medical technology',ar:'التكنولوجيا الطبية'},{w:'saved lives',ar:'أنقذت أرواحاً'}], meaning: 'ساعدت التكنولوجيا بطرق كثيرة: التكنولوجيا الطبية أنقذت أرواحاً.' },
-        { sentence: 'Small actions can make a real difference.', words: [{w:'small actions',ar:'أفعال صغيرة'},{w:'make a difference',ar:'تُحدث فرقاً'}], meaning: 'الأفعال الصغيرة يمكن أن تُحدث فرقاً حقيقياً.' },
+        { sentence: 'Air pollution in big cities is a serious problem that affects everyone, and climate change is making it worse every year.', words: [{w:'pollution',ar:'تلوث'},{w:'climate change',ar:'تغيّر المناخ'}], meaning: 'تلوث الهواء في المدن الكبيرة مشكلة خطيرة تؤثر على الجميع، وتغيّر المناخ يزيد الأمر سوءاً.' },
+        { sentence: 'Too much screen time and social media can cause stress and damage mental health.', words: [{w:'screen',ar:'شاشة'},{w:'social media',ar:'وسائل التواصل الاجتماعي'},{w:'stress',ar:'ضغط نفسي'},{w:'mental health',ar:'الصحة النفسية'}], meaning: 'الإفراط في وقت الشاشة ووسائل التواصل الاجتماعي قد يسبب الضغط النفسي ويضر بالصحة النفسية.' },
+        { sentence: 'Renewable energy is reducing pollution, and modern medicine is fighting disease more effectively than ever.', words: [{w:'renewable',ar:'متجدد'},{w:'medicine',ar:'طب'},{w:'disease',ar:'مرض'}], meaning: 'الطاقة المتجددة تقلل التلوث، والطب الحديث يكافح الأمراض بفاعلية أكبر من أي وقت مضى.' },
+        { sentence: 'We must all become more aware of the global impact of our choices.', words: [{w:'aware',ar:'واعٍ'},{w:'global',ar:'عالمي'},{w:'impact',ar:'تأثير'}], meaning: 'يجب أن نصبح جميعاً أكثر وعياً بالتأثير العالمي لخياراتنا.' },
+        { sentence: 'Small steps like choosing to exercise, recycle, and support local businesses can make a real difference.', words: [{w:'exercise',ar:'يتمرن'},{w:'recycle',ar:'يُعيد التدوير'},{w:'local',ar:'محلي'}], meaning: 'خطوات صغيرة كاختيار التمرين وإعادة التدوير ودعم الأعمال المحلية يمكن أن تُحدث فرقاً حقيقياً.' },
       ],
     },
     listening: {
@@ -884,11 +905,14 @@ export const A2_DAYS_21_30 = [
       ],
     },
     reading: {
-      passage: "Congratulations! You have completed the A2 Elementary level. Look at how far you have come. At the beginning, you reviewed Present Simple. You then learned about Past Simple and Present Perfect. You practised Passive Voice, Conditionals, Relative Clauses, and Reported Speech. You explored big topics like health, environment, and technology. You have described places, told stories, given opinions, and compared ideas. Your vocabulary has grown enormously. You should be proud of your determination and effort. The journey to B1 begins now — carry on, never give up, and enjoy every step of learning English!",
+      passage: "Today is a special day — we celebrate the end of the A2 journey. Every student who has reached this point has shown great determination and has worked hard to improve. You have learned grammar, built your vocabulary, and practised how to communicate in many different situations. Each skill you studied has helped you express yourself more clearly and understand more of the world around you. You should feel confident because you have achieved something real. Keep a journal, continue to practise, and review what you have learned. The B1 level is the next step, and you are more than ready to accomplish everything that comes next.",
       breakdown: [
-        { sentence: 'You have completed the A2 Elementary level.', words: [{w:'have completed',ar:'أكملت'},{w:'Elementary',ar:'مستوى ابتدائي'}], meaning: 'لقد أكملت مستوى A2 الابتدائي.' },
-        { sentence: 'Your vocabulary has grown enormously.', words: [{w:'has grown',ar:'نما'},{w:'enormously',ar:'بشكل هائل'}], meaning: 'نمت مفرداتك بشكل هائل.' },
-        { sentence: 'The journey to B1 begins now — carry on, never give up!', words: [{w:'journey',ar:'رحلة'},{w:'carry on',ar:'واصل'},{w:'never give up',ar:'لا تستسلم أبداً'}], meaning: 'رحلة B1 تبدأ الآن — واصل، ولا تستسلم أبداً!' },
+        { sentence: 'Every student who has reached this point has shown great determination and has worked hard to improve.', words: [{w:'determination',ar:'إصرار'},{w:'improve',ar:'يتحسّن'}], meaning: 'كل طالب وصل إلى هذه النقطة أظهر إصراراً كبيراً وعمل جاهداً ليتحسّن.' },
+        { sentence: 'You have learned grammar, built your vocabulary, and practised how to communicate in many different situations.', words: [{w:'grammar',ar:'قواعد اللغة'},{w:'vocabulary',ar:'مفردات'},{w:'communicate',ar:'يتواصل'}], meaning: 'تعلّمت قواعد اللغة، وبنيت مفرداتك، وتدرّبت على التواصل في مواقف كثيرة ومختلفة.' },
+        { sentence: 'Each skill you studied has helped you express yourself more clearly and understand more of the world.', words: [{w:'skill',ar:'مهارة'},{w:'express',ar:'يُعبّر'},{w:'understand',ar:'يفهم'}], meaning: 'كل مهارة درستها ساعدتك على التعبير عن نفسك بوضوح أكبر وفهم المزيد من العالم.' },
+        { sentence: 'You should feel confident because you have achieved something real.', words: [{w:'confident',ar:'واثق'},{w:'achieved',ar:'حققت'}], meaning: 'يجب أن تشعر بالثقة لأنك حققت شيئاً حقيقياً.' },
+        { sentence: 'Keep a journal, continue to practise, and review what you have learned.', words: [{w:'journal',ar:'يوميات'},{w:'practise',ar:'يتمرن'},{w:'review',ar:'مراجعة'}], meaning: 'احتفظ بيوميات، واصل التمرين، وراجع ما تعلّمته.' },
+        { sentence: 'The B1 level is the next step, and you are more than ready to accomplish everything that comes next.', words: [{w:'B1',ar:'مستوى B1'},{w:'accomplish',ar:'يُنجز'},{w:'journey',ar:'رحلة'}], meaning: 'مستوى B1 هو الخطوة التالية، وأنت أكثر من مستعد لإنجاز كل ما يأتي بعد ذلك.' },
       ],
     },
     listening: {
