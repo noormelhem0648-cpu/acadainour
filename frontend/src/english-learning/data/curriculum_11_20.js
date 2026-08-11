@@ -32,11 +32,12 @@ export const DAYS_11_20 = [
       }]
     },
     reading: {
-      passage: "I am at the clothes shop. I want a new shirt. I ask: 'Can I try this on, please?' The shop assistant says yes. The shirt fits well, but it is a bit expensive. I buy it! I love shopping.",
+      passage: "Layla goes to a big clothes shop. She finds a blue shirt and asks: 'Can I try this on, please?' The shirt fits well, but it is too expensive. Then she finds a cheap yellow shirt. She buys it and smiles.",
       breakdown: [
-        { sentence: "I am at the clothes shop.", words: [{ w: "I am", ar: "أنا" }, { w: "at", ar: "في" }, { w: "the clothes shop", ar: "محل الملابس" }], meaning: "أنا في محل الملابس." },
-        { sentence: "Can I try this on, please?", words: [{ w: "Can I", ar: "هل أستطيع" }, { w: "try", ar: "أجرّب" }, { w: "this", ar: "هذا" }, { w: "on", ar: "جزء من to try on" }, { w: "please", ar: "من فضلك" }], meaning: "هل أستطيع تجربة هذا من فضلك؟" },
-        { sentence: "The shirt fits well, but it is a bit expensive.", words: [{ w: "fits well", ar: "يناسب جيداً" }, { w: "but", ar: "لكن" }, { w: "a bit", ar: "قليلاً" }, { w: "expensive", ar: "غالٍ" }], meaning: "القميص يناسبني جيداً لكنه غالٍ قليلاً." }
+        { sentence: "Layla goes to a big clothes shop.", words: [{ w: "Layla", ar: "لَيلى" }, { w: "goes to", ar: "تذهب إلى" }, { w: "clothes shop", ar: "محل الملابس" }], meaning: "لَيلى تذهب إلى محل ملابس كبير." },
+        { sentence: "Can I try this on, please?", words: [{ w: "Can I", ar: "هل أستطيع" }, { w: "try this on", ar: "تجربة هذا" }, { w: "please", ar: "من فضلك" }], meaning: "هل أستطيع تجربة هذا من فضلك؟" },
+        { sentence: "The shirt fits well, but it is too expensive.", words: [{ w: "fits well", ar: "يناسب جيداً" }, { w: "but", ar: "لكن" }, { w: "too expensive", ar: "غالٍ جداً" }], meaning: "القميص يناسبها جيداً لكنه غالٍ جداً." },
+        { sentence: "Then she finds a cheap yellow shirt.", words: [{ w: "Then", ar: "ثم" }, { w: "she finds", ar: "تجد" }, { w: "cheap", ar: "رخيص" }, { w: "yellow shirt", ar: "قميص أصفر" }], meaning: "ثم تجد قميصاً أصفر رخيصاً." }
       ]
     },
     listening: {
@@ -101,11 +102,12 @@ RULES:
       }]
     },
     reading: {
-      passage: "I am at an Italian restaurant. The waiter gives me the menu. I order pasta and a salad. The food is delicious! After the meal, I ask for the bill. The waiter brings it. I pay and say thank you.",
+      passage: "Omar sits at a restaurant. The waiter gives him the menu and asks: 'For here or to go?' Omar orders grilled chicken and soup. The food is delicious! After eating, Omar asks for the bill and pays.",
       breakdown: [
-        { sentence: "The waiter gives me the menu.", words: [{ w: "The waiter", ar: "النادل" }, { w: "gives", ar: "يعطي" }, { w: "me", ar: "لي" }, { w: "the menu", ar: "القائمة" }], meaning: "النادل يعطيني القائمة." },
-        { sentence: "I order pasta and a salad.", words: [{ w: "I order", ar: "أطلب" }, { w: "pasta", ar: "باستا" }, { w: "and", ar: "و" }, { w: "a salad", ar: "سلطة" }], meaning: "أطلب باستا وسلطة." },
-        { sentence: "After the meal, I ask for the bill.", words: [{ w: "After the meal", ar: "بعد الوجبة" }, { w: "I ask", ar: "أطلب" }, { w: "for", ar: "من أجل" }, { w: "the bill", ar: "الحساب" }], meaning: "بعد الوجبة أطلب الحساب." }
+        { sentence: "The waiter gives him the menu and asks: 'For here or to go?'", words: [{ w: "The waiter", ar: "النادل" }, { w: "menu", ar: "قائمة الطعام" }, { w: "For here or to go?", ar: "هنا أم تيك أواي؟" }], meaning: "النادل يعطيه القائمة ويسأل: ستأكل هنا أم تأخذها معك؟" },
+        { sentence: "Omar orders grilled chicken and soup.", words: [{ w: "Omar", ar: "عمر" }, { w: "orders", ar: "يطلب" }, { w: "grilled chicken", ar: "دجاج مشوي" }, { w: "soup", ar: "شوربة" }], meaning: "عمر يطلب دجاجاً مشوياً وشوربة." },
+        { sentence: "The food is delicious!", words: [{ w: "The food", ar: "الطعام" }, { w: "delicious", ar: "لذيذ" }], meaning: "الطعام لذيذ!" },
+        { sentence: "After eating, Omar asks for the bill and pays.", words: [{ w: "After eating", ar: "بعد الأكل" }, { w: "asks for the bill", ar: "يطلب الحساب" }, { w: "pays", ar: "يدفع" }], meaning: "بعد الأكل، عمر يطلب الحساب ويدفع." }
       ]
     },
     listening: {
@@ -170,11 +172,12 @@ RULES:
       }]
     },
     reading: {
-      passage: "I feel sick today. My head hurts and I have a fever. I go to the doctor. The doctor asks: 'What is wrong?' I say: 'I have a headache and a sore throat.' The doctor gives me medicine. I rest at home.",
+      passage: "Rania feels sick today. Her head hurts and she has a high fever. She goes to the doctor. The doctor asks about the pain and gives her medicine. Rania rests at home and drinks water.",
       breakdown: [
-        { sentence: "My head hurts and I have a fever.", words: [{ w: "My head", ar: "رأسي" }, { w: "hurts", ar: "يؤلمني" }, { w: "and", ar: "و" }, { w: "I have", ar: "عندي" }, { w: "a fever", ar: "حرارة" }], meaning: "رأسي يؤلمني وعندي حرارة." },
-        { sentence: "I have a headache and a sore throat.", words: [{ w: "headache", ar: "صداع" }, { w: "and", ar: "و" }, { w: "sore throat", ar: "التهاب حلق" }], meaning: "عندي صداع والتهاب في الحلق." },
-        { sentence: "The doctor gives me medicine.", words: [{ w: "The doctor", ar: "الطبيب" }, { w: "gives", ar: "يعطي" }, { w: "me", ar: "لي" }, { w: "medicine", ar: "دواء" }], meaning: "الطبيب يعطيني دواء." }
+        { sentence: "Rania feels sick today.", words: [{ w: "Rania", ar: "رانيا" }, { w: "feels sick", ar: "تشعر بالمرض" }, { w: "today", ar: "اليوم" }], meaning: "رانيا تشعر بالمرض اليوم." },
+        { sentence: "Her head hurts and she has a high fever.", words: [{ w: "Her head", ar: "رأسها" }, { w: "hurts", ar: "يؤلمها" }, { w: "a high fever", ar: "حرارة عالية" }], meaning: "رأسها يؤلمها وعندها حرارة عالية." },
+        { sentence: "The doctor asks about the pain and gives her medicine.", words: [{ w: "The doctor", ar: "الطبيب" }, { w: "asks about", ar: "يسأل عن" }, { w: "the pain", ar: "الألم" }, { w: "medicine", ar: "دواء" }], meaning: "الطبيب يسأل عن الألم ويعطيها دواء." },
+        { sentence: "Rania rests at home and drinks water.", words: [{ w: "Rania", ar: "رانيا" }, { w: "rests", ar: "تستريح" }, { w: "at home", ar: "في البيت" }, { w: "drinks water", ar: "تشرب ماء" }], meaning: "رانيا تستريح في البيت وتشرب ماء." }
       ]
     },
     listening: {
@@ -239,11 +242,12 @@ RULES:
       }]
     },
     reading: {
-      passage: "I am at the airport. I check in for my flight. The lady asks for my passport and luggage. She gives me my boarding pass. My gate is number 12. The flight leaves at 11 PM. I am excited!",
+      passage: "Sami arrives at the airport early. He checks in for his flight and puts his luggage on the scale. The staff checks his passport and gives him his boarding pass. His gate is number 8. Sami walks quickly and boards the plane.",
       breakdown: [
-        { sentence: "I check in for my flight.", words: [{ w: "I check in", ar: "أسجل وصولي" }, { w: "for", ar: "لـ" }, { w: "my flight", ar: "رحلتي" }], meaning: "أسجل وصولي لرحلتي." },
-        { sentence: "She gives me my boarding pass.", words: [{ w: "She gives", ar: "تعطيني" }, { w: "me", ar: "لي" }, { w: "my boarding pass", ar: "بطاقة صعودي" }], meaning: "تعطيني بطاقة الصعود." },
-        { sentence: "The flight leaves at 11 PM.", words: [{ w: "The flight", ar: "الرحلة" }, { w: "leaves", ar: "تغادر" }, { w: "at 11 PM", ar: "الساعة 11 مساءً" }], meaning: "الرحلة تغادر الساعة 11 مساءً." }
+        { sentence: "He checks in for his flight and puts his luggage on the scale.", words: [{ w: "checks in", ar: "يسجّل وصوله" }, { w: "his flight", ar: "رحلته" }, { w: "luggage", ar: "أمتعته" }, { w: "the scale", ar: "الميزان" }], meaning: "يسجّل وصوله لرحلته ويضع أمتعته على الميزان." },
+        { sentence: "The staff checks his passport and gives him his boarding pass.", words: [{ w: "passport", ar: "جواز السفر" }, { w: "boarding pass", ar: "بطاقة الصعود" }], meaning: "الموظف يتحقق من جواز سفره ويعطيه بطاقة الصعود." },
+        { sentence: "His gate is number 8.", words: [{ w: "His gate", ar: "بوابته" }, { w: "number 8", ar: "رقم 8" }], meaning: "بوابته رقم 8." },
+        { sentence: "Sami walks quickly and boards the plane.", words: [{ w: "Sami", ar: "سامي" }, { w: "walks quickly", ar: "يمشي بسرعة" }, { w: "boards the plane", ar: "يصعد الطائرة" }], meaning: "سامي يمشي بسرعة ويصعد الطائرة." }
       ]
     },
     listening: {
@@ -308,11 +312,12 @@ RULES:
       }]
     },
     reading: {
-      passage: "In my free time, I love reading and listening to music. I also enjoy cooking new recipes. My sister likes swimming and drawing. We don't like watching too much TV. We prefer going outside!",
+      passage: "Nadia loves reading and cooking in her free time. She enjoys making new recipes for her family. Her brother likes swimming every morning. He doesn't like staying at home. They both love spending time together.",
       breakdown: [
-        { sentence: "In my free time, I love reading and listening to music.", words: [{ w: "In my free time", ar: "في وقت فراغي" }, { w: "I love", ar: "أحب" }, { w: "reading", ar: "القراءة" }, { w: "and", ar: "و" }, { w: "listening to music", ar: "الاستماع للموسيقى" }], meaning: "في وقت فراغي أحب القراءة والاستماع للموسيقى." },
-        { sentence: "My sister likes swimming and drawing.", words: [{ w: "My sister", ar: "أختي" }, { w: "likes", ar: "تحب" }, { w: "swimming", ar: "السباحة" }, { w: "and", ar: "و" }, { w: "drawing", ar: "الرسم" }], meaning: "أختي تحب السباحة والرسم." },
-        { sentence: "We prefer going outside!", words: [{ w: "We prefer", ar: "نفضل" }, { w: "going", ar: "الذهاب" }, { w: "outside", ar: "للخارج" }], meaning: "نفضل الخروج!" }
+        { sentence: "Nadia loves reading and cooking in her free time.", words: [{ w: "loves", ar: "تحب" }, { w: "reading", ar: "القراءة" }, { w: "cooking", ar: "الطبخ" }, { w: "in her free time", ar: "في وقت فراغها" }], meaning: "ناديا تحب القراءة والطبخ في وقت فراغها." },
+        { sentence: "She enjoys making new recipes for her family.", words: [{ w: "She enjoys", ar: "تستمتع" }, { w: "making", ar: "صنع" }, { w: "new recipes", ar: "وصفات جديدة" }, { w: "her family", ar: "عائلتها" }], meaning: "تستمتع بصنع وصفات جديدة لعائلتها." },
+        { sentence: "Her brother likes swimming every morning.", words: [{ w: "likes", ar: "يحب" }, { w: "swimming", ar: "السباحة" }, { w: "every morning", ar: "كل صباح" }], meaning: "أخوها يحب السباحة كل صباح." },
+        { sentence: "He doesn't like staying at home.", words: [{ w: "doesn't like", ar: "لا يحب" }, { w: "staying at home", ar: "البقاء في البيت" }], meaning: "هو لا يحب البقاء في البيت." }
       ]
     },
     listening: {
@@ -377,11 +382,11 @@ RULES:
       }]
     },
     reading: {
-      passage: "My school day starts at eight. I have five lessons every day. My favorite lesson is English. I study hard for my exams. Sometimes I don't understand the lesson, so I ask the teacher to repeat. I always do my homework.",
+      passage: "Tariq is a good student. He studies every day and does his homework on time. Today he has an English lesson. He does not understand one question, so he says: 'Can you repeat that, please?' Tariq feels ready for his exam.",
       breakdown: [
-        { sentence: "I have five lessons every day.", words: [{ w: "I have", ar: "عندي" }, { w: "five", ar: "خمس" }, { w: "lessons", ar: "حصص" }, { w: "every day", ar: "كل يوم" }], meaning: "عندي خمس حصص كل يوم." },
-        { sentence: "I don't understand the lesson, so I ask the teacher.", words: [{ w: "I don't understand", ar: "لا أفهم" }, { w: "so", ar: "لذا" }, { w: "I ask", ar: "أسأل" }, { w: "the teacher", ar: "المعلم" }], meaning: "لا أفهم الدرس لذا أسأل المعلم." },
-        { sentence: "I always do my homework.", words: [{ w: "I always", ar: "دائماً" }, { w: "do", ar: "أنجز" }, { w: "my homework", ar: "واجبي" }], meaning: "دائماً أنجز واجبي." }
+        { sentence: "He studies every day and does his homework on time.", words: [{ w: "studies", ar: "يدرس" }, { w: "every day", ar: "كل يوم" }, { w: "homework", ar: "الواجب" }, { w: "on time", ar: "في الوقت" }], meaning: "يدرس كل يوم ويُنجز واجبه في الوقت." },
+        { sentence: "He does not understand one question, so he says: 'Can you repeat that, please?'", words: [{ w: "does not understand", ar: "لا يفهم" }, { w: "Can you repeat", ar: "هل تستطيع التكرار" }, { w: "please", ar: "من فضلك" }], meaning: "لا يفهم سؤالاً فيقول: هل تستطيع التكرار من فضلك؟" },
+        { sentence: "Tariq feels ready for his exam.", words: [{ w: "Tariq", ar: "طارق" }, { w: "feels ready", ar: "يشعر بالجاهزية" }, { w: "his exam", ar: "امتحانه" }], meaning: "طارق يشعر بالجاهزية لامتحانه." }
       ]
     },
     listening: {
@@ -446,11 +451,12 @@ RULES:
       }]
     },
     reading: {
-      passage: "My house is not big, but it is very comfortable. There is a kitchen, a living room, and two bedrooms. My bedroom has a bed, a desk, and a small window. There are many books on my desk. I love my room!",
+      passage: "Hana lives in a small flat. There is a kitchen, a living room, and one bedroom. The furniture is old but comfortable. Hana's bedroom is always clean. Her brother's room is very messy!",
       breakdown: [
-        { sentence: "There is a kitchen, a living room, and two bedrooms.", words: [{ w: "There is", ar: "يوجد" }, { w: "a kitchen", ar: "مطبخ" }, { w: "a living room", ar: "غرفة جلوس" }, { w: "two bedrooms", ar: "غرفتا نوم" }], meaning: "يوجد مطبخ وغرفة جلوس وغرفتا نوم." },
-        { sentence: "My bedroom has a bed, a desk, and a small window.", words: [{ w: "My bedroom", ar: "غرفة نومي" }, { w: "has", ar: "يوجد بها" }, { w: "a bed", ar: "سرير" }, { w: "a desk", ar: "مكتب" }, { w: "a small window", ar: "نافذة صغيرة" }], meaning: "غرفة نومي بها سرير ومكتب ونافذة صغيرة." },
-        { sentence: "There are many books on my desk.", words: [{ w: "There are", ar: "يوجد" }, { w: "many books", ar: "كتب كثيرة" }, { w: "on my desk", ar: "على مكتبي" }], meaning: "يوجد كتب كثيرة على مكتبي." }
+        { sentence: "There is a kitchen, a living room, and one bedroom.", words: [{ w: "There is", ar: "يوجد" }, { w: "kitchen", ar: "مطبخ" }, { w: "living room", ar: "غرفة جلوس" }, { w: "bedroom", ar: "غرفة نوم" }], meaning: "يوجد مطبخ وغرفة جلوس وغرفة نوم واحدة." },
+        { sentence: "The furniture is old but comfortable.", words: [{ w: "furniture", ar: "الأثاث" }, { w: "old", ar: "قديم" }, { w: "comfortable", ar: "مريح" }], meaning: "الأثاث قديم لكنه مريح." },
+        { sentence: "Hana's bedroom is always clean.", words: [{ w: "Hana's bedroom", ar: "غرفة نوم هَنا" }, { w: "always", ar: "دائماً" }, { w: "clean", ar: "نظيفة" }], meaning: "غرفة نوم هَنا دائماً نظيفة." },
+        { sentence: "Her brother's room is very messy!", words: [{ w: "Her brother's room", ar: "غرفة أخيها" }, { w: "very messy", ar: "فوضوية جداً" }], meaning: "غرفة أخيها فوضوية جداً!" }
       ]
     },
     listening: {
@@ -515,11 +521,12 @@ RULES:
       }]
     },
     reading: {
-      passage: "I love sports! I play football with my friends every Saturday. Our team is very good. We practice for two hours and then rest. Sometimes we win and sometimes we lose, but we always have fun!",
+      passage: "Khalid loves football. He plays with his team every Friday. Before the game, they run and exercise for one hour. Sometimes they win and sometimes they lose. But Khalid always enjoys playing with his friends.",
       breakdown: [
-        { sentence: "I play football with my friends every Saturday.", words: [{ w: "I play", ar: "ألعب" }, { w: "football", ar: "كرة القدم" }, { w: "with my friends", ar: "مع أصدقائي" }, { w: "every Saturday", ar: "كل سبت" }], meaning: "ألعب كرة القدم مع أصدقائي كل سبت." },
-        { sentence: "We practice for two hours and then rest.", words: [{ w: "We practice", ar: "نتمرن" }, { w: "for two hours", ar: "لمدة ساعتين" }, { w: "and then", ar: "ثم" }, { w: "rest", ar: "نرتاح" }], meaning: "نتمرن لمدة ساعتين ثم نرتاح." },
-        { sentence: "We always have fun!", words: [{ w: "We always", ar: "دائماً" }, { w: "have fun", ar: "نستمتع" }], meaning: "دائماً نستمتع!" }
+        { sentence: "He plays with his team every Friday.", words: [{ w: "plays", ar: "يلعب" }, { w: "his team", ar: "فريقه" }, { w: "every Friday", ar: "كل جمعة" }], meaning: "يلعب مع فريقه كل جمعة." },
+        { sentence: "Before the game, they run and exercise for one hour.", words: [{ w: "run", ar: "يركضون" }, { w: "exercise", ar: "يتمرنون" }, { w: "one hour", ar: "ساعة واحدة" }], meaning: "قبل المباراة يركضون ويتمرنون لمدة ساعة." },
+        { sentence: "Sometimes they win and sometimes they lose.", words: [{ w: "Sometimes", ar: "أحياناً" }, { w: "win", ar: "يفوزون" }, { w: "lose", ar: "يخسرون" }], meaning: "أحياناً يفوزون وأحياناً يخسرون." },
+        { sentence: "But Khalid always enjoys playing with his friends.", words: [{ w: "But", ar: "لكن" }, { w: "always enjoys", ar: "دائماً يستمتع" }, { w: "playing", ar: "اللعب" }, { w: "his friends", ar: "أصدقائه" }], meaning: "لكن خالد دائماً يستمتع باللعب مع أصدقائه." }
       ]
     },
     listening: {
@@ -584,11 +591,13 @@ RULES:
       }]
     },
     reading: {
-      passage: "I feel many emotions every day. In the morning, I am happy because I drink my coffee. At school, I am excited about new lessons. After a long day, I feel tired. Sometimes I am sad because I miss my friends. Emotions make life interesting!",
+      passage: "Mona wakes up happy today because the sun is bright. She is excited because her best friend is coming to visit. In the afternoon, she feels tired because she cleaned the whole house. Her cat breaks a cup and she is a little angry. But then she laughs and feels happy again.",
       breakdown: [
-        { sentence: "I am happy because I drink my coffee.", words: [{ w: "I am happy", ar: "أنا سعيد" }, { w: "because", ar: "لأن" }, { w: "I drink", ar: "أشرب" }, { w: "my coffee", ar: "قهوتي" }], meaning: "أنا سعيد لأنني أشرب قهوتي." },
-        { sentence: "I am excited about new lessons.", words: [{ w: "I am excited", ar: "أنا متحمس" }, { w: "about", ar: "حول/بخصوص" }, { w: "new lessons", ar: "دروس جديدة" }], meaning: "أنا متحمس للدروس الجديدة." },
-        { sentence: "Sometimes I am sad because I miss my friends.", words: [{ w: "Sometimes", ar: "أحياناً" }, { w: "I am sad", ar: "أنا حزين" }, { w: "because", ar: "لأن" }, { w: "I miss", ar: "أشتاق لـ" }, { w: "my friends", ar: "أصدقائي" }], meaning: "أحياناً أنا حزين لأنني أشتاق لأصدقائي." }
+        { sentence: "Mona wakes up happy today because the sun is bright.", words: [{ w: "wakes up", ar: "تستيقظ" }, { w: "happy", ar: "سعيدة" }, { w: "because", ar: "لأن" }, { w: "the sun is bright", ar: "الشمس مشرقة" }], meaning: "مُنى تستيقظ سعيدة اليوم لأن الشمس مشرقة." },
+        { sentence: "She is excited because her best friend is coming to visit.", words: [{ w: "excited", ar: "متحمسة" }, { w: "because", ar: "لأن" }, { w: "best friend", ar: "صديقتها المقربة" }, { w: "coming to visit", ar: "ستأتي للزيارة" }], meaning: "هي متحمسة لأن صديقتها المقربة ستأتي للزيارة." },
+        { sentence: "In the afternoon, she feels tired because she cleaned the whole house.", words: [{ w: "feels tired", ar: "تشعر بالتعب" }, { w: "because", ar: "لأن" }, { w: "cleaned", ar: "نظّفت" }, { w: "the whole house", ar: "البيت كله" }], meaning: "في فترة الظهر تشعر بالتعب لأنها نظّفت البيت كله." },
+        { sentence: "Her cat breaks a cup and she is a little angry.", words: [{ w: "Her cat", ar: "قطتها" }, { w: "breaks", ar: "تكسر" }, { w: "a cup", ar: "كوباً" }, { w: "angry", ar: "غاضبة" }], meaning: "قطتها تكسر كوباً وهي غاضبة قليلاً." },
+        { sentence: "But then she laughs and feels happy again.", words: [{ w: "she laughs", ar: "تضحك" }, { w: "feels happy", ar: "تشعر بالسعادة" }, { w: "again", ar: "مجدداً" }], meaning: "لكنها تضحك وتشعر بالسعادة مجدداً." }
       ]
     },
     listening: {
@@ -653,11 +662,13 @@ RULES:
       }]
     },
     reading: {
-      passage: "My birthday is in April. I am so excited about it! Last year, my family had a big party for me. Next month, my sister's birthday is on April 20th. She will be eighteen years old. I will buy her a gift!",
+      passage: "Ziad's birthday is in January. Last year, his family made a big cake for him. Next month, his friend Dina has her birthday in February. Ziad will say: 'Happy Birthday, Dina!' When is your birthday?",
       breakdown: [
-        { sentence: "My birthday is in April.", words: [{ w: "My birthday", ar: "عيد ميلادي" }, { w: "is", ar: "يكون" }, { w: "in April", ar: "في أبريل" }], meaning: "عيد ميلادي في أبريل." },
-        { sentence: "Last year, my family had a big party for me.", words: [{ w: "Last year", ar: "العام الماضي" }, { w: "my family", ar: "عائلتي" }, { w: "had", ar: "أقامت" }, { w: "a big party", ar: "حفلة كبيرة" }, { w: "for me", ar: "لي" }], meaning: "العام الماضي أقامت عائلتي حفلة كبيرة لي." },
-        { sentence: "She will be eighteen years old.", words: [{ w: "She will be", ar: "ستكون" }, { w: "eighteen", ar: "ثمانية عشر" }, { w: "years old", ar: "سنة" }], meaning: "ستبلغ ثمانية عشر سنة." }
+        { sentence: "Ziad's birthday is in January.", words: [{ w: "Ziad's birthday", ar: "عيد ميلاد زياد" }, { w: "in January", ar: "في يناير" }], meaning: "عيد ميلاد زياد في يناير." },
+        { sentence: "Last year, his family made a big cake for him.", words: [{ w: "Last year", ar: "العام الماضي" }, { w: "his family", ar: "عائلته" }, { w: "made a big cake", ar: "صنعت كعكة كبيرة" }, { w: "for him", ar: "له" }], meaning: "العام الماضي صنعت عائلته كعكة كبيرة له." },
+        { sentence: "Next month, his friend Dina has her birthday in February.", words: [{ w: "Next month", ar: "الشهر القادم" }, { w: "birthday", ar: "عيد ميلاد" }, { w: "in February", ar: "في فبراير" }], meaning: "الشهر القادم، صديقته دينا عيد ميلادها في فبراير." },
+        { sentence: "Ziad will say: 'Happy Birthday, Dina!'", words: [{ w: "will say", ar: "سيقول" }, { w: "Happy Birthday", ar: "عيد ميلاد سعيد" }], meaning: "زياد سيقول: عيد ميلاد سعيد يا دينا!" },
+        { sentence: "When is your birthday?", words: [{ w: "When", ar: "متى" }, { w: "your birthday", ar: "عيد ميلادك" }], meaning: "متى عيد ميلادك؟" }
       ]
     },
     listening: {

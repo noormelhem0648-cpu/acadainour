@@ -32,13 +32,13 @@ export const DAYS_1_10 = [
       }]
     },
     reading: {
-      passage: "Hello! My name is Sara. I am a student. I am from Jordan. This is my friend Adam. He is a teacher.",
+      passage: "Hello! My name is Layla. I am a student at a new school. My teacher is very kind. Today I made a new friend. His name is Adam!",
       breakdown: [
-        { sentence: "Hello! My name is Sara.", words: [{ w: "Hello", ar: "مرحباً" }, { w: "My", ar: "ملكي (خاصتي)" }, { w: "name", ar: "اسم" }, { w: "is", ar: "يكون" }, { w: "Sara", ar: "سارة" }], meaning: "مرحباً! اسمي سارة." },
-        { sentence: "I am a student.", words: [{ w: "I", ar: "أنا" }, { w: "am", ar: "أكون" }, { w: "a", ar: "أداة نكرة" }, { w: "student", ar: "طالب" }], meaning: "أنا طالبة." },
-        { sentence: "I am from Jordan.", words: [{ w: "I", ar: "أنا" }, { w: "am", ar: "أكون" }, { w: "from", ar: "من" }, { w: "Jordan", ar: "الأردن" }], meaning: "أنا من الأردن." },
-        { sentence: "This is my friend Adam.", words: [{ w: "This", ar: "هذا" }, { w: "is", ar: "يكون" }, { w: "my", ar: "ملكي" }, { w: "friend", ar: "صديق" }, { w: "Adam", ar: "آدم" }], meaning: "هذا صديقي آدم." },
-        { sentence: "He is a teacher.", words: [{ w: "He", ar: "هو" }, { w: "is", ar: "يكون" }, { w: "a", ar: "أداة" }, { w: "teacher", ar: "معلم" }], meaning: "هو معلم." }
+        { sentence: "Hello! My name is Layla.", words: [{ w: "Hello", ar: "مرحباً" }, { w: "My", ar: "ملكي" }, { w: "name", ar: "اسم" }], meaning: "مرحباً! اسمي لَيلى." },
+        { sentence: "I am a student at a new school.", words: [{ w: "I am", ar: "أنا" }, { w: "student", ar: "طالب" }, { w: "new", ar: "جديد" }, { w: "school", ar: "مدرسة" }], meaning: "أنا طالبة في مدرسة جديدة." },
+        { sentence: "My teacher is very kind.", words: [{ w: "My", ar: "ملكي" }, { w: "teacher", ar: "معلم" }, { w: "very", ar: "جداً" }, { w: "kind", ar: "لطيف" }], meaning: "معلمي لطيف جداً." },
+        { sentence: "Today I made a new friend.", words: [{ w: "Today", ar: "اليوم" }, { w: "new", ar: "جديد" }, { w: "friend", ar: "صديق" }], meaning: "اليوم وجدت صديقاً جديداً." },
+        { sentence: "His name is Adam!", words: [{ w: "His", ar: "ملكه" }, { w: "name", ar: "اسم" }, { w: "Adam", ar: "آدم" }], meaning: "اسمه آدم!" }
       ]
     },
     listening: {
@@ -111,13 +111,13 @@ RULES:
       }]
     },
     reading: {
-      passage: "My name is Lina. I am eighteen years old. I have one sister. Her name is Rana. She is fifteen years old. We are students.",
+      passage: "My name is Karim. I am twenty years old. I have one brother and two sisters. My brother is only ten years old. How old are you?",
       breakdown: [
-        { sentence: "My name is Lina.", words: [{ w: "My", ar: "ملكي" }, { w: "name", ar: "اسم" }, { w: "is", ar: "يكون" }, { w: "Lina", ar: "لينا" }], meaning: "اسمي لينا." },
-        { sentence: "I am eighteen years old.", words: [{ w: "I", ar: "أنا" }, { w: "am", ar: "أكون" }, { w: "eighteen", ar: "ثمانية عشر" }, { w: "years", ar: "سنوات" }, { w: "old", ar: "عمر (قديم)" }], meaning: "عمري ثمانية عشر سنة." },
-        { sentence: "I have one sister.", words: [{ w: "I", ar: "أنا" }, { w: "have", ar: "عندي" }, { w: "one", ar: "واحدة" }, { w: "sister", ar: "أخت" }], meaning: "عندي أخت واحدة." },
-        { sentence: "Her name is Rana.", words: [{ w: "Her", ar: "اسمها (ملكية للمؤنث)" }, { w: "name", ar: "اسم" }, { w: "is", ar: "يكون" }, { w: "Rana", ar: "رنا" }], meaning: "اسمها رنا." },
-        { sentence: "We are students.", words: [{ w: "We", ar: "نحن" }, { w: "are", ar: "نكون" }, { w: "students", ar: "طلاب" }], meaning: "نحن طالبات." }
+        { sentence: "My name is Karim.", words: [{ w: "My", ar: "ملكي" }, { w: "name", ar: "اسم" }, { w: "is", ar: "يكون" }, { w: "Karim", ar: "كريم" }], meaning: "اسمي كريم." },
+        { sentence: "I am twenty years old.", words: [{ w: "I am", ar: "أنا" }, { w: "twenty", ar: "عشرون" }, { w: "years", ar: "سنوات" }, { w: "old", ar: "عمر" }], meaning: "عمري عشرون سنة." },
+        { sentence: "I have one brother and two sisters.", words: [{ w: "one", ar: "واحد" }, { w: "brother", ar: "أخ" }, { w: "two", ar: "اثنتان" }, { w: "sisters", ar: "أخوات" }], meaning: "عندي أخ واحد وأختان." },
+        { sentence: "My brother is only ten years old.", words: [{ w: "brother", ar: "أخ" }, { w: "only", ar: "فقط" }, { w: "ten", ar: "عشرة" }, { w: "years old", ar: "من العمر" }], meaning: "أخي عمره عشر سنوات فقط." },
+        { sentence: "How old are you?", words: [{ w: "How old", ar: "كم عمرك" }, { w: "are", ar: "تكون" }, { w: "you", ar: "أنت" }], meaning: "كم عمرك أنت؟" }
       ]
     },
     listening: {
@@ -189,13 +189,12 @@ RULES:
       }]
     },
     reading: {
-      passage: "I have a small room. My room is blue and white. I have a big bed and a small desk. My bag is red. I love my room!",
+      passage: "My friend Nour has a small blue bag. She also has a big red notebook for school. Her room is beautiful and the walls are green. I love her room very much!",
       breakdown: [
-        { sentence: "I have a small room.", words: [{ w: "I", ar: "أنا" }, { w: "have", ar: "عندي" }, { w: "a", ar: "أداة نكرة" }, { w: "small", ar: "صغير" }, { w: "room", ar: "غرفة" }], meaning: "عندي غرفة صغيرة." },
-        { sentence: "My room is blue and white.", words: [{ w: "My", ar: "غرفتي" }, { w: "room", ar: "غرفة" }, { w: "is", ar: "تكون" }, { w: "blue", ar: "أزرق" }, { w: "and", ar: "و" }, { w: "white", ar: "أبيض" }], meaning: "غرفتي زرقاء وبيضاء." },
-        { sentence: "I have a big bed and a small desk.", words: [{ w: "big", ar: "كبير" }, { w: "bed", ar: "سرير" }, { w: "small", ar: "صغير" }, { w: "desk", ar: "مكتب" }], meaning: "عندي سرير كبير ومكتب صغير." },
-        { sentence: "My bag is red.", words: [{ w: "My", ar: "ملكي" }, { w: "bag", ar: "حقيبة" }, { w: "is", ar: "تكون" }, { w: "red", ar: "أحمر" }], meaning: "حقيبتي حمراء." },
-        { sentence: "I love my room!", words: [{ w: "I", ar: "أنا" }, { w: "love", ar: "أحب" }, { w: "my", ar: "ملكي" }, { w: "room", ar: "غرفة" }], meaning: "أحب غرفتي!" }
+        { sentence: "My friend Nour has a small blue bag.", words: [{ w: "friend", ar: "صديقة" }, { w: "small", ar: "صغيرة" }, { w: "blue", ar: "زرقاء" }, { w: "bag", ar: "حقيبة" }], meaning: "صديقتي نور عندها حقيبة صغيرة زرقاء." },
+        { sentence: "She also has a big red notebook for school.", words: [{ w: "big", ar: "كبير" }, { w: "red", ar: "أحمر" }, { w: "notebook", ar: "دفتر" }, { w: "school", ar: "مدرسة" }], meaning: "عندها أيضاً دفتر كبير أحمر للمدرسة." },
+        { sentence: "Her room is beautiful and the walls are green.", words: [{ w: "room", ar: "غرفة" }, { w: "beautiful", ar: "جميلة" }, { w: "walls", ar: "جدران" }, { w: "green", ar: "خضراء" }], meaning: "غرفتها جميلة والجدران خضراء." },
+        { sentence: "I love her room very much!", words: [{ w: "I love", ar: "أحب" }, { w: "her", ar: "غرفتها" }, { w: "room", ar: "غرفة" }, { w: "very much", ar: "جداً" }], meaning: "أحب غرفتها جداً!" }
       ]
     },
     listening: {
@@ -267,13 +266,13 @@ RULES:
       }]
     },
     reading: {
-      passage: "This is my family. My father is Ali. He is a doctor. My mother is Hala. She is a teacher. I have two brothers and one sister. I love my family very much.",
+      passage: "I have a happy family. My mother is a doctor and my father is a teacher. I have one brother — his name is Tarek. My sister is my best friend. I love my family so much!",
       breakdown: [
-        { sentence: "This is my family.", words: [{ w: "This", ar: "هذا/هذه" }, { w: "is", ar: "يكون" }, { w: "my", ar: "ملكي" }, { w: "family", ar: "عائلة" }], meaning: "هذه عائلتي." },
-        { sentence: "My father is Ali.", words: [{ w: "My", ar: "ملكي" }, { w: "father", ar: "أب" }, { w: "is", ar: "يكون" }, { w: "Ali", ar: "علي" }], meaning: "أبي اسمه علي." },
-        { sentence: "He is a doctor.", words: [{ w: "He", ar: "هو" }, { w: "is", ar: "يكون" }, { w: "a", ar: "أداة" }, { w: "doctor", ar: "طبيب" }], meaning: "هو طبيب." },
-        { sentence: "I have two brothers and one sister.", words: [{ w: "I", ar: "أنا" }, { w: "have", ar: "عندي" }, { w: "two", ar: "اثنان" }, { w: "brothers", ar: "إخوة" }, { w: "one", ar: "واحدة" }, { w: "sister", ar: "أخت" }], meaning: "عندي أخوان وأخت واحدة." },
-        { sentence: "I love my family very much.", words: [{ w: "I", ar: "أنا" }, { w: "love", ar: "أحب" }, { w: "my", ar: "ملكي" }, { w: "family", ar: "عائلة" }, { w: "very much", ar: "جداً" }], meaning: "أحب عائلتي جداً." }
+        { sentence: "I have a happy family.", words: [{ w: "I have", ar: "عندي" }, { w: "happy", ar: "سعيدة" }, { w: "family", ar: "عائلة" }], meaning: "عندي عائلة سعيدة." },
+        { sentence: "My mother is a doctor and my father is a teacher.", words: [{ w: "mother", ar: "أم" }, { w: "doctor", ar: "طبيبة" }, { w: "father", ar: "أب" }, { w: "teacher", ar: "معلم" }], meaning: "أمي طبيبة وأبي معلم." },
+        { sentence: "I have one brother — his name is Tarek.", words: [{ w: "one", ar: "واحد" }, { w: "brother", ar: "أخ" }, { w: "his name", ar: "اسمه" }, { w: "Tarek", ar: "طارق" }], meaning: "عندي أخ واحد اسمه طارق." },
+        { sentence: "My sister is my best friend.", words: [{ w: "sister", ar: "أخت" }, { w: "best", ar: "أفضل" }, { w: "friend", ar: "صديق" }], meaning: "أختي هي أفضل صديقة لي." },
+        { sentence: "I love my family so much!", words: [{ w: "I love", ar: "أحب" }, { w: "my family", ar: "عائلتي" }, { w: "so much", ar: "كثيراً جداً" }], meaning: "أحب عائلتي كثيراً جداً!" }
       ]
     },
     listening: {
@@ -345,12 +344,13 @@ RULES:
       }]
     },
     reading: {
-      passage: "I wake up at six thirty every morning. I shower and eat breakfast. My breakfast is bread and tea. Then I go to school. I am never late. I love my morning routine!",
+      passage: "Every morning I wake up at six o'clock. I shower and then eat breakfast with my family. I always leave home at seven thirty. I never go to school late. My teacher is always happy with me!",
       breakdown: [
-        { sentence: "I wake up at six thirty every morning.", words: [{ w: "wake up", ar: "أستيقظ" }, { w: "at", ar: "في" }, { w: "six thirty", ar: "6:30" }, { w: "every morning", ar: "كل صباح" }], meaning: "أستيقظ الساعة 6:30 كل صباح." },
-        { sentence: "I shower and eat breakfast.", words: [{ w: "shower", ar: "أستحم" }, { w: "and", ar: "و" }, { w: "eat", ar: "آكل" }, { w: "breakfast", ar: "فطور" }], meaning: "أستحم وآكل الفطور." },
-        { sentence: "My breakfast is bread and tea.", words: [{ w: "My", ar: "ملكي" }, { w: "breakfast", ar: "فطور" }, { w: "is", ar: "يكون" }, { w: "bread", ar: "خبز" }, { w: "and", ar: "و" }, { w: "tea", ar: "شاي" }], meaning: "فطوري خبز وشاي." },
-        { sentence: "I am never late.", words: [{ w: "I am", ar: "أنا" }, { w: "never", ar: "أبداً" }, { w: "late", ar: "متأخر" }], meaning: "لا أتأخر أبداً." }
+        { sentence: "Every morning I wake up at six o'clock.", words: [{ w: "Every morning", ar: "كل صباح" }, { w: "wake up", ar: "أستيقظ" }, { w: "at six", ar: "الساعة السادسة" }], meaning: "كل صباح أستيقظ الساعة السادسة." },
+        { sentence: "I shower and then eat breakfast with my family.", words: [{ w: "shower", ar: "أستحم" }, { w: "then", ar: "ثم" }, { w: "eat breakfast", ar: "آكل الفطور" }, { w: "family", ar: "عائلة" }], meaning: "أستحم ثم آكل الفطور مع عائلتي." },
+        { sentence: "I always leave home at seven thirty.", words: [{ w: "always", ar: "دائماً" }, { w: "leave", ar: "أغادر" }, { w: "home", ar: "البيت" }, { w: "seven thirty", ar: "7:30" }], meaning: "دائماً أغادر البيت الساعة 7:30." },
+        { sentence: "I never go to school late.", words: [{ w: "never", ar: "أبداً" }, { w: "go to school", ar: "أذهب للمدرسة" }, { w: "late", ar: "متأخراً" }], meaning: "لا أذهب للمدرسة متأخراً أبداً." },
+        { sentence: "My teacher is always happy with me!", words: [{ w: "teacher", ar: "معلم" }, { w: "always", ar: "دائماً" }, { w: "happy", ar: "سعيد" }], meaning: "معلمي دائماً سعيد مني!" }
       ]
     },
     listening: {
@@ -422,13 +422,13 @@ RULES:
       }]
     },
     reading: {
-      passage: "I am at the café. I am very hungry. I want a chicken sandwich and a coffee. The coffee is hot. How much is my order? It is five dollars.",
+      passage: "Sara is very hungry at the café. She orders a sandwich and a coffee, please. Her friend Omar wants cold tea. How much is the total? The waiter says eight dollars.",
       breakdown: [
-        { sentence: "I am at the café.", words: [{ w: "I am", ar: "أنا" }, { w: "at", ar: "في" }, { w: "the", ar: "أداة التعريف" }, { w: "café", ar: "مقهى" }], meaning: "أنا في المقهى." },
-        { sentence: "I am very hungry.", words: [{ w: "I am", ar: "أنا" }, { w: "very", ar: "جداً" }, { w: "hungry", ar: "جائع" }], meaning: "أنا جائع جداً." },
-        { sentence: "I want a chicken sandwich and a coffee.", words: [{ w: "I want", ar: "أريد" }, { w: "chicken", ar: "دجاج" }, { w: "sandwich", ar: "ساندويش" }, { w: "coffee", ar: "قهوة" }], meaning: "أريد ساندويش دجاج وقهوة." },
-        { sentence: "How much is my order?", words: [{ w: "How much", ar: "كم" }, { w: "is", ar: "يكون" }, { w: "my", ar: "ملكي" }, { w: "order", ar: "طلب" }], meaning: "كم ثمن طلبي؟" },
-        { sentence: "It is five dollars.", words: [{ w: "It is", ar: "هو يكون" }, { w: "five", ar: "خمسة" }, { w: "dollars", ar: "دولارات" }], meaning: "بخمسة دولارات." }
+        { sentence: "Sara is very hungry at the café.", words: [{ w: "Sara", ar: "سارة" }, { w: "very hungry", ar: "جائعة جداً" }, { w: "café", ar: "مقهى" }], meaning: "سارة جائعة جداً في المقهى." },
+        { sentence: "She orders a sandwich and a coffee, please.", words: [{ w: "orders", ar: "تطلب" }, { w: "sandwich", ar: "ساندويش" }, { w: "coffee", ar: "قهوة" }, { w: "please", ar: "من فضلك" }], meaning: "هي تطلب ساندويش وقهوة من فضلك." },
+        { sentence: "Her friend Omar wants cold tea.", words: [{ w: "friend", ar: "صديق" }, { w: "wants", ar: "يريد" }, { w: "cold", ar: "بارد" }, { w: "tea", ar: "شاي" }], meaning: "صديقها عمر يريد شاياً بارداً." },
+        { sentence: "How much is the total?", words: [{ w: "How much", ar: "كم" }, { w: "is", ar: "يكون" }, { w: "total", ar: "الإجمالي" }], meaning: "كم يكون المجموع؟" },
+        { sentence: "The waiter says eight dollars.", words: [{ w: "waiter", ar: "النادل" }, { w: "says", ar: "يقول" }, { w: "eight dollars", ar: "ثمانية دولارات" }], meaning: "النادل يقول ثمانية دولارات." }
       ]
     },
     listening: {
@@ -500,12 +500,13 @@ RULES:
       }]
     },
     reading: {
-      passage: "Today is Monday. It is eight o'clock in the morning. I go to school at eight thirty. My class is from nine to twelve. On Friday, I do not go to school. I love Friday!",
+      passage: "Today is Monday morning. School starts at eight o'clock. What time does school finish? It finishes at two in the afternoon. I love Friday because it is the start of the weekend!",
       breakdown: [
-        { sentence: "Today is Monday.", words: [{ w: "Today", ar: "اليوم" }, { w: "is", ar: "يكون" }, { w: "Monday", ar: "الاثنين" }], meaning: "اليوم هو الاثنين." },
-        { sentence: "It is eight o'clock in the morning.", words: [{ w: "It is", ar: "الساعة" }, { w: "eight", ar: "ثمانية" }, { w: "o'clock", ar: "تماماً" }, { w: "in the morning", ar: "صباحاً" }], meaning: "الساعة الثامنة صباحاً." },
-        { sentence: "My class is from nine to twelve.", words: [{ w: "My class", ar: "حصتي" }, { w: "from", ar: "من" }, { w: "nine", ar: "تسعة" }, { w: "to", ar: "إلى" }, { w: "twelve", ar: "اثني عشر" }], meaning: "حصتي من التاسعة إلى الثانية عشرة." },
-        { sentence: "On Friday, I do not go to school.", words: [{ w: "On Friday", ar: "يوم الجمعة" }, { w: "do not", ar: "لا" }, { w: "go", ar: "أذهب" }, { w: "to school", ar: "للمدرسة" }], meaning: "يوم الجمعة لا أذهب للمدرسة." }
+        { sentence: "Today is Monday morning.", words: [{ w: "Today", ar: "اليوم" }, { w: "Monday", ar: "الاثنين" }, { w: "morning", ar: "صباح" }], meaning: "اليوم صباح الاثنين." },
+        { sentence: "School starts at eight o'clock.", words: [{ w: "School", ar: "المدرسة" }, { w: "starts", ar: "تبدأ" }, { w: "eight", ar: "ثمانية" }, { w: "o'clock", ar: "تماماً" }], meaning: "المدرسة تبدأ الساعة الثامنة تماماً." },
+        { sentence: "What time does school finish?", words: [{ w: "What time", ar: "كم الساعة" }, { w: "finish", ar: "تنتهي" }, { w: "school", ar: "المدرسة" }], meaning: "كم الساعة تنتهي المدرسة؟" },
+        { sentence: "It finishes at two in the afternoon.", words: [{ w: "finishes", ar: "تنتهي" }, { w: "two", ar: "الثانية" }, { w: "afternoon", ar: "بعد الظهر" }], meaning: "تنتهي الساعة الثانية بعد الظهر." },
+        { sentence: "I love Friday because it is the start of the weekend!", words: [{ w: "Friday", ar: "الجمعة" }, { w: "start", ar: "بداية" }, { w: "weekend", ar: "عطلة نهاية الأسبوع" }], meaning: "أحب الجمعة لأنها بداية عطلة نهاية الأسبوع!" }
       ]
     },
     listening: {
@@ -577,12 +578,13 @@ RULES:
       }]
     },
     reading: {
-      passage: "Today is winter. It is very cold and cloudy. I wear a big coat. I do not like cold weather. My favorite season is summer. In summer, it is hot and sunny. I love sunny days!",
+      passage: "Today it is cold and rainy. I do not like cold weather. My favorite season is summer. In summer, it is sunny and hot every day. What's the weather like in your city?",
       breakdown: [
-        { sentence: "Today is winter.", words: [{ w: "Today", ar: "اليوم" }, { w: "is", ar: "يكون" }, { w: "winter", ar: "شتاء" }], meaning: "اليوم هو فصل الشتاء." },
-        { sentence: "It is very cold and cloudy.", words: [{ w: "It is", ar: "الجو" }, { w: "very", ar: "جداً" }, { w: "cold", ar: "بارد" }, { w: "and", ar: "و" }, { w: "cloudy", ar: "غائم" }], meaning: "الجو بارد وغائم جداً." },
-        { sentence: "I wear a big coat.", words: [{ w: "I wear", ar: "أرتدي" }, { w: "a big", ar: "كبير" }, { w: "coat", ar: "معطف" }], meaning: "أرتدي معطفاً كبيراً." },
-        { sentence: "My favorite season is summer.", words: [{ w: "My favorite", ar: "المفضل لدي" }, { w: "season", ar: "فصل" }, { w: "is", ar: "يكون" }, { w: "summer", ar: "صيف" }], meaning: "فصلي المفضل هو الصيف." }
+        { sentence: "Today it is cold and rainy.", words: [{ w: "Today", ar: "اليوم" }, { w: "cold", ar: "بارد" }, { w: "rainy", ar: "ممطر" }], meaning: "اليوم الجو بارد وممطر." },
+        { sentence: "I do not like cold weather.", words: [{ w: "do not like", ar: "لا أحب" }, { w: "cold", ar: "بارد" }, { w: "weather", ar: "طقس" }], meaning: "لا أحب الطقس البارد." },
+        { sentence: "My favorite season is summer.", words: [{ w: "favorite", ar: "المفضل" }, { w: "season", ar: "فصل" }, { w: "summer", ar: "الصيف" }], meaning: "فصلي المفضل هو الصيف." },
+        { sentence: "In summer, it is sunny and hot every day.", words: [{ w: "summer", ar: "صيف" }, { w: "sunny", ar: "مشمس" }, { w: "hot", ar: "حار" }, { w: "every day", ar: "كل يوم" }], meaning: "في الصيف يكون الجو مشمساً وحاراً كل يوم." },
+        { sentence: "What's the weather like in your city?", words: [{ w: "What's the weather like", ar: "كيف الطقس" }, { w: "your city", ar: "مدينتك" }], meaning: "كيف الطقس في مدينتك؟" }
       ]
     },
     listening: {
@@ -654,12 +656,13 @@ RULES:
       }]
     },
     reading: {
-      passage: "My name is Nadia. I am a nurse. I work at a big hospital. My husband is an engineer. He works at a construction company. We both love our jobs. Our work is important!",
+      passage: "My name is Rami and I am a chef. I work at a big restaurant in the city. My sister is a nurse and she works at the hospital. My father is an engineer. What do you do for work?",
       breakdown: [
-        { sentence: "I am a nurse.", words: [{ w: "I am", ar: "أنا" }, { w: "a", ar: "أداة" }, { w: "nurse", ar: "ممرضة" }], meaning: "أنا ممرضة." },
-        { sentence: "I work at a big hospital.", words: [{ w: "I work", ar: "أعمل" }, { w: "at", ar: "في" }, { w: "a big", ar: "كبير" }, { w: "hospital", ar: "مستشفى" }], meaning: "أعمل في مستشفى كبير." },
-        { sentence: "My husband is an engineer.", words: [{ w: "My husband", ar: "زوجي" }, { w: "is", ar: "يكون" }, { w: "an", ar: "أداة (قبل حرف علة)" }, { w: "engineer", ar: "مهندس" }], meaning: "زوجي مهندس." },
-        { sentence: "He works at a construction company.", words: [{ w: "He works", ar: "يعمل" }, { w: "at", ar: "في" }, { w: "construction", ar: "إنشاء" }, { w: "company", ar: "شركة" }], meaning: "يعمل في شركة إنشاءات." }
+        { sentence: "My name is Rami and I am a chef.", words: [{ w: "My name", ar: "اسمي" }, { w: "I am", ar: "أنا" }, { w: "chef", ar: "شيف / طاهٍ" }], meaning: "اسمي رامي وأنا شيف." },
+        { sentence: "I work at a big restaurant in the city.", words: [{ w: "I work at", ar: "أعمل في" }, { w: "big", ar: "كبير" }, { w: "restaurant", ar: "مطعم" }, { w: "city", ar: "مدينة" }], meaning: "أعمل في مطعم كبير في المدينة." },
+        { sentence: "My sister is a nurse and she works at the hospital.", words: [{ w: "sister", ar: "أخت" }, { w: "nurse", ar: "ممرضة" }, { w: "works at", ar: "تعمل في" }, { w: "hospital", ar: "مستشفى" }], meaning: "أختي ممرضة وتعمل في المستشفى." },
+        { sentence: "My father is an engineer.", words: [{ w: "father", ar: "أب" }, { w: "an", ar: "أداة نكرة (قبل علة)" }, { w: "engineer", ar: "مهندس" }], meaning: "أبي مهندس." },
+        { sentence: "What do you do for work?", words: [{ w: "What do you do", ar: "ما هو عملك" }, { w: "for work", ar: "في العمل" }], meaning: "ما هو عملك؟" }
       ]
     },
     listening: {
@@ -731,12 +734,13 @@ RULES:
       }]
     },
     reading: {
-      passage: "I live in a small city. There is a big park near my house. There is also a supermarket and a bank. The hospital is a bit far. I go to the park every evening. I love my city!",
+      passage: "I am new to this city. Is there a supermarket near here? Yes, there is one next to the bank. The hospital is a bit far from here. There is also a beautiful park and I walk there every evening!",
       breakdown: [
-        { sentence: "I live in a small city.", words: [{ w: "I live", ar: "أسكن" }, { w: "in", ar: "في" }, { w: "a small", ar: "صغيرة" }, { w: "city", ar: "مدينة" }], meaning: "أسكن في مدينة صغيرة." },
-        { sentence: "There is a big park near my house.", words: [{ w: "There is", ar: "يوجد" }, { w: "a big", ar: "كبيرة" }, { w: "park", ar: "حديقة" }, { w: "near", ar: "قريبة من" }, { w: "my house", ar: "بيتي" }], meaning: "يوجد حديقة كبيرة قريبة من بيتي." },
-        { sentence: "The hospital is a bit far.", words: [{ w: "The hospital", ar: "المستشفى" }, { w: "is", ar: "يكون" }, { w: "a bit", ar: "قليلاً" }, { w: "far", ar: "بعيد" }], meaning: "المستشفى بعيد قليلاً." },
-        { sentence: "I go to the park every evening.", words: [{ w: "I go", ar: "أذهب" }, { w: "to the park", ar: "للحديقة" }, { w: "every evening", ar: "كل مساء" }], meaning: "أذهب للحديقة كل مساء." }
+        { sentence: "I am new to this city.", words: [{ w: "I am", ar: "أنا" }, { w: "new", ar: "جديد" }, { w: "city", ar: "مدينة" }], meaning: "أنا جديد في هذه المدينة." },
+        { sentence: "Is there a supermarket near here?", words: [{ w: "Is there a", ar: "هل يوجد" }, { w: "supermarket", ar: "سوبرماركت" }, { w: "near", ar: "قريب" }], meaning: "هل يوجد سوبرماركت قريب من هنا؟" },
+        { sentence: "Yes, there is one next to the bank.", words: [{ w: "there is", ar: "يوجد" }, { w: "one", ar: "واحد" }, { w: "next to", ar: "بجانب" }, { w: "bank", ar: "بنك" }], meaning: "نعم، يوجد واحد بجانب البنك." },
+        { sentence: "The hospital is a bit far from here.", words: [{ w: "hospital", ar: "مستشفى" }, { w: "a bit", ar: "قليلاً" }, { w: "far", ar: "بعيد" }], meaning: "المستشفى بعيد قليلاً من هنا." },
+        { sentence: "There is also a beautiful park and I walk there every evening!", words: [{ w: "There is", ar: "يوجد" }, { w: "beautiful", ar: "جميلة" }, { w: "park", ar: "حديقة" }, { w: "every evening", ar: "كل مساء" }], meaning: "يوجد أيضاً حديقة جميلة وأتمشى فيها كل مساء!" }
       ]
     },
     listening: {

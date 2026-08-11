@@ -32,11 +32,12 @@ export const DAYS_21_30 = [
       }]
     },
     reading: {
-      passage: "I call the clinic to make an appointment. The doctor sees me at 10 o'clock. She asks: 'How long have you had this pain?' I say: 'For three days.' She examines me and gives me a prescription. She tells me to rest and drink water. I hope I feel better soon!",
+      passage: "Layla is sick today. She calls the clinic to make an appointment. The doctor gives her a prescription and says she has an allergy to pollen. He tells her to rest for three days. Layla hopes she will feel better soon!",
       breakdown: [
-        { sentence: "I call the clinic to make an appointment.", words: [{ w: "I call", ar: "أتصل" }, { w: "the clinic", ar: "العيادة" }, { w: "to make", ar: "لحجز" }, { w: "an appointment", ar: "موعد" }], meaning: "أتصل بالعيادة لحجز موعد." },
-        { sentence: "How long have you had this pain?", words: [{ w: "How long", ar: "منذ متى" }, { w: "have you had", ar: "عندك" }, { w: "this pain", ar: "هذا الألم" }], meaning: "منذ متى عندك هذا الألم؟" },
-        { sentence: "She tells me to rest and drink water.", words: [{ w: "She tells", ar: "تخبرني" }, { w: "me to rest", ar: "بالراحة" }, { w: "and drink", ar: "وشرب" }, { w: "water", ar: "ماء" }], meaning: "تخبرني بالراحة وشرب الماء." }
+        { sentence: "She calls the clinic to make an appointment.", words: [{ w: "She calls", ar: "تتصل" }, { w: "the clinic", ar: "العيادة" }, { w: "an appointment", ar: "موعد" }], meaning: "تتصل بالعيادة لحجز موعد." },
+        { sentence: "The doctor gives her a prescription and says she has an allergy to pollen.", words: [{ w: "prescription", ar: "وصفة طبية" }, { w: "allergy", ar: "حساسية" }, { w: "pollen", ar: "حبوب اللقاح" }], meaning: "الطبيب يعطيها وصفة طبية ويقول إن لديها حساسية من حبوب اللقاح." },
+        { sentence: "He tells her to rest for three days.", words: [{ w: "tells her", ar: "يخبرها" }, { w: "to rest", ar: "بالراحة" }, { w: "for three days", ar: "لثلاثة أيام" }], meaning: "يخبرها بالراحة لثلاثة أيام." },
+        { sentence: "Layla hopes she will feel better soon!", words: [{ w: "Layla hopes", ar: "لايلا تتمنى" }, { w: "feel better", ar: "تتحسن" }, { w: "soon", ar: "قريباً" }], meaning: "لايلا تتمنى أن تتحسن قريباً!" }
       ]
     },
     listening: {
@@ -101,11 +102,12 @@ RULES:
       }]
     },
     reading: {
-      passage: "Excuse me! How do I get to the train station? Go straight for two blocks. Then turn left at the traffic lights. The station is on your right, next to the big hotel. You can't miss it! Thank you so much!",
+      passage: "Tom is lost in a new city. He stops a woman and says: 'Excuse me, where is the library?' She smiles and says: 'Go straight for one block, then turn left at the corner.' She adds: 'The library is next to the post office. You can't miss it!' Tom thanks her and finds the library easily.",
       breakdown: [
-        { sentence: "How do I get to the train station?", words: [{ w: "How do I", ar: "كيف" }, { w: "get to", ar: "أصل إلى" }, { w: "the train station", ar: "محطة القطار" }], meaning: "كيف أصل إلى محطة القطار؟" },
-        { sentence: "Go straight for two blocks.", words: [{ w: "Go straight", ar: "اسر مستقيماً" }, { w: "for two blocks", ar: "لمسافة مبنيين" }], meaning: "اسر مستقيماً مسافة مبنيين." },
-        { sentence: "The station is on your right, next to the big hotel.", words: [{ w: "on your right", ar: "على يمينك" }, { w: "next to", ar: "بجانب" }, { w: "the big hotel", ar: "الفندق الكبير" }], meaning: "المحطة على يمينك، بجانب الفندق الكبير." }
+        { sentence: "Excuse me, where is the library?", words: [{ w: "Excuse me", ar: "عفواً" }, { w: "where is", ar: "أين" }, { w: "the library", ar: "المكتبة" }], meaning: "عفواً، أين المكتبة؟" },
+        { sentence: "Go straight for one block, then turn left at the corner.", words: [{ w: "Go straight", ar: "اسر مستقيماً" }, { w: "turn left", ar: "اتجه يساراً" }, { w: "at the corner", ar: "عند الزاوية" }], meaning: "اسر مستقيماً مسافة مبنى، ثم اتجه يساراً عند الزاوية." },
+        { sentence: "The library is next to the post office.", words: [{ w: "The library", ar: "المكتبة" }, { w: "next to", ar: "بجانب" }, { w: "the post office", ar: "البريد" }], meaning: "المكتبة بجانب مكتب البريد." },
+        { sentence: "You can't miss it!", words: [{ w: "You can't miss it", ar: "لن يفوتك / ستجده سهلاً" }], meaning: "لن يفوتك!" }
       ]
     },
     listening: {
@@ -170,11 +172,12 @@ RULES:
       }]
     },
     reading: {
-      passage: "I take the bus to university every day. I buy a monthly ticket — it is cheap and easy. I get on at the first stop near my house. The ride takes about thirty minutes. I get off at the university stop. I love public transport!",
+      passage: "Maria travels to the city by train every week. She buys a return ticket at the station. She gets on the train at platform two and finds a seat. A passenger asks her: 'How long does it take to reach the city?' Maria says: 'About forty minutes.' She gets off at the last stop.",
       breakdown: [
-        { sentence: "I buy a monthly ticket — it is cheap and easy.", words: [{ w: "I buy", ar: "أشتري" }, { w: "a monthly ticket", ar: "تذكرة شهرية" }, { w: "cheap", ar: "رخيصة" }, { w: "easy", ar: "سهلة" }], meaning: "أشتري تذكرة شهرية — إنها رخيصة وسهلة." },
-        { sentence: "I get on at the first stop near my house.", words: [{ w: "I get on", ar: "أصعد" }, { w: "at the first stop", ar: "عند الموقف الأول" }, { w: "near my house", ar: "قريب من بيتي" }], meaning: "أصعد عند الموقف الأول القريب من بيتي." },
-        { sentence: "The ride takes about thirty minutes.", words: [{ w: "The ride", ar: "الرحلة" }, { w: "takes", ar: "تستغرق" }, { w: "about", ar: "تقريباً" }, { w: "thirty minutes", ar: "ثلاثين دقيقة" }], meaning: "الرحلة تستغرق تقريباً ثلاثين دقيقة." }
+        { sentence: "She buys a return ticket at the station.", words: [{ w: "She buys", ar: "تشتري" }, { w: "a return ticket", ar: "تذكرة ذهاب وإياب" }, { w: "at the station", ar: "في المحطة" }], meaning: "تشتري تذكرة ذهاب وإياب في المحطة." },
+        { sentence: "She gets on the train at platform two and finds a seat.", words: [{ w: "gets on", ar: "تصعد" }, { w: "the train", ar: "القطار" }, { w: "platform two", ar: "المنصة الثانية" }], meaning: "تصعد القطار عند المنصة الثانية وتجد مقعداً." },
+        { sentence: "How long does it take to reach the city?", words: [{ w: "How long", ar: "كم يستغرق" }, { w: "does it take", ar: "يأخذ" }, { w: "to reach", ar: "للوصول" }], meaning: "كم يستغرق الوصول إلى المدينة؟" },
+        { sentence: "She gets off at the last stop.", words: [{ w: "gets off", ar: "تنزل" }, { w: "the last stop", ar: "الموقف الأخير" }], meaning: "تنزل عند الموقف الأخير." }
       ]
     },
     listening: {
@@ -239,11 +242,12 @@ RULES:
       }]
     },
     reading: {
-      passage: "I go to the market every Saturday. I buy fresh vegetables and fruit. Today I need tomatoes, apples, and milk. I ask the seller: 'How much is a kilo of tomatoes?' He says: 'Two dollars.' I give him five dollars and he gives me the change.",
+      passage: "Ahmed goes to the market on Friday morning. He sees fresh apples and bananas on the table. He asks the seller: 'How much is a kilo of apples?' The seller says: 'One dollar.' Ahmed says: 'Give me two kilos, please.' He pays and gets his change.",
       breakdown: [
-        { sentence: "Today I need tomatoes, apples, and milk.", words: [{ w: "Today", ar: "اليوم" }, { w: "I need", ar: "أحتاج" }, { w: "tomatoes", ar: "طماطم" }, { w: "apples", ar: "تفاح" }, { w: "milk", ar: "حليب" }], meaning: "اليوم أحتاج طماطم وتفاح وحليب." },
-        { sentence: "How much is a kilo of tomatoes?", words: [{ w: "How much", ar: "كم" }, { w: "is", ar: "سعر" }, { w: "a kilo", ar: "كيلو" }, { w: "of tomatoes", ar: "من الطماطم" }], meaning: "كم سعر كيلو الطماطم؟" },
-        { sentence: "He gives me the change.", words: [{ w: "He gives", ar: "يعطيني" }, { w: "me", ar: "لي" }, { w: "the change", ar: "الباقي" }], meaning: "يعطيني باقي المبلغ." }
+        { sentence: "He sees fresh apples and bananas on the table.", words: [{ w: "fresh", ar: "طازجة" }, { w: "apples", ar: "تفاح" }, { w: "bananas", ar: "موز" }], meaning: "يرى تفاحاً وموزاً طازجاً على الطاولة." },
+        { sentence: "How much is a kilo of apples?", words: [{ w: "How much is", ar: "كم سعر" }, { w: "a kilo", ar: "كيلو" }, { w: "of apples", ar: "من التفاح" }], meaning: "كم سعر كيلو التفاح؟" },
+        { sentence: "Ahmed says: 'Give me two kilos, please.'", words: [{ w: "Give me", ar: "أعطني" }, { w: "two kilos", ar: "كيلوين" }], meaning: "أحمد يقول: أعطني كيلوين من فضلك." },
+        { sentence: "He pays and gets his change.", words: [{ w: "He pays", ar: "يدفع" }, { w: "gets his change", ar: "يأخذ الباقي" }], meaning: "يدفع ويأخذ باقي مبلغه." }
       ]
     },
     listening: {
@@ -309,11 +313,12 @@ RULES:
       }]
     },
     reading: {
-      passage: "I use technology every day. I have a smartphone and a laptop. In the morning, I check my messages and emails. I use apps for studying English and watching videos. Sometimes the Wi-Fi is slow and I get frustrated! I charge my phone every night.",
+      passage: "Nina uses her smartphone all day. In the morning, she checks her messages and calls her sister. She downloads a new app for learning French. In the afternoon, the Wi-Fi is slow and she cannot upload her photos. Her battery is almost dead, so she charges her phone before bed.",
       breakdown: [
-        { sentence: "I check my messages and emails.", words: [{ w: "I check", ar: "أتحقق من" }, { w: "my messages", ar: "رسائلي" }, { w: "and emails", ar: "والإيميلات" }], meaning: "أتحقق من رسائلي وإيميلاتي." },
-        { sentence: "I use apps for studying English and watching videos.", words: [{ w: "I use apps", ar: "أستخدم تطبيقات" }, { w: "for studying", ar: "للدراسة" }, { w: "English", ar: "الإنجليزية" }, { w: "and watching", ar: "ومشاهدة" }, { w: "videos", ar: "مقاطع فيديو" }], meaning: "أستخدم تطبيقات لدراسة الإنجليزية ومشاهدة الفيديوهات." },
-        { sentence: "I charge my phone every night.", words: [{ w: "I charge", ar: "أشحن" }, { w: "my phone", ar: "هاتفي" }, { w: "every night", ar: "كل ليلة" }], meaning: "أشحن هاتفي كل ليلة." }
+        { sentence: "In the morning, she checks her messages and calls her sister.", words: [{ w: "she checks", ar: "تتحقق من" }, { w: "her messages", ar: "رسائلها" }, { w: "calls", ar: "تتصل بـ" }], meaning: "في الصباح، تتحقق من رسائلها وتتصل بأختها." },
+        { sentence: "She downloads a new app for learning French.", words: [{ w: "downloads", ar: "تحمّل" }, { w: "a new app", ar: "تطبيقاً جديداً" }, { w: "for learning", ar: "لتعلم" }], meaning: "تحمّل تطبيقاً جديداً لتعلم الفرنسية." },
+        { sentence: "The Wi-Fi is slow and she cannot upload her photos.", words: [{ w: "Wi-Fi", ar: "واي فاي" }, { w: "slow", ar: "بطيء" }, { w: "upload", ar: "رفع" }], meaning: "الواي فاي بطيء ولا تستطيع رفع صورها." },
+        { sentence: "Her battery is almost dead, so she charges her phone before bed.", words: [{ w: "battery", ar: "البطارية" }, { w: "almost dead", ar: "تكاد تنفد" }, { w: "charges", ar: "تشحن" }], meaning: "بطاريتها تكاد تنفد، فتشحن هاتفها قبل النوم." }
       ]
     },
     listening: {
@@ -378,11 +383,12 @@ RULES:
       }]
     },
     reading: {
-      passage: "I love animals! I have a cat at home. Her name is Mimi. She is small and white. In nature, I love eagles. They are beautiful and powerful. My dream is to visit Africa and see wild animals like lions and elephants!",
+      passage: "Omar loves nature and animals. He has a small dog at home — dogs are friendly domestic animals. Last summer, he visited a forest near the mountains. He saw a large eagle flying high in the sky. Omar knows that wild animals like lions are beautiful but dangerous.",
       breakdown: [
-        { sentence: "She is small and white.", words: [{ w: "She is", ar: "هي" }, { w: "small", ar: "صغيرة" }, { w: "and", ar: "و" }, { w: "white", ar: "بيضاء" }], meaning: "هي صغيرة وبيضاء." },
-        { sentence: "They are beautiful and powerful.", words: [{ w: "They are", ar: "هم/هي (جمع)" }, { w: "beautiful", ar: "جميلة" }, { w: "and", ar: "و" }, { w: "powerful", ar: "قوية" }], meaning: "هي جميلة وقوية." },
-        { sentence: "My dream is to visit Africa and see wild animals.", words: [{ w: "My dream", ar: "حلمي" }, { w: "is to visit", ar: "هو زيارة" }, { w: "Africa", ar: "أفريقيا" }, { w: "wild animals", ar: "حيوانات برية" }], meaning: "حلمي هو زيارة أفريقيا ورؤية الحيوانات البرية." }
+        { sentence: "He has a small dog at home — dogs are friendly domestic animals.", words: [{ w: "dog", ar: "كلب" }, { w: "domestic", ar: "أليف" }, { w: "animals", ar: "حيوانات" }], meaning: "لديه كلب صغير في البيت — الكلاب حيوانات أليفة ومحبة." },
+        { sentence: "Last summer, he visited a forest near the mountains.", words: [{ w: "forest", ar: "غابة" }, { w: "near", ar: "قريب من" }, { w: "the mountains", ar: "الجبال" }], meaning: "الصيف الماضي، زار غابة قريبة من الجبال." },
+        { sentence: "He saw a large eagle flying high in the sky.", words: [{ w: "eagle", ar: "نسر" }, { w: "flying", ar: "يطير" }, { w: "high", ar: "عالياً" }], meaning: "رأى نسراً كبيراً يطير عالياً في السماء." },
+        { sentence: "Omar knows that wild animals like lions are beautiful but dangerous.", words: [{ w: "wild animals", ar: "حيوانات برية" }, { w: "beautiful", ar: "جميلة" }, { w: "dangerous", ar: "خطيرة" }], meaning: "عمر يعرف أن الحيوانات البرية كالأسود جميلة لكنها خطيرة." }
       ]
     },
     listening: {
@@ -447,11 +453,12 @@ RULES:
       }]
     },
     reading: {
-      passage: "This weekend is going to be great! On Saturday, I'm going to go to the cinema with my sister. Then we are going to eat at a restaurant. On Sunday, I'm going to visit my grandparents. I can't wait!",
+      passage: "Sara and her friend Dina are making plans for the weekend. Sara says: 'Let's go out on Saturday!' Dina agrees and says: 'I'm going to visit my aunt on Sunday.' They decide to watch a movie together on Saturday night. It is going to be a great weekend!",
       breakdown: [
-        { sentence: "I'm going to go to the cinema with my sister.", words: [{ w: "I'm going to", ar: "سأ..." }, { w: "go to the cinema", ar: "أذهب للسينما" }, { w: "with my sister", ar: "مع أختي" }], meaning: "سأذهب للسينما مع أختي." },
-        { sentence: "Then we are going to eat at a restaurant.", words: [{ w: "Then", ar: "ثم" }, { w: "we are going to", ar: "سنـ..." }, { w: "eat", ar: "نأكل" }, { w: "at a restaurant", ar: "في مطعم" }], meaning: "ثم سنأكل في مطعم." },
-        { sentence: "I can't wait!", words: [{ w: "I can't wait", ar: "لا أستطيع الانتظار (متحمس جداً)" }], meaning: "أنا متحمس جداً!" }
+        { sentence: "Sara and her friend Dina are making plans for the weekend.", words: [{ w: "making plans", ar: "يضعان خططاً" }, { w: "for the weekend", ar: "لعطلة الأسبوع" }], meaning: "سارة وصديقتها دينا تضعان خططاً لعطلة الأسبوع." },
+        { sentence: "Sara says: 'Let's go out on Saturday!'", words: [{ w: "Let's", ar: "يلا / هيا" }, { w: "go out", ar: "نخرج" }, { w: "on Saturday", ar: "يوم السبت" }], meaning: "سارة تقول: يلا نخرج يوم السبت!" },
+        { sentence: "Dina agrees and says: 'I'm going to visit my aunt on Sunday.'", words: [{ w: "I'm going to", ar: "سأ..." }, { w: "visit", ar: "أزور" }, { w: "my aunt", ar: "خالتي" }], meaning: "دينا توافق وتقول: سأزور خالتي يوم الأحد." },
+        { sentence: "They decide to watch a movie together on Saturday night.", words: [{ w: "watch a movie", ar: "يشاهدان فيلماً" }, { w: "together", ar: "معاً" }, { w: "Saturday night", ar: "ليلة السبت" }], meaning: "يقرران مشاهدة فيلم معاً ليلة السبت." }
       ]
     },
     listening: {
@@ -516,11 +523,12 @@ RULES:
       }]
     },
     reading: {
-      passage: "My best friend is Sara. She is tall and slim. She has long dark hair and brown eyes. She is very friendly and funny. She always makes me laugh! Sara is also very smart — she studies hard. I am lucky to have a friend like her.",
+      passage: "My uncle Karim is a very special person. He is tall with short brown hair and kind eyes. He is very funny and always makes us laugh. But at work, he is serious and works very hard. He looks like a movie star to me!",
       breakdown: [
-        { sentence: "She is tall and slim.", words: [{ w: "She is", ar: "هي" }, { w: "tall", ar: "طويلة" }, { w: "and", ar: "و" }, { w: "slim", ar: "نحيفة" }], meaning: "هي طويلة ونحيفة." },
-        { sentence: "She has long dark hair and brown eyes.", words: [{ w: "She has", ar: "لديها" }, { w: "long dark hair", ar: "شعر طويل داكن" }, { w: "and", ar: "و" }, { w: "brown eyes", ar: "عيون بنية" }], meaning: "لديها شعر طويل داكن وعيون بنية." },
-        { sentence: "She always makes me laugh!", words: [{ w: "She always", ar: "دائماً" }, { w: "makes me", ar: "تجعلني" }, { w: "laugh", ar: "أضحك" }], meaning: "دائماً تجعلني أضحك!" }
+        { sentence: "He is tall with short brown hair and kind eyes.", words: [{ w: "tall", ar: "طويل" }, { w: "short brown hair", ar: "شعر بني قصير" }, { w: "kind eyes", ar: "عيون لطيفة" }], meaning: "هو طويل بشعر بني قصير وعيون لطيفة." },
+        { sentence: "He is very funny and always makes us laugh.", words: [{ w: "funny", ar: "مضحك" }, { w: "always makes us", ar: "دائماً يجعلنا" }, { w: "laugh", ar: "نضحك" }], meaning: "هو مضحك جداً ودائماً يجعلنا نضحك." },
+        { sentence: "But at work, he is serious and works very hard.", words: [{ w: "serious", ar: "جاد" }, { w: "works very hard", ar: "يعمل بجد" }], meaning: "لكن في العمل، هو جاد ويعمل بجد." },
+        { sentence: "He looks like a movie star to me!", words: [{ w: "He looks like", ar: "يبدو مثل" }, { w: "a movie star", ar: "نجم سينما" }], meaning: "يبدو لي مثل نجم سينما!" }
       ]
     },
     listening: {
@@ -585,11 +593,12 @@ RULES:
       }]
     },
     reading: {
-      passage: "Today is my sister's birthday! She is twenty years old. We are going to have a party at home. I bought her a beautiful gift. All our family will be there. I wish her happiness and success. I hope she likes my gift! Happy Birthday, Sara!",
+      passage: "Today is Yusuf's graduation day and his family is very happy. They celebrate together at home with a big party. His mother gives him a beautiful gift — a new book. Everyone shouts: 'Congratulations, Yusuf!' His father says: 'I wish you success,' and Yusuf hopes next year will be even better.",
       breakdown: [
-        { sentence: "I bought her a beautiful gift.", words: [{ w: "I bought", ar: "اشتريت لها" }, { w: "her", ar: "لها" }, { w: "a beautiful", ar: "جميلة" }, { w: "gift", ar: "هدية" }], meaning: "اشتريت لها هدية جميلة." },
-        { sentence: "I wish her happiness and success.", words: [{ w: "I wish", ar: "أتمنى لها" }, { w: "her", ar: "لها" }, { w: "happiness", ar: "سعادة" }, { w: "and success", ar: "ونجاحاً" }], meaning: "أتمنى لها السعادة والنجاح." },
-        { sentence: "I hope she likes my gift!", words: [{ w: "I hope", ar: "أتمنى" }, { w: "she likes", ar: "أن تحب" }, { w: "my gift", ar: "هديتي" }], meaning: "أتمنى أن تحب هديتي!" }
+        { sentence: "They celebrate together at home with a big party.", words: [{ w: "celebrate", ar: "يحتفلون" }, { w: "together", ar: "معاً" }, { w: "a big party", ar: "حفلة كبيرة" }], meaning: "يحتفلون معاً في البيت بحفلة كبيرة." },
+        { sentence: "His mother gives him a beautiful gift — a new book.", words: [{ w: "gives him", ar: "تعطيه" }, { w: "a beautiful gift", ar: "هدية جميلة" }, { w: "a new book", ar: "كتاباً جديداً" }], meaning: "أمه تعطيه هدية جميلة — كتاباً جديداً." },
+        { sentence: "Everyone shouts: 'Congratulations, Yusuf!'", words: [{ w: "Everyone shouts", ar: "الجميع يصرخون" }, { w: "Congratulations", ar: "مبروك" }], meaning: "الجميع يصرخون: مبروك يا يوسف!" },
+        { sentence: "His father says: 'I wish you success,' and Yusuf hopes next year will be even better.", words: [{ w: "I wish you", ar: "أتمنى لك" }, { w: "success", ar: "النجاح" }, { w: "hopes", ar: "يأمل" }], meaning: "أبوه يقول: أتمنى لك النجاح، ويوسف يأمل أن يكون العام القادم أفضل." }
       ]
     },
     listening: {
@@ -654,11 +663,12 @@ RULES:
       }]
     },
     reading: {
-      passage: "Congratulations! You finished A1! In 30 days, you learned to introduce yourself, talk about your family and daily routine, order food, ask for directions, describe people, talk about the weather, and much more! You are now ready for A2. Keep going — you are amazing!",
+      passage: "You finished A1 and achieved your first big goal! You made great progress in thirty days. Now you feel confident when you speak English. I can now introduce myself, ask for directions, and talk about my day! Continue learning — the next level is waiting for you.",
       breakdown: [
-        { sentence: "You learned to introduce yourself.", words: [{ w: "You learned", ar: "تعلمت" }, { w: "to introduce", ar: "تقديم" }, { w: "yourself", ar: "نفسك" }], meaning: "تعلمت كيف تقدم نفسك." },
-        { sentence: "You are now ready for A2.", words: [{ w: "You are now", ar: "أنت الآن" }, { w: "ready", ar: "مستعد" }, { w: "for A2", ar: "لـ A2" }], meaning: "أنت الآن مستعد لمستوى A2." },
-        { sentence: "Keep going — you are amazing!", words: [{ w: "Keep going", ar: "استمر" }, { w: "you are", ar: "أنت" }, { w: "amazing", ar: "رائع" }], meaning: "استمر — أنت رائع!" }
+        { sentence: "You finished A1 and achieved your first big goal!", words: [{ w: "finished", ar: "أنهيت" }, { w: "achieved", ar: "حققت" }, { w: "your first big goal", ar: "هدفك الأول الكبير" }], meaning: "أنهيت A1 وحققت هدفك الأول الكبير!" },
+        { sentence: "You made great progress in thirty days.", words: [{ w: "made great progress", ar: "حققت تقدماً رائعاً" }, { w: "in thirty days", ar: "في ثلاثين يوماً" }], meaning: "حققت تقدماً رائعاً في ثلاثين يوماً." },
+        { sentence: "Now you feel confident when you speak English.", words: [{ w: "feel confident", ar: "تشعر بالثقة" }, { w: "when you speak", ar: "عندما تتحدث" }, { w: "English", ar: "الإنجليزية" }], meaning: "الآن تشعر بالثقة عندما تتحدث بالإنجليزية." },
+        { sentence: "Continue learning — the next level is waiting for you.", words: [{ w: "Continue learning", ar: "استمر في التعلم" }, { w: "the next level", ar: "المستوى التالي" }, { w: "is waiting", ar: "ينتظرك" }], meaning: "استمر في التعلم — المستوى التالي ينتظرك." }
       ]
     },
     listening: {
