@@ -73,21 +73,16 @@ export const B1_DAYS_11_20 = [
       ]
     },
     reading: {
-      passage: `The Quiet Revolution in Education
+      passage: `The Unexpected Coincidence
 
-Over the past two decades, education has undergone a transformation that few could have predicted. The traditional classroom, which for centuries had been the primary setting for formal learning, is no longer the only option available to students worldwide.
-
-Online learning platforms, which began as modest experiments in the early 2000s, now serve hundreds of millions of learners. These platforms, whose reach extends across every continent, have made quality education accessible to people who previously had no access to it. A student in a remote village, who might once have had limited options, can now take courses taught by professors at leading universities.
-
-The shift has not been without its critics. Some educators, whose careers are built on the traditional model, argue that digital learning lacks the social dimension that is essential to education. They point to the importance of the classroom, where students not only learn content but also develop collaboration and communication skills.
-
-Others, however, argue that flexibility is the key advantage that online education offers. A working parent, whose schedule makes attending classes difficult, can learn at their own pace. A person with a disability, who might face barriers in a physical institution, can participate fully in an online environment.
-
-The debate continues. What is certain is that the two models — traditional and digital — will coexist and complement each other in ways that educators of the previous century, who could not have imagined the internet, could never have foreseen.`,
+Sofia was a young entrepreneur whose startup had impressed investors for nearly a decade. She had been invited to speak at an exhibit of modern design, which was held in a renovated warehouse on the edge of the city. At the event, she met a senior architect, whose credentials in sustainable infrastructure were well known across the industry. It was a coincidence that her former mentor was there too — he had not attended the same gathering in years. The two men, who had been colleagues at a celebrated design firm, immediately began discussing a bilateral initiative to rebuild the city's public spaces. By the end of the evening, Sofia had the outline of a strategy for her next campaign, which she had not expected to find at an art exhibition.`,
       breakdown: [
-        { sentence: 'The traditional classroom, which for centuries had been the primary setting, is no longer the only option.', words: [{w:'which for centuries had been', ar:'التي كانت لقرون'},{w:'primary setting', ar:'البيئة الرئيسية'}], meaning: 'جملة وصفية طويلة غير تعريفية — معلومة إضافية تاريخية' },
-        { sentence: 'These platforms, whose reach extends across every continent, have made quality education accessible.', words: [{w:'whose reach extends', ar:'التي يمتد نطاقها'},{w:'accessible', ar:'في متناول الجميع'}], meaning: 'whose تُشير إلى ملكية: نطاق المنصات' },
-        { sentence: 'A working parent, whose schedule makes attending classes difficult, can learn at their own pace.', words: [{w:'whose schedule makes', ar:'الذي يجعل جدوله'},{w:'at their own pace', ar:'بوتيرتهم الخاصة'}], meaning: 'whose في سياق إنساني — يصف ظروف الفاعل' },
+        { sentence: 'Sofia was a young entrepreneur whose startup had impressed investors for nearly a decade.', words: [{w:'entrepreneur', ar:'رائد أعمال'},{w:'whose startup', ar:'التي كانت شركتها الناشئة'},{w:'decade', ar:'عقد'}], meaning: 'whose تُشير إلى ملكية — الشركة الناشئة تخص سوفيا' },
+        { sentence: 'She had been invited to speak at an exhibit of modern design, which was held in a renovated warehouse.', words: [{w:'exhibit', ar:'معرض'},{w:'which was held', ar:'الذي أُقيم'},{w:'renovated', ar:'مُجدَّد'}], meaning: 'جملة وصفية غير تعريفية مع which — تُضيف معلومة عن المكان' },
+        { sentence: 'At the event, she met a senior architect, whose credentials in sustainable infrastructure were well known.', words: [{w:'architect', ar:'مهندس معماري'},{w:'whose credentials', ar:'الذي كانت مؤهلاته'},{w:'infrastructure', ar:'بنية تحتية'}], meaning: 'whose لوصف صفة شخص — المؤهلات تخص المهندس المعماري' },
+        { sentence: 'It was a coincidence that her former mentor was there too — he had not attended the same gathering in years.', words: [{w:'coincidence', ar:'مصادفة'},{w:'mentor', ar:'مرشد / موجّه'}], meaning: 'جملة تشريحية — المصادفة هي الفكرة المحورية' },
+        { sentence: 'The two men, who had been colleagues at a celebrated design firm, began discussing a bilateral initiative.', words: [{w:'who had been colleagues', ar:'اللذان كانا زميلين'},{w:'bilateral', ar:'ثنائي'},{w:'initiative', ar:'مبادرة'}], meaning: 'who في جملة غير تعريفية — يصف علاقة سابقة بين الرجلين' },
+        { sentence: 'By the end of the evening, Sofia had the outline of a strategy for her next campaign.', words: [{w:'strategy', ar:'استراتيجية'},{w:'campaign', ar:'حملة'}], meaning: 'خاتمة تجمع مفردتين محوريتين — نتيجة اللقاء غير المتوقع' },
       ]
     },
     listening: {
@@ -198,23 +193,16 @@ The debate continues. What is certain is that the two models — traditional and
       ]
     },
     reading: {
-      passage: `Is Social Media Good for Society?
+      passage: `A New City, Old Habits
 
-The debate over social media's impact on society has intensified in recent years. Supporters argue that these platforms have transformed the way people connect, share information, and organise around shared causes. Furthermore, social media has given a voice to individuals and communities that were previously marginalised in mainstream discourse.
-
-Critics, however, point to significant downsides. Research has consistently shown a correlation between heavy social media use and increased levels of anxiety, particularly among teenagers. Moreover, the spread of misinformation has become a serious concern — false information travels faster than accurate reporting, with potentially damaging consequences.
-
-Despite these criticisms, it would be premature to conclude that social media is purely harmful. Many users report genuine benefits: maintaining long-distance relationships, accessing professional opportunities, and staying informed about local and global events. Nevertheless, the question of how platforms are designed and regulated remains crucial.
-
-In contrast to the early optimism that greeted social media's rise, public opinion has become considerably more nuanced. People are increasingly aware that the same technology that enables connection can also enable division. Whereas once it seemed that more connectivity would mean more understanding, the reality has proven more complex.
-
-The challenge, consequently, is not to eliminate social media but to use it more deliberately and critically. This requires a combination of digital literacy education, responsible platform design, and individual awareness. The tools exist — what is needed is the collective will to use them wisely.`,
+Omar moved to a new city for work in January; however, the first few weeks were far more difficult than he had expected. The job was interesting, albeit considerably more demanding than his previous role. Furthermore, he barely knew anyone, which made the evenings feel long and quiet. In contrast, his colleague Layla had adapted quickly — she had joined a running group and enrolled in a cooking class within her first month. Consequently, Omar decided to take her advice and sign up for a local language exchange. The experience was not what he had anticipated; nevertheless, the friendships he formed turned out to be the most valuable part of his new life. Whereas he had once valued routine above everything, he gradually learned to appreciate the unexpected.`,
       breakdown: [
-        { sentence: 'Furthermore, social media has given a voice to previously marginalised communities.', words: [{w:'Furthermore', ar:'علاوةً على ذلك'},{w:'marginalised', ar:'مهمَّشة'}], meaning: 'إضافة نقطة إيجابية للحجة السابقة' },
-        { sentence: 'Critics, however, point to significant downsides.', words: [{w:'however', ar:'غير أن'},{w:'downsides', ar:'سلبيات'}], meaning: 'انتقال للرأي المعاكس بلطف' },
-        { sentence: 'Despite these criticisms, it would be premature to conclude that social media is purely harmful.', words: [{w:'Despite', ar:'على الرغم من'},{w:'premature', ar:'متسرّع'}], meaning: 'رفض الاستنتاج المتطرف رغم الانتقادات' },
-        { sentence: 'Whereas once it seemed that more connectivity would mean more understanding, the reality has proven more complex.', words: [{w:'Whereas', ar:'في حين أن'},{w:'proven more complex', ar:'ثبت أنه أكثر تعقيداً'}], meaning: 'المقارنة بين التوقع والواقع' },
-        { sentence: 'The challenge, consequently, is not to eliminate social media but to use it more deliberately.', words: [{w:'consequently', ar:'وبالتالي'},{w:'deliberately', ar:'بوعي وتعمّد'}], meaning: 'نتيجة منطقية من كل الحجج السابقة' },
+        { sentence: 'Omar moved to a new city for work in January; however, the first few weeks were far more difficult than he had expected.', words: [{w:'however', ar:'غير أن / بيد أن'}], meaning: 'however بعد الفاصلة المنقوطة — ينقل القارئ إلى فكرة مناقضة' },
+        { sentence: 'The job was interesting, albeit considerably more demanding than his previous role.', words: [{w:'albeit', ar:'وإن / رغم أن'},{w:'demanding', ar:'مُرهِق / يتطلب جهداً'}], meaning: 'albeit تُضيف تحفظاً خفيفاً على ما سبق' },
+        { sentence: 'Furthermore, he barely knew anyone, which made the evenings feel long and quiet.', words: [{w:'Furthermore', ar:'علاوةً على ذلك'},{w:'barely', ar:'بالكاد'}], meaning: 'Furthermore تُضيف سلبية أخرى إلى الفكرة السابقة' },
+        { sentence: 'In contrast, his colleague Layla had adapted quickly — she had joined a running group within her first month.', words: [{w:'In contrast', ar:'على النقيض'},{w:'adapted', ar:'تكيّفت'}], meaning: 'In contrast تعقد مقارنة مباشرة بين شخصين' },
+        { sentence: 'Consequently, Omar decided to take her advice and sign up for a local language exchange.', words: [{w:'Consequently', ar:'وبالتالي / نتيجةً لذلك'}], meaning: 'Consequently تُعبّر عن نتيجة منطقية للمشهد السابق' },
+        { sentence: 'Whereas he had once valued routine above everything, he gradually learned to appreciate the unexpected.', words: [{w:'Whereas', ar:'في حين أن / بينما'},{w:'gradually', ar:'تدريجياً'}], meaning: 'Whereas تقارن بين موقفين متعاكسين للشخص نفسه عبر الزمن' },
       ]
     },
     listening: {
@@ -324,22 +312,15 @@ The challenge, consequently, is not to eliminate social media but to use it more
       ]
     },
     reading: {
-      passage: `Starting Up: The Challenges No One Warns You About
+      passage: `The Garden Project
 
-When Rania decided to set up her own business at twenty-eight, she had a clear vision and a strong product. What she had not anticipated were the daily challenges that nobody talks about in entrepreneurship courses.
-
-The first six months were the hardest. She ran out of her initial budget faster than expected, which meant she had to cut back on everything — marketing, staff, even her own salary. She had to come up with creative solutions to keep the business running without additional investment.
-
-Several deals fell through at critical moments. A partnership she had spent months building collapsed because the other party backed down at the final stage. Instead of giving up, she followed up with alternative partners and eventually pulled off an agreement that turned out to be better than the original.
-
-Laying off the two staff members she had initially taken on was the most difficult decision. She had drawn up their contracts with genuine optimism and the subsequent conversation felt like a personal failure. However, the restructuring brought about a leaner, more efficient operation.
-
-Looking back three years later, Rania says she would not change her decision to start the business. "Every time something fell through, I had to make up for it by working smarter," she explains. "The setbacks were hard, but they built something that no business school course could have taught me."`,
+When Tomas decided to set up a community garden in his neighbourhood, he had no idea how difficult it would be. He came across an abandoned plot of land behind the library and immediately came up with a plan to transform it. His neighbour, Mrs Younis, agreed to take on the role of project manager, and together they drew up a proposal for the local council. Several early agreements fell through when funding was cut, forcing them to cut back on their original design and deal with a great deal of disappointment. They carried out surveys among local residents to build wider support, and this effort eventually helped them pull off a successful grant application. The council agreed to phase out the waste-clearing fees, and the garden finally opened the following spring — bringing the whole street together for the first time.`,
       breakdown: [
-        { sentence: 'She ran out of her initial budget faster than expected.', words: [{w:'ran out of', ar:'نفدت'},{w:'initial budget', ar:'الميزانية الأولية'}], meaning: 'run out of = ينفد — فعل مركب غير قابل للفصل' },
-        { sentence: 'Several deals fell through at critical moments.', words: [{w:'fell through', ar:'فشلت'},{w:'critical moments', ar:'لحظات حاسمة'}], meaning: 'fall through = لا يتحقق الاتفاق' },
-        { sentence: 'The restructuring brought about a leaner, more efficient operation.', words: [{w:'brought about', ar:'أحدثت'},{w:'leaner', ar:'أكثر رشاقة'}], meaning: 'bring about = يُحدث تغييراً' },
-        { sentence: 'Every time something fell through, I had to make up for it by working smarter.', words: [{w:'fell through', ar:'فشل'},{w:'make up for', ar:'يُعوّض عن'}], meaning: 'فعلان مركبان في جملة واحدة' },
+        { sentence: 'When Tomas decided to set up a community garden in his neighbourhood, he had no idea how difficult it would be.', words: [{w:'set up', ar:'يُنشئ / يُؤسّس'}], meaning: 'set up = يُؤسس — فعل مركب قابل للفصل: "set it up"' },
+        { sentence: 'He came across an abandoned plot of land and immediately came up with a plan to transform it.', words: [{w:'came across', ar:'صادف'},{w:'came up with', ar:'توصّل إلى / ابتكر'}], meaning: 'فعلان مركبان متتاليان — come across غير قابل للفصل' },
+        { sentence: 'Mrs Younis agreed to take on the role of project manager, and together they drew up a proposal.', words: [{w:'take on', ar:'يتولى / يتحمّل'},{w:'drew up', ar:'أعدّ / صاغ'}], meaning: 'take on + draw up — فعلان مركبان في سياق رسمي' },
+        { sentence: 'Several early agreements fell through when funding was cut, forcing them to cut back on their original design.', words: [{w:'fell through', ar:'فشلت / لم تتحقق'},{w:'cut back on', ar:'يُقلّل من'}], meaning: 'fall through = لا يتحقق. cut back on = يُخفّض — غير قابلَين للفصل' },
+        { sentence: 'They carried out surveys among local residents, which helped them pull off a successful grant application.', words: [{w:'carried out', ar:'نفّذ / أجرى'},{w:'pull off', ar:'ينجح في إنجاز'}], meaning: 'carry out = يُنفّذ. pull off = يُنجز شيئاً صعباً' },
       ]
     },
     listening: {
@@ -469,22 +450,15 @@ Looking back three years later, Rania says she would not change her decision to 
       ]
     },
     reading: {
-      passage: `Letters I Never Sent
+      passage: `The Song She Never Wrote
 
-There is a writing exercise sometimes recommended by therapists: write a letter to your younger self. The purpose is not nostalgia — it is clarity. It forces you to confront the things you wish you had done differently, and, in doing so, often reveals what you still want to change now.
-
-If I could write to my twenty-two-year-old self, I would start with this: I wish you had worried less about what other people thought. So much energy went into managing impressions — at work, in relationships, online — energy that could have gone into building something real.
-
-I wish I had invested more time in friendships that mattered. I was so focused on professional goals that I let close relationships drift. I wish I had picked up the phone more often. I wish I had said "thank you" more clearly, more genuinely.
-
-I also wish I had been more patient with myself. I was convinced that success had to come quickly, or it would not come at all. I wish someone had told me that slow, consistent progress is almost always more durable than fast, flashy achievement.
-
-But here is what I have learned: wishing things had been different is only useful if it changes how you act now. The real question is not "I wish I had..." — it is "What am I going to do about it today?"`,
+Amira had always been a talented musician, but she never had the confidence to perform in front of large audiences. She wishes she had been less hesitant when a famous producer heard her play at a small café ten years ago — it was a genuine opportunity that never came back. At the time, she was too stubborn to accept feedback and too distracted by her fear to take the next step. I wish I had been more committed to my practice, she once wrote in her journal, and more grateful for the people who believed in me. She also regrets not investing in professional lessons earlier, knowing that fluency on the piano requires years of patient, dedicated effort. Now in her thirties, she no longer hesitates — she plays at festivals, teaches children, and has finally learned to make her music the highest priority in her life.`,
       breakdown: [
-        { sentence: 'I wish you had worried less about what other people thought.', words: [{w:'wish you had worried', ar:'أتمنى لو كنتَ قلقتَ أقل'},{w:'managing impressions', ar:'إدارة الانطباعات'}], meaning: 'wish + past perfect = ندم على أسلوب تفكير ماضٍ' },
-        { sentence: 'I wish I had invested more time in friendships that mattered.', words: [{w:'had invested', ar:'استثمرتُ'},{w:'drift', ar:'تتفكك / تبتعد'}], meaning: 'ندم على الأولويات الخاطئة في الشباب' },
-        { sentence: 'I wish someone had told me that slow progress is more durable.', words: [{w:'durable', ar:'صامد / مستدام'},{w:'flashy', ar:'براق / مؤقت'}], meaning: 'wish + past perfect مع فاعل مختلف (someone)' },
-        { sentence: 'Wishing things had been different is only useful if it changes how you act now.', words: [{w:'Wishing', ar:'التمني (جيروند كفاعل)'},{w:'act now', ar:'تتصرف الآن'}], meaning: 'الندم مفيد فقط إذا أدى إلى تغيير حقيقي في الحاضر' },
+        { sentence: 'Amira had always been a talented musician, but she never had the confidence to perform in front of large audiences.', words: [{w:'confidence', ar:'ثقة بالنفس'}], meaning: 'الجملة تُقدّم الصراع الرئيسي — غياب الثقة هو المشكلة' },
+        { sentence: 'She wishes she had been less hesitant when a famous producer heard her — it was a genuine opportunity that never came back.', words: [{w:'wishes she had been', ar:'تتمنى لو كانت'},{w:'hesitant', ar:'مترددة'},{w:'genuine', ar:'حقيقي / صادق'},{w:'opportunity', ar:'فرصة'}], meaning: 'wish + past perfect = ندم على موقف محدد في الماضي' },
+        { sentence: 'At the time, she was too stubborn to accept feedback and too distracted by her fear to take the next step.', words: [{w:'stubborn', ar:'عنيد'},{w:'distracted', ar:'مُشتَّت'}], meaning: 'جملتان متوازيتان تشرحان أسباب التردد' },
+        { sentence: 'I wish I had been more committed to my practice, and more grateful for the people who believed in me.', words: [{w:'wish I had been', ar:'أتمنى لو كنتُ'},{w:'committed', ar:'ملتزم'},{w:'grateful', ar:'ممتنّ'}], meaning: 'wish + past perfect مكرّر — ندمان مختلفان في جملة واحدة' },
+        { sentence: 'She also regrets not investing in professional lessons earlier, knowing that fluency on the piano requires years of patient effort.', words: [{w:'investing', ar:'الاستثمار'},{w:'fluency', ar:'طلاقة'}], meaning: 'الندم هنا عبر "regrets not + -ing" — بديل تعبيري عن wish' },
       ]
     },
     listening: {
@@ -612,21 +586,14 @@ But here is what I have learned: wishing things had been different is only usefu
       ]
     },
     reading: {
-      passage: `The Rise of the Service Economy
+      passage: `Before the Wedding
 
-In the past, most people did most things themselves. They grew their own food, repaired their own clothes, and built their own furniture. Today, however, a growing proportion of what we do — or rather, what we have done — reflects a fundamental shift in how society organises labour.
-
-Having your shopping delivered, getting your home cleaned, or having your car serviced are all examples of this shift. The causative construction — having something done — is not just a grammar point. It reflects a broader cultural and economic reality: we are increasingly comfortable delegating tasks to specialists.
-
-This has significant economic implications. As incomes rise, people tend to outsource more. A professional who earns a high hourly rate will often get routine tasks handled by others, because the time saved is worth more than the cost. A company will have its accounts audited, its software developed, and its premises maintained by external specialists, rather than employing full-time staff for every function.
-
-The trend is not without its critics. Some argue that having everything done for you leads to a loss of practical skills and self-reliance. Others point out that the service economy often relies on poorly paid workers who have little choice but to do the jobs that others prefer not to do.
-
-Whatever one's view, it is clear that the grammar of "having things done" has never been more relevant to everyday life.`,
+With her daughter's wedding only three weeks away, Mrs Haddad had a long list of tasks to organise. She had already had the apartment decorated and the invitations delivered, but there was still much to do. She needed to get her dress altered — the tailor had promised to have it ready by Friday. Her husband, meanwhile, was getting his car serviced and had asked a colleague to have some photographs framed as a gift for the couple. They had also arranged to have the garden measured for a temporary canopy and to get the sound equipment installed by a professional. By the morning of the wedding, everything had been taken care of, and Mrs Haddad finally allowed herself to sit down and enjoy a cup of tea.`,
       breakdown: [
-        { sentence: 'Having your shopping delivered, getting your home cleaned — reflect a fundamental shift.', words: [{w:'having delivered', ar:'توصيل بواسطة آخرين'},{w:'getting cleaned', ar:'تنظيف بواسطة آخرين'},{w:'fundamental shift', ar:'تحوّل جذري'}], meaning: 'have/get + done = تفويض مهام للآخرين' },
-        { sentence: 'A professional will often get routine tasks handled by others.', words: [{w:'get routine tasks handled', ar:'تُنجز المهام الروتينية'},{w:'delegating', ar:'التفويض'}], meaning: 'get + object + past participle في سياق اقتصادي' },
-        { sentence: 'A company will have its accounts audited, its software developed, its premises maintained.', words: [{w:'have audited/developed/maintained', ar:'تدقيق/تطوير/صيانة بواسطة آخرين'}], meaning: '3 أمثلة على have + done في سياق مهني' },
+        { sentence: 'She had already had the apartment decorated and the invitations delivered, but there was still much to do.', words: [{w:'had the apartment decorated', ar:'جدّدت الشقة بواسطة آخرين'},{w:'the invitations delivered', ar:'أرسلت الدعوات بواسطة آخرين'}], meaning: 'have + object + past participle — مهمتان مُفوَّضتان لأشخاص آخرين' },
+        { sentence: 'She needed to get her dress altered — the tailor had promised to have it ready by Friday.', words: [{w:'get her dress altered', ar:'تعديل الفستان بواسطة الخياط'},{w:'altered', ar:'مُعدَّل'}], meaning: 'get something done — صيغة أكثر شيوعاً في المحادثة' },
+        { sentence: 'Her husband was getting his car serviced and had asked a colleague to have some photographs framed.', words: [{w:'getting his car serviced', ar:'صيانة السيارة بواسطة الميكانيكي'},{w:'have photographs framed', ar:'تأطير الصور بواسطة آخر'}], meaning: 'مثالان على have/get + done في نفس الجملة' },
+        { sentence: 'They had arranged to have the garden measured for a canopy and to get the sound equipment installed.', words: [{w:'have the garden measured', ar:'قياس الحديقة بواسطة آخر'},{w:'get installed', ar:'تركيب بواسطة متخصص'}], meaning: 'have و get متبادلَان — كلاهما صحيح في هذا السياق' },
       ]
     },
     listening: {
@@ -755,22 +722,15 @@ Whatever one's view, it is clear that the grammar of "having things done" has ne
       ]
     },
     reading: {
-      passage: `Why Communication Fails
+      passage: `The Argument That Changed Things
 
-It is not the absence of information that causes most workplace conflicts — it is the way information is communicated. This is what research in organisational behaviour has consistently shown: the problem rarely lies in what is said, but in how it is said, when it is said, and who says it.
-
-What many managers fail to understand is that communication is not a single act — it is an ongoing process. Never has a single email, however well-crafted, been sufficient to convey a major change to an organisation. What is needed is repeated, consistent, and transparent messaging across multiple channels.
-
-It was a study conducted in 2019 that first clearly demonstrated how much time employees waste dealing with misunderstandings caused by poor communication. The research found that workers in large organisations spent an average of two hours per day clarifying unclear instructions or redoing work because of miscommunication. What this adds up to is approximately ten working weeks per year — lost entirely.
-
-Rarely do organisations take this seriously enough. They do invest in training — but seldom do they invest in the right kind: training that focuses not on how to give information but on how to ensure it has been understood.
-
-It is only when communication is treated as a strategic priority — not an administrative afterthought — that organisations truly thrive. What we need is not more communication. What we need is better communication.`,
+It was not Priya's loudest speech that won the national debate finals — it was her most subtle one. What the judges remembered was not the volume of her argument but the genuine depth of her insight. Never had such a decisive and compelling case been made by such a young competitor at that level. Seldom do contestants openly acknowledge the weakest point in their own position, yet Priya did exactly that — and the audience found it extraordinary. What she chose to emphasise was not her own correctness but the fundamental complexity of the issue itself. Little did anyone in the room know that her apparent confidence concealed real doubt, and that was precisely what made her argument so powerful.`,
       breakdown: [
-        { sentence: 'It is not the absence of information — it is the way information is communicated.', words: [{w:'It is...that', ar:'إنه ... هو ما'},{w:'absence', ar:'غياب'}], meaning: 'cleft sentence للتركيز على السبب الحقيقي' },
-        { sentence: 'What many managers fail to understand is that communication is an ongoing process.', words: [{w:'What...fail to understand', ar:'ما يُخفق كثير من المدراء في فهمه'}], meaning: 'What-cleft للتركيز على المعلومة الجوهرية' },
-        { sentence: 'Never has a single email been sufficient to convey a major change.', words: [{w:'Never has', ar:'لم يكن قط (قلب الترتيب)'}], meaning: 'inversion بعد Never للتأكيد' },
-        { sentence: 'Rarely do organisations take this seriously enough.', words: [{w:'Rarely do', ar:'نادراً ما تأخذ (قلب الترتيب)'}], meaning: 'inversion بعد Rarely — اكثر رسميةً من "Organisations rarely take..."' },
+        { sentence: 'It was not Priya\'s loudest speech that won the finals — it was her most subtle one.', words: [{w:'It was not... that', ar:'لم يكن ... هو ما'},{w:'subtle', ar:'خفيّ / دقيق'}], meaning: 'cleft sentence للتركيز على السبب الحقيقي — ينفي ويُثبت في آنٍ معاً' },
+        { sentence: 'What the judges remembered was not the volume of her argument but the genuine depth of her insight.', words: [{w:'What the judges remembered', ar:'ما تذكّره القضاة'},{w:'insight', ar:'بصيرة / عمق فكري'}], meaning: 'What-cleft — يُسلّط الضوء على ما أثّر في القضاة فعلاً' },
+        { sentence: 'Never had such a decisive and compelling case been made by such a young competitor.', words: [{w:'Never had', ar:'لم يكن قط (قلب الترتيب)'},{w:'decisive', ar:'حاسم'},{w:'compelling', ar:'مقنع / آسر'}], meaning: 'inversion بعد Never — had يسبق الفاعل في القلب' },
+        { sentence: 'Seldom do contestants openly acknowledge the weakest point in their own position.', words: [{w:'Seldom do', ar:'نادراً ما (قلب الترتيب)'},{w:'acknowledge', ar:'يُقرّ / يعترف'}], meaning: 'inversion بعد Seldom — أكثر رسميةً وتأثيراً من "Contestants seldom..."' },
+        { sentence: 'What she chose to emphasise was not her own correctness but the fundamental complexity of the issue.', words: [{w:'emphasise', ar:'يُشدّد على'},{w:'fundamental', ar:'جوهري / أساسي'}], meaning: 'What-cleft ثانية في الفقرة — تكشف عن استراتيجية برياء' },
       ]
     },
     listening: {
@@ -881,21 +841,15 @@ It is only when communication is treated as a strategic priority — not an admi
       ]
     },
     reading: {
-      passage: `The Butterfly Effect of Decisions
+      passage: `The Road Not Taken
 
-Every significant decision we make creates a ripple effect that extends far beyond the moment of choice. The study of mixed conditionals — sentences that connect a past cause with a present result, or a present condition with a past consequence — reveals something profound about how we understand our own lives.
-
-Consider this: if you had chosen a different university, you would probably be living in a different city now. Your friends, your career, perhaps even your relationships would all be different. This is not speculation — it is the logic of cause and effect, played out across time.
-
-What makes mixed conditionals linguistically interesting is precisely this time-crossing quality. Standard conditionals operate within a single time frame. Mixed conditionals, however, allow us to connect different moments: "If I had been more disciplined as a student, I would not be facing these difficulties now."
-
-Psychologists who study regret note that people most frequently dwell on decisions from their past that have had lasting present consequences. In other words, the mixed conditional structure ("if I had done X, I would be Y now") is the grammar of regret — but also of gratitude. If she had not struggled in those early years, she would not be as resilient as she is today.
-
-Understanding this structure helps us speak more precisely about our lives. It acknowledges that the past and the present are not separate — they are connected by every choice we have ever made.`,
+Daniel was thirty-eight and had spent most of his career at the same company, slowly building momentum toward a senior position. If he had seized the opportunity to study abroad at twenty-two, he would now be working in the international department he had always dreamed of joining. He also knew that if he were more proactive today, he would have applied for the team leader role before the deadline closed. His mentor had once told him that resilience is not built by avoiding setbacks but by moving through them — and Daniel wished he had understood that truth earlier. If he had trusted his instincts at those crucial intersections in his career, his whole trajectory would look very different now. He was still not too late, and that realisation gave him the determination to finally act.`,
       breakdown: [
-        { sentence: 'If you had chosen a different university, you would probably be living in a different city now.', words: [{w:'had chosen', ar:'اخترت (ماضٍ)'},{w:'would be living', ar:'كنت ستعيش (حاضر)'}], meaning: 'سبب ماضٍ → نتيجة حاضرة — النوع الأول' },
-        { sentence: 'If I had been more disciplined as a student, I would not be facing these difficulties now.', words: [{w:'had been disciplined', ar:'كنت أكثر انضباطاً'},{w:'would not be facing', ar:'لما كنت أواجه'}], meaning: 'نفس النمط — الماضي يُشكّل الحاضر' },
-        { sentence: 'If she had not struggled in those early years, she would not be as resilient as she is today.', words: [{w:'had not struggled', ar:'لو لم تكافح'},{w:'as resilient as', ar:'بهذه المرونة'}], meaning: 'الشرطية المختلطة للامتنان — التجارب الصعبة تبني القوة' },
+        { sentence: 'Daniel had spent most of his career at the same company, slowly building momentum toward a senior position.', words: [{w:'momentum', ar:'زخم'}], meaning: 'الجملة الافتتاحية تضع السياق — momentum يصف التقدم البطيء' },
+        { sentence: 'If he had seized the opportunity to study abroad at twenty-two, he would now be working in the international department.', words: [{w:'had seized', ar:'اغتنم (ماضٍ)'},{w:'would now be working', ar:'كان سيعمل الآن (حاضر)'},{w:'opportunity', ar:'فرصة'}], meaning: 'شرطية مختلطة: سبب ماضٍ فائت → نتيجة حاضرة مفقودة' },
+        { sentence: 'If he were more proactive today, he would have applied for the team leader role before the deadline closed.', words: [{w:'were more proactive', ar:'كان أكثر استباقية (حاضر)'},{w:'would have applied', ar:'كان سيتقدم (ماضٍ)'},{w:'proactive', ar:'استباقي / مبادر'}], meaning: 'شرطية مختلطة: حالة حاضرة افتراضية → نتيجة ماضية' },
+        { sentence: 'His mentor had told him that resilience is not built by avoiding setbacks but by moving through them.', words: [{w:'mentor', ar:'مرشد'},{w:'resilience', ar:'مرونة / صمود'},{w:'setbacks', ar:'نكسات'}], meaning: 'حكمة من مرشد — تُذكّر بمفردات اليوم في سياق إنساني' },
+        { sentence: 'If he had trusted his instincts at those crucial intersections, his whole trajectory would look very different now.', words: [{w:'crucial', ar:'حاسم'},{w:'trajectory', ar:'مسار / منحنى'}], meaning: 'شرطية مختلطة ثانية: ماضٍ → حاضر — كلمة intersection تُجسّد لحظات الاختيار' },
       ]
     },
     listening: {
@@ -1020,22 +974,15 @@ Understanding this structure helps us speak more precisely about our lives. It a
       ]
     },
     reading: {
-      passage: `The Architecture of Progress
+      passage: `The Paper That Almost Wasn't
 
-Standing at the entrance of the new research centre, Dr Farah Al-Hassan felt a mix of pride and relief. Having spent seven years fighting for funding, navigating bureaucracy, and managing a team of forty researchers, she had finally seen her vision become reality.
-
-Built on the site of an old industrial facility, the centre had transformed an abandoned area of the city into a hub of innovation. Designed to be fully carbon-neutral, it incorporated solar panels, rainwater collection systems, and natural ventilation — features rarely seen in buildings of this scale.
-
-Entering the main atrium, visitors are immediately struck by the open, collaborative spaces that define the architecture. Knowing that creativity thrives in informal environments, Dr Al-Hassan had insisted on breakout areas, quiet pods, and communal kitchens — elements not typically prioritised in traditional research institutions.
-
-Having overcome considerable resistance from the university's administration, she had also secured flexible working arrangements for all staff. "People produce their best work when trusted to manage their own time," she has often argued.
-
-Recognised internationally for her work in urban sustainability, Dr Al-Hassan was invited to speak at a global conference in September. Asked about the centre's impact, she said simply: "Having seen what's possible when people collaborate across disciplines, I no longer believe in working in silos."`,
+Having spent three years investigating the effects of microplastics on marine life, Dr Nour Khalil was finally ready to publish her findings. Exhausted by the long process of data collection and peer review, she had almost abandoned the project in its final stages. Convinced by a colleague's encouragement, however, she revised the paper one last time and submitted it to a leading journal. Published in the spring edition, the study was immediately cited by researchers across four continents and praised for the clarity with which it assessed a complex problem. Motivated by the response, she began to compile a second, broader investigation, this time funded by an international environmental organisation. Having dedicated so many years to the subject, she felt a quiet pride — not in the recognition, but in the work itself.`,
       breakdown: [
-        { sentence: 'Having spent seven years fighting for funding, she had finally seen her vision become reality.', words: [{w:'Having spent', ar:'بعد أن أمضت'},{w:'fighting for funding', ar:'تناضل من أجل التمويل'}], meaning: 'having + past participle = فعل مكتمل قبل الفعل الرئيسي' },
-        { sentence: 'Built on the site of an old industrial facility, the centre had transformed an abandoned area.', words: [{w:'Built on', ar:'مشيّداً على'},{w:'transformed', ar:'حوّل'}], meaning: '-ed participle — المركز هو موضوع البناء' },
-        { sentence: 'Knowing that creativity thrives in informal environments, she had insisted on breakout areas.', words: [{w:'Knowing that', ar:'مُدركةً أن'},{w:'thrives', ar:'ينمو / يزدهر'}], meaning: '-ing participle — علم مصاحب للفعل الرئيسي' },
-        { sentence: 'Having overcome considerable resistance, she had also secured flexible working arrangements.', words: [{w:'Having overcome', ar:'بعد أن تغلّبت على'},{w:'considerable resistance', ar:'مقاومة كبيرة'}], meaning: 'having + past participle للتتابع الزمني' },
+        { sentence: 'Having spent three years investigating the effects of microplastics, Dr Nour Khalil was finally ready to publish.', words: [{w:'Having spent', ar:'بعد أن أمضت'},{w:'investigating', ar:'تبحث في / تحقق في'},{w:'publish', ar:'تنشر'}], meaning: 'having + past participle — الفعل الأول مكتمل تماماً قبل الفعل الرئيسي' },
+        { sentence: 'Exhausted by the long process of data collection and peer review, she had almost abandoned the project.', words: [{w:'Exhausted', ar:'مُنهَكة'},{w:'abandoned', ar:'تخلّت عن'}], meaning: '-ed participle — الدكتورة هي من تعرّضت للإنهاك' },
+        { sentence: 'Convinced by a colleague\'s encouragement, she revised the paper one last time and submitted it.', words: [{w:'Convinced', ar:'مُقتنِعة / مُقنَعة'}], meaning: '-ed participle — تأثير خارجي يُحرّك الفاعل نحو الفعل' },
+        { sentence: 'Published in the spring edition, the study was immediately cited by researchers across four continents.', words: [{w:'Published', ar:'المنشورة'},{w:'cited', ar:'استُشهد بها'}], meaning: '-ed participle — الدراسة هي موضوع النشر لا فاعله' },
+        { sentence: 'Motivated by the response, she began to compile a second investigation, funded by an international organisation.', words: [{w:'Motivated', ar:'مُحفَّزة'},{w:'compile', ar:'يُجمّع / يُعدّ'},{w:'funded', ar:'مُموَّل'}], meaning: '-ing و -ed participles متعددة في جملة واحدة' },
       ]
     },
     listening: {
@@ -1132,22 +1079,16 @@ Recognised internationally for her work in urban sustainability, Dr Al-Hassan wa
       ]
     },
     reading: {
-      passage: `The Changing Face of Work
+      passage: `The Promotion She Almost Missed
 
-The workplace of 2025 looks very different from the one that existed just a decade ago. Having undergone one of the most significant transformations in modern history — accelerated by a global pandemic — the way we work, where we work, and what we value about work have all shifted fundamentally.
-
-Remote and hybrid working, once considered a perk reserved for senior employees, are now standard expectations for many professionals. Companies that failed to adapt have often struggled to attract and retain talent. Those that embraced flexibility, on the other hand, have reported higher levels of productivity and employee satisfaction.
-
-What has also changed is what employees seek from their careers. A salary package, while important, is no longer the primary motivator for many workers — particularly younger generations. Meaningful work, opportunities for growth, a positive team culture, and clear ethical values have all risen in importance. Consequently, companies that cannot articulate their purpose clearly are finding recruitment increasingly difficult.
-
-The rise of automation and artificial intelligence has added another dimension to this transformation. Some roles have been made redundant; others have been created. Having observed these trends for several years, analysts predict that the most resilient workers of the future will be those who are adaptable, who invest continuously in learning, and who can work effectively alongside intelligent systems rather than in competition with them.
-
-What is clear, then, is that career success in the modern era demands more than technical competence. It demands self-awareness, resilience, and the ability to keep reinventing oneself — professionally and personally.`,
+After three years of managing a heavy workload without complaint, Yasmine finally decided to speak to her manager about a promotion. She had always been ambitious but lacked the confidence to negotiate for herself, worried that she might come across as demanding rather than competent. Her mentor, who had worked in the company for over a decade, encouraged her to show more initiative and to present her achievements at the next team review. The appraisal that followed was one of the most constructive conversations she had experienced at work — her manager confirmed that she had exceeded every benchmark set for her role. Yasmine was offered the position but was asked to complete a three-month probation period in the new department, which she accepted without hesitation. Looking back six months later, she understood that resilience and the courage to negotiate had finally opened the right door.`,
       breakdown: [
-        { sentence: 'Having undergone one of the most significant transformations in modern history, the workplace looks very different.', words: [{w:'Having undergone', ar:'بعد أن خضع لـ'},{w:'accelerated by', ar:'مُسرَّعاً بـ'}], meaning: 'having + past participle لتقديم السياق التاريخي' },
-        { sentence: 'What has also changed is what employees seek from their careers.', words: [{w:'What has changed', ar:'ما تغيّر'},{w:'seek', ar:'يسعون إلى'}], meaning: 'What-cleft للتركيز على موضوع الفقرة الجديدة' },
-        { sentence: 'Consequently, companies that cannot articulate their purpose clearly are finding recruitment increasingly difficult.', words: [{w:'Consequently', ar:'وبالتالي'},{w:'articulate', ar:'يُعبّر بوضوح'},{w:'recruitment', ar:'التوظيف'}], meaning: 'نتيجة منطقية + مفردات مهنية متقدمة' },
-        { sentence: 'Having observed these trends, analysts predict that the most resilient workers will be those who are adaptable.', words: [{w:'Having observed', ar:'بعد رصدهم'},{w:'resilient', ar:'مرنون'}], meaning: 'having + past participle في سياق تحليلي' },
+        { sentence: 'After three years of managing a heavy workload without complaint, Yasmine finally decided to speak to her manager.', words: [{w:'workload', ar:'حجم العمل / عبء العمل'}], meaning: 'workload يصف الضغط التراكمي — سياق يُمهّد للحدث الرئيسي' },
+        { sentence: 'She had always been ambitious but lacked the confidence to negotiate for herself.', words: [{w:'ambitious', ar:'طموحة'},{w:'negotiate', ar:'تتفاوض'}], meaning: 'تعارض بين الطموح وضعف الثقة — يُوضّح تحدي الشخصية' },
+        { sentence: 'Her mentor encouraged her to show more initiative and to present her achievements at the next team review.', words: [{w:'mentor', ar:'مرشد / موجّه'},{w:'initiative', ar:'مبادرة / روح المبادرة'}], meaning: 'دور المرشد في دفع الموظف نحو العمل الصحيح' },
+        { sentence: 'The appraisal that followed was one of the most constructive conversations she had experienced — her manager confirmed she had exceeded every benchmark.', words: [{w:'appraisal', ar:'تقييم الأداء'},{w:'constructive', ar:'بنّاء'},{w:'benchmark', ar:'معيار / مقياس مرجعي'}], meaning: 'ثلاث مفردات مهنية في جملة واحدة طبيعية' },
+        { sentence: 'Yasmine was offered the position but was asked to complete a three-month probation period, which she accepted without hesitation.', words: [{w:'probation', ar:'فترة تجريبية'}], meaning: 'probation كشرط طبيعي في التوظيف — سياق واقعي مألوف' },
+        { sentence: 'She understood that resilience and the courage to negotiate had finally opened the right door.', words: [{w:'resilience', ar:'مرونة / صمود'},{w:'negotiate', ar:'التفاوض'}], meaning: 'خاتمة تجمع مفردتين محوريتين — تُلخّص درس القصة' },
       ]
     },
     listening: {
@@ -1243,24 +1184,16 @@ What is clear, then, is that career success in the modern era demands more than 
       ]
     },
     reading: {
-      passage: `Technology: Tool or Master?
+      passage: `The Algorithm's Suggestion
 
-There is a question that has become increasingly urgent in the past decade: are we using technology, or is technology using us?
-
-The distinction matters. When we use a hammer, we pick it up and put it down. We are in control. But when we use a smartphone, the relationship is different. Designed by teams of engineers and psychologists to maximise our attention, these devices are not neutral tools. They are products built to keep us engaged, scrolling, reacting — often at the expense of deeper thinking, genuine connection, and focused work.
-
-What is particularly concerning is the opacity of the systems involved. Algorithms decide what we see, in what order, and how often. They have been trained to show us content that provokes a strong emotional response — because engagement, not accuracy or wellbeing, is what drives advertising revenue. Consequently, content that frightens, angers, or outrages us tends to spread faster than content that informs or reassures.
-
-This is not to say that technology is inherently harmful. Having transformed access to education, healthcare, financial services, and communication, digital technology has undeniably improved millions of lives. The challenge is not the technology itself, but the incentive structures built into its design.
-
-If these incentives were aligned with public benefit rather than profit, the technology would look very different. Regulated in the way that pharmaceuticals or financial products are regulated, digital platforms could be required to demonstrate that their products do not cause measurable harm.
-
-The question is not whether we can imagine such a system. It is whether we have the collective will to demand it.`,
+Leila was a journalist who had spent years writing about the ethical questions surrounding artificial intelligence and data privacy. One morning, a platform's algorithm surfaced an article filled with disinformation that contradicted her own recently published report — and it had already reached half a million readers. Concerned about the spread of misinformation and the lack of transparency in how content was promoted, she contacted the company directly and asked for an explanation. The response was brief and evasive; consequently, she wrote a piece arguing that digital platforms must be properly regulated before they cause further and deeper harm to public trust. What worried her most was not the single article but the broader pattern: rapid innovation without accountability, and global connectivity without responsibility. Having grown up in the early days of the internet, she still believed in its potential — but she knew that a sustainable digital future required a fundamental rethinking of how these systems were designed and governed.`,
       breakdown: [
-        { sentence: 'Designed by teams of engineers and psychologists to maximise our attention, these devices are not neutral tools.', words: [{w:'Designed to maximise', ar:'مُصمَّمة لتعظيم'},{w:'neutral tools', ar:'أدوات محايدة'}], meaning: '-ed participle clause — الأجهزة هي موضوع التصميم' },
-        { sentence: 'Having transformed access to education and healthcare, digital technology has undeniably improved millions of lives.', words: [{w:'Having transformed', ar:'بعد أن حوّلت'},{w:'undeniably', ar:'لا يمكن إنكاره'}], meaning: 'having + past participle — إقرار بالإيجابيات قبل الانتقاد' },
-        { sentence: 'If these incentives were aligned with public benefit, the technology would look very different.', words: [{w:'were aligned', ar:'كانت منسجمة'},{w:'public benefit', ar:'المنفعة العامة'}], meaning: 'second conditional — تغيير افتراضي وعواقبه' },
-        { sentence: 'It is whether we have the collective will to demand it.', words: [{w:'collective will', ar:'الإرادة الجماعية'},{w:'demand it', ar:'المطالبة به'}], meaning: 'خاتمة قوية — التحدي ليس تقنياً بل سياسياً واجتماعياً' },
+        { sentence: 'Leila was a journalist who had spent years writing about the ethical questions surrounding artificial intelligence and data privacy.', words: [{w:'ethical', ar:'أخلاقي'},{w:'artificial intelligence', ar:'ذكاء اصطناعي'},{w:'data privacy', ar:'خصوصية البيانات'}], meaning: 'جملة افتتاحية تُعرّف بالشخصية وتضع ثلاث مفردات مفتاحية' },
+        { sentence: 'A platform\'s algorithm surfaced an article filled with disinformation that contradicted her report — and it had already reached half a million readers.', words: [{w:'algorithm', ar:'خوارزمية'},{w:'platform', ar:'منصة'},{w:'disinformation', ar:'معلومات مضللة (متعمدة)'}], meaning: 'algorithm و platform في سياق عملي — disinformation وليس misinformation لأن التضليل متعمد' },
+        { sentence: 'Concerned about the spread of misinformation and the lack of transparency, she contacted the company directly.', words: [{w:'misinformation', ar:'معلومات خاطئة (غير متعمدة)'},{w:'transparency', ar:'شفافية'}], meaning: 'كلا المصطلحين في جملة واحدة — فارق دقيق بينهما يستحق الملاحظة' },
+        { sentence: 'Consequently, she wrote a piece arguing that digital platforms must be properly regulated before they cause further harm.', words: [{w:'Consequently', ar:'وبالتالي'},{w:'regulate', ar:'يُنظّم / يُقنّن'}], meaning: 'Consequently ينقل النتيجة المنطقية — regulate في سياق السياسة الرقمية' },
+        { sentence: 'What worried her most was not the single article but the broader pattern: rapid innovation without accountability, and connectivity without responsibility.', words: [{w:'innovation', ar:'ابتكار'},{w:'connectivity', ar:'اتصال / ترابط'}], meaning: 'What-cleft يُسلّط الضوء على القضية الأعمق لا الحادثة الفردية' },
+        { sentence: 'She knew that a sustainable digital future required a fundamental rethinking of how these systems were designed and governed.', words: [{w:'sustainable', ar:'مستدام'}], meaning: 'sustainable في سياق رقمي — توسيع مألوف لمفردة غالباً ما تُرتبط بالبيئة' },
       ]
     },
     listening: {

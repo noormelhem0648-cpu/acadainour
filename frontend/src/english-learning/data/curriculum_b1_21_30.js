@@ -59,20 +59,14 @@ export const B1_DAYS_21_30 = [
       ]
     },
     reading: {
-      passage: `The Race Against Time
+      passage: `A Forest Under Pressure
 
-At the current rate of carbon emissions, the world is on track to warm by more than 2°C above pre-industrial levels before the end of this century. This may sound like a small number, but climate scientists have been warning for decades that even this level of warming would trigger consequences that are difficult to reverse — rising sea levels, more frequent extreme weather events, widespread biodiversity loss, and increasing food and water insecurity.
-
-What is encouraging, however, is that solutions already exist. Renewable energy — solar, wind, and hydroelectric — is now cheaper than fossil fuels in many parts of the world. Electric vehicles are becoming mainstream. Reforestation projects are being launched at unprecedented scale. Plant-based food systems are gaining ground.
-
-The challenge, therefore, is not technological. It is political and economic. Fossil fuel industries have invested heavily in lobbying against regulation. Governments that depend on oil and gas revenues are reluctant to accelerate the transition. And wealthy nations — which have historically contributed most to the problem — have been slow to provide the financial support promised to developing countries for adaptation and mitigation.
-
-Having analysed over 6,000 studies, the Intergovernmental Panel on Climate Change concluded that limiting warming to 1.5°C is still technically possible — but only if emissions begin to fall steeply within the next few years. The window is narrow. The question is whether the political will exists to act in time.`,
+When journalist Sara Nasser arrived in the Amazon, she expected to find a vast green wilderness. Instead, she witnessed the rapid pace of deforestation — entire hillsides stripped bare to make room for farmland, destroying the natural habitat of thousands of species. The loss of this extraordinary biodiversity threatens entire food chains, and scientists warn that the ecosystem may reach a tipping point from which it cannot recover. Local conservation groups were pushing back, planting native trees and demanding that governments commit to net zero targets and invest in renewable energy instead of fossil fuels. They argued that solar panels and wind farms could power rural communities without driving further pollution or rising emissions. Without urgent action to address climate change, Sara wrote in her report, the world's lungs will fall silent — and with them, any serious hope of sustainability.`,
       breakdown: [
-        { sentence: 'At the current rate of carbon emissions, the world is on track to warm by more than 2°C.', words: [{w:'on track to', ar:'في مسار لـ'},{w:'pre-industrial', ar:'ما قبل الصناعي'}], meaning: 'تعبير مفيد: "on track to" = يسير نحو تحقيق شيء ما' },
-        { sentence: 'Having analysed over 6,000 studies, the IPCC concluded that limiting warming is still possible.', words: [{w:'Having analysed', ar:'بعد تحليل'},{w:'concluded', ar:'خلص إلى'}], meaning: 'participle clause — البحث الممتد يُفضي إلى استنتاج' },
-        { sentence: 'Fossil fuel industries have invested heavily in lobbying against regulation.', words: [{w:'invested heavily in', ar:'استثمرت بكثافة في'},{w:'lobbying against', ar:'ضغط ضد'}], meaning: '"lobby against" = تمارس ضغطاً للتأثير على القرارات السياسية' },
-        { sentence: 'The window is narrow. The question is whether the political will exists to act in time.', words: [{w:'political will', ar:'إرادة سياسية'},{w:'act in time', ar:'يتصرف في الوقت المناسب'}], meaning: 'خاتمة قوية — التحدي الحقيقي بشري لا تقني' },
+        { sentence: 'Instead, she witnessed the rapid pace of deforestation — entire hillsides stripped bare to make room for farmland, destroying the natural habitat of thousands of species.', words: [{w:'deforestation', ar:'إزالة الغابات'},{w:'habitat', ar:'موطن طبيعي'}], meaning: '"stripped bare" تعبير قوي = جُرِّدت تماماً. لاحظ كيف تُوضّح جملة المشاركة "destroying..." النتيجة الفورية' },
+        { sentence: 'The loss of this extraordinary biodiversity threatens entire food chains, and scientists warn that the ecosystem may reach a tipping point from which it cannot recover.', words: [{w:'biodiversity', ar:'تنوع بيولوجي'},{w:'ecosystem', ar:'نظام بيئي'},{w:'tipping point', ar:'نقطة اللاعودة'}], meaning: '"may reach" = hedging — احتمال، لا يقين. أسلوب علمي دقيق' },
+        { sentence: 'Local conservation groups were pushing back, planting native trees and demanding that governments commit to net zero targets and invest in renewable energy instead of fossil fuels.', words: [{w:'conservation', ar:'حفاظ / صون'},{w:'net zero', ar:'صافي صفر'},{w:'renewable energy', ar:'طاقة متجددة'},{w:'fossil fuels', ar:'وقود أحفوري'}], meaning: 'past continuous "were pushing back" = نضال مستمر. لاحظ التوازي: "planting... and demanding..."' },
+        { sentence: 'Without urgent action to address climate change, Sara wrote in her report, the world\'s lungs will fall silent — and with them, any serious hope of sustainability.', words: [{w:'climate change', ar:'تغير المناخ'},{w:'sustainability', ar:'استدامة'}], meaning: 'خاتمة استعارية قوية — "the world\'s lungs" = الغابات. "fall silent" = تموت / تصمت' },
       ]
     },
     listening: {
@@ -168,22 +162,15 @@ Having analysed over 6,000 studies, the Intergovernmental Panel on Climate Chang
       ]
     },
     reading: {
-      passage: `The Wellbeing Paradox
+      passage: `More Than Medicine
 
-We live in an era of unprecedented medical advancement. Life expectancy has risen dramatically over the past century. Vaccines have eradicated diseases that once killed millions. Surgical techniques that would have seemed miraculous to previous generations are now routine. And yet, by many measures, people in developed countries are not getting healthier — they are getting sicker in new and different ways.
-
-Rates of chronic conditions — obesity, type 2 diabetes, cardiovascular disease, anxiety, depression — have risen sharply over the same period. These are not infectious diseases. They are, to a significant degree, lifestyle diseases: the product of sedentary work environments, ultra-processed food, chronic stress, social isolation, and inadequate sleep.
-
-What this tells us is that the medical model — which focuses primarily on treating illness once it occurs — is insufficient. What is needed is a shift towards prevention: supporting people to make healthier choices through better education, urban design, food policy, and workplace culture.
-
-Having studied population health for decades, researchers have consistently found that the strongest predictors of good health are not genetics or access to advanced medicine. They are factors like social connection, sense of purpose, physical activity, and economic security. These are conditions of living, not conditions of medicine.
-
-The most powerful intervention, it seems, may not be a pill — it may be a park, a community centre, a living wage, and a society that values rest as well as productivity.`,
+Dr Leila Hasan had been treating patients for twenty years when she noticed a troubling pattern emerging in her clinic. Many of her patients were not suffering from infections — they had chronic conditions linked directly to their lifestyle: poor nutrition, a sedentary routine, and persistent anxiety that disrupted their sleep and weakened their immune system. One young patient, a software engineer, arrived with symptoms of exhaustion and frequent headaches; the diagnosis was burnout, made worse by excessive screentime and almost no exercise. Dr Hasan wrote a prescription, but she insisted that therapy and genuine social connection were just as essential as any medication. She believed in a holistic approach — one that treated mental health with the same urgency as physical wellbeing. Prevention, she often told her students, is not simply cheaper than treatment; it is the most compassionate choice a healthcare system can make.`,
       breakdown: [
-        { sentence: 'Life expectancy has risen dramatically over the past century.', words: [{w:'life expectancy', ar:'متوسط العمر المتوقع'},{w:'dramatically', ar:'بشكل ملحوظ'}], meaning: 'Present perfect للتعبير عن تغيير مستمر إلى الآن' },
-        { sentence: 'These are lifestyle diseases: the product of sedentary work environments, ultra-processed food, chronic stress.', words: [{w:'ultra-processed', ar:'مُصنَّع للغاية'},{w:'chronic stress', ar:'ضغط مزمن'}], meaning: 'مصطلحات صحة عامة مهمة' },
-        { sentence: 'Having studied population health for decades, researchers have consistently found that the strongest predictors are social factors.', words: [{w:'Having studied', ar:'بعد دراستهم'},{w:'predictors', ar:'مؤشرات / منبّئات'}], meaning: 'participle clause لإضفاء مصداقية على النتيجة' },
-        { sentence: 'The most powerful intervention may not be a pill — it may be a park, a community centre, a living wage.', words: [{w:'intervention', ar:'تدخل'},{w:'living wage', ar:'أجر كافٍ للمعيشة'}], meaning: 'خاتمة قوية — إعادة صياغة الصحة من منظور اجتماعي' },
+        { sentence: 'Many of her patients were not suffering from infections — they had chronic conditions linked directly to their lifestyle: poor nutrition, a sedentary routine, and persistent anxiety that disrupted their sleep and weakened their immune system.', words: [{w:'chronic', ar:'مزمن'},{w:'lifestyle', ar:'نمط حياة'},{w:'sedentary', ar:'خامل / قليل الحركة'},{w:'anxiety', ar:'قلق'},{w:'immune system', ar:'جهاز مناعي'}], meaning: 'colon بعد "lifestyle" يُقدّم قائمة توضيحية — أسلوب كتابي فعّال' },
+        { sentence: 'One young patient arrived with symptoms of exhaustion and frequent headaches; the diagnosis was burnout, made worse by excessive screentime and almost no exercise.', words: [{w:'symptoms', ar:'أعراض'},{w:'diagnosis', ar:'تشخيص'},{w:'screentime', ar:'وقت الشاشة'},{w:'exercise', ar:'تمرين'}], meaning: 'الفاصلة المنقوطة (;) تربط سببًا بنتيجة — "symptom" يظهر أولاً، ثم "diagnosis"' },
+        { sentence: 'Dr Hasan wrote a prescription, but she insisted that therapy and genuine social connection were just as essential as any medication.', words: [{w:'prescription', ar:'وصفة طبية'},{w:'therapy', ar:'علاج نفسي'}], meaning: '"just as essential as" = مقارنة المساواة — بنية مفيدة في B1' },
+        { sentence: 'She believed in a holistic approach — one that treated mental health with the same urgency as physical wellbeing.', words: [{w:'holistic', ar:'شمولي / كلي'},{w:'mental health', ar:'صحة نفسية'},{w:'wellbeing', ar:'رفاهية / عافية'}], meaning: 'الشرطة الطويلة (—) تُدخل تعريفاً مباشراً. "the same X as Y" = بنية مقارنة قوية' },
+        { sentence: 'Prevention, she often told her students, is not simply cheaper than treatment; it is the most compassionate choice a healthcare system can make.', words: [{w:'prevention', ar:'وقاية'}], meaning: 'الجملة المعترضة "she often told her students" تُضيف صوتاً شخصياً وتُكسر إيقاع النص' },
       ]
     },
     listening: {
@@ -279,24 +266,15 @@ The most powerful intervention, it seems, may not be a pill — it may be a park
       ]
     },
     reading: {
-      passage: `Does Art Still Matter?
+      passage: `Making Something Real
 
-In an age of algorithmic content, fifteen-second videos, and infinite scrolling, it is worth asking: does art — in its deeper, more demanding sense — still matter?
-
-The question might seem elitist. Art, after all, is everywhere now. More music is being produced, more images are being created, more stories are being told than at any point in human history. Access has never been easier. Yet something feels different. When everything is available instantly, the attention required to engage deeply with a piece of music, a novel, or a film becomes harder to sustain.
-
-What great art has always done — and what distinguishes it from content — is that it asks something of us. A powerful novel demands that we inhabit unfamiliar perspectives. A challenging film asks us to sit with ambiguity and resist easy conclusions. A piece of music we truly listen to, rather than play in the background, can alter how we feel about the world for days.
-
-These experiences are not trivial. Having studied the psychological effects of aesthetic engagement for years, researchers have found that exposure to serious art — literature, film, theatre, visual art — is associated with greater empathy, emotional intelligence, and cognitive flexibility. Put simply, art makes us better at being human.
-
-If streaming algorithms were designed to expose us to challenging, unfamiliar work rather than more of what we already like, we might collectively develop both more sophisticated tastes and more capacity for understanding those who are different from us.
-
-Art, then, is not decoration. It is education in the deepest sense — not instruction, but transformation.`,
+Omar had spent three years working on his documentary about street artists in his city, determined to capture their authentic stories rather than the mainstream narrative that dismissed them as vandals. The film explored how contemporary art could subvert official messages, using public walls as a medium to challenge power and speak for communities that rarely appeared in galleries. When the film was finally screened, some critics offered a sharp critique, arguing that the work was too controversial and lacked aesthetic polish. But audiences disagreed — they found the portrayal of marginalised voices both moving and urgent, and the film's heritage theme — how art preserves what history forgets — resonated deeply. The documentary went viral on streaming platforms overnight, reaching millions who had never entered a gallery. Omar believed that art's greatest quality was its universal power: the ability to offer new perspectives and cross borders that politics could not.`,
       breakdown: [
-        { sentence: 'When everything is available instantly, the attention required to engage deeply becomes harder to sustain.', words: [{w:'available instantly', ar:'متاح فوراً'},{w:'harder to sustain', ar:'أصعب في الاستمرار'}], meaning: 'infinitive of purpose: "attention required to engage"' },
-        { sentence: 'Having studied the psychological effects of aesthetic engagement, researchers have found exposure to serious art is associated with greater empathy.', words: [{w:'aesthetic engagement', ar:'التفاعل الجمالي'},{w:'associated with', ar:'مرتبط بـ'}], meaning: 'having + past participle + passive: جملة أكاديمية كاملة' },
-        { sentence: 'If streaming algorithms were designed to expose us to challenging work, we might develop more sophisticated tastes.', words: [{w:'were designed', ar:'صُمِّمت (افتراضي)'},{w:'sophisticated tastes', ar:'أذواق راقية'}], meaning: 'second conditional مع passive في شرط الـ if' },
-        { sentence: 'Art is not decoration. It is education in the deepest sense — not instruction, but transformation.', words: [{w:'instruction', ar:'تعليم تلقيني'},{w:'transformation', ar:'تحوّل / تغيير جذري'}], meaning: 'خاتمة قوية: تعريف إعادة الصياغة (not X, but Y)' },
+        { sentence: 'Omar had spent three years working on his documentary about street artists, determined to capture their authentic stories rather than the mainstream narrative that dismissed them as vandals.', words: [{w:'documentary', ar:'فيلم وثائقي'},{w:'authentic', ar:'أصيل / حقيقي'},{w:'mainstream', ar:'تيار سائد'},{w:'narrative', ar:'سرد / رواية'}], meaning: 'past perfect "had spent" يُعبّر عن جهد امتدّ قبل لحظة الفيلم — ترتيب زمني دقيق' },
+        { sentence: 'The film explored how contemporary art could subvert official messages, using public walls as a medium to challenge power and speak for communities that rarely appeared in galleries.', words: [{w:'contemporary', ar:'معاصر'},{w:'subvert', ar:'يُقوّض / يُفسد'},{w:'medium', ar:'وسيط / وسيلة'}], meaning: '"using public walls as a medium" = جملة مشاركة حالية تُوضّح الأسلوب' },
+        { sentence: 'When the film was finally screened, some critics offered a sharp critique, arguing that the work was too controversial and lacked aesthetic polish.', words: [{w:'critique', ar:'نقد'},{w:'controversial', ar:'مثير للجدل'},{w:'aesthetic', ar:'جمالي / ذوق جمالي'}], meaning: '"arguing that" يُقدّم رأياً ضمن الرواية — لا يعني أن الراوي يوافق' },
+        { sentence: 'But audiences disagreed — they found the portrayal of marginalised voices both moving and urgent, and the film\'s heritage theme resonated deeply.', words: [{w:'portrayal', ar:'تصوير / تجسيد'},{w:'heritage', ar:'تراث'}], meaning: 'الشرطة الطويلة (—) تُدخل تناقضاً مفاجئاً بين رأي النقاد ورأي الجمهور' },
+        { sentence: 'Omar believed that art\'s greatest quality was its universal power: the ability to offer new perspectives and cross borders that politics could not.', words: [{w:'universal', ar:'كوني / عالمي'},{w:'perspectives', ar:'منظورات / وجهات نظر'}], meaning: 'colon يُعرِّف "universal power" بشكل مباشر — خاتمة تلخّص رسالة النص' },
       ]
     },
     listening: {
@@ -391,21 +369,15 @@ Art, then, is not decoration. It is education in the deepest sense — not instr
       ]
     },
     reading: {
-      passage: `The Ethics of Scientific Progress
+      passage: `The Long Road to Discovery
 
-Science has transformed human life in ways that would have been unimaginable to previous generations. Diseases that once killed millions are now preventable. Information that once required years of research can be accessed in seconds. And technologies are emerging that promise to extend human lifespan, reverse genetic conditions, and perhaps one day eliminate suffering on a vast scale.
-
-Yet with each new capability comes a new ethical question. The development of CRISPR gene-editing technology, for example, offers the possibility of curing inherited diseases. But it also raises the prospect of "designer babies" — the selective editing of embryos not to cure illness but to choose traits like intelligence or appearance. Having reviewed the evidence from a decade of research, most bioethicists agree that we are not yet equipped, legally or morally, to make these decisions responsibly.
-
-Similarly, artificial intelligence is being used to diagnose diseases, recommend treatments, and predict health outcomes with remarkable accuracy. But who is responsible when an AI makes a mistake? How do we audit a system whose decision-making process is opaque even to its creators?
-
-These are not reasons to slow down scientific progress. They are reasons to ensure that progress is accompanied by robust ethical frameworks, international cooperation, and genuine public debate. Science tells us what is possible. Ethics tells us what is wise. We need both.
-
-By the end of this century, it is likely that many of today's most serious diseases will have been eradicated. The question is not whether we can achieve this — it is whether we can do so in a way that is fair, transparent, and accountable to all of humanity.`,
+For seven years, Dr Amara Diallo's team had been running experiments in a small laboratory, testing a new treatment for a degenerative brain condition that affected millions worldwide. The methodology was rigorous: every variable was carefully controlled, and results were submitted for peer review before any public announcement was made. One morning, the data from their latest clinical trial confirmed what they had long hoped — the treatment was genuinely working. It was, by any measure, a historic breakthrough, one that decades of medical research had been building towards. The team quickly began developing a prototype delivery device, guided by the hypothesis that earlier intervention would produce better patient outcomes. Having verified their findings independently and published in leading journals, they hoped that technology transfer to medical companies would bring the treatment to patients within five years.`,
       breakdown: [
-        { sentence: 'Having reviewed the evidence from a decade of research, most bioethicists agree that we are not yet equipped to make these decisions.', words: [{w:'Having reviewed', ar:'بعد مراجعة'},{w:'bioethicists', ar:'علماء أخلاقيات الأحياء'},{w:'equipped', ar:'مستعدون / مجهّزون'}], meaning: 'having + past participle — يُضفي مصداقية على الاستنتاج بالاستناد إلى الأدلة' },
-        { sentence: 'Science tells us what is possible. Ethics tells us what is wise. We need both.', words: [{w:'what is possible', ar:'ما هو ممكن'},{w:'what is wise', ar:'ما هو حكيم'}], meaning: 'جملة قصيرة قوية — تقطير ثنائية علم/أخلاق' },
-        { sentence: 'By the end of this century, many of today\'s most serious diseases will have been eradicated.', words: [{w:'will have been eradicated', ar:'سيكون قد اُستئصِل'},{w:'most serious', ar:'الأشد خطورة'}], meaning: 'Future perfect passive — التنبؤ بحالة مستقبلية' },
+        { sentence: 'The methodology was rigorous: every variable was carefully controlled, and results were submitted for peer review before any public announcement was made.', words: [{w:'methodology', ar:'منهجية'},{w:'variable', ar:'متغير'},{w:'peer review', ar:'مراجعة الأقران'}], meaning: 'colon يُقدّم التفاصيل التي تُوضّح ما تعنيه "rigorous" — دقة الكتابة العلمية' },
+        { sentence: 'One morning, the data from their latest clinical trial confirmed what they had long hoped — the treatment was genuinely working.', words: [{w:'data', ar:'بيانات'},{w:'clinical trial', ar:'تجربة سريرية'}], meaning: 'الشرطة (—) تُدخل لحظة الاكتشاف بشكل درامي — أسلوب سردي مؤثر' },
+        { sentence: 'It was, by any measure, a historic breakthrough, one that decades of medical research had been building towards.', words: [{w:'breakthrough', ar:'اختراق / إنجاز'},{w:'research', ar:'بحث'}], meaning: 'الجملة المعترضة "by any measure" تُضيف تأكيداً لاستثنائية الحدث' },
+        { sentence: 'The team quickly began developing a prototype delivery device, guided by the hypothesis that earlier intervention would produce better patient outcomes.', words: [{w:'prototype', ar:'نموذج أولي'},{w:'hypothesis', ar:'فرضية'}], meaning: '"guided by the hypothesis" = جملة مشاركة ماضية — تُوضّح الفكرة التي قادت العمل' },
+        { sentence: 'Having verified their findings independently and published in leading journals, they hoped that technology transfer to medical companies would bring the treatment to patients within five years.', words: [{w:'verify', ar:'يتحقق / يُثبت'},{w:'technology transfer', ar:'نقل التكنولوجيا'}], meaning: 'having + past participle يُلخّص الخطوات المنجزة قبل الهدف النهائي' },
       ]
     },
     listening: {
@@ -501,19 +473,16 @@ By the end of this century, it is likely that many of today's most serious disea
       ]
     },
     reading: {
-      passage: `The Passport Divide
+      passage: `A Journey Without Maps
 
-Not all passports are equal. A German or Japanese passport grants visa-free or visa-on-arrival access to over 190 countries. An Afghan or Syrian passport, by contrast, may open fewer than 30 borders without advance permission. This disparity, which has come to be known informally as "passport privilege", reveals something important about the profound inequality that exists in the global freedom of movement.
-
-For those who hold powerful passports, travel is often discussed in terms of personal enrichment: experiencing new cultures, broadening perspectives, building memories. What is rarely acknowledged in this conversation is that the ability to move freely across the world is not a right that all people share equally — it is, largely, a matter of where one happened to be born.
-
-Having lived in both the Global North and Global South, many writers and thinkers have noted this paradox: wealthy tourists fly to impoverished countries, are welcomed as economic contributors, and return home. Citizens of those same countries, meanwhile, face extensive scrutiny and rejection when applying for visas to visit the places from which their visitors came.
-
-This does not mean that travel is inherently wrong or that open borders are the only solution. It means that those of us who travel freely would do well to carry our passport privilege alongside our camera and sunscreen — to be aware of it, to appreciate it, and, perhaps, to advocate for a more equitable world in which the freedom to move is not determined by birth.`,
+When Tariq first crossed the border into Germany, he carried one bag and a great deal of uncertainty. Having emigrated from Syria in difficult circumstances, he found it hard to acclimatise to the new culture — the language, the food, and the unspoken daily rules all felt entirely foreign. Like many in the diaspora, he experienced a sharp culture shock before gradually learning to immerse himself in local customs while keeping his own identity alive. Years later, Tariq became an expatriate by choice, moving to Canada for work — a beautifully cosmopolitan city where he finally felt at home. He often reflected on the privilege of his new passport, thinking of the refugees who had shared his original journey but who still faced closed borders and rejected visa applications. Travel had changed his worldview completely: he no longer saw the world as a set of destinations to visit, but as a web of human stories waiting to be understood.`,
       breakdown: [
-        { sentence: 'This disparity, which has come to be known informally as "passport privilege", reveals something important about inequality.', words: [{w:'disparity', ar:'تفاوت'},{w:'come to be known as', ar:'بات يُعرف بـ'}], meaning: 'non-defining relative clause — معلومة إضافية بين فاصلتين' },
-        { sentence: 'Having lived in both the Global North and Global South, many writers have noted this paradox.', words: [{w:'Global North/South', ar:'الشمال/الجنوب العالمي'},{w:'paradox', ar:'مفارقة'}], meaning: 'having + past participle — تجربة شخصية كأساس للتحليل' },
-        { sentence: 'Those of us who travel freely would do well to carry our passport privilege alongside our camera.', words: [{w:'would do well to', ar:'يستحسن أن'},{w:'privilege', ar:'امتياز'}], meaning: '"would do well to" = أسلوب توصية لطيف وغير مباشر' },
+        { sentence: 'When Tariq first crossed the border into Germany, he carried one bag and a great deal of uncertainty.', words: [{w:'border', ar:'حدود'}], meaning: '"a great deal of" = قدراً كبيراً من — بديل أكاديمي راقٍ عن "a lot of"' },
+        { sentence: 'Having emigrated from Syria in difficult circumstances, he found it hard to acclimatise to the new culture — the language, the food, and the unspoken daily rules all felt entirely foreign.', words: [{w:'emigrated', ar:'هاجر (من بلده)'},{w:'acclimatise', ar:'يتأقلم'}], meaning: 'having + past participle يُعبّر عن السبب — الهجرة هي السبب وراء صعوبة التأقلم' },
+        { sentence: 'Like many in the diaspora, he experienced a sharp culture shock before gradually learning to immerse himself in local customs while keeping his own identity alive.', words: [{w:'diaspora', ar:'شتات'},{w:'culture shock', ar:'صدمة ثقافية'},{w:'immerse', ar:'ينغمس'},{w:'local customs', ar:'عادات محلية'}], meaning: '"before gradually learning to" يُعبّر عن مرحلة انتقالية — التطور تدريجي لا فوري' },
+        { sentence: 'Years later, Tariq became an expatriate by choice, moving to Canada for work — a beautifully cosmopolitan city where he finally felt at home.', words: [{w:'expatriate', ar:'مغترب'},{w:'cosmopolitan', ar:'عالمي / متعدد الثقافات'}], meaning: 'الشرطة (—) تُدخل وصفاً يُعرِّف المكان — أسلوب سردي طبيعي' },
+        { sentence: 'He often reflected on the privilege of his new passport, thinking of the refugees who still faced closed borders and rejected visa applications.', words: [{w:'privilege', ar:'امتياز'},{w:'refugees', ar:'لاجئون'},{w:'visa', ar:'تأشيرة'}], meaning: '"thinking of" = جملة مشاركة حالية تُعبّر عن تزامن الفعل مع الأفكار' },
+        { sentence: 'Travel had changed his worldview completely: he no longer saw the world as a set of destinations to visit, but as a web of human stories waiting to be understood.', words: [{w:'worldview', ar:'رؤية للعالم'},{w:'destinations', ar:'وجهات'}], meaning: 'colon يُقدّم تفسيراً محدداً لـ "changed his worldview" — البنية: "not X but Y"' },
       ]
     },
     listening: {
@@ -610,21 +579,14 @@ This does not mean that travel is inherently wrong or that open borders are the 
       ]
     },
     reading: {
-      passage: `Beyond GDP: What Does Prosperity Really Mean?
+      passage: `The Cost of Living
 
-For most of the twentieth century, Gross Domestic Product — GDP — was the defining measure of a country's success. A growing economy meant, by definition, a better country. Politicians were elected on the basis of it. Policies were designed around it. Wars were justified by it.
-
-But what GDP measures, and what it ignores, is increasingly the subject of serious debate. GDP counts the economic value of all goods and services produced in a country. It counts the cost of cleaning up an oil spill. It counts the money spent on treating diseases that could have been prevented. It does not count the value of unpaid care work — the millions of hours spent raising children, caring for elderly parents, or supporting communities. It does not count equality, wellbeing, sustainability, or happiness.
-
-Having observed that countries with high GDP can simultaneously have high rates of poverty, mental illness, and environmental destruction, many economists are now arguing for a broader set of measures. Bhutan introduced the concept of "Gross National Happiness". New Zealand adopted a "Wellbeing Budget". Several Nordic countries measure social progress alongside economic output.
-
-If economic systems were redesigned to measure what actually matters to people — health, security, meaningful work, social connection, and environmental quality — then policy decisions would look very different. Investment would flow differently. Priorities would shift.
-
-The question is not whether a better measure of prosperity is possible. It is whether those who benefit most from the current system have any incentive to change it.`,
+When the recession hit, Nadia's father lost his factory job almost overnight, and the family's disposable income fell so sharply that they struggled to pay basic bills. Nadia, who was studying economics at university, had always believed that a growing economy meant better lives for everyone — but the reality around her told a different story. She read about rising inequality and the widening wealth gap between those at the very top and the millions living in poverty, and she began to question whether GDP growth really measured anything that mattered to ordinary families. Her professor explained that high inflation eroded the purchasing power of wages fastest for those who could least afford it, and that years of austerity had left public services desperately underfunded. What was needed, the professor argued, was a combination of a genuine living wage, stronger financial literacy education, and fair trade policies that shared the benefits of growth more widely. Nadia decided she would dedicate her career to building a more equitable economy — because a system that leaves so many behind, she wrote, is not truly working at all.`,
       breakdown: [
-        { sentence: 'GDP counts the cost of cleaning up an oil spill — it does not count the value of unpaid care work.', words: [{w:'counts the cost', ar:'يحسب تكلفة'},{w:'unpaid care work', ar:'العمل الرعائي غير مدفوع الأجر'}], meaning: 'تناقض حاد — ما يقيسه الناتج المحلي مقابل ما يُغفله' },
-        { sentence: 'Having observed that countries with high GDP can have high rates of poverty, many economists now argue for broader measures.', words: [{w:'Having observed', ar:'بعد ملاحظتهم'},{w:'simultaneously', ar:'في آنٍ واحد'}], meaning: 'having + past participle — البحث يُفضي إلى إعادة التفكير' },
-        { sentence: 'If economic systems were redesigned to measure what matters to people, policy decisions would look very different.', words: [{w:'were redesigned', ar:'أُعيد تصميمها (افتراضي)'},{w:'policy decisions', ar:'القرارات السياسية'}], meaning: 'second conditional مع passive في شرط الـ if — الإصلاح الافتراضي' },
+        { sentence: 'When the recession hit, Nadia\'s father lost his factory job almost overnight, and the family\'s disposable income fell so sharply that they struggled to pay basic bills.', words: [{w:'recession', ar:'ركود'},{w:'disposable income', ar:'الدخل المتاح / القابل للإنفاق'}], meaning: '"so... that..." = بنية نتيجة — الشدة تُفضي مباشرةً إلى العواقب' },
+        { sentence: 'She read about rising inequality and the widening wealth gap between those at the very top and the millions living in poverty, and she began to question whether GDP growth really measured anything that mattered to ordinary families.', words: [{w:'inequality', ar:'عدم مساواة'},{w:'wealth gap', ar:'فجوة الثروة'},{w:'poverty', ar:'فقر'}], meaning: '"began to question whether" = بداية التحوّل الفكري — الشك يُولد التحقيق' },
+        { sentence: 'Her professor explained that high inflation eroded the purchasing power of wages fastest for those who could least afford it, and that years of austerity had left public services desperately underfunded.', words: [{w:'inflation', ar:'تضخم'},{w:'austerity', ar:'تقشف'}], meaning: '"for those who could least afford it" = بنية نسبية تُضيف بُعداً أخلاقياً وإنسانياً' },
+        { sentence: 'What was needed, the professor argued, was a combination of a genuine living wage, stronger financial literacy education, and fair trade policies that shared the benefits of growth more widely.', words: [{w:'living wage', ar:'أجر كافٍ للمعيشة'},{w:'financial literacy', ar:'الثقافة المالية'},{w:'trade', ar:'تجارة'}], meaning: '"What was needed" = cleft sentence — يُركّز على الحل بدلاً من المشكلة' },
       ]
     },
     listening: {
@@ -721,23 +683,15 @@ The question is not whether a better measure of prosperity is possible. It is wh
       ]
     },
     reading: {
-      passage: `The Distance Between Equality and Justice
+      passage: `Changing the System
 
-There is an important distinction that is often overlooked in conversations about fairness: the difference between equality and equity.
-
-Equality means giving everyone the same thing. Equity means giving people what they actually need. If you give everyone the same sized box to stand on to see over a fence, a very tall person does not need a box at all — and a very short person may still not be able to see. Equity would mean giving each person the box they need, so that everyone can see equally well.
-
-This distinction matters enormously when we consider how societies are structured. Education systems that provide the same resources to wealthy schools and underfunded schools are technically equal — but they are not equitable. Criminal justice systems that apply the same laws to everyone are technically equal — but if those laws were written by, and historically enforced against, certain communities more than others, the equality is largely formal rather than substantive.
-
-Having studied social policy across multiple countries, researchers consistently find that achieving genuine equity requires not just removing individual barriers, but actively redesigning systems that were never built with everyone in mind.
-
-This is uncomfortable, because it implies that neutrality is not enough. Simply treating everyone "the same" — in a world where people do not start from the same place — may perpetuate existing disadvantages rather than correct them.
-
-Justice, then, is not the absence of discrimination. It is the presence of systems designed to counteract the inequalities that history and structure have created. The distance between equality and justice is the distance between good intentions and meaningful change.`,
+When Rosa joined her neighbourhood's grassroots movement, she believed that meaningful change could only come from the community itself — not from the top down. The group campaigned for accountability from local institutions, arguing that discrimination in housing and employment had left many marginalised families with far fewer opportunities than their neighbours. At a public meeting, Rosa explained that they were not simply demanding equality; they were demanding equity — they wanted systems that acknowledged that different people faced different starting points and needed different levels of support. The movement drew on the language of human rights and solidarity, insisting that genuine diversity in local decision-making was not just an ethical ideal but a practical necessity. Having spent five years doing advocacy work in affected communities, Rosa had witnessed first-hand how systemic bias could persist even when no individual acted with obvious prejudice. She believed that true justice meant more than removing barriers — it meant actively empowering communities to shape their own futures, with welfare systems that supported rather than controlled.`,
       breakdown: [
-        { sentence: 'Education systems that provide the same resources to wealthy and underfunded schools are technically equal — but they are not equitable.', words: [{w:'technically equal', ar:'متساوٍ من الناحية التقنية'},{w:'not equitable', ar:'ليس منصفاً'}], meaning: 'تناقض حاد يُوضّح الفرق الجوهري بين المساواة والإنصاف' },
-        { sentence: 'Having studied social policy across multiple countries, researchers consistently find that achieving equity requires redesigning systems.', words: [{w:'Having studied', ar:'بعد دراستهم'},{w:'consistently', ar:'باستمرار / بانتظام'}], meaning: 'having + past participle — البحث الواسع يُرسّخ الاستنتاج' },
-        { sentence: 'Simply treating everyone "the same" may perpetuate existing disadvantages rather than correct them.', words: [{w:'perpetuate', ar:'يُديم / يُرسّخ'},{w:'rather than correct', ar:'بدلاً من تصحيحها'}], meaning: 'hedging: "may" + خاتمة قوية عن النوايا مقابل الأثر الفعلي' },
+        { sentence: 'The group campaigned for accountability from local institutions, arguing that discrimination in housing and employment had left many marginalised families with far fewer opportunities than their neighbours.', words: [{w:'accountability', ar:'مساءلة / مسؤولية'},{w:'discrimination', ar:'تمييز'},{w:'marginalised', ar:'مهمَّش'}], meaning: '"arguing that" يُقدّم الحجة الجوهرية للحملة — الفعل "left" يُعبّر عن أثر مستمر' },
+        { sentence: 'Rosa explained that they were not simply demanding equality; they were demanding equity — they wanted systems that acknowledged that different people faced different starting points.', words: [{w:'equality', ar:'مساواة'},{w:'equity', ar:'إنصاف / عدالة'}], meaning: 'الفاصلة المنقوطة ثم الشرطة تُقدّم توضيحاً متصاعداً — "not X; they were demanding Y — they wanted Z"' },
+        { sentence: 'The movement drew on the language of human rights and solidarity, insisting that genuine diversity in local decision-making was not just an ethical ideal but a practical necessity.', words: [{w:'human rights', ar:'حقوق الإنسان'},{w:'solidarity', ar:'تضامن'},{w:'diversity', ar:'تنوع'}], meaning: '"not just X but Y" = بنية تصحيح تُرقّي الحجة من الأخلاقي إلى العملي' },
+        { sentence: 'Having spent five years doing advocacy work in affected communities, Rosa had witnessed first-hand how systemic bias could persist even when no individual acted with obvious prejudice.', words: [{w:'advocacy', ar:'مناصرة'},{w:'systemic', ar:'ممنهج / بنيوي'},{w:'bias', ar:'تحيز'}], meaning: 'having + past participle يُمنح المصداقية عبر التجربة المباشرة — "even when" يُعبّر عن المفارقة' },
+        { sentence: 'She believed that true justice meant more than removing barriers — it meant actively empowering communities to shape their own futures, with welfare systems that supported rather than controlled.', words: [{w:'justice', ar:'عدالة'},{w:'empower', ar:'يُمكِّن / يُعزّز'},{w:'welfare', ar:'رفاه / ضمان اجتماعي'}], meaning: 'الشرطة (—) تُوسّع التعريف: العدالة ليست سلبية (إزالة) بل إيجابية (تمكين)' },
       ]
     },
     listening: {
@@ -838,26 +792,15 @@ Justice, then, is not the absence of discrimination. It is the presence of syste
       ]
     },
     reading: {
-      passage: `B1 Grammar in Action — An Integrated Text
+      passage: `The Language of Power
 
-The following passage deliberately uses all major B1 grammar structures. Read it once for meaning, then a second time to identify the structures.
-
----
-
-What has changed most fundamentally in global politics over the past decade is not the issues themselves — poverty, inequality, climate, conflict — but the language in which they are discussed. Never before have so many people had access to so much information. And yet, paradoxically, never before has it been so difficult to reach consensus on basic facts.
-
-Having grown up in an era of social media, younger generations have developed a complex relationship with truth. Information that was once verified before publication is now shared instantly and corrected — if at all — only afterwards. Consequently, public debate has become increasingly polarised.
-
-This is a problem that should have been anticipated. If media literacy had been taught systematically from an early age, citizens would be better equipped to evaluate the information they encounter daily. What is needed, therefore, is not censorship but education — not less speech, but more critical thinking.
-
-It is often argued that technology is neutral, that platforms are merely mirrors of society. But this is a claim that does not withstand scrutiny. Algorithms, which are designed to maximise engagement, tend to amplify outrage over nuance, speed over accuracy, and confirmation over challenge. These are choices — embedded in code, but choices nonetheless.
-
-The situation could be worse, however. Having seen how quickly public opinion can shift when given accurate information, there is reason for cautious optimism. If platforms were held accountable for the content they promote — not just the content they host — the incentives would change. And if incentives changed, behaviour might follow.`,
+Political rhetoric has always shaped public debate, but in the age of social media it operates at an unprecedented speed that makes careful scrutiny more difficult than ever before. The fundamental tension in modern public life is not between left and right — it is between those who value nuanced, honest argument and those who favour simple, emotive statements that spread quickly but explain little. Arguably, the most dangerous speeches are not those that lie explicitly, but those that rely on implicit assumptions — subtle distortions that audiences absorb without realising they have been misled. A sophisticated thinker understands that every policy debate has more than one dimension: economic, social, ethical, and historical, all pulling in different directions. What underpins a robust and credible argument is not volume or confidence but genuine insight — the capacity to see complexity and communicate it clearly, without losing your audience. A viable alternative to today's polarised discourse does exist, albeit rarely: the leader, commentator, or citizen who is willing to say "I don't know" and to treat public conversation as a search for truth rather than a performance.`,
       breakdown: [
-        { sentence: 'What has changed most fundamentally is not the issues themselves, but the language in which they are discussed.', words: [{w:'What has changed', ar:'ما تغيّر'},{w:'fundamentally', ar:'جذرياً'}], meaning: '[CLEFT + PASSIVE] تمييز ما تغيّر بدقة' },
-        { sentence: 'Never before have so many people had access to so much information.', words: [{w:'Never before have', ar:'لم يحدث قط أن'},{w:'had access to', ar:'تمكّنوا من الوصول إلى'}], meaning: '[INVERSION] Never before + auxiliary + subject' },
-        { sentence: 'If media literacy had been taught systematically, citizens would be better equipped to evaluate information.', words: [{w:'had been taught', ar:'كانت قد عُلِّمت'},{w:'would be equipped', ar:'لكانوا مجهّزين'}], meaning: '[MIXED CONDITIONAL] ماضٍ + حاضر' },
-        { sentence: 'If platforms were held accountable for the content they promote, the incentives would change.', words: [{w:'were held accountable', ar:'كانت مساءلة'},{w:'incentives', ar:'حوافز'}], meaning: '[SECOND CONDITIONAL + PASSIVE] — افتراضي في الحاضر' },
+        { sentence: 'Political rhetoric has always shaped public debate, but in the age of social media it operates at an unprecedented speed that makes careful scrutiny more difficult than ever before.', words: [{w:'rhetoric', ar:'خطاب / بلاغة'},{w:'unprecedented', ar:'غير مسبوق'},{w:'scrutiny', ar:'تدقيق / فحص دقيق'}], meaning: '"more... than ever before" = مقارنة تصاعدية — تُعبّر عن تفاقم ظاهرة بمرور الوقت' },
+        { sentence: 'The fundamental tension in modern public life is not between left and right — it is between those who value nuanced, honest argument and those who favour simple, emotive statements.', words: [{w:'fundamental', ar:'جوهري / أساسي'},{w:'tension', ar:'توتر / تعارض'},{w:'nuanced', ar:'دقيق / متشعّب'}], meaning: 'البنية "not X — it is Y" تُعيد تأطير المشكلة بطريقة أكثر عمقاً' },
+        { sentence: 'Arguably, the most dangerous speeches are not those that lie explicitly, but those that rely on implicit assumptions — subtle distortions that audiences absorb without realising they have been misled.', words: [{w:'arguably', ar:'يمكن القول إن'},{w:'explicitly', ar:'صراحةً'},{w:'implicit', ar:'ضمني'},{w:'subtle', ar:'خفي / دقيق'}], meaning: '"arguably" في بداية الجملة يُشير إلى أن الكاتب يُقدّم رأياً لا حقيقة مطلقة — علامة نضج أكاديمي' },
+        { sentence: 'What underpins a robust and credible argument is not volume or confidence but genuine insight — the capacity to see complexity and communicate it clearly.', words: [{w:'underpin', ar:'يدعم / يُرسّخ'},{w:'robust', ar:'متين / قوي'},{w:'insight', ar:'بصيرة / فهم عميق'}], meaning: '[CLEFT] "What underpins..." = cleft sentence تُركّز على الجوهر وتُحدّد ما يدعم الحجة الحقيقية' },
+        { sentence: 'A viable alternative to today\'s polarised discourse does exist, albeit rarely: the leader or citizen willing to say "I don\'t know" and treat public conversation as a search for truth.', words: [{w:'viable', ar:'قابل للتطبيق / ممكن'},{w:'albeit', ar:'وإن / على الرغم من أنه'}], meaning: '"does exist" = تأكيد بـ do الاستفزازي. "albeit rarely" = تنازل صادق يُضيف مصداقية' },
       ]
     },
     listening: {
@@ -954,21 +897,16 @@ The situation could be worse, however. Having seen how quickly public opinion ca
       ]
     },
     reading: {
-      passage: `The Art of Disagreeing Well
+      passage: `Learning to Argue
 
-One of the most undervalued skills in public life — and one of the rarest — is the ability to disagree well. Not simply to assert that someone is wrong, but to engage with their argument, acknowledge its strengths, identify its weaknesses, and offer a more compelling alternative.
-
-Good disagreement is not aggressive — it is precise. It does not attack the person; it engages with the idea. It does not dismiss; it dismantles. A well-constructed counter-argument says: "I understand what you are claiming, and I acknowledge the logic behind it, but here is the evidence that suggests a different conclusion."
-
-In an era of social media, however, the incentives push in the opposite direction. Quick, confident, emotive statements attract more attention than slow, careful, qualified ones. A tweet that says "This is completely wrong" reaches more people than one that says "This claim may be partially valid, but it overlooks several important factors." Yet the latter is almost always the more honest assessment.
-
-Having studied the structure of persuasive argument across many cultures, rhetoricians note that the most trusted speakers are those who demonstrate that they have genuinely considered the other side. Acknowledging a counter-argument — and then refuting it with evidence — is far more persuasive than pretending the counter-argument does not exist.
-
-This is a skill that can be learned. It requires practice, intellectual honesty, and the willingness to be uncertain. It also requires something rarer still: the courage to say "I may be wrong — but on balance, I believe this is right."`,
+Professor Chen always told her students that a strong argument begins with a clear thesis — one that is specific enough to defend and broad enough to genuinely matter. The most common weakness she observed was the failure to acknowledge counter-arguments: students would make bold assertions without engaging with the most relevant objections to their position, which made even their strongest ideas seem fragile. "If you cannot refute the strongest version of the opposing view," she would say, "then your argument rests on a weak premise and will not survive serious scrutiny." She also urged students to qualify their claims honestly — to concede where evidence was uncertain, rather than maintaining a confidence they did not genuinely feel. A logical and coherent essay, she explained, does not pretend to be fully objective; it is persuasive precisely because it is transparent about what is subjective and what is not. The implications of learning this skill, Professor Chen believed, extended far beyond the classroom — in a world saturated with misleading rhetoric, the ability to substantiate claims and reason carefully was perhaps the most valuable thing any education could provide.`,
       breakdown: [
-        { sentence: 'Good disagreement is not aggressive — it is precise. It does not attack the person; it engages with the idea.', words: [{w:'precise', ar:'دقيق'},{w:'engages with', ar:'يتعامل مع'}], meaning: 'تعريف من خلال التناقض: "not X, it is Y" — أسلوب مؤثر وواضح' },
-        { sentence: 'Having studied the structure of persuasive argument, rhetoricians note that the most trusted speakers demonstrate they have genuinely considered the other side.', words: [{w:'rhetoricians', ar:'علماء البلاغة'},{w:'genuinely considered', ar:'أولوا اعتباراً حقيقياً'}], meaning: 'having + past participle + cleft-style emphasis' },
-        { sentence: 'Acknowledging a counter-argument and then refuting it with evidence is far more persuasive than pretending it does not exist.', words: [{w:'Acknowledging', ar:'الاعتراف بـ'},{w:'refuting', ar:'دحض'},{w:'pretending', ar:'التظاهر'}], meaning: 'gerund as subject — مهارة الحجة المتقدمة' },
+        { sentence: 'Professor Chen always told her students that a strong argument begins with a clear thesis — one that is specific enough to defend and broad enough to genuinely matter.', words: [{w:'thesis', ar:'أطروحة / فكرة محورية'}], meaning: 'الشرطة (—) تُدخل تعريفاً يُحدّد معنى "clear" — التعريف بالمعايير المزدوجة' },
+        { sentence: 'The most common weakness was the failure to acknowledge counter-arguments: students would make bold assertions without engaging with the most relevant objections to their position.', words: [{w:'acknowledge', ar:'يُقرّ بـ / يعترف'},{w:'counter-arguments', ar:'حجج مضادة'},{w:'assertions', ar:'ادعاءات / تأكيدات'},{w:'relevant', ar:'ذو صلة / وثيق الصلة'}], meaning: 'colon يُقدّم الدليل المحدد على الضعف — "would make" تُعبّر عن عادة متكررة في الماضي' },
+        { sentence: '"If you cannot refute the strongest version of the opposing view," she would say, "then your argument rests on a weak premise and will not survive serious scrutiny."', words: [{w:'refute', ar:'يدحض'},{w:'premise', ar:'فرضية / مسلّمة'}], meaning: '[FIRST CONDITIONAL embedded in reported speech] اقتباس مباشر يُضيف صوتاً حياً للنص' },
+        { sentence: 'She also urged students to qualify their claims honestly — to concede where evidence was uncertain, rather than maintaining a confidence they did not genuinely feel.', words: [{w:'qualify', ar:'يُخفّف / يُقيّد'},{w:'concede', ar:'يُسلّم بـ / يُقرّ'}], meaning: '"rather than" تُقارن بين السلوك المطلوب والسلوك الشائع — أداة نقدية قوية' },
+        { sentence: 'A logical and coherent essay does not pretend to be fully objective; it is persuasive precisely because it is transparent about what is subjective and what is not.', words: [{w:'logical', ar:'منطقي'},{w:'coherent', ar:'متماسك / منسجم'},{w:'objective', ar:'موضوعي'},{w:'persuasive', ar:'مقنع / إقناعي'},{w:'subjective', ar:'ذاتي / شخصي'}], meaning: '"precisely because" = أداة تأكيد السبب — تُقلب التوقع: الذاتية مصدر قوة لا ضعف' },
+        { sentence: 'The implications of learning this skill extended far beyond the classroom — the ability to substantiate claims and reason carefully was perhaps the most valuable thing any education could provide.', words: [{w:'implications', ar:'تداعيات / مضامين'},{w:'substantiate', ar:'يُثبت / يُؤكّد بأدلة'}], meaning: '"extended far beyond" يُوسّع نطاق الفكرة من السياق الأكاديمي إلى الحياة — خاتمة شاملة' },
       ]
     },
     listening: {
@@ -1071,23 +1009,15 @@ This is a skill that can be learned. It requires practice, intellectual honesty,
       ]
     },
     reading: {
-      passage: `What You Now Know
+      passage: `The Learner Who Kept Going
 
-You began this course as a beginner at B1. Thirty days later, you are something different.
-
-You can now express opinions with nuance, using structures like cleft sentences, inversions, and mixed conditionals that mark the speech of educated, thoughtful speakers. You can write arguments that acknowledge counter-arguments and defend positions with evidence. You can discuss complex topics — climate, technology, health, equality, economics, art — with vocabulary and precision that most people who have studied English for years have not fully developed.
-
-Having completed this course, you know things about English that many native speakers cannot explain. You understand the difference between "disinformation" and "misinformation". You know when to use "equity" and when to use "equality". You can construct a participle clause, deploy inversion for effect, and use hedging language to make your arguments more credible rather than less.
-
-But more than this, you have built a habit. Thirty days of consistent effort, day after day, is the foundation on which fluency is built. If you continue at B2 with the same commitment and discipline you have shown here, you will find that the language begins to feel less like something you are learning and more like something you are inhabiting.
-
-What is B2? It is the level at which English stops being a subject and starts being a tool — one that works for you in professional contexts, academic writing, and rich, independent conversation. It is the level at which you can read a novel, follow a lecture, argue a point, and feel — for the first time — that the language is truly yours.
-
-You have reached B1. The next step is waiting.`,
+When Hana started learning English two years ago, she could barely introduce herself — today, after months of dedicated study, she speaks with genuine fluency in everyday situations, which she describes as the most meaningful accomplishment of her adult life. Her progress was gradual at first, built day by day through the discipline of consistent practice, regular reflection on what she had learned, and remarkable perseverance through periods of frustration and self-doubt. What made the biggest difference, she says, was immersion: watching films in English, reading articles and listening to podcasts, and pushing herself to have real conversations rather than just completing exercises in a book. Reaching B1 — the international benchmark for independent language use — felt like crossing a major milestone, but Hana had no intention of stopping there. She now aspires to full B2 proficiency, carrying with her the momentum and resilience that carried her through the hardest days. Her trajectory from nervous beginner to confident, autonomous speaker is not just a language story — it is a story about what happens when commitment and exposure compound, quietly and steadily, over time.`,
       breakdown: [
-        { sentence: 'Having completed this course, you know things about English that many native speakers cannot explain.', words: [{w:'Having completed', ar:'بعد أن أنهيت'},{w:'that many native speakers', ar:'التي لا يستطيع كثير من الناطقين'}], meaning: 'having + past participle — الإنجاز يُفضي إلى تحديد ما اكتسبه الطالب' },
-        { sentence: 'If you continue at B2 with the same commitment and discipline, you will find the language feels like something you are inhabiting.', words: [{w:'commitment', ar:'التزام'},{w:'inhabiting', ar:'تسكن / تعيش داخل'}], meaning: 'first conditional (ليس second) — الآن هذا الهدف قابل للتحقيق!' },
-        { sentence: 'B2 is the level at which English stops being a subject and starts being a tool.', words: [{w:'stops being', ar:'يكف عن كونه'},{w:'starts being', ar:'يبدأ في كونه'}], meaning: 'تعريف شعري قوي لمرحلة B2 — الانتقال من تعلّم اللغة إلى العيش بها' },
+        { sentence: 'When Hana started learning English two years ago, she could barely introduce herself — today, after months of dedicated study, she speaks with genuine fluency in everyday situations, which she describes as the most meaningful accomplishment of her adult life.', words: [{w:'dedicated', ar:'مُكرِّس جهده'},{w:'fluency', ar:'طلاقة'},{w:'accomplishment', ar:'إنجاز'}], meaning: 'الشرطة (—) تُقارن البداية والآن — "which she describes as" = non-defining relative clause يُضيف التقييم الشخصي' },
+        { sentence: 'Her progress was gradual at first, built day by day through the discipline of consistent practice, regular reflection on what she had learned, and remarkable perseverance through periods of frustration and self-doubt.', words: [{w:'gradual', ar:'تدريجي'},{w:'discipline', ar:'انضباط'},{w:'reflection', ar:'تأمل / تفكّر'},{w:'perseverance', ar:'مثابرة'}], meaning: '"built day by day through..." = جملة مشاركة ماضية تُبيّن كيف تحقق التقدم — القائمة تُضيف الثقل التراكمي' },
+        { sentence: 'What made the biggest difference, she says, was immersion: watching films in English, reading articles, and pushing herself to have real conversations rather than just completing exercises.', words: [{w:'immersion', ar:'انغماس'}], meaning: '[CLEFT] "What made... was immersion" + colon يُقدّم تفاصيل الانغماس — الجملة المعترضة "she says" تُضيف الصوت الشخصي' },
+        { sentence: 'Reaching B1 — the international benchmark for independent language use — felt like crossing a major milestone, but Hana had no intention of stopping there.', words: [{w:'benchmark', ar:'معيار مرجعي'},{w:'independent', ar:'مستقل'},{w:'milestone', ar:'إنجاز / محطة مهمة'}], meaning: 'الشرطتان تُدخلان تعريفاً — "but" تُحوّل الإنجاز إلى نقطة انطلاق لا نهاية' },
+        { sentence: 'She now aspires to full B2 proficiency, carrying with her the momentum and resilience that carried her through the hardest days.', words: [{w:'aspire', ar:'يطمح'},{w:'proficiency', ar:'إتقان / كفاءة'},{w:'momentum', ar:'زخم'},{w:'resilience', ar:'مرونة / صمود'}], meaning: '"carrying with her" = جملة مشاركة تُوصل الحاضر بالماضي — تُعبّر عن الاستمرارية' },
       ]
     },
     listening: {

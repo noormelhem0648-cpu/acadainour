@@ -74,18 +74,15 @@ export const B1_DAYS_1_10 = [
       ]
     },
     reading: {
-      passage: `A Second Chance
+      passage: `A Studio of Her Own
 
-Maria had always dreamed of becoming a doctor, but life hadn't gone according to plan. By the time she was twenty-five, she had already worked three different jobs, none of which she had enjoyed. Her parents had hoped she would follow a more stable career path, and she had tried to meet their expectations — but deep down, she had never stopped wanting to study medicine.
-
-Then, one afternoon, her old university professor called. He had heard about a scholarship programme for mature students. The deadline was in two weeks. Maria hadn't prepared anything, but she decided to apply anyway. She stayed up every night that week, writing her personal statement and gathering documents she had collected over the years.
-
-When the results arrived, she could hardly believe what she read. The committee had selected her from over five hundred applicants. She had been chosen. Everything she had worked for, every sacrifice she had made, had finally led to this moment. Her journey was just beginning — but for the first time in years, she felt certain it was the right path.`,
+Dara had always dreamed of establishing her own design studio, but she had never seriously pursued that ambition until the morning her company announced a round of layoffs. By that point, she had accomplished enough to stand on her own — she had acquired three years of experience and had already built a loyal client base that her colleague Jin had encouraged her to keep. It was evident to everyone who knew her that she had the talent, yet she had often hesitated, telling herself that the consequences of failing would be too great to bear. That morning, however, something shifted — she resolved to eliminate every excuse she had ever made and to stop waiting for permission. She obtained a small business loan by the end of the week, and within a month had implemented a plan that had seemed impossible just weeks before. The path was uncertain, but for the first time in years, it felt genuinely her own.`,
       breakdown: [
-        { sentence: 'Life hadn\'t gone according to plan.', words: [{w:'hadn\'t gone', ar:'لم تسِر'},{w:'according to plan', ar:'وفق الخطة'}], meaning: 'الحياة لم تسِر كما خططت لها' },
-        { sentence: 'She had already worked three different jobs.', words: [{w:'had already worked', ar:'كانت قد عملت بالفعل'}], meaning: 'كانت قد مرّت بثلاثة وظائف مختلفة قبل ذلك الوقت' },
-        { sentence: 'She had never stopped wanting to study medicine.', words: [{w:'had never stopped', ar:'لم تتوقف قط'}], meaning: 'رغبتها في الطب استمرت طوال الوقت' },
-        { sentence: 'The committee had selected her from over five hundred applicants.', words: [{w:'had selected', ar:'كانوا قد اختاروا'},{w:'applicants', ar:'المتقدمين'}], meaning: 'تم اختيارها من بين أكثر من خمسمئة شخص' },
+        { sentence: 'She had never seriously pursued that ambition until the morning her company announced a round of layoffs.', words: [{w:'had never pursued', ar:'لم تسعَ قط'},{w:'ambition', ar:'طموح'}], meaning: 'الماضي التام للتعبير عن حدث لم يقع حتى لحظة محددة' },
+        { sentence: 'She had accomplished enough to stand on her own — she had acquired three years of experience and had already built a loyal client base.', words: [{w:'had accomplished', ar:'كانت قد أنجزت'},{w:'had acquired', ar:'كانت قد اكتسبت'}], meaning: 'الماضي التام + already لأحداث مكتملة قبل وقت آخر' },
+        { sentence: 'It was evident to everyone who knew her that she had the talent, yet she had often hesitated.', words: [{w:'evident', ar:'واضحاً'},{w:'had hesitated', ar:'كانت قد ترددت'}], meaning: 'صفة واضحة + تصرف متكرر في الماضي' },
+        { sentence: 'She resolved to eliminate every excuse she had ever made and to stop waiting for permission.', words: [{w:'resolved', ar:'عقدت العزم'},{w:'eliminate', ar:'يزيل / يُنهي'}], meaning: 'قرار حازم للتحرر من الماضي' },
+        { sentence: 'She obtained a small business loan by the end of the week, and within a month had implemented a plan that had seemed impossible.', words: [{w:'obtained', ar:'حصلت على'},{w:'implemented', ar:'نفّذت'}], meaning: 'تقدّم سريع بعد اتخاذ القرار — الماضي التام للأحداث المتتابعة' },
       ]
     },
     listening: {
@@ -212,20 +209,15 @@ When the results arrived, she could hardly believe what she read. The committee 
       ]
     },
     reading: {
-      passage: `Planning for an Uncertain Future
+      passage: `The Big Move
 
-Nobody can predict the future with certainty — but that doesn't mean planning is pointless. In fact, research consistently shows that people who set clear intentions and commit to long-term goals are significantly more likely to achieve them.
-
-The key is to distinguish between different types of future thinking. When you say, "I will probably eat less sugar," you are expressing a vague intention. But when you say, "I am going to cut out sugary drinks starting Monday," you are committing to a specific plan backed by a decision you have already made. These two statements feel similar but function very differently in the brain.
-
-Companies use the same principle. A successful business doesn't just hope things will improve — it develops a clear strategy, sets measurable priorities, and schedules regular reviews to track progress. The most effective organisations are those that plan flexibly: they know where they are heading, but they are prepared to adapt when circumstances change.
-
-Whether you are managing your career, your health, or your finances, the message is the same: vague hopes rarely become reality. Concrete plans — ones with deadlines, resources, and a clear vision — are far more likely to lead to a meaningful outcome.`,
+Laila's intention has always been to work in sustainable urban design, and this year she is finally going to commit to making it happen. She has already booked a flight to Berlin, where she is meeting a group of architects next Tuesday to discuss a new green initiative she has been developing for months. The prospects for her chosen field look genuinely promising — experts forecast that demand for eco-friendly buildings will expand significantly over the next decade, and Laila's vision is to be at the centre of that shift. She will not simply look for a job; she plans to negotiate a role that gives her the freedom to shape projects from the ground up, with a clear strategy for building her reputation abroad. Her friend Omar predicts the transition will be difficult and warns that progress in a competitive new city rarely comes without sacrifice. But Laila's priority is set, her schedule is planned, and for the first time the outcome of her choices feels entirely within her own hands.`,
       breakdown: [
-        { sentence: 'People who set clear intentions are more likely to achieve them.', words: [{w:'intentions', ar:'نيّات'},{w:'more likely', ar:'أكثر احتمالاً'}], meaning: 'الناس الذين يضعون نوايا واضحة أكثر عرضة لتحقيق أهدافهم' },
-        { sentence: 'You are committing to a specific plan backed by a decision.', words: [{w:'committing', ar:'تلتزم'},{w:'backed by', ar:'مدعومة بـ'}], meaning: 'تلتزم بخطة محددة مبنية على قرار سابق' },
-        { sentence: 'They are prepared to adapt when circumstances change.', words: [{w:'prepared', ar:'مستعدون'},{w:'adapt', ar:'يتكيفون'},{w:'circumstances', ar:'الظروف'}], meaning: 'هم مستعدون للتكيف حين تتغير الظروف' },
-        { sentence: 'Concrete plans are far more likely to lead to a meaningful outcome.', words: [{w:'concrete', ar:'ملموسة / محددة'},{w:'outcome', ar:'نتيجة'}], meaning: 'الخطط المحددة أكثر ميلاً للوصول لنتيجة حقيقية بكثير' },
+        { sentence: 'Laila\'s intention has always been to work in sustainable urban design, and this year she is finally going to commit to making it happen.', words: [{w:'intention', ar:'نية'},{w:'sustainable', ar:'مستدام'},{w:'commit', ar:'تلتزم'}], meaning: 'will / going to: نية ثابتة تتحول إلى خطة محددة' },
+        { sentence: 'Experts forecast that demand for eco-friendly buildings will expand significantly over the next decade.', words: [{w:'forecast', ar:'يتنبأ'},{w:'expand', ar:'يتوسع'}], meaning: 'will للتنبؤ المبني على تحليل — صيغة المستقبل العلمية' },
+        { sentence: 'She plans to negotiate a role that gives her freedom, with a clear strategy for building her reputation abroad.', words: [{w:'negotiate', ar:'تتفاوض'},{w:'strategy', ar:'استراتيجية'}], meaning: 'going to للخطة المقررة مسبقاً' },
+        { sentence: 'Her friend Omar predicts the transition will be difficult and warns that progress in a competitive new city rarely comes without sacrifice.', words: [{w:'transition', ar:'انتقال'},{w:'progress', ar:'تقدم'}], meaning: 'will للتوقع + الحاضر البسيط للحقيقة العامة' },
+        { sentence: 'Her priority is set, her schedule is planned, and the outcome of her choices feels entirely within her own hands.', words: [{w:'priority', ar:'أولوية'},{w:'schedule', ar:'جدول / مواعيد'},{w:'outcome', ar:'نتيجة'}], meaning: 'مفردات التخطيط المستقبلي في سياق حقيقي' },
       ]
     },
     listening: {
@@ -336,22 +328,16 @@ Whether you are managing your career, your health, or your finances, the message
       ]
     },
     reading: {
-      passage: `What Would You Do?
+      passage: `The Journalist
 
-Imagine for a moment that you were offered two very different paths in life. In the first scenario, you would earn a modest salary doing work you genuinely loved — creative, meaningful, and flexible. In the second, you would earn twice as much, but the work would feel repetitive, stressful, and unfulfilling.
-
-Which would you choose?
-
-This is not a hypothetical question that philosophers invented — it is a dilemma that millions of people face every year. Career coaches often say that if more people chose meaning over money, overall happiness levels in society would be higher. But is it really that simple?
-
-Critics argue that financial security matters enormously. If you didn\'t have enough money to meet your basic needs, no amount of meaningful work would compensate. Others point out that if workplaces were more creative and rewarding, fewer people would feel forced to choose between passion and practicality.
-
-Perhaps the real question isn\'t which path you would take — but what you would do to make your chosen path more worthwhile. If you invested in your skills, built strong relationships, and kept learning, almost any career could become meaningful. The scenario, ultimately, depends not just on the choice — but on the person making it.`,
+If Marcus were not so afraid of failure, he would dedicate every spare evening to writing the novel that had lived quietly in his head for nearly six years. He is capable of producing genuinely powerful work — his editor has told him so more than once — yet a deep sense of reluctance holds him back every time he sits at his desk. If he could afford to take a sabbatical, he would not hesitate for a single moment, and he would approach the project with the full attention it deserves. The dilemma, of course, is financial: without a salary, how would he cope with months of uncertainty while waiting for a publisher to respond? If life were more flexible, he would invest every hour of creative energy in his craft rather than spending it writing articles he finds increasingly worthless. His old mentor told him something he has never forgotten: "If you were grateful for your talent instead of frightened by it, you would never assume that success was out of reach."`,
       breakdown: [
-        { sentence: 'If more people chose meaning over money, happiness levels would be higher.', words: [{w:'chose', ar:'اختاروا'},{w:'meaning', ar:'المعنى'},{w:'over', ar:'على حساب'}], meaning: 'لو اختار الناس المعنى على المال، سترتفع مستويات السعادة' },
-        { sentence: 'If you didn\'t have enough money, no amount of meaningful work would compensate.', words: [{w:'compensate', ar:'يعوّض'}], meaning: 'لو لم يكن لديك ما يكفي من المال، لن تعوّض عنه أي كمية من العمل المعنوي' },
-        { sentence: 'If workplaces were more rewarding, fewer people would feel forced to choose.', words: [{w:'rewarding', ar:'مُجزية'},{w:'forced to choose', ar:'مضطرين للاختيار'}], meaning: 'لو كانت بيئات العمل أكثر إشباعاً، لشعر أشخاص أقل بالاضطرار للاختيار' },
-        { sentence: 'If you invested in your skills, almost any career could become meaningful.', words: [{w:'invested in', ar:'استثمرت في'},{w:'meaningful', ar:'ذات معنى'}], meaning: 'لو استثمرت في مهاراتك، يمكن لأي مسار مهني تقريباً أن يصبح ذا معنى' },
+        { sentence: 'If Marcus were not so afraid of failure, he would dedicate every spare evening to writing the novel that had lived in his head for six years.', words: [{w:'were not afraid', ar:'لم يكن خائفاً'},{w:'dedicate', ar:'يُكرّس'}], meaning: 'الشرطية الثانية: موقف افتراضي غير حقيقي في الحاضر' },
+        { sentence: 'He is capable of producing genuinely powerful work, yet a deep sense of reluctance holds him back every time he sits at his desk.', words: [{w:'capable', ar:'قادر'},{w:'reluctance', ar:'تردد'}], meaning: 'الفجوة بين القدرة والتصرف — أساس الشرطية الثانية' },
+        { sentence: 'If he could afford to take a sabbatical, he would not hesitate for a single moment, and he would approach the project with full attention.', words: [{w:'afford', ar:'يتحمل تكلفة'},{w:'hesitate', ar:'يتردد'},{w:'approach', ar:'نهج / طريقة تعامل'}], meaning: 'would + infinitive في جزء النتيجة من الشرطية الثانية' },
+        { sentence: 'The dilemma is financial: without a salary, how would he cope with months of uncertainty?', words: [{w:'dilemma', ar:'معضلة'},{w:'cope', ar:'يتعامل مع / يتحمل'}], meaning: 'سؤال بالشرطية الثانية: How would...?' },
+        { sentence: 'If life were more flexible, he would invest every hour of creative energy in his craft rather than spending it writing articles he finds increasingly worthless.', words: [{w:'flexible', ar:'مرن'},{w:'invest', ar:'يستثمر'}], meaning: 'If + past simple → would + verb: الصيغة الأساسية للشرطية الثانية' },
+        { sentence: 'If you were grateful for your talent instead of frightened by it, you would never assume that success was out of reach.', words: [{w:'grateful', ar:'ممتنن'},{w:'assume', ar:'يفترض'}], meaning: 'If I were you... — الشرطية الثانية للنصيحة والتحدي' },
       ]
     },
     listening: {
@@ -462,21 +448,15 @@ Perhaps the real question isn\'t which path you would take — but what you woul
       ]
     },
     reading: {
-      passage: `The Road Not Taken — A Reflection
+      passage: `One Decision
 
-Looking back at the key decisions in our lives is something most of us do at some point. We ask ourselves: "What would have happened if I had taken a different path?"
-
-Consider the story of Ahmed. As a young man, he had received two job offers: one in his hometown, close to family and friends, and one in a different country offering a much higher salary. He chose to stay. For years, he was content — but occasionally, he wondered what his life would have been like if he had accepted the other offer.
-
-What Ahmed had not considered, however, was that he could not have predicted the outcome with certainty. If he had moved abroad, he might have thrived — or he might have struggled with loneliness and culture shock. He could have built an impressive career, or he could have returned home within a year, disheartened.
-
-Psychologists who study decision-making say that we consistently overestimate how much better things would have been if we had made a different choice. This is called the "what if" trap. If we had spent less time imagining alternate paths, we would have invested more energy in making our actual path as rewarding as possible.
-
-The truth is that almost every choice carries both gains and losses. The question is not what would have happened — but what we choose to do with the path we are on now.`,
+Coach Amara had always believed the regional championship was within her team's reach, but a single decision in the final minutes had changed everything. If she had not overlooked the exhaustion on her striker's face, she would have substituted him ten minutes earlier, and the outcome might have been completely different. Her assistant had tried to intervene — pointing out that the player was visibly struggling — but Amara had felt under too much pressure to stop and reconsider. If the team had persisted through the final quarter with fresher legs, they could have overcome their opponents' last desperate push and held the lead they had fought so hard to build. She later regretted not considering the alternative: pulling back into a defensive shape and protecting the draw, instead of chasing a goal that never came. If she had foreseen how quickly the momentum would shift, she would never have underestimated the risk, and that long, painful season might have ended in triumph rather than tears.`,
       breakdown: [
-        { sentence: 'What would have happened if I had taken a different path?', words: [{w:'would have happened', ar:'ماذا كان سيحدث'},{w:'taken a different path', ar:'سلكت طريقاً مختلفاً'}], meaning: 'سؤال كلاسيكي بالشرطية الثالثة' },
-        { sentence: 'If he had moved abroad, he might have thrived — or he might have struggled.', words: [{w:'thrived', ar:'ازدهر'},{w:'struggled', ar:'كافح'}], meaning: 'might have تعطي احتمالاً وليس يقيناً' },
-        { sentence: 'If we had spent less time imagining, we would have invested more energy in our actual path.', words: [{w:'imagining alternate paths', ar:'تخيّل مسارات بديلة'},{w:'invested more energy', ar:'استثمرنا طاقة أكبر'}], meaning: 'التخيل الزائد يسرق الطاقة من الحاضر' },
+        { sentence: 'If she had not overlooked the exhaustion on her striker\'s face, she would have substituted him earlier, and the outcome might have been different.', words: [{w:'had not overlooked', ar:'لم تتجاهل'},{w:'might have been', ar:'ربما كان'}], meaning: 'الشرطية الثالثة: would have + might have في جملة واحدة' },
+        { sentence: 'Her assistant had tried to intervene, but Amara had felt under too much pressure to stop and reconsider.', words: [{w:'intervene', ar:'يتدخل'},{w:'pressure', ar:'ضغط'}], meaning: 'سياق الشرطية الثالثة — لماذا لم تتخذ القرار الصحيح' },
+        { sentence: 'If the team had persisted through the final quarter, they could have overcome their opponents\' last desperate push.', words: [{w:'had persisted', ar:'أصرّوا'},{w:'could have overcome', ar:'كان بمقدورهم التغلب'},{w:'desperate', ar:'يائس'}], meaning: 'could have = إمكانية لم تتحقق في الماضي' },
+        { sentence: 'She later regretted not considering the alternative — pulling back into a defensive shape — instead of chasing a goal that never came.', words: [{w:'regretted', ar:'ندمت'},{w:'alternative', ar:'البديل'}], meaning: 'الندم + البديل الذي لم يُؤخذ — قلب الشرطية الثالثة' },
+        { sentence: 'If she had foreseen how quickly the momentum would shift, she would never have underestimated the risk.', words: [{w:'had foreseen', ar:'توقعت'},{w:'underestimated', ar:'استهانت بـ'}], meaning: 'If + past perfect → would never have: الصيغة الكاملة للشرطية الثالثة' },
       ]
     },
     listening: {
@@ -602,22 +582,15 @@ The truth is that almost every choice carries both gains and losses. The questio
       ]
     },
     reading: {
-      passage: `The Missing Presentation
+      passage: `The Empty House
 
-When Ali walked into the conference room on Tuesday morning, his heart sank. The projector was already running, twenty executives were seated around the table, and there was no sign of his co-presenter, Sara.
-
-She must have overslept, he thought — though she had seemed fine the night before. He tried calling her, but her phone went straight to voicemail. She cannot have turned it off deliberately — something must have happened.
-
-He had two choices: delay the presentation or begin alone. He should not have agreed to present without a proper backup plan — that was clear now. He could have prepared his own complete version of the slides. He might have asked a colleague to stand in if needed. But he had not done any of those things.
-
-In the end, he presented alone. It was not perfect, but it was good enough. Sara arrived forty minutes later, pale and apologetic. Her alarm had not gone off.
-
-Afterwards, his manager pulled him aside. "You handled that well," she said. "But you should have told me straight away. I could have bought you more time." Ali nodded. Next time, he told himself, he would be ready for every scenario.`,
+When Sofia noticed that her elderly neighbour's curtains had not moved in three days, she began to feel uneasy — something must have happened, though she could not determine what. The lights inside the house were still on, which seemed suspicious; the neighbour could not have simply vanished without telling anyone, since she was meticulous about keeping people informed of her plans. Sofia mentioned the incident to a man across the street, who said he had witnessed the woman leaving in a hurry on Monday morning but had not thought much of it at the time — he should have investigated then, but the clues had not seemed urgent. They agreed that someone should have acted sooner; the evidence had been there all along, and they had simply ignored it out of a reluctance to seem nosy. Contacting the authorities, Sofia pointed out that the woman might have fallen ill inside, exhausted by a condition she had concealed from her neighbours for months. When officers finally entered the house, they found her safe but unable to reach her phone — a potential disaster that could have been avoided if anyone had taken the simple precaution of checking earlier.`,
       breakdown: [
-        { sentence: 'She must have overslept — though she had seemed fine the night before.', words: [{w:'must have overslept', ar:'لا بد أنها نامت كثيراً'},{w:'seemed fine', ar:'بدت بخير'}], meaning: 'استنتاج منطقي مبني على الدليل' },
-        { sentence: 'She cannot have turned it off deliberately.', words: [{w:'cannot have', ar:'لا يمكن أن تكون'},{w:'deliberately', ar:'عمداً'}], meaning: 'استبعاد احتمال بثقة' },
-        { sentence: 'He should not have agreed to present without a backup plan.', words: [{w:'should not have agreed', ar:'لم كان ينبغي له الموافقة'}], meaning: 'انتقاد قرار ماضٍ' },
-        { sentence: 'You should have told me — I could have bought you more time.', words: [{w:'should have told', ar:'كان ينبغي لك الإخبار'},{w:'could have bought', ar:'كان بمقدوري شراء'}], meaning: 'ندم على عدم التصرف الصحيح في الوقت المناسب' },
+        { sentence: 'Something must have happened, though she could not determine what.', words: [{w:'must have happened', ar:'لا بد أنه حدث شيء'}], meaning: 'must have: استنتاج منطقي بثقة شبه تامة' },
+        { sentence: 'The neighbour could not have simply vanished without telling anyone.', words: [{w:'could not have vanished', ar:'لا يمكن أن تكون اختفت'},{w:'suspicious', ar:'مريب'}], meaning: 'cannot have: استبعاد احتمال بثقة' },
+        { sentence: 'They agreed that someone should have acted sooner; the evidence had been there all along, and they had simply ignored it.', words: [{w:'should have acted', ar:'كان ينبغي التصرف'},{w:'evidence', ar:'الدليل'},{w:'ignored', ar:'تجاهلوه'}], meaning: 'should have: انتقاد عدم التصرف في الوقت المناسب' },
+        { sentence: 'Sofia pointed out that the woman might have fallen ill inside, exhausted by a condition she had concealed.', words: [{w:'might have fallen ill', ar:'ربما مرضت'},{w:'exhausted', ar:'منهكة'}], meaning: 'might have: احتمال في الماضي — ليس يقيناً' },
+        { sentence: 'A potential disaster that could have been avoided if anyone had taken the simple precaution of checking earlier.', words: [{w:'could have been avoided', ar:'كان يمكن تجنبه'},{w:'precaution', ar:'احتياط'}], meaning: 'could have: إمكانية لم تتحقق — للتأسف والتعليق' },
       ]
     },
     listening: {
@@ -728,22 +701,15 @@ Afterwards, his manager pulled him aside. "You handled that well," she said. "Bu
       ]
     },
     reading: {
-      passage: `How News Is Made
+      passage: `The Bridge That Changed a City
 
-Most people consume news every day, but few consider how it is actually produced. A single news story passes through many hands before it is published or broadcast.
-
-First, a story is identified — either by a journalist in the field or suggested by an editor. Once the topic is chosen, sources are contacted and interviews are arranged. Background information is researched and facts are verified against multiple reliable sources. In serious publications, every claim must be checked and cross-referenced before it is included in the final article.
-
-After the article is written, it is edited for accuracy, language, and length. In some organisations, it is then reviewed by a legal team to ensure that no laws have been broken. Only after all these steps have been completed is the article approved for publication.
-
-When controversial stories are involved, the process becomes even more careful. Comments that could be considered defamatory must be removed. Photographs are selected with care — permission must be obtained before any image is used commercially.
-
-Once the article is published online, it is monitored for reader reactions. If a significant error is discovered, a correction is issued and the original article is updated. Trust, once lost, is very difficult to rebuild.`,
+The Selwa Bridge, which now connects the old quarter of the city to its modern waterfront, was designed by a team of civil engineers in the late 1990s and was funded almost entirely by private investment. Before construction began, the surrounding land was assessed for environmental impact, and strict conditions were approved by the city council to protect the river ecosystem from damage. The steel for the structure was manufactured in three different countries, then distributed to the site over a period of eighteen months. When the bridge was finally opened to the public in 2003, the announcement was broadcast live across national television and radio, and thousands of residents gathered along the waterfront to celebrate. In the years since, the surrounding district has been transformed: new restaurants have been launched, heritage buildings have been restored, and the entire area has been confirmed as one of the most visited destinations in the region. Today, the bridge is recognised not simply as a feat of engineering, but as a symbol of what can be generated when communities invest in shared public spaces.`,
       breakdown: [
-        { sentence: 'A story is identified — either by a journalist or suggested by an editor.', words: [{w:'is identified', ar:'يُحدَّد'},{w:'suggested', ar:'يُقترح'}], meaning: 'مبني للمجهول: التركيز على العملية' },
-        { sentence: 'Facts are verified against multiple reliable sources.', words: [{w:'are verified', ar:'تُتحقق'},{w:'reliable', ar:'موثوقة'}], meaning: 'التحقق من الحقائق خطوة أساسية' },
-        { sentence: 'Only after all these steps have been completed is the article approved.', words: [{w:'have been completed', ar:'اكتملت'},{w:'is approved', ar:'يُعتمد'}], meaning: 'inversion بعد only للتركيز' },
-        { sentence: 'Trust, once lost, is very difficult to rebuild.', words: [{w:'once lost', ar:'متى فُقدت'},{w:'rebuild', ar:'يُعاد بناؤه'}], meaning: 'الثقة صعبة الاستعادة' },
+        { sentence: 'The Selwa Bridge was designed by a team of civil engineers and was funded almost entirely by private investment.', words: [{w:'was designed', ar:'صُمِّم'},{w:'was funded', ar:'مُوِّل'}], meaning: 'المبني للمجهول في الماضي البسيط — فاعل مذكور بـ by' },
+        { sentence: 'The surrounding land was assessed for environmental impact, and strict conditions were approved by the city council.', words: [{w:'was assessed', ar:'قُيِّم'},{w:'were approved', ar:'وُفِق عليها'}], meaning: 'مبني للمجهول في الماضي: التركيز على العملية وليس الفاعل' },
+        { sentence: 'The steel was manufactured in three different countries, then distributed to the site over eighteen months.', words: [{w:'was manufactured', ar:'صُنِع'},{w:'distributed', ar:'وُزِّع'}], meaning: 'أفعال متتابعة في المبني للمجهول تصف مرحلة من البناء' },
+        { sentence: 'The announcement was broadcast live across national television and radio.', words: [{w:'was broadcast', ar:'بُثَّ'}], meaning: 'مبني للمجهول + ظرف live للتوضيح' },
+        { sentence: 'New restaurants have been launched, heritage buildings have been restored, and the area has been confirmed as one of the most visited destinations in the region.', words: [{w:'have been launched', ar:'أُطلقت'},{w:'have been restored', ar:'رُمِّمت'},{w:'has been confirmed', ar:'أُكِّدت'}], meaning: 'المبني للمجهول في المضارع التام — نتائج ممتدة حتى الآن' },
       ]
     },
     listening: {
@@ -858,22 +824,15 @@ Once the article is published online, it is monitored for reader reactions. If a
       ]
     },
     reading: {
-      passage: `The Art of Saying No
+      passage: `The Kitchen
 
-Many people struggle with saying no. Whether it is avoiding disappointing others or simply not knowing how to decline politely, the inability to set boundaries can lead to exhaustion, resentment, and a loss of personal direction.
-
-Learning to say no is not about being selfish — it is about being honest. Consistently agreeing to things you do not want to do is, in fact, a form of dishonesty. It prevents others from understanding your real limits and stops you from pursuing what truly matters to you.
-
-There are practical ways to start. Instead of immediately agreeing or refusing, consider asking for time. Saying "Let me think about it before committing" is not only acceptable — it demonstrates thoughtfulness. After considering the request carefully, you can respond with clarity.
-
-Being capable of declining politely requires practice. You might say: "I appreciate you thinking of me, but I am not able to take this on right now." This avoids sounding dismissive while still being clear. Instead of inventing excuses, be honest about your priorities without going into unnecessary detail.
-
-The long-term benefits of learning this skill are significant. People who are good at protecting their time and energy are generally more focused, more productive, and less prone to burning out. Setting clear limits is not just about saying no — it is about saying yes to the things that genuinely matter.`,
+Growing up in a small coastal town, Emre had always been keen on helping his grandmother cook, though he had never considered pursuing it as a career. After graduating from a business degree he had chosen to please his parents, he found himself incapable of enjoying office work, despite earning a decent salary. Instead of continuing to ignore the feeling, he enrolled in a professional cooking course — admitting to himself, for the first time, that no spreadsheet had ever made him feel alive the way that creating a meal did. Concentrating during eight-hour kitchen shifts was exhausting but exhilarating, and he excelled at understanding the science behind flavour that his instructors had spent decades studying. He succeeded in landing a placement at a well-regarded restaurant by the end of the year, and he looked forward to learning from a head chef who was known for engaging with apprentices generously rather than dismissing them. Avoiding shortcuts and insisting on using the finest local ingredients — these were the principles Emre brought to work every morning, and they were precisely what prevented him from becoming just another cook who had forgotten why he had started.`,
       breakdown: [
-        { sentence: 'Learning to say no is not about being selfish — it is about being honest.', words: [{w:'Learning', ar:'تعلّم (جيروند كفاعل)'},{w:'being selfish', ar:'كونك أنانياً'},{w:'being honest', ar:'كونك صادقاً'}], meaning: 'جيروند كفاعل × 3 في جملة واحدة' },
-        { sentence: 'Instead of immediately agreeing or refusing, consider asking for time.', words: [{w:'instead of', ar:'بدلاً من'},{w:'agreeing', ar:'الموافقة'},{w:'asking', ar:'الطلب'}], meaning: 'جيروند بعد instead of' },
-        { sentence: 'Being capable of declining politely requires practice.', words: [{w:'Being capable', ar:'كون القدرة على'},{w:'declining', ar:'الرفض'},{w:'requires', ar:'يستلزم'}], meaning: 'جيروند كفاعل مركب' },
-        { sentence: 'People who are good at protecting their time are more focused.', words: [{w:'good at protecting', ar:'بارعون في حماية'},{w:'focused', ar:'مركّزون'}], meaning: 'جيروند بعد good at' },
+        { sentence: 'Emre had always been keen on helping his grandmother cook, though he had never considered pursuing it as a career.', words: [{w:'keen on helping', ar:'متحمساً للمساعدة'},{w:'considered pursuing', ar:'فكّر في متابعته'}], meaning: 'جيروند بعد keen on وبعد considered' },
+        { sentence: 'Instead of continuing to ignore the feeling, he enrolled in a professional cooking course — admitting to himself that no spreadsheet had ever made him feel alive.', words: [{w:'Instead of ignoring', ar:'بدلاً من تجاهل'},{w:'admitting', ar:'مُعترفاً'}], meaning: 'جيروند بعد instead of + جيروند في صيغة الحال' },
+        { sentence: 'Concentrating during eight-hour kitchen shifts was exhausting but exhilarating, and he excelled at understanding the science behind flavour.', words: [{w:'Concentrating', ar:'التركيز (جيروند كفاعل)'},{w:'excelled at understanding', ar:'تفوّق في الفهم'}], meaning: 'جيروند كفاعل للجملة + جيروند بعد excel at' },
+        { sentence: 'He succeeded in landing a placement, and he looked forward to learning from a head chef known for engaging with apprentices.', words: [{w:'succeeded in landing', ar:'نجح في الحصول'},{w:'looked forward to learning', ar:'تطلّع إلى التعلم'},{w:'engaging with', ar:'الانخراط مع'}], meaning: 'جيروند إلزامي بعد succeed in وlook forward to' },
+        { sentence: 'Avoiding shortcuts and insisting on using local ingredients — these were precisely what prevented him from becoming just another cook.', words: [{w:'Avoiding', ar:'تجنّب (جيروند كفاعل)'},{w:'insisting on', ar:'الإصرار على'},{w:'prevented from', ar:'منعه من'}], meaning: 'جيروند كفاعل + بعد on + بعد prevent from' },
       ]
     },
     listening: {
@@ -1000,20 +959,16 @@ The long-term benefits of learning this skill are significant. People who are go
       ]
     },
     reading: {
-      passage: `Learning Languages as an Adult
+      passage: `The Exam Hall
 
-Many adults believe they are too old to learn a new language fluently. This belief, while understandable, is not entirely supported by research. The adult brain is not too inflexible to acquire new linguistic patterns — it simply approaches learning differently from a child's brain.
-
-Children learn languages unconsciously, through immersion and repetition. Adults, on the other hand, are experienced enough to use conscious strategies: they can analyse grammar rules, compare structures with their native language, and study in order to build vocabulary systematically. These advantages, when used effectively, can lead to impressive results.
-
-There are, however, genuine challenges. Adults typically have less time available to study and more existing habits to overcome. Pronunciation is often difficult enough to require significant dedicated practice. In order to sound natural, learners need not just to know the words but to internalise the rhythm and melody of the language.
-
-The key insight is that success in adult language learning depends less on age and more on consistency, motivation, and method. If you are motivated enough to commit to daily practice — even for thirty minutes — and if you use the language in real contexts in order to reinforce what you learn, progress will come. The journey may be slower than it was in childhood, but it can be just as rewarding.`,
+Nora had always been determined enough to sit every professional exam her field required, but the one ahead of her now felt too complex to tackle without a completely different approach. She had spent four months studying in order to master the material, waking before dawn and staying up past midnight, driven by an ambition that made her colleagues half-admire and half-pity her. The content itself was not too ambiguous to understand — it simply demanded more focused effort than she had been giving it, and she was honest enough to acknowledge that. In order to strengthen her weakest area, she hired a specialist tutor, restructured her schedule, and forced herself to attempt practice questions she had previously judged as too difficult to be worth her time. Two weeks before the exam, she felt competent enough to attempt a full mock test without hesitation, and the results gave her the kind of confidence she had not felt in months. Nora passed with the highest score in her cohort — proof that being motivated enough to change your method, not merely your effort, is what ultimately enables real success.`,
       breakdown: [
-        { sentence: 'The adult brain is not too inflexible to acquire new linguistic patterns.', words: [{w:'too inflexible to acquire', ar:'بالغ الجمود لاكتساب'},{w:'linguistic patterns', ar:'أنماط لغوية'}], meaning: 'نفي too...to — الدماغ ليس عاجزاً' },
-        { sentence: 'Adults are experienced enough to use conscious strategies.', words: [{w:'experienced enough to use', ar:'ذوو خبرة كافية لاستخدام'}], meaning: 'enough...to — الكبار لديهم ميزة' },
-        { sentence: 'Adults study in order to build vocabulary systematically.', words: [{w:'in order to build', ar:'من أجل بناء'},{w:'systematically', ar:'بشكل منهجي'}], meaning: 'in order to — الهدف من الدراسة' },
-        { sentence: 'If you are motivated enough to commit to daily practice, progress will come.', words: [{w:'motivated enough to commit', ar:'متحمس بما يكفي للالتزام'}], meaning: 'enough...to — الدافعية شرط النجاح' },
+        { sentence: 'The exam ahead felt too complex to tackle without a completely different approach.', words: [{w:'too complex to tackle', ar:'بالغة التعقيد لمعالجتها'}], meaning: 'too + صفة + to: المشكلة بالغة الشدة تمنع الفعل' },
+        { sentence: 'She had spent four months studying in order to master the material.', words: [{w:'in order to master', ar:'من أجل إتقان'}], meaning: 'in order to: يضيف الهدف بشكل رسمي وواضح' },
+        { sentence: 'The content was not too ambiguous to understand — it simply demanded more focused effort than she had been giving it.', words: [{w:'too ambiguous to understand', ar:'غامضة للغاية لفهمها'},{w:'ambiguous', ar:'غامض / ملتبس'}], meaning: 'نفي too...to: يُثبت أن الفهم ممكن' },
+        { sentence: 'She forced herself to attempt practice questions she had previously judged as too difficult to be worth her time.', words: [{w:'attempt', ar:'تحاول'},{w:'too difficult to be worth', ar:'صعبة للغاية لتستحق'}], meaning: 'too + صفة + to في وصف تحيّز سابق' },
+        { sentence: 'She felt competent enough to attempt a full mock test without hesitation.', words: [{w:'competent enough to attempt', ar:'كفؤة بما يكفي لمحاولة'},{w:'hesitation', ar:'تردد'}], meaning: 'صفة + enough + to: الكفاءة بلغت الحد المطلوب للفعل' },
+        { sentence: 'Being motivated enough to change your method is what ultimately enables real success.', words: [{w:'motivated enough to change', ar:'متحمسة بما يكفي للتغيير'},{w:'enables', ar:'يُمكّن'}], meaning: 'enough + to + enable: النتيجة النهائية في جملة ختامية' },
       ]
     },
     listening: {
@@ -1141,22 +1096,16 @@ The key insight is that success in adult language learning depends less on age a
       ]
     },
     reading: {
-      passage: `The Subtle Art of Word Choice
+      passage: `The Interview Tapes
 
-One of the most fascinating — and challenging — aspects of learning English is understanding how the same verb can mean something completely different depending on what follows it.
-
-Consider the verb "stop". If a colleague says "I stopped working with that client", it means the professional relationship ended. But if they say "I stopped to work on something he sent me", it means they paused what they were doing in order to help him. These two sentences describe opposite situations, yet they differ by only two letters.
-
-The same subtlety applies to "remember". "I remember telling you about the deadline" suggests that you did tell someone and now recall doing so. "Remember to tell her about the deadline" is a request for future action — the telling has not happened yet. Mixing these up in a professional context can cause genuine misunderstandings.
-
-"Try" works similarly. "Try pressing the reset button" suggests that pressing it might solve the problem — it is a suggestion. "I tried to press it but nothing happened" describes an effort that failed.
-
-Mastering these distinctions takes time. Students who go on studying these patterns will eventually develop an intuition for them. The key is exposure — reading widely, listening carefully, and not giving up. Going on to reach fluency requires patience, but noticing these nuances is exactly what separates an intermediate learner from an advanced one.`,
+Yusuf remembered meeting the filmmaker Petra for the first time at a small mountain festival, where she had stopped to watch his short film and stayed for the entire screening without saying a single word. Years later, when she had become one of the most celebrated documentary directors in the country, he recalled her telling him afterwards: "I remember thinking that you had something subtle and genuinely worthwhile to say." He had gone on to produce three more films since then, though he admitted neglecting his most ambitious project — a documentary about vanishing island communities — for far too long, always finding a reason to delay. Petra tried calling him one spring afternoon to ask if he was ready to begin, and this time he did not dread picking up the phone — he stopped worrying about whether the film would be perfect, and simply said yes. She had always insisted that the nuances of a story emerge only when you trust the process rather than trying to control every outcome. He went on to spend the next two years filming, and the result was something neither of them could have fully predicted.`,
       breakdown: [
-        { sentence: 'I stopped working with that client. / I stopped to work on something.', words: [{w:'stopped working', ar:'توقفت عن العمل'},{w:'stopped to work', ar:'توقفت لأعمل'}], meaning: 'نفس الفعل — معنيان متضادان' },
-        { sentence: 'I remember telling you. / Remember to tell her.', words: [{w:'remember telling', ar:'أتذكر أنني قلت'},{w:'Remember to tell', ar:'لا تنسَ أن تقول'}], meaning: 'الماضي مقابل المستقبل' },
-        { sentence: 'Try pressing the reset button.', words: [{w:'Try pressing', ar:'جرّب الضغط (كحل)'}], meaning: 'اقتراح محتمل للحل' },
-        { sentence: 'Students who go on studying will develop an intuition.', words: [{w:'go on studying', ar:'يستمرون في الدراسة'},{w:'intuition', ar:'حدس / إحساس'}], meaning: 'go on + gerund = الاستمرار في نفس الفعل' },
+        { sentence: 'Yusuf remembered meeting the filmmaker Petra at a mountain festival, where she had stopped to watch his short film.', words: [{w:'remembered meeting', ar:'تذكّر أنه التقى (ماضٍ)'},{w:'stopped to watch', ar:'توقفت لتشاهد (هدف)'}], meaning: 'remember + gerund: ذكرى ماضية / stop + to: توقف لفعل شيء آخر' },
+        { sentence: 'He recalled her telling him: "I remember thinking that you had something subtle and worthwhile to say."', words: [{w:'recalled telling', ar:'تذكّر قولها'},{w:'subtle', ar:'دقيق'},{w:'worthwhile', ar:'يستحق'}], meaning: 'recall + gerund: استحضار ذكرى بعيدة' },
+        { sentence: 'He admitted neglecting his most ambitious project for far too long, always finding a reason to delay.', words: [{w:'admitted neglecting', ar:'اعترف بإهماله'},{w:'neglect', ar:'يُهمل'}], meaning: 'admit + gerund: الاعتراف بفعل سلبي في الماضي' },
+        { sentence: 'Petra tried calling him one spring afternoon, and this time he stopped worrying about whether the film would be perfect.', words: [{w:'tried calling', ar:'حاولت الاتصال (كحل)'},{w:'stopped worrying', ar:'توقف عن القلق'}], meaning: 'try + gerund: محاولة كحل / stop + gerund: إنهاء فعل كان مستمراً' },
+        { sentence: 'She had always insisted that the nuances of a story emerge only when you trust the process.', words: [{w:'nuances', ar:'الفوارق الدقيقة'},{w:'dread', ar:'يخشى'}], meaning: 'nuances: الفوارق الدقيقة التي تميز المتعلم المتقدم' },
+        { sentence: 'He went on to spend the next two years filming, and the result was something neither of them could have predicted.', words: [{w:'went on to spend', ar:'انتقل إلى قضاء (فعل جديد مختلف)'}], meaning: 'go on + to infinitive: الانتقال إلى نشاط جديد مختلف' },
       ]
     },
     listening: {
@@ -1286,23 +1235,16 @@ Mastering these distinctions takes time. Students who go on studying these patte
       ]
     },
     reading: {
-      passage: `The Whistleblower
+      passage: `The Town Hall
 
-It was during a routine audit that Layla first noticed something was wrong. The figures in the quarterly report did not match what she had seen in the internal database. She said nothing at first — she told herself she must have been mistaken.
-
-But the discrepancy was too large to dismiss. She mentioned it to her supervisor, who said that the accounts team would look into it. When she followed up a week later, he told her not to worry about it. He insisted that everything had been double-checked and confirmed as accurate.
-
-Layla was not convinced. She asked a colleague whether he had noticed any irregularities. He admitted that he had seen similar issues but said he had chosen to ignore them. He warned her not to raise the matter officially — he claimed that people who had done so in the past had faced consequences.
-
-Despite the warnings, Layla decided to report what she had found to the compliance department. She stated that she had discovered a series of discrepancies and emphasised that the amounts involved were significant.
-
-The investigation that followed revealed that a senior manager had been manipulating the figures for over three years. Layla was later recognised for her integrity. In an interview, she said simply: "I knew what was right. I am glad I did not stay silent."`,
+At last night's community meeting, the mayor announced that a new leisure centre would be built on the site of the old warehouse district, and she confirmed that construction would begin before the end of the year. Several residents complained that they had not been consulted about the plans, and one senior councillor argued that the proposed timeline was unrealistic given the scale of the project. The mayor maintained that every cost had been carefully reviewed and emphasised that the centre would create over two hundred permanent jobs for local people. When asked directly about the environmental impact, she admitted that an independent assessment had not yet been completed, though she insisted that one would be commissioned within the following two weeks. A local business owner then persuaded the crowd to hear the full proposal before reacting, pointing out that the plans included a large green space and a community hall that residents had been requesting for nearly a decade. The meeting concluded when the planning director warned that any further delay would cost the city a substantial government grant, and he recommended that a binding decision be made within the next thirty days.`,
       breakdown: [
-        { sentence: 'She told herself she must have been mistaken.', words: [{w:'told herself', ar:'قالت لنفسها'},{w:'must have been mistaken', ar:'لا بد أنها أخطأت'}], meaning: 'كلام منقول + modal perfect' },
-        { sentence: 'He told her not to worry about it.', words: [{w:'told her not to worry', ar:'أخبرها بعدم القلق'}], meaning: 'نقل الأوامر السلبية: told + object + not to' },
-        { sentence: 'She asked a colleague whether he had noticed any irregularities.', words: [{w:'asked whether', ar:'سألت إذا'},{w:'had noticed', ar:'لاحظ (past perfect)'}], meaning: 'نقل السؤال المغلق: asked + whether + past perfect' },
-        { sentence: 'He warned her not to raise the matter officially.', words: [{w:'warned her not to raise', ar:'حذّرها من رفع القضية'}], meaning: 'نقل التحذير: warned + object + not to' },
-        { sentence: 'She stated that she had discovered a series of discrepancies.', words: [{w:'stated that', ar:'أكدت أن'},{w:'had discovered', ar:'كانت قد اكتشفت'}], meaning: 'نقل رسمي: stated + that + past perfect' },
+        { sentence: 'The mayor announced that a new leisure centre would be built, and she confirmed that construction would begin before the end of the year.', words: [{w:'announced', ar:'أعلنت'},{w:'confirmed', ar:'أكدت'}], meaning: 'نقل الكلام: Present Simple → Past Simple، will → would' },
+        { sentence: 'Several residents complained that they had not been consulted, and one councillor argued that the timeline was unrealistic.', words: [{w:'complained', ar:'شكوا'},{w:'argued', ar:'احتجّ'}], meaning: 'أفعال تقرير تحمل موقفاً: complained / argued' },
+        { sentence: 'The mayor maintained that every cost had been carefully reviewed and emphasised that the centre would create over two hundred jobs.', words: [{w:'maintained', ar:'أصرّت'},{w:'emphasised', ar:'شددت'}], meaning: 'maintained = تكرار موقف ثابت / emphasised = التشديد على نقطة مهمة' },
+        { sentence: 'She admitted that an assessment had not yet been completed, though she insisted that one would be commissioned within two weeks.', words: [{w:'admitted', ar:'اعترفت'},{w:'insisted', ar:'أصرّت'}], meaning: 'نقل الاعتراف + نقل الإصرار — تحويل الزمن للخلف' },
+        { sentence: 'A local business owner persuaded the crowd to hear the full proposal, pointing out that the plans included a community hall residents had been requesting for nearly a decade.', words: [{w:'persuaded', ar:'أقنع'},{w:'pointing out', ar:'مُلفتاً الانتباه'}], meaning: 'persuaded + to + infinitive / point out + that: أفعال تقرير شائعة' },
+        { sentence: 'The planning director warned that any delay would cost the city a grant, and he recommended that a decision be made within thirty days.', words: [{w:'warned', ar:'حذّر'},{w:'recommended', ar:'أوصى'}], meaning: 'warned + that / recommended + that + subjunctive: نقل الأوامر الرسمية' },
       ]
     },
     listening: {
