@@ -1,72 +1,33 @@
-import { useState, useEffect, useRef } from 'react'
-import { createPortal } from 'react-dom'
+import { useState, useEffect } from 'react'
 
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+const KEY = 'el_portrait_locked'
+
+function applyLock(locked) {
+  document.querySelectorAll('.el-app').forEach(el =>
+    el.classList.toggle('el-portrait-locked', locked)
+  )
+}
 
 export default function OrientLockBtn() {
-  const [locked, setLocked] = useState(false)
-  const [show, setShow] = useState(false)
-  const [portal, setPortal] = useState(null)
-  const btnRef = useRef(null)
+  const [locked, setLocked] = useState(() => localStorage.getItem(KEY) === '1')
 
-  useEffect(() => {
-    // Render inside .el-app so CSS variables and scoped selectors work
-    const el = btnRef.current?.closest('.el-app') || document.body
-    setPortal(el)
-  }, [])
+  // Apply saved preference on every mount (page navigation creates a new instance)
+  useEffect(() => { applyLock(locked) }, [locked])
 
   const toggle = () => {
     const next = !locked
     setLocked(next)
-    if (next) setShow(true)
+    localStorage.setItem(KEY, next ? '1' : '0')
+    applyLock(next)
   }
 
-  const overlay = show && portal
-    ? createPortal(
-        <div
-          className="el-orient-overlay"
-          onClick={() => setShow(false)}
-        >
-          <div
-            className="el-orient-modal"
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="el-orient-title">🔒 قفل دوران الشاشة</div>
-            <div className="el-orient-body">
-              {isIOS ? (
-                <>
-                  🍎 <strong>آيفون / آيباد:</strong><br />
-                  اسحب من الزاوية العلوية اليمنى ← Control Center<br />
-                  ← اضغط على رمز القفل الدائري
-                </>
-              ) : (
-                <>
-                  🤖 <strong>أندرويد:</strong><br />
-                  اسحب من أعلى الشاشة لفتح الإعدادات السريعة<br />
-                  ← اضغط على <strong>"تدوير تلقائي"</strong> لإيقافه
-                </>
-              )}
-            </div>
-            <button className="el-nav-btn primary" style={{ marginTop: 16, width: '100%' }} onClick={() => setShow(false)}>
-              حسناً
-            </button>
-          </div>
-        </div>,
-        portal
-      )
-    : null
-
   return (
-    <>
-      <button
-        ref={btnRef}
-        className={'el-icon-btn' + (locked ? ' active' : '')}
-        title={locked ? 'فتح التدوير' : 'قفل التدوير'}
-        onClick={toggle}
-      >
-        {locked ? '🔒' : '🔓'}
-      </button>
-      {overlay}
-    </>
+    <button
+      className={'el-icon-btn' + (locked ? ' active' : '')}
+      title={locked ? 'فتح التدوير' : 'قفل التدوير'}
+      onClick={toggle}
+    >
+      {locked ? '🔒' : '🔓'}
+    </button>
   )
 }
