@@ -4,7 +4,14 @@ import { createPortal } from 'react-dom'
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
 
 export default function OrientLockBtn() {
+  const [locked, setLocked] = useState(false)
   const [show, setShow] = useState(false)
+
+  const toggle = () => {
+    const next = !locked
+    setLocked(next)
+    if (next) setShow(true)   // show instructions only when locking
+  }
 
   const overlay = show
     ? createPortal(
@@ -57,8 +64,12 @@ export default function OrientLockBtn() {
 
   return (
     <>
-      <button className="el-icon-btn" title="قفل دوران الشاشة" onClick={() => setShow(true)}>
-        🔄
+      <button
+        className={'el-icon-btn' + (locked ? ' active' : '')}
+        title={locked ? 'فتح التدوير' : 'قفل التدوير'}
+        onClick={toggle}
+      >
+        {locked ? '🔒' : '🔓'}
       </button>
       {overlay}
     </>
