@@ -484,7 +484,7 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
   const [buddyMessages, setBuddyMessages] = useState([])
   const [buddyInput, setBuddyInput] = useState('')
   const [avatarState, setAvatarState] = useState('idle')
-  const [buddyOpen, setBuddyOpen] = useState(true)
+  const [buddyOpen, setBuddyOpen] = useState(false)
   const [showXP, setShowXP] = useState(false)
   const [donePending, setDonePending] = useState(false)
   const [showVoicePicker, setShowVoicePicker] = useState(() => !localStorage.getItem('noura_voice_setup'))
