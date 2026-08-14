@@ -60,34 +60,39 @@ function VoiceSelector({ onClose }) {
   const [tab, setTab] = useState('us')
   const [rate, setRate] = useState(() => getRate() ?? 0.9)
   const [pitch, setPitch] = useState(() => getPitch() ?? 1.0)
+  const [accentOpen, setAccentOpen] = useState(false)
+
+  const loadVoices = () => {
+    const all = window.speechSynthesis?.getVoices() || []
+    if (all.length) setVoices(all.filter(v => v.lang.startsWith('en')))
+    return all.length > 0
+  }
 
   useEffect(() => {
     if (!window.speechSynthesis) return
     let stopped = false
-    const load = () => {
-      if (stopped) return
-      const all = window.speechSynthesis.getVoices()
-      if (all.length) setVoices(all.filter(v => v.lang.startsWith('en')))
-    }
+    const load = () => { if (!stopped) loadVoices() }
     load()
     window.speechSynthesis.addEventListener('voiceschanged', load)
-    // iOS Safari: voices only load after the first speak() triggered by a user gesture.
-    // The modal opens via a button tap so we're inside a gesture — speak a silent utterance
-    // to force voice loading, then re-check.
-    try {
-      const u = new SpeechSynthesisUtterance('')
-      u.volume = 0
-      u.onend = load
-      window.speechSynthesis.speak(u)
-    } catch (e) {}
-    // Additional polling for slower devices / Android
-    const timers = [100, 500, 1000, 2000, 3500, 6000].map(ms => setTimeout(load, ms))
+    const timers = [200, 800, 1500, 3000, 6000].map(ms => setTimeout(load, ms))
     return () => {
       stopped = true
       window.speechSynthesis.removeEventListener('voiceschanged', load)
       timers.forEach(clearTimeout)
     }
   }, [])
+
+  const activateVoices = () => {
+    // iOS requires a real text utterance from a user gesture to expose voices
+    window.speechSynthesis.cancel()
+    const u = new SpeechSynthesisUtterance('Hello')
+    u.volume = 0.01
+    u.onend = () => { loadVoices(); setTimeout(loadVoices, 300) }
+    u.onerror = () => { loadVoices(); setTimeout(loadVoices, 300) }
+    window.speechSynthesis.speak(u)
+    // also poll
+    [300, 700, 1500].forEach(ms => setTimeout(loadVoices, ms))
+  }
 
   const usVoices = voices.filter(v => v.lang === 'en-US' || v.lang.startsWith('en-US')).sort((a, b) => {
     const score = v => /online|natural|neural/i.test(v.name) ? 0 : /google/i.test(v.name) ? 1 : 2
@@ -166,26 +171,33 @@ function VoiceSelector({ onClose }) {
           <button className={`el-voice-tab${tab === 'uk' ? ' active' : ''}`} onClick={() => setTab('uk')}>🇬🇧 بريطاني (UK)</button>
         </div>
 
-        {/* Accent info card */}
-        <div className="el-voice-accent-card">
-          <div className="el-voice-accent-title">
-            {ACCENT_INFO[tab].flag} {ACCENT_INFO[tab].title}
+        {/* Collapsible accent info */}
+        <button className="el-voice-accent-toggle" onClick={() => setAccentOpen(o => !o)}>
+          {ACCENT_INFO[tab].flag} {ACCENT_INFO[tab].title} {accentOpen ? '▲' : '▼'}
+        </button>
+        {accentOpen && (
+          <div className="el-voice-accent-card">
+            <div className="el-voice-accent-traits">
+              {ACCENT_INFO[tab].traits.map(t => (
+                <div key={t.sound} className="el-voice-accent-row">
+                  <span className="el-voice-accent-sound">{t.sound}</span>
+                  <span className="el-voice-accent-label">{t.label}</span>
+                  <span className="el-voice-accent-desc">{tab === 'us' ? t.us : t.uk}</span>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="el-voice-accent-traits">
-            {ACCENT_INFO[tab].traits.map(t => (
-              <div key={t.sound} className="el-voice-accent-row">
-                <span className="el-voice-accent-sound">{t.sound}</span>
-                <span className="el-voice-accent-label">{t.label}</span>
-                <span className="el-voice-accent-desc">{tab === 'us' ? t.us : t.uk}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        )}
 
         <div className="el-voice-list">
           {currentVoices.length === 0 && (
             <div className="el-voice-empty">
-              جاري تحميل الأصوات... إذا لم تظهر، اضغط على أي زر ▶ لتفعيل الصوت
+              <div style={{ marginBottom: 12, color: 'var(--el-muted)', fontSize: '.85rem', direction: 'rtl' }}>
+                لم تُحمَّل الأصوات بعد
+              </div>
+              <button className="el-voice-activate-btn" onClick={activateVoices}>
+                🎙️ اضغط هنا لتفعيل الأصوات
+              </button>
             </div>
           )}
           {currentVoices.map(v => (
@@ -212,24 +224,24 @@ function VoiceSelector({ onClose }) {
             <div className="el-voice-current">✅ محدد: <strong>{currentSelected}</strong></div>
           )}
 
-          <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: '.82rem', minWidth: 90, color: 'var(--text-muted)' }}>🐢 السرعة 🐇</span>
+              <span style={{ fontSize: '.82rem', minWidth: 70, color: 'var(--el-muted)' }}>🐢 السرعة 🐇</span>
               <input type="range" min="0.5" max="1.5" step="0.05" value={rate}
                 onChange={e => setRate(Number(e.target.value))}
                 style={{ flex: 1 }} />
-              <span style={{ fontSize: '.8rem', minWidth: 32, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{rate.toFixed(2)}</span>
+              <span style={{ fontSize: '.8rem', minWidth: 30, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{rate.toFixed(2)}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: '.82rem', minWidth: 90, color: 'var(--text-muted)' }}>🔈 النبرة 🔊</span>
+              <span style={{ fontSize: '.82rem', minWidth: 70, color: 'var(--el-muted)' }}>🔈 النبرة 🔊</span>
               <input type="range" min="0.5" max="2.0" step="0.05" value={pitch}
                 onChange={e => setPitch(Number(e.target.value))}
                 style={{ flex: 1 }} />
-              <span style={{ fontSize: '.8rem', minWidth: 32, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{pitch.toFixed(2)}</span>
+              <span style={{ fontSize: '.8rem', minWidth: 30, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{pitch.toFixed(2)}</span>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+          <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
             <button className="el-nav-btn primary" onClick={save}>💾 حفظ وتطبيق</button>
             <button className="el-nav-btn" onClick={() => { stopTTS(); onClose() }}>تخطي</button>
           </div>
@@ -485,6 +497,7 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
   const [buddyInput, setBuddyInput] = useState('')
   const [avatarState, setAvatarState] = useState('idle')
   const [buddyOpen, setBuddyOpen] = useState(false)
+  const [orientLocked, setOrientLocked] = useState(false)
   const [showXP, setShowXP] = useState(false)
   const [donePending, setDonePending] = useState(false)
   const [showVoicePicker, setShowVoicePicker] = useState(() => !localStorage.getItem('noura_voice_setup'))
@@ -546,6 +559,19 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
           <div style={{ display: 'flex', gap: 6 }}>
             <button className="el-icon-btn" onClick={() => setShowVoicePicker(true)} title="اختر الصوت">🎙️</button>
             <button className={'el-icon-btn' + (buddyOpen ? ' active' : '')} onClick={() => setBuddyOpen(b => !b)} title="Study Buddy">🤖</button>
+            <button className="el-icon-btn" title={orientLocked ? 'فتح التدوير' : 'قفل التدوير'} onClick={() => {
+              const next = !orientLocked
+              setOrientLocked(next)
+              // eslint-disable-next-line no-restricted-globals
+              const orient = screen?.orientation
+              if (orient?.lock) {
+                const cur = orient.type || ''
+                const target = cur.includes('landscape') ? 'landscape' : 'portrait'
+                orient.lock(next ? target : 'any').catch(() => {})
+              } else {
+                alert(next ? 'قفّل دوران الشاشة من إعدادات هاتفك (Control Center على iPhone)' : 'افتح قفل الدوران من إعدادات هاتفك')
+              }
+            }}>{orientLocked ? '🔒' : '🔓'}</button>
             <button className="el-icon-btn" onClick={() => setDarkMode(!darkMode)}>{darkMode ? '☀️' : '🌙'}</button>
           </div>
         </header>
