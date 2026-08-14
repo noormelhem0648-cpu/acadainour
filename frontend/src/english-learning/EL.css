@@ -1787,21 +1787,9 @@
 .el-voice-current { font-size: .82rem; color: var(--el-muted); }
 .el-voice-current strong { color: var(--el-accent); }
 
-/* ── Portrait lock via CSS rotation (works on all browsers, no API needed) ── */
-@media screen and (orientation: landscape) {
-  .el-app.el-portrait-locked {
-    transform: rotate(-90deg);
-    transform-origin: left top;
-    width: 100vh;
-    height: 100vw;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    overflow: hidden;
-  }
-}
-/* Prevent scroll to the off-screen rotated position */
-body:has(.el-app.el-portrait-locked) {
+/* Portrait lock: JS applies inline styles when locked in landscape.
+   This rule only prevents body scroll while the fixed lock is active. */
+body:has(.el-app[style*="rotate"]) {
   overflow: hidden;
 }
 
