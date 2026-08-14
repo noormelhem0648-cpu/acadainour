@@ -62,53 +62,49 @@ function VoiceSelector({ onClose }) {
   const [rate, setRate] = useState(() => getRate() ?? 0.9)
   const [pitch, setPitch] = useState(() => getPitch() ?? 1.0)
   const [accentOpen, setAccentOpen] = useState(false)
-  const [activating, setActivating] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [unsupported, setUnsupported] = useState(false)
 
-  const loadVoices = () => {
-    const all = window.speechSynthesis?.getVoices() || []
-    const en = all.filter(v => v.lang.startsWith('en'))
-    if (en.length) setVoices(en)
-    return en.length > 0
-  }
-
   useEffect(() => {
-    if (!window.speechSynthesis) { setUnsupported(true); return }
-    let stopped = false
-    const load = () => { if (!stopped) loadVoices() }
-    load()
-    window.speechSynthesis.addEventListener('voiceschanged', load)
-    const timers = [200, 800, 1500, 3000, 6000].map(ms => setTimeout(load, ms))
+    if (!window.speechSynthesis) { setLoading(false); setUnsupported(true); return }
+
+    let done = false
+    const tryLoad = () => {
+      const all = window.speechSynthesis.getVoices() || []
+      const en = all.filter(v => v.lang.startsWith('en'))
+      if (en.length) { setVoices(en); setLoading(false); done = true }
+    }
+
+    // 1. Immediate check
+    tryLoad()
+    if (done) return
+
+    // 2. voiceschanged event
+    window.speechSynthesis.addEventListener('voiceschanged', tryLoad)
+
+    // 3. Speak a short utterance — the modal opened from a user tap so we're inside a gesture
+    //    This is required on some Android browsers and iOS Safari to expose the voice list
+    try {
+      const u = new SpeechSynthesisUtterance('hi')
+      u.rate = 10; u.volume = 0.01
+      u.onend = tryLoad
+      window.speechSynthesis.speak(u)
+    } catch (_) {}
+
+    // 4. Poll every 400ms for 4 seconds
+    const polls = [400, 800, 1200, 1800, 2500, 3500].map(ms => setTimeout(tryLoad, ms))
+
+    // 5. Give up after 4s → mark as unsupported
+    const giveUp = setTimeout(() => {
+      if (!done) { setLoading(false); setUnsupported(true) }
+    }, 4000)
+
     return () => {
-      stopped = true
-      window.speechSynthesis.removeEventListener('voiceschanged', load)
-      timers.forEach(clearTimeout)
+      window.speechSynthesis.removeEventListener('voiceschanged', tryLoad)
+      polls.forEach(clearTimeout)
+      clearTimeout(giveUp)
     }
   }, [])
-
-  const activateVoices = () => {
-    if (activating) return
-    setActivating(true)
-    // Speak a real audible (but brief) utterance — this is the only reliable trigger across all browsers
-    const u = new SpeechSynthesisUtterance('OK')
-    u.rate = 2; u.volume = 0.5
-    const tryLoad = () => {
-      if (loadVoices()) { setActivating(false); return }
-    }
-    u.onend = () => { tryLoad(); setTimeout(tryLoad, 300); setTimeout(tryLoad, 800) }
-    u.onerror = () => { tryLoad(); setTimeout(tryLoad, 300) }
-    window.speechSynthesis.speak(u)
-    // aggressive polling after gesture
-    const polls = [400, 900, 1600, 2500, 4000, 6000].map(ms =>
-      setTimeout(() => { if (loadVoices()) setActivating(false) }, ms)
-    )
-    // after 8s if still nothing → browser doesn't support voice listing
-    setTimeout(() => {
-      polls.forEach(clearTimeout)
-      setActivating(false)
-      if (!loadVoices()) setUnsupported(true)
-    }, 8000)
-  }
 
   const usVoices = voices.filter(v => v.lang === 'en-US' || v.lang.startsWith('en-US')).sort((a, b) => {
     const score = v => /online|natural|neural/i.test(v.name) ? 0 : /google/i.test(v.name) ? 1 : 2
@@ -206,35 +202,25 @@ function VoiceSelector({ onClose }) {
         )}
 
         <div className="el-voice-list">
-          {currentVoices.length === 0 && (
+          {voices.length === 0 && (
             <div className="el-voice-empty">
-              {unsupported ? (
-                <>
-                  <div style={{ fontSize: '2rem' }}>🔊</div>
-                  <div style={{ direction: 'rtl', textAlign: 'center', color: 'var(--el-text)', fontWeight: 700, fontSize: '.95rem' }}>
-                    متصفحك لا يدعم عرض قائمة الأصوات
-                  </div>
-                  <div style={{ direction: 'rtl', textAlign: 'center', color: 'var(--el-muted)', fontSize: '.82rem' }}>
-                    الصوت سيعمل تلقائياً بالصوت الافتراضي للجهاز.<br/>
-                    يمكنك ضبط السرعة والنبرة أدناه.
-                  </div>
-                  <button className="el-nav-btn primary" style={{ marginTop: 8 }} onClick={save}>
-                    💾 حفظ السرعة والنبرة
-                  </button>
-                </>
-              ) : activating ? (
+              {loading ? (
                 <>
                   <div style={{ fontSize: '1.8rem' }}>⏳</div>
                   <div style={{ color: 'var(--el-muted)', fontSize: '.88rem', direction: 'rtl' }}>جاري تحميل الأصوات...</div>
                 </>
-              ) : (
+              ) : unsupported ? (
                 <>
-                  <div style={{ color: 'var(--el-muted)', fontSize: '.85rem', direction: 'rtl' }}>لم تُحمَّل الأصوات بعد</div>
-                  <button className="el-voice-activate-btn" onClick={activateVoices}>
-                    🎙️ اضغط هنا لتفعيل الأصوات
-                  </button>
+                  <div style={{ fontSize: '2rem' }}>🔊</div>
+                  <div style={{ direction: 'rtl', textAlign: 'center', color: 'var(--el-text)', fontWeight: 700, fontSize: '.95rem' }}>
+                    متصفحك لا يدعم اختيار الصوت
+                  </div>
+                  <div style={{ direction: 'rtl', textAlign: 'center', color: 'var(--el-muted)', fontSize: '.82rem', lineHeight: 1.6 }}>
+                    الصوت سيعمل تلقائياً بصوت الجهاز الافتراضي.<br/>
+                    اضبط السرعة والنبرة أدناه ثم احفظ.
+                  </div>
                 </>
-              )}
+              ) : null}
             </div>
           )}
           {currentVoices.map(v => (
