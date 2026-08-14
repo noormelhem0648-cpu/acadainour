@@ -534,6 +534,7 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
   const [avatarState, setAvatarState] = useState('idle')
   const [buddyOpen, setBuddyOpen] = useState(false)
   const [orientLocked, setOrientLocked] = useState(false)
+  const [showOrientTip, setShowOrientTip] = useState(false)
   const [showXP, setShowXP] = useState(false)
   const [donePending, setDonePending] = useState(false)
   const [showVoicePicker, setShowVoicePicker] = useState(() => !localStorage.getItem('noura_voice_setup'))
@@ -588,6 +589,18 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
       <WordLookupProvider>
       {showXP && <XPPopAnimation amount={XP_VALUES[componentId] || 15} onDone={() => setShowXP(false)} />}
       {showVoicePicker && <VoiceSelector onClose={() => setShowVoicePicker(false)} />}
+      {showOrientTip && (
+        <div className="el-orient-tip-overlay" onClick={() => setShowOrientTip(false)}>
+          <div className="el-orient-tip" onClick={e => e.stopPropagation()}>
+            <div className="el-orient-tip-title">🔒 قفل دوران الشاشة</div>
+            <div className="el-orient-tip-body">
+              <div className="el-orient-tip-row">🤖 <strong>أندرويد:</strong> اسحب من أعلى الشاشة ← اضغط على رمز التدوير</div>
+              <div className="el-orient-tip-row">🍎 <strong>آيفون:</strong> Control Center ← رمز القفل بجانب الصوت</div>
+            </div>
+            <button className="el-nav-btn primary" style={{ marginTop: 12, width: '100%' }} onClick={() => setShowOrientTip(false)}>حسناً</button>
+          </div>
+        </div>
+      )}
       <div className="el-page el-comp-page">
         <header className="el-top-bar">
           <button className="el-icon-btn" onClick={() => navigate(`${EL}/level/${levelId}/day/${dayId}`)}>←</button>
@@ -595,17 +608,28 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
           <div style={{ display: 'flex', gap: 6 }}>
             <button className="el-icon-btn" onClick={() => setShowVoicePicker(true)} title="اختر الصوت">🎙️</button>
             <button className={'el-icon-btn' + (buddyOpen ? ' active' : '')} onClick={() => setBuddyOpen(b => !b)} title="Study Buddy">🤖</button>
-            <button className="el-icon-btn" title={orientLocked ? 'فتح التدوير' : 'قفل التدوير'} onClick={() => {
-              const next = !orientLocked
-              setOrientLocked(next)
+            <button className="el-icon-btn" title={orientLocked ? 'فتح التدوير' : 'قفل التدوير'} onClick={async () => {
               // eslint-disable-next-line no-restricted-globals
               const orient = screen?.orientation
-              if (orient?.lock) {
-                const cur = orient.type || ''
-                const target = cur.includes('landscape') ? 'landscape' : 'portrait'
-                orient.lock(next ? target : 'any').catch(() => {})
+              if (!orientLocked) {
+                // Try fullscreen first (required by most browsers for orientation lock)
+                try {
+                  await document.documentElement.requestFullscreen?.()
+                } catch (_) {}
+                try {
+                  const cur = orient?.type || ''
+                  const target = cur.includes('landscape') ? 'landscape' : 'portrait'
+                  await orient.lock(target)
+                  setOrientLocked(true)
+                } catch (_) {
+                  // API not supported or denied → show instructions tip
+                  try { await document.exitFullscreen?.() } catch (_2) {}
+                  setShowOrientTip(true)
+                }
               } else {
-                alert(next ? 'قفّل دوران الشاشة من إعدادات هاتفك (Control Center على iPhone)' : 'افتح قفل الدوران من إعدادات هاتفك')
+                try { orient?.unlock?.() } catch (_) {}
+                try { await document.exitFullscreen?.() } catch (_) {}
+                setOrientLocked(false)
               }
             }}>{orientLocked ? '🔒' : '🔓'}</button>
             <button className="el-icon-btn" onClick={() => setDarkMode(!darkMode)}>{darkMode ? '☀️' : '🌙'}</button>
