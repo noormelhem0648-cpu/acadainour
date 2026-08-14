@@ -7,6 +7,7 @@ import { getDay } from '../data/curriculum'
 import { getRolePlayTopic } from '../data/roleplay_topics'
 import { useProgress } from '../hooks/useProgress'
 import '../EL.css'
+import OrientLockBtn from '../components/OrientLockBtn'
 
 const EL = '/english-learning'
 
@@ -242,6 +243,7 @@ WHY: [جملة عربية قصيرة تشرح السبب]`
             >
               {ttsPlaying ? '🔊' : ttsEnabled ? '🔈' : '🔇'}
             </button>
+            <OrientLockBtn />
             <button className="el-icon-btn" onClick={() => stopTTS() || setDarkMode(!darkMode)}>{darkMode ? '☀️' : '🌙'}</button>
           </div>
         </header>

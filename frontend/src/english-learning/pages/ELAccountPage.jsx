@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { API_BASE } from '../../config'
 import { useProgress } from '../hooks/useProgress'
 import '../EL.css'
+import OrientLockBtn from '../components/OrientLockBtn'
 
 const EL = '/english-learning'
 
@@ -162,6 +163,7 @@ export default function ELAccountPage({ darkMode, setDarkMode, onLogout }) {
         <header className="el-top-bar">
           <button className="el-icon-btn" onClick={() => navigate(EL)}>←</button>
           <span className="el-top-bar-title">⚙️ إعدادات الحساب</span>
+          <OrientLockBtn />
           <button className="el-icon-btn" onClick={() => setDarkMode(!darkMode)}>
             {darkMode ? '☀️' : '🌙'}
           </button>

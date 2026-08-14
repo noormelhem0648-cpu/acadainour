@@ -2,6 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ALL_DAYS, A2_ALL_DAYS, B1_ALL_DAYS, B2_ALL_DAYS, C1_ALL_DAYS, C2_ALL_DAYS, LEVELS, COMPONENTS } from '../data/curriculum'
 import { useProgress } from '../hooks/useProgress'
 import '../EL.css'
+import OrientLockBtn from '../components/OrientLockBtn'
 
 const EL = '/english-learning'
 
@@ -29,6 +30,7 @@ export default function ELDaysPage({ darkMode, setDarkMode }) {
         <header className="el-top-bar">
           <button className="el-icon-btn" onClick={() => navigate(EL)}>←</button>
           <span className="el-top-bar-title">{level.name}</span>
+          <OrientLockBtn />
           <button className="el-icon-btn" onClick={() => setDarkMode(!darkMode)}>{darkMode ? '☀️' : '🌙'}</button>
         </header>
 

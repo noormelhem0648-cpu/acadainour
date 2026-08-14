@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { LEVELS } from '../data/curriculum'
 import { useProgress, ALL_BADGES, XP_VALUES } from '../hooks/useProgress'
 import '../EL.css'
+import OrientLockBtn from '../components/OrientLockBtn'
 
 
 /* ── Vocab Growth Chart ── */
@@ -255,6 +256,7 @@ export default function ELProgressPage({ darkMode, setDarkMode }) {
         <header className="el-top-bar">
           <button className="el-icon-btn" onClick={() => navigate(EL)}>←</button>
           <span className="el-top-bar-title">📊 تقدمي الكامل</span>
+          <OrientLockBtn />
           <button className="el-icon-btn" onClick={() => setDarkMode(!darkMode)}>{darkMode ? '☀️' : '🌙'}</button>
         </header>
 

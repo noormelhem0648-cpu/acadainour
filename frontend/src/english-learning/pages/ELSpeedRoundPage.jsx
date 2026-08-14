@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { getDay } from '../data/curriculum'
 import { useProgress } from '../hooks/useProgress'
 import '../EL.css'
+import OrientLockBtn from '../components/OrientLockBtn'
 
 const EL = '/english-learning'
 
@@ -122,6 +123,7 @@ export default function ELSpeedRoundPage({ darkMode, setDarkMode }) {
         <header className="el-top-bar">
           <button className="el-icon-btn" onClick={() => navigate(`${EL}/level/${levelId}/day/${dayId}`)}>←</button>
           <span className="el-top-bar-title">⚡ Speed Round</span>
+          <OrientLockBtn />
           <button className="el-icon-btn" onClick={() => setDarkMode(!darkMode)}>{darkMode ? '☀️' : '🌙'}</button>
         </header>
 

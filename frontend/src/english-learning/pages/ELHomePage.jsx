@@ -4,6 +4,7 @@ import { LEVELS, getDay } from '../data/curriculum'
 import { useProgress } from '../hooks/useProgress'
 import { speak } from '../utils/tts'
 import '../EL.css'
+import OrientLockBtn from '../components/OrientLockBtn'
 
 function UserAvatarBtn({ onClick }) {
   const name = (() => { try { return JSON.parse(localStorage.getItem('noura_user'))?.name || '' } catch { return '' } })()
@@ -281,6 +282,7 @@ export default function ELHomePage({ darkMode, setDarkMode }) {
             <span className="el-brand-name">English with Noura</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <OrientLockBtn />
             <button className="el-icon-btn" onClick={() => setDarkMode(!darkMode)} title="Toggle theme">
               {darkMode ? '☀️' : '🌙'}
             </button>

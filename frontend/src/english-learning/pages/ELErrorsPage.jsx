@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useProgress } from '../hooks/useProgress'
 import '../EL.css'
+import OrientLockBtn from '../components/OrientLockBtn'
 
 const EL = '/english-learning'
 
@@ -42,6 +43,7 @@ export default function ELErrorsPage({ darkMode, setDarkMode }) {
         <header className="el-top-bar">
           <button className="el-icon-btn" onClick={() => navigate(EL)}>←</button>
           <span className="el-top-bar-title">📊 لوحة الأخطاء</span>
+          <OrientLockBtn />
           <button className="el-icon-btn" onClick={() => setDarkMode(!darkMode)}>{darkMode ? '☀️' : '🌙'}</button>
         </header>
 

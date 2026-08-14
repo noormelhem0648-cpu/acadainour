@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { speak } from '../utils/tts'
 import '../EL.css'
+import OrientLockBtn from '../components/OrientLockBtn'
 
 function IpaDualSpeak({ text }) {
   const word = text.split(',')[0].trim()
@@ -85,6 +86,7 @@ export default function ELIPAPage({ darkMode, setDarkMode }) {
         <header className="el-top-bar">
           <button className="el-icon-btn" onClick={() => navigate(EL)}>←</button>
           <span className="el-top-bar-title">🔤 دليل IPA الصوتي</span>
+          <OrientLockBtn />
           <button className="el-icon-btn" onClick={() => setDarkMode(!darkMode)}>{darkMode ? '☀️' : '🌙'}</button>
         </header>
 

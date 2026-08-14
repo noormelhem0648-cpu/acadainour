@@ -3,6 +3,7 @@ import { API_BASE as API } from '../../config'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getDay } from '../data/curriculum'
 import '../EL.css'
+import OrientLockBtn from '../components/OrientLockBtn'
 
 const EL = '/english-learning'
 
@@ -111,6 +112,7 @@ IMPORTANT RULE: If the student asks you to solve their homework, exam, or assign
           </div>
           <div style={{ display: 'flex', gap: 4 }}>
             <button className="el-icon-btn" title="محادثة جديدة" onClick={clear}>🔄</button>
+            <OrientLockBtn />
             <button className="el-icon-btn" onClick={() => setDarkMode(!darkMode)}>{darkMode ? '☀️' : '🌙'}</button>
           </div>
         </header>
