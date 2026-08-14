@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
@@ -6,35 +6,33 @@ const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
 export default function OrientLockBtn() {
   const [locked, setLocked] = useState(false)
   const [show, setShow] = useState(false)
+  const [portal, setPortal] = useState(null)
+  const btnRef = useRef(null)
+
+  useEffect(() => {
+    // Render inside .el-app so CSS variables and scoped selectors work
+    const el = btnRef.current?.closest('.el-app') || document.body
+    setPortal(el)
+  }, [])
 
   const toggle = () => {
     const next = !locked
     setLocked(next)
-    if (next) setShow(true)   // show instructions only when locking
+    if (next) setShow(true)
   }
 
-  const overlay = show
+  const overlay = show && portal
     ? createPortal(
         <div
-          style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)',
-            zIndex: 99999, display: 'flex', alignItems: 'center',
-            justifyContent: 'center', padding: 24,
-          }}
+          className="el-orient-overlay"
           onClick={() => setShow(false)}
         >
           <div
-            style={{
-              background: 'var(--el-bg2)', borderRadius: 16, padding: '24px 20px 20px',
-              width: '100%', maxWidth: 340, border: '1.5px solid var(--el-border)',
-              boxShadow: '0 8px 32px rgba(0,0,0,.25)',
-            }}
+            className="el-orient-modal"
             onClick={e => e.stopPropagation()}
           >
-            <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--el-accent)', marginBottom: 14, direction: 'rtl' }}>
-              🔒 قفل دوران الشاشة
-            </div>
-            <div style={{ direction: 'rtl', lineHeight: 1.7, fontSize: '.9rem', color: 'var(--el-text)' }}>
+            <div className="el-orient-title">🔒 قفل دوران الشاشة</div>
+            <div className="el-orient-body">
               {isIOS ? (
                 <>
                   🍎 <strong>آيفون / آيباد:</strong><br />
@@ -49,22 +47,19 @@ export default function OrientLockBtn() {
                 </>
               )}
             </div>
-            <button
-              className="el-nav-btn primary"
-              style={{ marginTop: 16, width: '100%' }}
-              onClick={() => setShow(false)}
-            >
+            <button className="el-nav-btn primary" style={{ marginTop: 16, width: '100%' }} onClick={() => setShow(false)}>
               حسناً
             </button>
           </div>
         </div>,
-        document.body
+        portal
       )
     : null
 
   return (
     <>
       <button
+        ref={btnRef}
         className={'el-icon-btn' + (locked ? ' active' : '')}
         title={locked ? 'فتح التدوير' : 'قفل التدوير'}
         onClick={toggle}

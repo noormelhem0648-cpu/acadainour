@@ -1787,19 +1787,18 @@
 .el-voice-current { font-size: .82rem; color: var(--el-muted); }
 .el-voice-current strong { color: var(--el-accent); }
 
-/* ── Orientation lock tip ── */
-.el-orient-tip-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 10001;
+/* ── Orientation lock modal ── */
+.el-app .el-orient-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 9999;
   display: flex; align-items: center; justify-content: center; padding: 24px;
 }
-.el-orient-tip {
+.el-app .el-orient-modal {
   background: var(--el-bg2); border-radius: 16px; padding: 24px 20px 20px;
   width: 100%; max-width: 340px; border: 1.5px solid var(--el-border);
-  box-shadow: 0 8px 32px rgba(0,0,0,.2);
+  box-shadow: 0 8px 32px rgba(0,0,0,.25);
 }
-.el-orient-tip-title { font-size: 1.05rem; font-weight: 800; color: var(--el-accent); margin-bottom: 14px; direction: rtl; }
-.el-orient-tip-body { display: flex; flex-direction: column; gap: 10px; }
-.el-orient-tip-row { font-size: .88rem; color: var(--el-text); direction: rtl; line-height: 1.5; }
+.el-app .el-orient-title { font-size: 1.05rem; font-weight: 800; color: var(--el-accent); margin-bottom: 14px; direction: rtl; }
+.el-app .el-orient-body { font-size: .9rem; color: var(--el-text); direction: rtl; line-height: 1.7; }
 
 /* ═══════════════════════════════════════════════
    SOCIAL / COMMUNITY PAGE
