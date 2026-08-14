@@ -68,20 +68,45 @@ export const C2_DAYS_11_20 = [
       ]
     },
     reading: {
-      passage: `The Market as Social Institution
+      passage: `The Invisible Architecture of Inequality
 
-Economics textbooks introduce the market as if it were a natural phenomenon: supply and demand, equilibrium prices, the invisible hand coordinating the dispersed decisions of millions of self-interested agents. This presentation obscures an important truth: markets are social institutions, constituted and maintained by legal systems, political choices, cultural norms, and power relations that are themselves not products of the market.
-
-Property rights do not spring from nature; they are legally defined and politically enforced. Contract law does not emerge spontaneously; it is created and maintained by courts and legislatures. The wage relation presupposes that workers cannot survive outside of employment — a presupposition that was historically created through enclosure, colonial dispossession, and the destruction of subsistence alternatives. None of this is to say that markets are illegitimate; it is to say that their supposed naturalness is a mystification that conceals the political choices embedded in their design.
-
-This has consequences. If markets are institutions, they can be designed differently. The question "how should markets be regulated?" is importantly different from "should markets be regulated?" — for to have a market at all is already to have regulation: property rights, contract enforcement, anti-monopoly rules, rules of fraud and misrepresentation. The choice is not between regulated and unregulated markets but between differently regulated markets, with different distributional consequences.
-
-The political philosopher who understands this cannot accept the claim that a particular configuration of market institutions is simply "the market" and that any departure from it is "intervention." Every configuration embeds particular choices about who gets what, who bears risk, and who has power. These are inherently political questions, not technical ones, and they require political — not merely economic — answers.`,
+The market, in orthodox economic thought, is envisioned as a neutral arena governed by the invisible hand—a self-correcting mechanism that allocates resources with impersonal efficiency. Yet the rise of financialisation over the past four decades has fundamentally altered that picture, shifting corporate incentives away from productive investment and toward the extraction of rents from existing assets. Heterodox economics has long argued that such rent-seeking behaviour, far from being an aberration, is structurally encouraged by the very institutions that neoliberalism erected in the name of freedom. The Gini coefficient, a statistical measure of distributional inequality, has climbed steadily across most advanced economies throughout this period, suggesting that creative destruction has generated new wealth unevenly, concentrating gains at the apex of the income distribution. When governments respond to financial crises with austerity rather than stimulus, they validate a moral hazard already embedded in the system: private actors take risk knowing that socialised losses will be absorbed by the state. The logic of financialised capitalism ultimately produces an economy that rewards the ownership of claims over the future labour of others rather than the creation of goods and services. Understanding this architecture is the first obligation of any politics serious about equality.`,
       breakdown: [
-        { sentence: 'Markets are social institutions, constituted and maintained by legal systems, political choices, cultural norms, and power relations that are themselves not products of the market.', words: [{w:'constituted',ar:'مُشكَّلة / مُؤسَّسة'},{w:'obscures',ar:'يُعتّم على'},{w:'mystification',ar:'تمويه / إضفاء طابع غامض'}], meaning: 'الأطروحة المركزية: الأسواق مؤسسات اجتماعية لا ظواهر طبيعية — الحقوق القانونية وعلاقات القوة تُشكّلها وتُقيمها؛ هذا ليس نقداً للأسواق بل للتمثيل التعليمي الذي يُخفي بنيتها السياسية.' },
-        { sentence: 'The wage relation presupposes that workers cannot survive outside of employment — a presupposition that was historically created through enclosure, colonial dispossession, and the destruction of subsistence alternatives.', words: [{w:'presupposes',ar:'يفترض مسبقاً'},{w:'enclosure',ar:'التسييج / تسييج المشاعات'},{w:'subsistence',ar:'الكفاف / البقاء'}], meaning: 'التراكم البدائي (ماركس) في السياق: علاقة الأجر لا تنشأ طبيعياً بل تاريخياً عبر تدمير البدائل — العامل "يختار" العمل لأنه لا بديل له؛ هذا يُغيّر الاقتصاد السياسي للعلاقة.' },
-        { sentence: 'The choice is not between regulated and unregulated markets but between differently regulated markets, with different distributional consequences.', words: [{w:'distributional',ar:'توزيعي'},{w:'regulation',ar:'تنظيم'},{w:'configuration',ar:'تشكيل / بنية'}], meaning: 'إعادة الصياغة المحورية: الخيار ليس "تنظيم أم حرية" بل "أي تنظيم؟" — كل سوق مُنظَّم بطريقة ما (حقوق ملكية، عقود، احتكار)؛ الفرق اقتصادي وسياسي حول من يستفيد.' },
-        { sentence: 'Every configuration embeds particular choices about who gets what, who bears risk, and who has power. These are inherently political questions, not technical ones.', words: [{w:'embeds',ar:'تُضمِّن'},{w:'inherently',ar:'بطبيعتها / ذاتياً'},{w:'configuration',ar:'تشكيل'}], meaning: 'الخلاصة: كل "طبيعية" سوقية مُضمَّنة فيها خيارات سياسية عن التوزيع والمخاطرة والسلطة — هذه أسئلة سياسية تحتاج إجابات سياسية؛ الاقتصاد التقني لا يحسمها.' },
+        {
+          sentence: 'The market, in orthodox economic thought, is envisioned as a neutral arena governed by the invisible hand—a self-correcting mechanism that allocates resources with impersonal efficiency.',
+          words: [{w:'invisible hand',ar:'اليد الخفية'},{w:'orthodox',ar:'تقليدي / أرثوذكسي'}],
+          meaning: 'Classical economics imagines the market as a self-regulating system guided by the metaphor of an unseen force.'
+        },
+        {
+          sentence: 'Yet the rise of financialisation over the past four decades has fundamentally altered that picture, shifting corporate incentives away from productive investment and toward the extraction of rents from existing assets.',
+          words: [{w:'financialisation',ar:'التمويل / الأدلجة المالية'},{w:'rent-seeking',ar:'السعي لانتزاع الريع'}],
+          meaning: 'The growing dominance of finance has redirected corporate behaviour toward extracting value rather than creating it.'
+        },
+        {
+          sentence: 'Heterodox economics has long argued that such rent-seeking behaviour, far from being an aberration, is structurally encouraged by the very institutions that neoliberalism erected in the name of freedom.',
+          words: [{w:'heterodox economics',ar:'الاقتصاد غير التقليدي'},{w:'neoliberalism',ar:'النيوليبرالية'}],
+          meaning: 'Alternative economic schools contend that rent-seeking is built into neoliberal institutional design, not an accidental flaw.'
+        },
+        {
+          sentence: 'The Gini coefficient, a statistical measure of distributional inequality, has climbed steadily across most advanced economies throughout this period, suggesting that creative destruction has generated new wealth unevenly, concentrating gains at the apex of the income distribution.',
+          words: [{w:'Gini coefficient',ar:'معامل جيني'},{w:'creative destruction',ar:'الهدم الخلاق'}],
+          meaning: 'Rising inequality statistics indicate that market dynamism has disproportionately benefited those already at the top.'
+        },
+        {
+          sentence: 'When governments respond to financial crises with austerity rather than stimulus, they validate a moral hazard already embedded in the system: private actors take risk knowing that socialised losses will be absorbed by the state.',
+          words: [{w:'austerity',ar:'التقشف'},{w:'moral hazard',ar:'الخطر الأخلاقي'}],
+          meaning: 'Austerity politics reinforces the perverse incentive whereby financial actors can privatise profits while externalising losses onto the public.'
+        },
+        {
+          sentence: 'The logic of financialised capitalism ultimately produces an economy that rewards the ownership of claims over the future labour of others rather than the creation of goods and services.',
+          words: [{w:'financialised capitalism',ar:'الرأسمالية المالية'}],
+          meaning: 'Under financialised capitalism, holding assets generates more reward than productive work or entrepreneurship.'
+        },
+        {
+          sentence: 'Understanding this architecture is the first obligation of any politics serious about equality.',
+          words: [{w:'architecture',ar:'بنية / هندسة'}],
+          meaning: 'Genuine egalitarian politics must first diagnose the structural mechanisms that reproduce inequality.'
+        }
       ]
     },
     listening: {
@@ -192,20 +217,45 @@ The political philosopher who understands this cannot accept the claim that a pa
       ]
     },
     reading: {
-      passage: `The Limits of Self-Knowledge
+      passage: `On the Unreliable Witness of the Self
 
-"Know yourself," commanded the Oracle at Delphi. The instruction has proved more demanding than it appeared. Centuries of philosophy, religion, and introspective practice have produced an enormous body of advice about how to examine oneself; and yet the systematic study of human psychology has revealed, repeatedly and sometimes shockingly, how little we understand about the actual causes of our own thoughts, feelings, and behaviour.
-
-The problem is not mere ignorance — a gap that could in principle be filled by more careful attention. The problem is structural: the processes that actually drive our behaviour are, for the most part, not accessible to conscious inspection. We do not experience ourselves choosing our emotional reactions; they arrive. We do not observe ourselves forming first impressions; they are simply there. When we confabulate reasons for our choices — constructing post-hoc explanations that feel like recollections of genuine deliberation — we are not lying; we are genuinely doing the best we can with the limited introspective access we have.
-
-This has a disquieting implication for practical ethics. If the causes of our behaviour are largely inaccessible to us, how can we take responsibility for them? If self-deception is structural rather than wilful, how can we be blamed for maintaining it? The philosophical tradition has generally assumed that self-knowledge is the precondition for self-transformation; if I do not know what I am, I cannot change. But the psychological evidence suggests that the mechanism of change may be more oblique: we change by changing our environments, our habits, our relationships — not primarily by achieving insight into our innermost motivations.
-
-This is not counsel of despair. The partial self-knowledge that is available to us — including the metacognitive knowledge that we are systematically biased, self-deceiving, and confabulating — is itself a resource. Knowing that our introspective access is limited changes how we hold our self-knowledge: more lightly, more provisionally, more open to disconfirmation.`,
+The self we present to others is, in large measure, a story—a narrative identity assembled from memory, aspiration, and the selective forgetting of inconvenient truths. Cognitive dissonance theory suggests that when our actions violate our self-image, we do not revise the image; we revise the facts, engaging in the subtle art of self-deception that psychologists have documented with uncomfortable precision. Metacognition, the capacity to observe our own thinking, offers one partial remedy, but introspection is itself a fallible instrument: we confabulate motives, misdate memories, and retrospectively impose coherence on choices that were made impulsively. Rumination, that relentless rehearsal of perceived slights and failures, compounds the problem by embedding distorted narratives ever more deeply into our sense of who we are. What is remarkable is not that we deceive ourselves but that we do so with such conviction, constructing elaborate justifications that survive repeated social challenge. Resilience, properly understood, may depend less on positive illusions about the self than on a willingness to hold the self lightly—to entertain the possibility that the witness is unreliable. The philosophical tradition from Montaigne to contemporary cognitive science converges on a single, disquieting conclusion: self-knowledge is not a possession but a practice, never fully achieved.`,
       breakdown: [
-        { sentence: 'The problem is structural: the processes that actually drive our behaviour are, for the most part, not accessible to conscious inspection.', words: [{w:'structural',ar:'بنيوي'},{w:'accessible',ar:'يمكن الوصول إليه'},{w:'confabulate',ar:'يُلفّق / يُبرّر لاشعورياً'}], meaning: 'التمييز المحوري: الجهل عن المعرفة الذاتية ليس تقصيراً يُعالَج بمزيد من الانتباه بل مشكلة بنيوية — العمليات المُحرِّكة للسلوك غير متاحة للفحص الواعي.' },
-        { sentence: 'When we confabulate reasons for our choices — constructing post-hoc explanations that feel like recollections of genuine deliberation — we are not lying; we are genuinely doing the best we can with the limited introspective access we have.', words: [{w:'confabulate',ar:'يُلفّق تفسيرات لاواعية'},{w:'post-hoc',ar:'بعد الحدث'},{w:'deliberation',ar:'تداول / تفكير مقصود'}], meaning: 'التفريق الجوهري: التلفيق ليس كذباً — الشخص يفعل ما بوسعه مع وصول استبطاني محدود؛ هذا يُغيّر الحكم الأخلاقي والعلاجي.' },
-        { sentence: 'If self-deception is structural rather than wilful, how can we be blamed for maintaining it? The philosophical tradition has assumed that self-knowledge is the precondition for self-transformation.', words: [{w:'wilful',ar:'متعمّد'},{w:'precondition',ar:'شرط مسبق'},{w:'oblique',ar:'ملتوٍ / غير مباشر'}], meaning: 'المعضلة الأخلاقية: إذا كان الخداع الذاتي بنيوياً لا متعمداً، كيف يُمكن إلقاء اللوم؟ الفلسفة افترضت معرفة الذات شرطاً للتحوّل — لكن الأدلة تُشير لمسارات تحوّل أكثر التواءً.' },
-        { sentence: 'The metacognitive knowledge that we are systematically biased, self-deceiving, and confabulating is itself a resource. Knowing that our introspective access is limited changes how we hold our self-knowledge: more lightly, more provisionally, more open to disconfirmation.', words: [{w:'provisionally',ar:'باستثناءات / بشكل مؤقت'},{w:'disconfirmation',ar:'التفنيد / النقض'},{w:'metacognitive',ar:'ما وراء معرفي'}], meaning: 'التحوّل من اليأس للأداة: ما وراء المعرفة بحدود الاستبطان هو ذاتها موردٌ — تُحوّل طريقة حملنا للمعرفة الذاتية: بخفّة، وبشكل مؤقت، ومنفتحين على التفنيد. الختام يُبرهن ولا يُريح.' },
+        {
+          sentence: 'The self we present to others is, in large measure, a story—a narrative identity assembled from memory, aspiration, and the selective forgetting of inconvenient truths.',
+          words: [{w:'narrative identity',ar:'الهوية السردية'},{w:'selective forgetting',ar:'النسيان الانتقائي'}],
+          meaning: 'Our sense of self is not a given but a constructed story we tell, shaped partly by what we choose not to remember.'
+        },
+        {
+          sentence: 'Cognitive dissonance theory suggests that when our actions violate our self-image, we do not revise the image; we revise the facts, engaging in the subtle art of self-deception that psychologists have documented with uncomfortable precision.',
+          words: [{w:'cognitive dissonance',ar:'التنافر المعرفي'},{w:'self-deception',ar:'الخداع الذاتي'}],
+          meaning: 'Rather than updating our self-concept to match reality, we distort reality to protect the self-concept—a mechanism well-established in psychology.'
+        },
+        {
+          sentence: 'Metacognition, the capacity to observe our own thinking, offers one partial remedy, but introspection is itself a fallible instrument: we confabulate motives, misdate memories, and retrospectively impose coherence on choices that were made impulsively.',
+          words: [{w:'metacognition',ar:'ما وراء الإدراك'},{w:'introspection',ar:'الاستبطان / الفحص الذاتي'}],
+          meaning: `Even the tool of self-observation is imperfect, because looking inward does not guarantee accurate findings about one's own mental processes.`
+        },
+        {
+          sentence: 'Rumination, that relentless rehearsal of perceived slights and failures, compounds the problem by embedding distorted narratives ever more deeply into our sense of who we are.',
+          words: [{w:'rumination',ar:'الاجترار الذهني / التفكير المتكرر'}],
+          meaning: 'Obsessive mental replay of negative experiences strengthens false or distorted self-narratives rather than resolving them.'
+        },
+        {
+          sentence: 'What is remarkable is not that we deceive ourselves but that we do so with such conviction, constructing elaborate justifications that survive repeated social challenge.',
+          words: [{w:'elaborate justifications',ar:'مبررات متقنة'}],
+          meaning: 'The tenacity of self-deception is striking: we maintain our distorted stories even when others consistently contradict them.'
+        },
+        {
+          sentence: 'Resilience, properly understood, may depend less on positive illusions about the self than on a willingness to hold the self lightly—to entertain the possibility that the witness is unreliable.',
+          words: [{w:'resilience',ar:'المرونة النفسية / الصمود'}],
+          meaning: 'Genuine psychological resilience may require epistemic humility about the self rather than confident self-belief.'
+        },
+        {
+          sentence: 'The philosophical tradition from Montaigne to contemporary cognitive science converges on a single, disquieting conclusion: self-knowledge is not a possession but a practice, never fully achieved.',
+          words: [{w:'self-knowledge',ar:'معرفة الذات'}],
+          meaning: 'Across centuries of inquiry, the consensus is that knowing oneself is an ongoing and inherently incomplete endeavour.'
+        }
       ]
     },
     listening: {
@@ -316,20 +366,45 @@ This is not counsel of despair. The partial self-knowledge that is available to 
       ]
     },
     reading: {
-      passage: `On What We Owe the Non-Human World
+      passage: `The Anthropocene and the Ethics of Finitude
 
-The central question of environmental ethics is also the most radical: does the natural world — species, ecosystems, rivers, mountains — have value independent of its usefulness to human beings? Or is nature valuable only insofar as it serves human ends?
-
-The dominant tradition in Western ethics has been anthropocentric: it has extended moral consideration to human beings and, in recent centuries, to some non-human animals on the basis of their sentience. But it has generally not extended moral consideration to species as such (which cannot feel anything), to ecosystems (which are processes, not subjects), or to the non-living natural world. For this tradition, environmental concern is justified by the services that nature provides to human beings; the tragedy of extinction is that we lose a resource.
-
-Deep ecologists argue that this is not merely insufficient but mistaken. The value of a species or an ecosystem does not consist in what it does for us; it exists in its own right. On this view, the extinction of the last passenger pigeon was a moral tragedy not because it deprived anyone of a resource but because it was the permanent elimination of a unique form of life — an irreversible foreclosing of possibility that has value in itself.
-
-The difficulty with this view is specifying what kind of thing bears intrinsic value and why. Individual animals are plausible bearers of value because they can suffer and flourish. Species and ecosystems are harder: they are not conscious, cannot suffer, and have no interests in the ordinary sense. Aldo Leopold's response — to extend the concept of moral community to include "soils, waters, plants, and animals, or what we may collectively call the land" — has been influentially developed, but it requires a significant revision of the individualist assumptions underlying most ethical thinking.`,
+We have entered the Anthropocene—a geological epoch defined by the capacity of a single species to reshape the planetary systems on which all life depends—yet our moral frameworks remain stubbornly anthropocentric, designed for a world in which human action had only local consequence. Deep ecology challenges this parochialism by insisting that the intrinsic value of non-human life is not contingent on its utility to us, a challenge that intergenerational justice extends in temporal as well as biological terms: what we owe the unborn is not merely a liveable climate but intact ecosystems capable of supporting biodiversity at a scale we have not yet devastated. The concept of ecological grief has entered clinical and cultural discourse as communities witness the disappearance of species, glaciers, and landscapes that formed the texture of their collective memory—losses that cannot be measured in economic units alone. Rewilding initiatives, which seek to restore predator-prey dynamics and allow succession to proceed without human management, represent a practical attempt to honour deep ecology's insistence on non-human agency. Yet rewilding also surfaces the contradictions within our ambition: we can only restore wildness by managing it, only protect nature by deciding which version of it to preserve. The scale of biodiversity collapse now underway suggests that incremental environmental policy, calibrated to human comfort, is structurally inadequate to the challenge. What the Anthropocene demands is not merely better technology but a transformation in the moral imagination—a willingness to conceive of ourselves as one stakeholder among many in a community that extends across species and generations.`,
       breakdown: [
-        { sentence: 'Does the natural world have value independent of its usefulness to human beings? Or is nature valuable only insofar as it serves human ends?', words: [{w:'anthropocentric',ar:'مُتمحوِر حول الإنسان'},{w:'sentience',ar:'الإحساس / القدرة على الشعور'},{w:'intrinsic value',ar:'القيمة الذاتية'}], meaning: 'السؤال المركزي للأخلاق البيئية بُني في صياغتين متقابلتين — القيمة المستقلة (عن الإنسان) مقابل القيمة الأداتية؛ الإجابة تُحدّد نطاق الاعتبار الأخلاقي والالتزامات التي تنجم عنه.' },
-        { sentence: 'The tragedy of extinction, for this tradition, is that we lose a resource. Deep ecologists argue that this is not merely insufficient but mistaken.', words: [{w:'extinction',ar:'الانقراض'},{w:'passenger pigeon',ar:'الحمام المهاجر'},{w:'foreclosing of possibility',ar:'إغلاق دائم للإمكانية'}], meaning: 'التقابل: التقليد السائد يُرثى انقراض نوع كخسارة موارد؛ الإيكولوجيا العميقة: هذا ليس ناقصاً بل مخطئاً — القيمة الذاتية للنوع مستقلة عن نفعه، وانقراضه إغلاق لا تُعوَّض إمكانية.' },
-        { sentence: 'The difficulty is specifying what kind of thing bears intrinsic value and why. Individual animals are plausible bearers of value because they can suffer and flourish.', words: [{w:'plausible',ar:'معقول'},{w:'bearers of value',ar:'حاملو القيمة'},{w:'individualist assumptions',ar:'افتراضات فردانية'}], meaning: 'المعضلة الفلسفية: الأنواع والنظم البيئية غير واعية ولا تشعر ولا لها مصالح بالمعنى المعتاد — تمديد القيمة الذاتية إليها يتطلب مراجعة جذرية للافتراضات الفردانية في معظم الأخلاق.' },
-        { sentence: 'Leopold\'s response — to extend the concept of moral community to include soils, waters, plants, and animals — requires a significant revision of the individualist assumptions underlying most ethical thinking.', words: [{w:'biotic community',ar:'المجتمع الحيوي'},{w:'integrity',ar:'النزاهة / السلامة'},{w:'revision',ar:'مراجعة جذرية'}], meaning: 'أخلاقيات الأرض (ليوبولد): المجتمع الأخلاقي يتسع ليشمل الأرض بوصفها كلاً حيوياً — ليست نظرية تعالج أجزاء (أفراد) بل كيانات كلية (نظم) كموضوع اهتمام أخلاقي؛ هذا يستلزم أخلاقاً كلانية لا تجميعية.' },
+        {
+          sentence: 'We have entered the Anthropocene—a geological epoch defined by the capacity of a single species to reshape the planetary systems on which all life depends—yet our moral frameworks remain stubbornly anthropocentric, designed for a world in which human action had only local consequence.',
+          words: [{w:'Anthropocene',ar:'الأنثروبوسين / عصر الإنسان'},{w:'anthropocentrism',ar:'المركزية البشرية'}],
+          meaning: 'Although humanity now alters Earth-wide systems, our ethics still assume that human concerns are the only ones that ultimately matter.'
+        },
+        {
+          sentence: 'Deep ecology challenges this parochialism by insisting that the intrinsic value of non-human life is not contingent on its utility to us, a challenge that intergenerational justice extends in temporal as well as biological terms.',
+          words: [{w:'deep ecology',ar:'البيئية العميقة'},{w:'intergenerational justice',ar:'العدالة بين الأجيال'}],
+          meaning: 'Radical ecological thought and justice theory together broaden the moral circle beyond present humans to include other species and future people.'
+        },
+        {
+          sentence: 'The concept of ecological grief has entered clinical and cultural discourse as communities witness the disappearance of species, glaciers, and landscapes that formed the texture of their collective memory.',
+          words: [{w:'ecological grief',ar:'الحزن البيئي'}],
+          meaning: 'The loss of natural environments generates genuine mourning in communities for whom those environments were meaningful and identity-defining.'
+        },
+        {
+          sentence: `Rewilding initiatives, which seek to restore predator-prey dynamics and allow succession to proceed without human management, represent a practical attempt to honour deep ecology's insistence on non-human agency.`,
+          words: [{w:'rewilding',ar:'إعادة التوحش / التبرية'}],
+          meaning: 'Programmes that reintroduce large fauna and reduce human intervention embody the philosophical commitment to letting nature govern itself.'
+        },
+        {
+          sentence: 'Yet rewilding also surfaces the contradictions within our ambition: we can only restore wildness by managing it, only protect nature by deciding which version of it to preserve.',
+          words: [{w:'contradictions',ar:'تناقضات'}],
+          meaning: 'The paradox of conservation is that the very human agency we wish to reduce must be exercised in order to achieve that reduction.'
+        },
+        {
+          sentence: 'The scale of biodiversity collapse now underway suggests that incremental environmental policy, calibrated to human comfort, is structurally inadequate to the challenge.',
+          words: [{w:'biodiversity',ar:'التنوع البيولوجي'}],
+          meaning: 'The speed and extent of species loss indicate that modest, politically convenient environmental measures cannot address the underlying crisis.'
+        },
+        {
+          sentence: 'What the Anthropocene demands is not merely better technology but a transformation in the moral imagination—a willingness to conceive of ourselves as one stakeholder among many in a community that extends across species and generations.',
+          words: [{w:'moral imagination',ar:'الخيال الأخلاقي'}],
+          meaning: 'Responding adequately to ecological crisis requires a fundamental shift in how we picture our obligations and our place in the living world.'
+        }
       ]
     },
     listening: {
@@ -440,20 +515,43 @@ The difficulty with this view is specifying what kind of thing bears intrinsic v
       ]
     },
     reading: {
-      passage: `What Fiction Does That Argument Cannot
+      passage: `The Novel as a Machine for Feeling Otherwise
 
-Philosophy argues; fiction shows. This is not a trivial distinction. When a philosophical argument establishes that poverty diminishes human dignity, it establishes a general claim that is either true or false. When a novel explores a character's experience of poverty with patient, loving specificity, it accomplishes something else: it makes the claim vivid, particular, emotionally present. It generates not the knowledge that poverty harms but the felt experience of what that harm is like for this person, in this place, at this time.
-
-The philosophical question is whether this is a cognitive achievement or merely an affective one. Martha Nussbaum argues that it is irreducibly cognitive: the imagination of particular situations, with all their complexity and contingency, is a form of knowledge that abstract argument cannot replicate. To imagine oneself into another life — fully, specifically, with emotional engagement — is to learn something about what that life is like that propositional knowledge cannot capture.
-
-The counterclaim is that fiction's particularity is also its limitation. A novel about poverty in nineteenth-century London illuminates something; but it also selects, stylises, and shapes its material in ways that may produce understanding of one very specific kind of poverty while obscuring the structural conditions that generate poverty in general. The felt particular may be the enemy of the structural analysis that genuine understanding requires.
-
-Perhaps both are right. The imagination of the particular and the analysis of the structural are not alternatives but complements — and a literature adequate to the complexity of social life will require both. The mistake is to treat either kind of understanding as sufficient on its own: to retreat into the felt particular while ignoring structural conditions, or to theorise those conditions while losing the concreteness of individual experience.`,
+A character's interior life, rendered through free indirect discourse, occupies a strange phenomenological position: it is neither the author's voice nor the character's own, but a third space in which the reader experiences thoughts that are not their own as though they were. This technique of defamiliarisation—making the familiar strange—is one of the novel's most powerful ethical instruments, because it solicits imaginative identification with minds that differ from the reader's own in history, desire, and moral assumption. Close reading attends to the texture of this solicitation: the grammar that hesitates, the image that accumulates resonance across chapters, the moment at which catharsis threatens to collapse into sentimentality and the author pulls back. Intertextuality deepens the effect, as allusions to prior texts layer meaning that readers may or may not retrieve, producing a text that is different for every informed reader who enters it. The unreliable narrator, a figure who cannot be trusted to report accurately on events or motives, makes this interpretive instability explicit, forcing readers into active epistemological work rather than passive reception. Where the grotesque erupts—in bodies distorted by poverty, violence, or political deformation—the novel refuses the consolations of beauty, insisting that certain realities resist aesthetic redemption. What literature can do, and argument cannot, is make the reader feel the weight of a life before they are asked to judge it.`,
       breakdown: [
-        { sentence: 'Philosophy argues; fiction shows. When a novel explores a character\'s experience with patient, loving specificity, it makes the claim vivid, particular, emotionally present.', words: [{w:'specificity',ar:'التحديد / الخصوصية'},{w:'vivid',ar:'حيّ / واضح'},{w:'propositional knowledge',ar:'معرفة قضوية'}], meaning: 'التمييز الجوهري: الفلسفة تُقيم ادعاءات عامة؛ الرواية تُجسّد الادعاء بخصوصية محبّة وتجعله حاضراً عاطفياً — "not the knowledge THAT but the felt experience of WHAT" — تمييز معرفي دقيق بين نوعَي المعرفة.' },
-        { sentence: 'Nussbaum argues that imagination of particular situations is a form of knowledge that abstract argument cannot replicate — to imagine oneself into another life fully is to learn something that propositional knowledge cannot capture.', words: [{w:'contingency',ar:'الطارئية / الصدفية'},{w:'replicate',ar:'تستنسخ / تُعيد إنتاج'},{w:'irreducibly',ar:'باختزال مستحيل'}], meaning: 'موقف نوسباوم: الخيال الخاص معرفي لا مجرد وجداني — "irreducibly cognitive" يرفض اختزاله لإثارة عاطفية؛ التخيّل التام لحياة أخرى يُكسب معرفة لا تُحصَّل بالادعاء المجرد.' },
-        { sentence: 'Fiction\'s particularity is also its limitation. The felt particular may be the enemy of the structural analysis that genuine understanding requires.', words: [{w:'stylises',ar:'يُسلوب / يُشكّل جمالياً'},{w:'structural conditions',ar:'الشروط البنيوية'},{w:'obscuring',ar:'يُعتّم على'}], meaning: 'النقيض المُقلق: الخصوصية الروائية تُضيء نوعاً محدداً من المعاناة وقد تُعتّم على الشروط البنيوية العامة — "the felt particular may be the enemy of the structural" يُثير التوتر بين التجسيد والتحليل.' },
-        { sentence: 'The imagination of the particular and the analysis of the structural are complements, not alternatives — a literature adequate to social life requires both.', words: [{w:'complements',ar:'مُتكاملان'},{w:'retreat',ar:'الانسحاب'},{w:'adequate to',ar:'ملائم لـ / كافٍ لـ'}], meaning: 'الحل بتجاوز الثنائية: لا تعارض بين الخاص والبنيوي بل تكامل — الأدب الكافي للتعقيد الاجتماعي يستلزم كليهما؛ الخطأ الاختزال (الانغماس في الخاص أو الاكتفاء بالنظرية البنيوية).' },
+        {
+          sentence: `A character's interior life, rendered through free indirect discourse, occupies a strange phenomenological position: it is neither the author's voice nor the character's own, but a third space in which the reader experiences thoughts that are not their own as though they were.`,          words: [{w:'free indirect discourse',ar:'الخطاب غير المباشر الحر'}],
+          meaning: `Free indirect discourse creates a blended narrative mode that uniquely positions readers inside a character's consciousness without full immersion.`
+        },
+        {
+          sentence: `This technique of defamiliarisation—making the familiar strange—is one of the novel's most powerful ethical instruments, because it solicits imaginative identification with minds that differ from the reader's own in history, desire, and moral assumption.`,          words: [{w:'defamiliarisation',ar:'التغريب / جعل المألوف غريباً'}],
+          meaning: 'By rendering the ordinary as strange, literature compels readers to see and feel across experiential and moral difference.'
+        },
+        {
+          sentence: 'Close reading attends to the texture of this solicitation: the grammar that hesitates, the image that accumulates resonance across chapters, the moment at which catharsis threatens to collapse into sentimentality and the author pulls back.',
+          words: [{w:'close reading',ar:'القراءة المتأنية / الدقيقة'},{w:'catharsis',ar:'التطهير العاطفي'}],
+          meaning: `Attentive literary analysis tracks how formal choices—syntax, imagery, emotional pacing—guide the reader's response with precision.`
+        },
+        {
+          sentence: 'Intertextuality deepens the effect, as allusions to prior texts layer meaning that readers may or may not retrieve, producing a text that is different for every informed reader who enters it.',
+          words: [{w:'intertextuality',ar:'التناص'}],
+          meaning: `References to earlier works create accumulated layers of significance that vary depending on the reader's literary knowledge.`
+        },
+        {
+          sentence: 'The unreliable narrator, a figure who cannot be trusted to report accurately on events or motives, makes this interpretive instability explicit, forcing readers into active epistemological work rather than passive reception.',
+          words: [{w:'unreliable narrator',ar:'الراوي غير الموثوق'}],
+          meaning: 'When narrators are demonstrably untrustworthy, readers must actively interrogate what they are told rather than accepting it at face value.'
+        },
+        {
+          sentence: 'Where the grotesque erupts—in bodies distorted by poverty, violence, or political deformation—the novel refuses the consolations of beauty, insisting that certain realities resist aesthetic redemption.',
+          words: [{w:'grotesque',ar:'الغروتيسك / المشوَّه'}],
+          meaning: 'Grotesque imagery forces an encounter with aspects of human experience that cannot be made beautiful or reassuring.'
+        },
+        {
+          sentence: 'What literature can do, and argument cannot, is make the reader feel the weight of a life before they are asked to judge it.',
+          words: [{w:'weight of a life',ar:'ثقل حياة'}],
+          meaning: `Fiction's unique power lies in generating felt understanding of particular lives before any abstract moral assessment takes place.`
+        }
       ]
     },
     listening: {
@@ -563,20 +661,44 @@ Perhaps both are right. The imagination of the particular and the analysis of th
       ]
     },
     reading: {
-      passage: `Structure, Agency, and the Problem of Determinism in Sociology
+      passage: `The Hidden Curriculum of Class
 
-Sociology faces a persistent dilemma: if social structures powerfully shape individual behaviour, how can we maintain any meaningful concept of individual agency or moral responsibility? And if individuals act freely and creatively, how can we explain the remarkable regularities of social life — the consistent patterns of inequality, the predictability of group behaviour, the reproduction of social arrangements across generations?
-
-The structuralist tradition — from Durkheim's social facts to Althusser's ideological state apparatuses — tends to dissolve the individual into social forces: human behaviour is explained by the positions individuals occupy in social structures, not by their intentions, values, or choices. This has the virtue of explaining social regularities and challenging the individualist assumptions of common sense and much economic theory; its weakness is that it seems to leave no room for the kind of purposive, creative, innovative action that is also a manifest feature of social life.
-
-The agency tradition — from Weber's interpretive sociology to symbolic interactionism — insists that social life is constituted by meaningful human action, and that understanding it requires grasping the meanings and intentions of actors rather than the laws of social structures. This has the virtue of taking human consciousness seriously; its weakness is that it can make it difficult to explain structural regularities, systematic inequality, and the reproduction of social arrangements that no individual intended to reproduce.
-
-Bourdieu's attempt at a synthesis — through the concepts of habitus, field, and capital — aims to transcend this antinomy without dissolving either pole: habitus is both structured (produced by objective social conditions) and structuring (generating practices that reproduce those conditions), while remaining the product of a history and therefore theoretically open to change. Whether this synthesis fully resolves the structure-agency problem remains contested.`,
+Every school teaches two curricula: the official one, printed in syllabi and assessed in examinations, and the hidden one, transmitted through the daily experience of which knowledge is valorised, which bodies are at ease, and which futures are imagined as realistic. Pierre Bourdieu's concept of habitus captures the embodied dispositions—the posture, accent, taste, and ambition—that children absorb from family and neighbourhood before they ever enter a classroom, and which the school then rewards as though they were natural talent rather than inherited cultural capital. Symbolic violence operates quietly in this arrangement: students from working-class backgrounds are invited to judge their own underachievement as personal failure rather than structural outcome, internalising the logic of a meritocracy that was never fully real. The iron cage of credentialism reinforces this process, as qualifications become the currency of mobility while simultaneously encoding the cultural preferences of the already-advantaged. Anomie afflicts those who internalise the aspirational norms of social mobility without ever acquiring the means to achieve them—a condition that Merton identified as a structural feature of unequal societies, not an individual pathology. Social mobility data in most advanced economies reveal that the escalator has slowed: the correlation between parental income and child outcome has strengthened, not weakened, in recent decades. To take meritocracy seriously as a principle, rather than as an ideology, would require dismantling the very mechanisms through which class advantage is reproduced in educational form.`,
       breakdown: [
-        { sentence: 'If social structures powerfully shape individual behaviour, how can we maintain any meaningful concept of individual agency or moral responsibility?', words: [{w:'dilemma',ar:'المعضلة'},{w:'regularities',ar:'الانتظامات / الأنماط المنتظمة'},{w:'dissolve',ar:'يُذيب / يُفكّك'}], meaning: 'معضلة التحديد الاجتماعي: إذا شكّلت البنى الاجتماعية السلوك بقوة، كيف نحافظ على مفهوم ذي معنى للفاعلية الفردية والمسؤولية الأخلاقية؟ الثنائية الجوهرية في علم الاجتماع لا حلّ لها سهل.' },
-        { sentence: 'The structuralist tradition tends to dissolve the individual into social forces: behaviour is explained by positions in social structures, not by intentions, values, or choices.', words: [{w:'apparatuses',ar:'أجهزة'},{w:'purposive',ar:'هادف / مقصود'},{w:'manifest',ar:'ظاهر / بيّن'}], meaning: 'الموقف البنيوي وميزته ونقطة ضعفه — يُفسّر الأنماط المنتظمة ويتحدى الفردانية لكنه يُزيح الفاعلية؛ إذا كان الفرد نتاج بنى، من يُبدع ومن يقاوم ومن يُغيّر؟' },
-        { sentence: 'The agency tradition insists social life is constituted by meaningful human action; its weakness is making it difficult to explain structural regularities that no individual intended to reproduce.', words: [{w:'interpretive',ar:'تفسيري / تأويلي'},{w:'symbolic interactionism',ar:'التفاعلية الرمزية'},{w:'antinomy',ar:'تعارض بنيوي / تناقض منطقي'}], meaning: 'موقف الفاعلية وإشكاليته — يأخذ الوعي البشري بجدية لكنه يُصعّب تفسير الأنماط المنتظمة والتفاوت المنهجي. لا أحد يُريد إعادة إنتاج الطبقية لكنها تتجدّد — كيف؟' },
-        { sentence: 'Bourdieu\'s synthesis through habitus, field, and capital aims to transcend this antinomy: habitus is both structured (produced by objective conditions) and structuring (generating practices that reproduce those conditions), while remaining theoretically open to change.', words: [{w:'antinomy',ar:'تعارض بنيوي'},{w:'transcend',ar:'يتجاوز'},{w:'synthesis',ar:'تركيب / توليف'}], meaning: 'محاولة التوليف (بورديو): الهابيتوس مُبنيَّن ومُبنيِّن في آنٍ واحد — ينتجه الشرط الموضوعي ويُنتج ممارسات تُجدّد ذاك الشرط؛ لكن هذا لا يعني الحتمية: تاريخية الهابيتوس تُبقيه نظرياً قابلاً للتغيير.' },
+        {
+          sentence: 'Every school teaches two curricula: the official one, printed in syllabi and assessed in examinations, and the hidden one, transmitted through the daily experience of which knowledge is valorised, which bodies are at ease, and which futures are imagined as realistic.',
+          words: [{w:'hidden curriculum',ar:'المنهج الخفي'}],
+          meaning: 'Beyond formal instruction, schools communicate unstated norms about whose culture, comfort, and aspirations are legitimate.'
+        },
+        {
+          sentence: `Pierre Bourdieu's concept of habitus captures the embodied dispositions—the posture, accent, taste, and ambition—that children absorb from family and neighbourhood before they ever enter a classroom, and which the school then rewards as though they were natural talent rather than inherited cultural capital.`,          words: [{w:'habitus',ar:'الهابيتوس / الملكة الاجتماعية'},{w:'cultural capital',ar:'رأس المال الثقافي'}],
+          meaning: 'Class-based dispositions acquired outside school are treated by educational institutions as evidence of individual merit rather than social inheritance.'
+        },
+        {
+          sentence: 'Symbolic violence operates quietly in this arrangement: students from working-class backgrounds are invited to judge their own underachievement as personal failure rather than structural outcome, internalising the logic of a meritocracy that was never fully real.',
+          words: [{w:'symbolic violence',ar:'العنف الرمزي'},{w:'meritocracy',ar:'الجدارقراطية / الاستحقاقية'}],
+          meaning: 'Ideological domination works by making structural disadvantage appear as personal inadequacy, protecting the legitimacy of inequality.'
+        },
+        {
+          sentence: 'The iron cage of credentialism reinforces this process, as qualifications become the currency of mobility while simultaneously encoding the cultural preferences of the already-advantaged.',
+          words: [{w:'iron cage',ar:'القفص الحديدي'}],
+          meaning: 'Systems of formal qualification, while presented as neutral, tend to favour the cultural styles of dominant social groups.'
+        },
+        {
+          sentence: 'Anomie afflicts those who internalise the aspirational norms of social mobility without ever acquiring the means to achieve them—a condition that Merton identified as a structural feature of unequal societies, not an individual pathology.',
+          words: [{w:'anomie',ar:'الأنومي / انعدام المعيار'}],
+          meaning: 'The gap between socially promised success and structural access to it produces a form of normlessness that is socially generated, not personally chosen.'
+        },
+        {
+          sentence: 'Social mobility data in most advanced economies reveal that the escalator has slowed: the correlation between parental income and child outcome has strengthened, not weakened, in recent decades.',
+          words: [{w:'social mobility',ar:'الحراك الاجتماعي'}],
+          meaning: 'Empirical evidence contradicts meritocratic narratives by showing that family background predicts life outcomes more strongly than it once did.'
+        },
+        {
+          sentence: 'To take meritocracy seriously as a principle, rather than as an ideology, would require dismantling the very mechanisms through which class advantage is reproduced in educational form.',
+          words: [{w:'ideology',ar:'أيديولوجية'}],
+          meaning: 'Genuine commitment to merit-based reward demands confronting and restructuring the class-reproducing functions of the education system.'
+        }
       ]
     },
     listening: {
@@ -686,20 +808,42 @@ Bourdieu's attempt at a synthesis — through the concepts of habitus, field, an
       ]
     },
     reading: {
-      passage: `The Afterlives of Empire
+      passage: `Knowledge and Its Borders
 
-Colonialism ended as a formal system of governance in the twentieth century. It has not ended as a set of structures, practices, and mentalities that continue to shape the distribution of power, wealth, and recognition in the world. The decolonisation of political institutions did not automatically produce the decolonisation of epistemologies, economies, or imaginations. The question of what to do with the afterlives of empire is not merely historical; it is urgently present.
-
-Consider the question of reparations. The argument for reparations for transatlantic slavery and colonial plunder is not that contemporary governments are morally guilty in the same sense as their predecessors, but that they are the beneficiaries of unjust historical processes and that justice requires addressing the ongoing effects of those processes. This argument encounters powerful objections: why should people who were not born when the injustice occurred pay for what their ancestors did? How can damages be calculated? Do reparations address symptoms rather than causes?
-
-These are serious objections. But they prove less than they appear to. The fact that individuals are not personally guilty does not mean that institutions are not responsible; corporations and states are the kinds of entities that can have ongoing responsibilities arising from their histories. The difficulty of calculating damages is a reason for humility about the scale and form of reparation, not a reason for abandoning the project. And the distinction between symptoms and causes is less sharp than it seems: the economic disadvantage of Black communities in the United States, for instance, is causally connected to the specific economic policies — slavery, Jim Crow, redlining — that produced it.
-
-The deeper challenge of postcolonial reckoning is not legal or economic but epistemological: it requires those who have benefited from colonial frameworks to subject those very frameworks to scrutiny, to take seriously knowledge produced outside them, and to entertain the possibility that what looks like universal reason from the inside of a tradition may be particular from the outside.`,
+Edward Said's Orientalism diagnosed a structural relationship between knowledge and power: the colonial archive did not merely describe the non-Western world but constituted it as an object of knowledge available for administration, reform, and eventual incorporation into the imperial order. Miranda Fricker's concept of epistemic injustice extends this analysis inward, identifying the ways in which subaltern speakers are denied credibility not because their testimony is false but because the listener's interpretive frameworks—shaped by race, gender, and class—cannot accommodate what they report. Decolonisation, as an epistemological rather than purely political project, requires dismantling the hierarchies that determine whose knowledge counts, an effort that encounters resistance from institutions whose legitimacy depends on the existing ordering of intellectual authority. Homi Bhabha's notion of hybridity complicates both colonial and anti-colonial narratives by insisting that the contact zone between cultures produces something new in both directions—identities and knowledges that are neither purely metropolitan nor purely peripheral. Settler colonialism presents a distinct challenge to decolonial thought because it did not merely exploit indigenous labour but sought to eliminate indigenous presence and replace it with a permanent settler society, making the question of what decolonisation means materially rather than only discursively urgent. The concept of epistemic privilege—the idea that structural position grants distinctive insight into the workings of power—has animated both feminist standpoint theory and critical race scholarship, though its limits are debated wherever identity is treated as guaranteeing rather than informing knowledge. What these traditions share is a refusal to treat knowledge as the innocent product of individual rational inquiry, insisting instead that knowing is always situated, always partial, always already political.`,
       breakdown: [
-        { sentence: 'Colonialism ended as a formal system of governance. It has not ended as a set of structures, practices, and mentalities that continue to shape the distribution of power, wealth, and recognition.', words: [{w:'afterlives',ar:'المراحل اللاحقة / آثار البقاء'},{w:'epistemologies',ar:'معرفيات / نظم المعرفة'},{w:'reckoning',ar:'محاسبة / تصفية حسابات'}], meaning: 'التمييز المركزي: انتهى الاستعمار الرسمي لم تنتهِ هياكله وممارساته وعقلياته — "afterlives of empire" ليس استعارة شاعرية بل مفهوم تحليلي يُشير لاستمرار التشكيل الاستعماري بعد انتهاء السيطرة الرسمية.' },
-        { sentence: 'The argument for reparations is not that contemporary governments are morally guilty as their predecessors, but that they are the beneficiaries of unjust historical processes and that justice requires addressing ongoing effects.', words: [{w:'reparations',ar:'التعويضات / الجبر'},{w:'plunder',ar:'النهب'},{w:'ancestors',ar:'الأجداد'}], meaning: 'إعادة صياغة حجة التعويضات: ليس المسؤولية الشخصية بل الاستفادة من عمليات ظالمة تاريخية وصلة السببية بآثارها المستمرة — تمييز جوهري بين الذنب الأخلاقي الفردي والمسؤولية المؤسسية.' },
-        { sentence: 'The fact that individuals are not personally guilty does not mean that institutions are not responsible; corporations and states are entities that can have ongoing responsibilities arising from their histories.', words: [{w:'beneficiaries',ar:'المستفيدون'},{w:'redlining',ar:'الريدلاينينج (التمييز العقاري ضد الأقليات)'},{w:'humility',ar:'التواضع'}], meaning: 'التفريق بين ذنب الأفراد ومسؤولية المؤسسات — الشركات والدول كيانات ذات تاريخ تنبثق منها مسؤوليات مستمرة؛ الاستدلال بالمسؤولية الفردية لتفادي المسؤولية المؤسسية مغالطة.' },
-        { sentence: 'The deeper challenge of postcolonial reckoning is epistemological: it requires those who benefited from colonial frameworks to subject those frameworks to scrutiny, to take seriously knowledge produced outside them.', words: [{w:'scrutiny',ar:'التدقيق / الفحص الدقيق'},{w:'entertain',ar:'يأخذ بعين الاعتبار / يُبادر النظر'},{w:'particular',ar:'خاص / جزئي'}], meaning: 'الاستنتاج الأعمق: المسؤولية ليست مالية فقط بل إبستيمولوجية — على المستفيدين من الأطر الاستعمارية أن يُخضعوا تلك الأطر ذاتها للفحص وأن يأخذوا بجدية المعرفة المُنتجة خارجها.' },
+        {
+          sentence: `Edward Said's Orientalism diagnosed a structural relationship between knowledge and power: the colonial archive did not merely describe the non-Western world but constituted it as an object of knowledge available for administration, reform, and eventual incorporation into the imperial order.`,          words: [{w:'Orientalism',ar:'الاستشراق'}],
+          meaning: `Said's foundational argument is that Western scholarship on the East was not neutral description but a practice of power that shaped what it claimed only to observe.`
+        },
+        {
+          sentence: `Miranda Fricker's concept of epistemic injustice extends this analysis inward, identifying the ways in which subaltern speakers are denied credibility not because their testimony is false but because the listener's interpretive frameworks cannot accommodate what they report.`,          words: [{w:'epistemic injustice',ar:'الظلم المعرفي'},{w:'subaltern',ar:'التابع / المُهمَّش'}],
+          meaning: 'Epistemic injustice locates harm in the systematic failure to recognise marginalised people as credible sources of knowledge about their own experience.'
+        },
+        {
+          sentence: 'Decolonisation, as an epistemological rather than purely political project, requires dismantling the hierarchies that determine whose knowledge counts, an effort that encounters resistance from institutions whose legitimacy depends on the existing ordering of intellectual authority.',
+          words: [{w:'decolonisation',ar:'إنهاء الاستعمار'}],
+          meaning: 'Intellectual decolonisation challenges the institutional structures that privilege certain ways of knowing over others, not only the political structures of past empires.'
+        },
+        {
+          sentence: `Homi Bhabha's notion of hybridity complicates both colonial and anti-colonial narratives by insisting that the contact zone between cultures produces something new in both directions.`,          words: [{w:'hybridity',ar:'الهجنة / التهجين'},{w:'contact zone',ar:'منطقة التماس الثقافي'}],
+          meaning: 'Cultural encounter does not leave either party unchanged; hybridity names the novel identities and meanings that emerge from that mutual alteration.'
+        },
+        {
+          sentence: 'Settler colonialism presents a distinct challenge to decolonial thought because it did not merely exploit indigenous labour but sought to eliminate indigenous presence and replace it with a permanent settler society.',
+          words: [{w:'settler colonialism',ar:'الاستعمار الاستيطاني'}],
+          meaning: 'Unlike extractive colonialism, settler colonialism aims at elimination and replacement, posing unique questions about what decolonisation can mean in practice.'
+        },
+        {
+          sentence: 'The concept of epistemic privilege—the idea that structural position grants distinctive insight into the workings of power—has animated both feminist standpoint theory and critical race scholarship, though its limits are debated wherever identity is treated as guaranteeing rather than informing knowledge.',
+          words: [{w:'epistemic privilege',ar:'الامتياز المعرفي'}],
+          meaning: 'The claim that social position confers special knowledge is influential but contested, particularly when it risks reducing knowledge claims to identity claims.'
+        },
+        {
+          sentence: 'What these traditions share is a refusal to treat knowledge as the innocent product of individual rational inquiry, insisting instead that knowing is always situated, always partial, always already political.',
+          words: [{w:'situated knowledge',ar:'المعرفة الموضعية'}],
+          meaning: 'Across post-colonial and feminist epistemology, the common thread is that there is no view from nowhere—all knowledge is produced from a particular social location.'
+        }
       ]
     },
     listening: {
@@ -810,20 +954,42 @@ The deeper challenge of postcolonial reckoning is not legal or economic but epis
       ]
     },
     reading: {
-      passage: `The Informational Environment and the Conditions of Democracy
+      passage: `The Attention Economy and the Conditions of Democratic Thought
 
-Democratic theory has always presupposed some minimum conditions for the formation of political opinion: citizens must have access to relevant information, must be capable of evaluating competing claims, and must be able to engage with the views of those who disagree with them. These conditions were never perfectly realised — mass media have always had owners with interests, advertisers with sensitivities, and editors with assumptions — but they were approximated, imperfectly, by the structures of twentieth-century broadcasting and print journalism. The question is whether they survive the present transition.
-
-The structural problem with current digital information environments is not that they contain too much false information — they probably contain no greater proportion of falsehoods than the information environments of previous centuries, which included partisan newspapers, pamphlets, and rumour in abundance. The problem is the combination of personalisation, engagement optimisation, and speed that characterises the platform model. Content is ranked not by its accuracy or its relevance to democratic deliberation but by its capacity to generate engagement — likes, shares, comments, clicks — and engagement is disproportionately generated by content that triggers strong emotional responses: outrage, fear, tribal identification, moral disgust.
-
-This is not primarily a problem of bad actors, though bad actors exploit it effectively. It is a problem of incentive structures: the same mechanisms that recommend the most engaging cat video also recommend the most engaging conspiracy theory. The cat video is harmless; the conspiracy theory, in a political context, may undermine the shared factual foundations on which democratic deliberation depends. The platform has no structural incentive to distinguish between them.
-
-What would it mean to take this problem seriously? It would mean accepting that privately owned platforms with advertising-based business models have structural incentives that are misaligned with democratic epistemics, and that this misalignment cannot be corrected by educating consumers to make better choices within the existing system. It would require structural interventions — in ownership, in algorithmic transparency, in liability regimes, in public media funding — of a kind that existing political coalitions find very difficult to achieve.`,
+Walter Lippmann's early insight—that the pictures in our heads bear only a contingent relationship to the world outside—has found its most alarming validation in the contemporary attention economy, where algorithmic curation selects and sequences information not to inform but to maximise the time a user spends in a state of stimulated engagement. Agenda-setting research demonstrated decades ago that the press does not tell people what to think but what to think about; the shift from editorial gatekeeping to personalised recommendation has radicalised this dynamic, creating filter bubbles in which citizens encounter versions of reality calibrated to their existing beliefs rather than to shared facts. Disinformation flourishes in this environment because it is emotionally resonant and algorithmically rewarded: a fabricated outrage travels faster than a careful correction because it activates the psychological machinery that evolution designed for threat detection, not epistemic evaluation. Habermas's public sphere—the idealised forum of rational deliberation in which private citizens reason together toward public conclusions—presupposes a shared informational commons that the attention economy systematically dismantles. Manufacturing consent, in Chomsky and Herman's analysis, once required institutional coordination between state and media corporations; the current moment suggests that consent can also be manufactured by structures that have no coordinating agenda but whose emergent effects are nonetheless systematically distorting. Democratic theory has always had to contend with the gap between the ideal of the informed citizen and the reality of limited attention, motivated reasoning, and elite manipulation; what is new is the scale and precision with which those limitations can now be exploited. Rebuilding the conditions for democratic thought may require not merely media literacy but structural interventions in the design of the informational environment itself.`,
       breakdown: [
-        { sentence: 'Democratic theory has always presupposed some minimum conditions for the formation of political opinion: citizens must have access to relevant information, evaluate competing claims, and engage with the views of those who disagree.', words: [{w:'presupposed',ar:'افترض مسبقاً'},{w:'approximated',ar:'اقترب من / قارب'},{w:'imperfectly',ar:'بشكل غير كامل'}], meaning: 'افتراضات النظرية الديمقراطية للبيئة المعلوماتية: وصول للمعلومات + القدرة على التقييم + التفاعل مع من يختلفون — استخدام "presupposed" (لا "assumed"): يُشير لشروط ضمنية سابقة للنقاش؛ "approximated, imperfectly" يُقرّ بالفجوة التاريخية بين المثال والواقع.' },
-        { sentence: 'The structural problem is not that digital environments contain too much false information — they probably contain no greater proportion of falsehoods than previous centuries — but the combination of personalisation, engagement optimisation, and speed.', words: [{w:'falsehoods',ar:'الأكاذيب / المعلومات الزائفة'},{w:'proportion',ar:'نسبة'},{w:'disproportionately',ar:'بشكل غير متناسب'}], meaning: 'إعادة تأطير المشكلة: ليست كمية المحتوى الزائف (المشكلة ليست جديدة) بل التركيبة: تخصيص + تحسين التفاعل + السرعة — "no greater proportion than previous centuries" تحرّك من الذعر الأخلاقي للتشخيص البنيوي الدقيق.' },
-        { sentence: 'Content is ranked not by its accuracy or relevance to democratic deliberation but by its capacity to generate engagement — and engagement is disproportionately generated by content triggering outrage, fear, tribal identification, moral disgust.', words: [{w:'tribal identification',ar:'التعرف القبلي / الانتماء الجماعي'},{w:'conspiracy theory',ar:'نظرية المؤامرة'},{w:'misaligned',ar:'غير متوافق / منحرف'}], meaning: 'الآلية المركزية: المحتوى يُصنَّف بالتفاعل لا الدقة؛ والتفاعل يُولّده بشكل غير متناسب المحتوى المُثير للاستجابات العاطفية القوية — "tribal identification, moral disgust" مفردات من علم النفس الأخلاقي (هايدت) تُشخّص ما يستغله نظام الترتيب.' },
-        { sentence: 'What would it mean to take this problem seriously? It would mean accepting that advertising-based platforms have structural incentives misaligned with democratic epistemics — misalignment that cannot be corrected by educating consumers to make better choices within the existing system.', words: [{w:'liability regimes',ar:'أنظمة المسؤولية القانونية'},{w:'algorithmic transparency',ar:'شفافية الخوارزمية'},{w:'epistemics',ar:'المعرفيات / المعايير المعرفية'}], meaning: 'الاستنتاج السياسي: الحل الفردي (محو الأمية الإعلامية) غير كافٍ لأن المشكلة بنيوية — "misaligned with democratic epistemics" عبارة دقيقة: ليس فقط مضرة بالسياسة بل غير متوافقة مع المعايير المعرفية اللازمة لعمل الديمقراطية.' },
+        {
+          sentence: `Walter Lippmann's early insight—that the pictures in our heads bear only a contingent relationship to the world outside—has found its most alarming validation in the contemporary attention economy, where algorithmic curation selects and sequences information not to inform but to maximise engagement.`,          words: [{w:'attention economy',ar:'اقتصاد الانتباه'},{w:'algorithmic curation',ar:'الانتقاء الخوارزمي'}],
+          meaning: `Lippmann's observation that our mental models of reality are constructed rather than given is most sharply confirmed by platforms designed to capture attention rather than convey truth.`
+        },
+        {
+          sentence: 'Agenda-setting research demonstrated decades ago that the press does not tell people what to think but what to think about; the shift from editorial gatekeeping to personalised recommendation has radicalised this dynamic, creating filter bubbles in which citizens encounter versions of reality calibrated to their existing beliefs.',
+          words: [{w:'agenda-setting',ar:'تحديد الأجندة'},{w:'filter bubble',ar:'فقاعة المرشح / الفقاعة المعلوماتية'}],
+          meaning: `Algorithmic personalisation intensifies the media's agenda-setting power by enclosing each user in a self-reinforcing informational world.`
+        },
+        {
+          sentence: 'Disinformation flourishes in this environment because it is emotionally resonant and algorithmically rewarded: a fabricated outrage travels faster than a careful correction because it activates the psychological machinery that evolution designed for threat detection, not epistemic evaluation.',
+          words: [{w:'disinformation',ar:'التضليل المعلوماتي'}],
+          meaning: 'False and inflammatory content spreads rapidly because it exploits cognitive biases rather than meeting standards of accuracy.'
+        },
+        {
+          sentence: `Habermas's public sphere—the idealised forum of rational deliberation in which private citizens reason together toward public conclusions—presupposes a shared informational commons that the attention economy systematically dismantles.`,          words: [{w:'public sphere',ar:'المجال العام'}],
+          meaning: 'The philosophical precondition for democratic deliberation—shared access to common facts—is undermined by an attention economy that fragments rather than unifies the informational environment.'
+        },
+        {
+          sentence: `Manufacturing consent, in Chomsky and Herman's analysis, once required institutional coordination between state and media corporations; the current moment suggests that consent can also be manufactured by structures that have no coordinating agenda but whose emergent effects are nonetheless systematically distorting.`,          words: [{w:'manufacturing consent',ar:'تصنيع القبول / الموافقة'}],
+          meaning: 'Propaganda no longer requires conscious coordination; algorithmic systems can produce distorting effects on public opinion without any conspiratorial intent.'
+        },
+        {
+          sentence: 'Democratic theory has always had to contend with the gap between the ideal of the informed citizen and the reality of limited attention, motivated reasoning, and elite manipulation; what is new is the scale and precision with which those limitations can now be exploited.',
+          words: [{w:'motivated reasoning',ar:'التفكير المدفوع بالدوافع'}],
+          meaning: 'The challenge to democracy from cognitive limitation and manipulation is old; what has changed is the technological capacity to exploit those limitations at mass scale.'
+        },
+        {
+          sentence: 'Rebuilding the conditions for democratic thought may require not merely media literacy but structural interventions in the design of the informational environment itself.',
+          words: [{w:'media literacy',ar:'الثقافة الإعلامية'}],
+          meaning: 'Individual competence in evaluating information is insufficient; the architecture of the informational environment must itself be reformed.'
+        }
       ]
     },
     listening: {
@@ -932,20 +1098,43 @@ What would it mean to take this problem seriously? It would mean accepting that 
       ]
     },
     reading: {
-      passage: `What Art Does That Argument Cannot
+      passage: `The Judgment We Cannot Quite Explain
 
-There is a long tradition of philosophical suspicion about art. Plato thought it epistemically dangerous: by representing the world rather than knowing it, and by appealing to the emotions rather than reason, art cultivated precisely the mental faculties that good thinking required suppressing. Tolstoy thought it morally irresponsible: by making the audience feel profound emotions about fictional characters and situations, it drained the empathetic capacity that should have been directed at real suffering. More recently, Noel Carroll has worried about the way in which skilled aesthetic rhetoric — the way narrative structure, characterisation, and emotional manipulation can make the audience sympathetic to morally dubious positions — gives art a power over moral imagination that it cannot be held accountable for in the way arguments can.
-
-These are serious concerns, and they are not well met by simply insisting on art\'s importance or defending aesthetic autonomy. The claim that art has value independent of its moral and epistemic effects does not address the concern that those effects exist and matter. Art does things to people; the question is what things.
-
-What art does that argument cannot is to make certain kinds of experience available: not to tell us what it is like to be someone else, but to put us in a position where we have to confront the problem of understanding — the specific, irreducible difficulty of another person or situation — rather than being given the understanding ready-made. The best literary fiction does not resolve the ethical and psychological complexity of its characters; it presents that complexity in a form that requires ongoing engagement from the reader, that refuses the cognitive shortcuts that are the price of efficient argument.
-
-This is a claim about art\'s relationship to knowledge that is more modest than the Romantic claim (that art gives us a higher form of knowledge that reason cannot) but more specific than the autonomist claim (that art\'s value is purely formal). It is the claim that certain kinds of understanding can only be achieved through sustained aesthetic engagement — not because art is magical or irrational, but because some things can only be understood by being undergone.`,
+When we stand before a canvas that stops us—not because we understand it but because it will not let us pass—we are in the presence of what Kant called the sublime: an experience that exceeds the categories we bring to it, leaving us simultaneously diminished and enlarged. The culture industry, in Adorno and Horkheimer's analysis, systematically forecloses this encounter by producing aesthetic objects pre-digested for effortless consumption, offering the simulacrum of catharsis without the risk of genuine disturbance. Defamiliarisation is the counter-strategy: art that makes perception labour, that refuses the automatic recognition which habit substitutes for experience, restoring to familiar objects the strangeness that custom has eroded. Close reading of a painting, like close reading of a poem, discovers that the work means differently than it meant at first glance—that the grotesque figure in the corner, initially registered as decorative, is in fact organising the entire emotional logic of the composition. The institutional theory of art, which holds that what counts as art is determined by the practices and declarations of an art world rather than by intrinsic properties, is often taken as a deflationary account; yet it correctly identifies that aesthetic experience is historically and socially embedded, not available to a timeless universal perceiver. Intertextuality operates across visual as well as verbal traditions: a contemporary work's conversation with its predecessors is often more determining of its meaning than any single element within it. What aesthetic experience at its most demanding offers is not pleasure, exactly, but the surprise of encountering a mind that organised the world differently—and the unsettling recognition that the world can be so organised.`,
       breakdown: [
-        { sentence: 'Plato thought art epistemically dangerous: by representing rather than knowing, and appealing to emotions rather than reason, it cultivated precisely the mental faculties that good thinking required suppressing.', words: [{w:'epistemically',ar:'معرفياً / من حيث المعرفة'},{w:'irresponsible',ar:'غير مسؤول'},{w:'accountable',ar:'خاضع للمساءلة'}], meaning: 'الاعتراضات الكلاسيكية على الفن — أفلاطون (خطر معرفي)، تولستوي (خطر أخلاقي)، كارول (قوة خطابية غير خاضعة للمساءلة) — الفقرة تُقدّم الاعتراضات بجدية حقيقية لا لرفضها بسهولة.' },
-        { sentence: 'The claim that art has value independent of its moral and epistemic effects does not address the concern that those effects exist and matter. Art does things to people; the question is what things.', words: [{w:'drained',ar:'استنزف'},{w:'empathetic',ar:'التعاطفي'},{w:'rhetoric',ar:'الخطاب / البلاغة'}], meaning: 'رفض الاستقلالية الجمالية كإجابة كافية: حتى لو أن للفن قيمة مستقلة فهو يُحدث آثاراً على الناس؛ التساؤل الصادق ليس عن الاستقلالية بل عن طبيعة تلك الآثار — "Art does things to people; the question is what things." جملة تُبدِّل الجدل.' },
-        { sentence: 'What art does that argument cannot is to make certain kinds of experience available: not to tell us what it is like to be someone else, but to put us in a position where we have to confront the problem of understanding rather than being given the understanding ready-made.', words: [{w:'irreducible',ar:'لا يمكن اختزاله'},{w:'cognitive shortcuts',ar:'الاختصارات المعرفية'},{w:'undergone',ar:'عُبِر به / اختُبِر'},{w:'sustained',ar:'مستدام / مستمر'}], meaning: 'الادعاء المحوري: الفن لا يُخبرنا ما معنى كون الآخر — يضعنا في موقع نضطر فيه لمواجهة مشكلة الفهم لا تلقّيه جاهزاً. "not to tell us... but to put us in a position where we have to confront" — الفعل التحويلي: من تلقّي للمواجهة.' },
-        { sentence: 'This is a claim about art\'s relationship to knowledge more modest than the Romantic claim (art gives higher knowledge reason cannot) but more specific than the autonomist claim (art\'s value is purely formal). Some things can only be understood by being undergone.', words: [{w:'modest',ar:'متواضع / أقل ادعاءً'},{w:'purely formal',ar:'شكلي بحت'},{w:'undergone',ar:'خُضت / مُررت به'}], meaning: 'التموضع الدقيق: بين مبالغة الرومانسيين (الفن معرفة أسمى) وخواء الاستقلالية (الفن شكل بحت). "some things can only be understood by being undergone" — الخاتمة تُدمج الابستيمولوجيا بالتجربة الجمالية في جملة واحدة بالغة الإيجاز.' },
+        {
+          sentence: 'When we stand before a canvas that stops us—not because we understand it but because it will not let us pass—we are in the presence of what Kant called the sublime: an experience that exceeds the categories we bring to it, leaving us simultaneously diminished and enlarged.',
+          words: [{w:'sublime',ar:'الرفيع / الجليل'}],
+          meaning: 'The sublime names an aesthetic encounter with what overwhelms our faculties of comprehension, producing both awe and a paradoxical sense of expansion.'
+        },
+        {
+          sentence: `The culture industry, in Adorno and Horkheimer's analysis, systematically forecloses this encounter by producing aesthetic objects pre-digested for effortless consumption, offering the simulacrum of catharsis without the risk of genuine disturbance.`,          words: [{w:'culture industry',ar:'صناعة الثقافة'},{w:'catharsis',ar:'التطهير العاطفي'}],
+          meaning: 'Mass cultural production substitutes comfortable emotional release for the unsettling genuine transformation that serious art might provoke.'
+        },
+        {
+          sentence: 'Defamiliarisation is the counter-strategy: art that makes perception labour, that refuses the automatic recognition which habit substitutes for experience, restoring to familiar objects the strangeness that custom has eroded.',
+          words: [{w:'defamiliarisation',ar:'التغريب'}],
+          meaning: 'Art that estranges the familiar restores attentiveness by preventing the shortcuts of habitual perception from short-circuiting genuine encounter.'
+        },
+        {
+          sentence: 'Close reading of a painting, like close reading of a poem, discovers that the work means differently than it meant at first glance—that the grotesque figure in the corner, initially registered as decorative, is in fact organising the entire emotional logic of the composition.',
+          words: [{w:'close reading',ar:'القراءة المتأنية'},{w:'grotesque',ar:'المشوَّه / الغروتيسك'}],
+          meaning: 'Careful, unhurried attention to aesthetic works reveals meanings and structures invisible to first impression.'
+        },
+        {
+          sentence: 'The institutional theory of art, which holds that what counts as art is determined by the practices and declarations of an art world rather than by intrinsic properties, is often taken as a deflationary account; yet it correctly identifies that aesthetic experience is historically and socially embedded.',
+          words: [{w:'institutional theory of art',ar:'النظرية المؤسسية للفن'}],
+          meaning: `Art's status is socially conferred rather than inherent, which contextualises rather than diminishes the significance of aesthetic experience.`
+        },
+        {
+          sentence: `Intertextuality operates across visual as well as verbal traditions: a contemporary work's conversation with its predecessors is often more determining of its meaning than any single element within it.`,          words: [{w:'intertextuality',ar:'التناص'}],
+          meaning: 'Works of art are always in dialogue with earlier works; understanding that dialogue is often essential to understanding the work itself.'
+        },
+        {
+          sentence: 'What aesthetic experience at its most demanding offers is not pleasure, exactly, but the surprise of encountering a mind that organised the world differently—and the unsettling recognition that the world can be so organised.',
+          words: [{w:'aesthetic experience',ar:'التجربة الجمالية'}],
+          meaning: 'The deepest value of art is cognitive and existential: it discloses alternative ways of perceiving and ordering reality.'
+        }
       ]
     },
     listening: {
@@ -1054,20 +1243,42 @@ This is a claim about art\'s relationship to knowledge that is more modest than 
       ]
     },
     reading: {
-      passage: `The Crisis of International Human Rights
+      passage: `Between the Valid and the Just
 
-The international human rights system — the Universal Declaration of 1948, the International Covenants, the treaty bodies, the regional courts, the International Criminal Court — was constructed on the premise that there are rights which all human beings possess simply by virtue of their humanity, rights which states are obligated to protect and which the international community is entitled to enforce when states fail. This premise is both philosophically contested and politically under pressure.
-
-The philosophical contestation is significant. The claim that human rights are universal has been challenged from multiple directions: from relativists who argue that rights reflect particular cultural values rather than universal human nature; from communitarians who argue that the language of individual rights is foreign to societies organised around different conceptions of collective identity and social obligation; and from postcolonial theorists who note that the "universal" rights declared in 1948 were drafted primarily by Western powers and reflect Western liberal assumptions about the relationship between individuals and states.
-
-These are not merely academic disputes. The gap between the universality claimed by human rights discourse and the selectivity with which human rights are actually invoked in international politics — the way in which powerful states can violate rights with impunity while weaker states are sanctioned for lesser violations — is a genuine source of delegitimisation for the human rights project. The accusation of double standards is not merely a rhetorical weapon; it identifies a structural feature of the international order in which the enforcement of universal norms is necessarily filtered through the political interests of powerful states.
-
-Yet the alternative — abandoning the claim to universality and accepting that rights are merely cultural preferences — generates its own difficulties: it removes any principled basis for international solidarity with those whose rights are violated by their own governments, and it provides governments with an inexhaustible supply of cultural-relativist justifications for repression.`,
+Legal positivism's central claim—that the validity of a law is a matter of social fact, not moral merit—has the virtue of clarity and the vice of silence on the question of what we owe to laws that are formally valid but substantively unjust. Natural law traditions respond that an unjust law is no law at all, a proposition that has animated civil disobedience movements from Thoreau to King and that finds contemporary expression in the concept of jus cogens—peremptory norms of international law from which no derogation is permitted, even by state consent. The rule of law, as an ideal, promises that governance will proceed through general, prospective, and publicly known rules rather than through the arbitrary will of officials; habeas corpus and due process are its procedural expressions, guaranteeing that state power over the person will be exercised only through forms subject to scrutiny and challenge. Judicial review extends this logic to legislation itself, empowering courts to strike down statutes that violate constitutional norms, though critics argue that this substitutes the judgment of unelected lawyers for that of democratic majorities. Rawls's veil of ignorance offers a thought experiment for evaluating institutional arrangements: principles chosen by rational agents ignorant of their own position in society would, he argued, tend toward a fair distribution of basic liberties and economic opportunity. Civil disobedience, in Rawls's account, is justified under a nearly just regime when legal channels have been exhausted and the injustice addressed is serious and clear—a formulation that preserves the integrity of the rule of law while acknowledging its imperfection. The deepest tension in legal and political philosophy remains that between the stability that legality provides and the justice that it may, at moments, require us to break.`,
       breakdown: [
-        { sentence: 'The international human rights system was constructed on the premise that there are rights which all human beings possess simply by virtue of their humanity — rights which the international community is entitled to enforce when states fail.', words: [{w:'premise',ar:'مقدمة / افتراض'},{w:'contestation',ar:'طعن / جدل'},{w:'delegitimisation',ar:'تجريد من الشرعية'}], meaning: 'وصف الإطار المفاهيمي للنظام الدولي لحقوق الإنسان: الحقوق تُمتلك بفضل الإنسانية الجوهرية، والمجتمع الدولي له حق التطبيق حين تفشل الدول — "simply by virtue of their humanity" يُبرز الأساس: ليس المواطنة أو العقد.' },
-        { sentence: 'The "universal" rights declared in 1948 were drafted primarily by Western powers and reflect Western liberal assumptions about the relationship between individuals and states.', words: [{w:'relativists',ar:'النسبيون'},{w:'communitarians',ar:'الجماعيتيون'},{w:'impunity',ar:'الإفلات من العقاب'}], meaning: 'الطعون الثلاثة في الكونية: النسبية الثقافية (الحقوق تعكس قيماً ثقافية خاصة)، الجماعية (لغة الحقوق الفردية غريبة عن مجتمعات منظَّمة حول الهوية الجماعية)، ما بعد الاستعمار (الحقوق "الكونية" 1948 صاغتها قوى غربية).' },
-        { sentence: 'The gap between the universality claimed by human rights discourse and the selectivity with which rights are actually invoked — powerful states violate rights with impunity while weaker states are sanctioned — is a genuine source of delegitimisation.', words: [{w:'selectivity',ar:'الانتقائية'},{w:'rhetorical weapon',ar:'سلاح خطابي'},{w:'repression',ar:'القمع'}], meaning: 'الطعن السياسي الأقوى: ازدواجية المعايير ليست خطاباً بل سمة بنيوية للنظام الدولي — تطبيق الأعراف الكونية يُصفَّى ضرورةً عبر المصالح السياسية للدول القوية؛ "genuine source of delegitimisation" يميّز بين الادعاء الإيديولوجي والتشخيص الهيكلي.' },
-        { sentence: 'Yet the alternative — abandoning universality and accepting that rights are merely cultural preferences — removes any principled basis for international solidarity with those whose rights are violated by their own governments, and provides governments with cultural-relativist justifications for repression.', words: [{w:'principled basis',ar:'أساس مبدئي'},{w:'inexhaustible',ar:'لا ينضب'},{w:'solidarity',ar:'التضامن'}], meaning: 'المعضلة الحرجة: التخلي عن الكونية يُزيل الأساس المبدئي للتضامن الدولي ويُمنح الحكومات مبررات لا تنضب للقمع. "inexhaustible supply of cultural-relativist justifications" — استعارة مبتكرة: النسبية الثقافية كمصدر لا ينضب للمبررات.' },
+        {
+          sentence: `Legal positivism's central claim—that the validity of a law is a matter of social fact, not moral merit—has the virtue of clarity and the vice of silence on the question of what we owe to laws that are formally valid but substantively unjust.`,          words: [{w:'legal positivism',ar:'الوضعية القانونية'}],
+          meaning: `The positivist separation of legal validity from moral justification explains the law's structure but leaves open the question of its moral authority.`
+        },
+        {
+          sentence: 'Natural law traditions respond that an unjust law is no law at all, a proposition that has animated civil disobedience movements from Thoreau to King and that finds contemporary expression in the concept of jus cogens.',
+          words: [{w:'natural law',ar:'القانون الطبيعي'},{w:'jus cogens',ar:'القواعد الآمرة (القانون الدولي)'},{w:'civil disobedience',ar:'العصيان المدني'}],
+          meaning: 'The tradition that grounds legal obligation in moral truth provides philosophical support for resistance to unjust laws and for non-derogable international norms.'
+        },
+        {
+          sentence: 'The rule of law, as an ideal, promises that governance will proceed through general, prospective, and publicly known rules rather than through the arbitrary will of officials; habeas corpus and due process are its procedural expressions.',
+          words: [{w:'rule of law',ar:'سيادة القانون'},{w:'habeas corpus',ar:'أمر إحضار الجسد (حق الاستئناف)'},{w:'due process',ar:'الإجراءات القانونية الواجبة'}],
+          meaning: 'The rule of law ideal requires that power be exercised through established, transparent procedures rather than personal or political discretion.'
+        },
+        {
+          sentence: 'Judicial review extends this logic to legislation itself, empowering courts to strike down statutes that violate constitutional norms, though critics argue that this substitutes the judgment of unelected lawyers for that of democratic majorities.',
+          words: [{w:'judicial review',ar:'الرقابة القضائية'}],
+          meaning: 'Constitutional review by courts protects fundamental rights but raises questions about the democratic legitimacy of judicial power over elected legislatures.'
+        },
+        {
+          sentence: `Rawls's veil of ignorance offers a thought experiment for evaluating institutional arrangements: principles chosen by rational agents ignorant of their own position in society would tend toward a fair distribution of basic liberties and economic opportunity.`,          words: [{w:'veil of ignorance',ar:'حجاب الجهل'}],
+          meaning: `By imagining choice without knowledge of one's own social position, Rawls generates principles of justice that are not biased toward the interests of the already-advantaged.`
+        },
+        {
+          sentence: `Civil disobedience, in Rawls's account, is justified under a nearly just regime when legal channels have been exhausted and the injustice addressed is serious and clear—a formulation that preserves the integrity of the rule of law while acknowledging its imperfection.`,          words: [{w:'civil disobedience',ar:'العصيان المدني'}],
+          meaning: 'Principled lawbreaking is compatible with respect for legality when it is selective, public, and responsive to serious injustice that cannot be corrected through ordinary politics.'
+        },
+        {
+          sentence: 'The deepest tension in legal and political philosophy remains that between the stability that legality provides and the justice that it may, at moments, require us to break.',
+          words: [{w:'tension',ar:'توتر / تناقض'}],
+          meaning: 'Law provides order and predictability, but the pursuit of justice sometimes demands defying the very norms that provide those goods.'
+        }
       ]
     },
     listening: {
@@ -1177,20 +1388,43 @@ Yet the alternative — abandoning the claim to universality and accepting that 
       ]
     },
     reading: {
-      passage: `Recognition, Redistribution, and the Limits of Identity
+      passage: `Recognition and Its Discontents
 
-The rise of identity politics has transformed progressive politics in the late twentieth and early twenty-first centuries. Movements centred on race, gender, sexuality, disability, and cultural identity have made claims that were previously invisible or unspeakable into central features of political discourse. This is a genuine achievement: it has extended the scope of democratic politics, given voice to experiences of marginalisation that were previously privatised, and produced real legal and institutional changes.
-
-But it has also generated tensions that deserve honest examination. The most significant is the tension identified by Nancy Fraser: between the politics of recognition (the claim to cultural acknowledgement, respect, and non-denigration of identity) and the politics of redistribution (the claim to economic equality, material provision, and structural transformation of the conditions that produce poverty and disadvantage). Identity-based movements have sometimes displaced rather than supplemented redistributive demands — focusing on representation and recognition at the cultural level while leaving economic structures largely unchallenged.
-
-This displacement is not inevitable. Intersectional frameworks precisely identify the way in which economic disadvantage and cultural misrecognition are mutually constitutive rather than separable: racism is simultaneously a cultural phenomenon and an economic mechanism; sexism operates through both representational denigration and material exclusion. The challenge is to develop political analyses and coalitions capable of addressing both simultaneously.
-
-The deepest problem, however, may be epistemological. Politics organised around identity assumes that shared identity generates shared political interests. But within any identity category, interests diverge: class, gender, and political commitments cut across racial identities; cultural background, education, and economic position cross-cut gender categories. The political task is not to deny the reality of group identity but to think carefully about when and how identity-based solidarity can form the basis for coalitions that are broad enough to achieve structural change.`,
+Charles Taylor's argument that misrecognition—the distorted or absent reflection of a group's identity in the broader culture—constitutes a form of harm has been enormously productive, giving philosophical precision to grievances that liberal frameworks of rights and redistribution struggled to accommodate. Yet the recognition paradigm has also attracted criticism: Nancy Fraser contends that exclusive focus on cultural recognition can displace the redistributive politics necessary to address economic injustice, producing a politics of visibility that leaves material inequality intact. Judith Butler's account of performativity complicates matters further by suggesting that the identities for which recognition is sought are not pre-given essences but effects of the very norms and repetitions through which they are expressed—a genealogy that raises the question of what, precisely, recognition is recognising. Intersectionality, as Kimberlé Crenshaw developed it, insists that gender, race, class, and other axes of identity cannot be analysed separately: the experience of Black women, for instance, is not the experience of Black men plus the experience of white women, but something categorically distinct, invisible to frameworks that treat each axis in isolation. The concept of epistemic privilege—that structural marginalisation grants distinctive insight into the workings of power—animates much intersectional scholarship, though critics note that it can slide into the assumption that identity guarantees rather than informs knowledge claims. Affirmative action policies instantiate one response to structural disadvantage, and the charge of tokenism they attract illustrates the difficulty of any measure that addresses group inequality through individual selection. The deepest question these debates surface is whether recognition and redistribution are ultimately compatible goals, or whether the politics of identity has, by fragmenting solidarities, inadvertently served the interests of the economic order it sought to challenge.`,
       breakdown: [
-        { sentence: 'The rise of identity politics has extended the scope of democratic politics, given voice to previously privatised experiences of marginalisation, and produced real legal and institutional changes.', words: [{w:'privatised',ar:'مُخصخصة / خاصة لا عامة'},{w:'displacement',ar:'الإزاحة'},{w:'mutually constitutive',ar:'مُشكِّلة متبادلة'}], meaning: 'اعتراف صادق بإنجازات سياسات الهوية قبل النقد — "previously privatised" تعبير دقيق: ما كان يُعامَل كمسألة خاصة أصبح سياسياً؛ "extended the scope of democratic politics" يُقرّ بالتوسيع الفعلي لا مجرد التعقيد.' },
-        { sentence: 'Identity-based movements have sometimes displaced rather than supplemented redistributive demands — focusing on representation and recognition at the cultural level while leaving economic structures largely unchallenged.', words: [{w:'supplemented',ar:'أكمَل / أضاف لـ'},{w:'unchallenged',ar:'غير متحدَّى'},{w:'diverge',ar:'يتباعد / يختلف'}], meaning: 'النقد المركزي (فريزر): الإزاحة لا الإكمال — "displaced rather than supplemented" تمييز حاسم يرفض النقد الأيديولوجي المتحيّز ويُشخّص ميلاً وظيفياً؛ "leaving economic structures largely unchallenged" يُحدد ما أُهمل.' },
-        { sentence: 'Intersectional frameworks identify how economic disadvantage and cultural misrecognition are mutually constitutive: racism is simultaneously a cultural phenomenon and an economic mechanism; sexism operates through both representational denigration and material exclusion.', words: [{w:'simultaneously',ar:'في آنٍ واحد'},{w:'denigration',ar:'التشهير / التحقير'},{w:'cross-cut',ar:'يقطع عرضياً / يتقاطع مع'}], meaning: 'الرد على نقد الإزاحة: الإطار التقاطعي يُثبت أن الظاهرتين (الاعتراف وإعادة التوزيع) مُشكِّلتان متبادلتان — "racism is simultaneously a cultural phenomenon and an economic mechanism" نموذج: الجملة الواحدة تُجسّد الحجة.' },
-        { sentence: 'The deepest problem is epistemological: politics organised around identity assumes shared identity generates shared political interests. But within any category, interests diverge: class, gender, and commitments cut across racial identities. The task is not to deny group identity but to think when identity-based solidarity can form coalitions broad enough to achieve structural change.', words: [{w:'epistemological',ar:'معرفي / إبستيمولوجي'},{w:'coalitions',ar:'تحالفات'},{w:'structural change',ar:'التغيير الهيكلي'}], meaning: 'أعمق نقد: المشكلة معرفية — افتراض أن الهوية المشتركة تُنتج مصالح مشتركة خاطئ؛ المصالح تتباعد داخل الفئات. الخاتمة توجيهية: ليس إنكار الهوية بل التفكير في متى وكيف يُمكن للتضامن الهوياتي تشكيل تحالفات واسعة كافية للتغيير الهيكلي.' },
+        {
+          sentence: `Charles Taylor's argument that misrecognition—the distorted or absent reflection of a group's identity in the broader culture—constitutes a form of harm has been enormously productive, giving philosophical precision to grievances that liberal frameworks of rights and redistribution struggled to accommodate.`,          words: [{w:'politics of recognition',ar:'سياسة الاعتراف'},{w:'misrecognition',ar:'سوء الاعتراف'}],
+          meaning: `Taylor's recognition theory formalises the harm done when societies fail to acknowledge or actively distort the identities of marginalised groups.`
+        },
+        {
+          sentence: 'Yet the recognition paradigm has also attracted criticism: Nancy Fraser contends that exclusive focus on cultural recognition can displace the redistributive politics necessary to address economic injustice, producing a politics of visibility that leaves material inequality intact.',
+          words: [{w:'recognition vs redistribution',ar:'الاعتراف مقابل إعادة التوزيع'}],
+          meaning: 'The danger Fraser identifies is that symbolic inclusion can substitute for economic change, making identity politics a vehicle for legitimating rather than challenging inequality.'
+        },
+        {
+          sentence: `Judith Butler's account of performativity complicates matters further by suggesting that the identities for which recognition is sought are not pre-given essences but effects of the very norms and repetitions through which they are expressed.`,          words: [{w:'performativity',ar:'الأدائية / الأداتية'}],
+          meaning: 'If identities are constituted by their performance rather than expressing a prior essence, then recognition politics must grapple with the instability of the very categories it aims to affirm.'
+        },
+        {
+          sentence: 'Intersectionality, as Kimberlé Crenshaw developed it, insists that gender, race, class, and other axes of identity cannot be analysed separately: the experience of Black women is not the experience of Black men plus the experience of white women, but something categorically distinct.',
+          words: [{w:'intersectionality',ar:'التقاطعية'}],
+          meaning: 'Intersectional analysis reveals that multiple axes of oppression interact to produce experiences invisible to single-axis frameworks.'
+        },
+        {
+          sentence: 'The concept of epistemic privilege—that structural marginalisation grants distinctive insight into the workings of power—animates much intersectional scholarship, though critics note that it can slide into the assumption that identity guarantees rather than informs knowledge claims.',
+          words: [{w:'epistemic privilege',ar:'الامتياز المعرفي'}],
+          meaning: 'While social position can yield distinctive perspectives on power, conflating social identity with epistemic authority risks undermining the critical force of the claim.'
+        },
+        {
+          sentence: 'Affirmative action policies instantiate one response to structural disadvantage, and the charge of tokenism they attract illustrates the difficulty of any measure that addresses group inequality through individual selection.',
+          words: [{w:'affirmative action',ar:'التمييز الإيجابي'},{w:'tokenism',ar:'الرمزية الشكلية'}],
+          meaning: 'Policies designed to correct structural inequality through targeted inclusion face the accusation that they address symptoms rather than causes, benefiting individuals without transforming structures.'
+        },
+        {
+          sentence: 'The deepest question these debates surface is whether recognition and redistribution are ultimately compatible goals, or whether the politics of identity has, by fragmenting solidarities, inadvertently served the interests of the economic order it sought to challenge.',
+          words: [{w:'solidarities',ar:'التضامنات'}],
+          meaning: 'At stake in these theoretical debates is a practical question: whether identity-based politics strengthens or weakens the coalitions necessary for structural economic transformation.'
+        }
       ]
     },
     listening: {

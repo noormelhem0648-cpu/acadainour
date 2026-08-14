@@ -2244,90 +2244,72 @@ function AILiveReaction({ score }) {
 }
 
 /* ─── Vocabulary Story Generator ─── */
-const STORY_BANK = {
-  'حوار حياة يومية': [
-    [
-      { speaker: 'Sarah', text: 'Good morning, Mark! How was your weekend?' },
-      { speaker: 'Mark', text: "It was great! I went to the park with my family. What about you?" },
-      { speaker: 'Sarah', text: 'I stayed home. I cooked a big dinner and watched a movie.' },
-      { speaker: 'Mark', text: 'That sounds relaxing. Are you ready for the meeting today?' },
-      { speaker: 'Sarah', text: 'Almost! I just need to review my notes. I feel a little nervous.' },
-      { speaker: 'Mark', text: "Don't worry. You always do a great job. Let's go in together." },
-    ],
-    [
-      { speaker: 'Sarah', text: 'Excuse me, do you know where the library is?' },
-      { speaker: 'Mark', text: 'Yes! Go straight, then turn left at the traffic light.' },
-      { speaker: 'Sarah', text: 'How far is it from here?' },
-      { speaker: 'Mark', text: "About ten minutes on foot. It's next to the post office." },
-      { speaker: 'Sarah', text: 'Thank you so much! You are very helpful.' },
-      { speaker: 'Mark', text: 'No problem! Have a nice day.' },
-    ],
-    [
-      { speaker: 'Sarah', text: 'Hi Mark! What are you having for lunch?' },
-      { speaker: 'Mark', text: 'I ordered a sandwich and a coffee. The food here is delicious.' },
-      { speaker: 'Sarah', text: 'I agree! I usually have a salad, but today I want something warm.' },
-      { speaker: 'Mark', text: 'You should try the soup. It is really good in cold weather.' },
-      { speaker: 'Sarah', text: 'That is a great idea. I will order that!' },
-      { speaker: 'Mark', text: 'Good choice. Enjoy your meal!' },
-    ],
-  ],
-  'قصة مغامرة': [
-    [
-      { speaker: 'Narrator', text: 'It was a dark and stormy night when Sarah and Mark heard a strange sound outside.' },
-      { speaker: 'Sarah', text: 'Did you hear that? Something is moving in the garden!' },
-      { speaker: 'Mark', text: 'I will go and check. Wait here.' },
-      { speaker: 'Narrator', text: 'Mark opened the door slowly. He looked outside carefully.' },
-      { speaker: 'Mark', text: "It is just a cat! A small black cat. It is sitting by the door." },
-      { speaker: 'Sarah', text: 'Oh! The poor thing looks cold. Let us bring it inside.' },
-      { speaker: 'Narrator', text: 'They gave the cat some milk and a warm blanket. That night, they found a new friend.' },
-    ],
-    [
-      { speaker: 'Narrator', text: "Sarah found an old map while cleaning the attic of her grandmother's house." },
-      { speaker: 'Sarah', text: 'Mark, look at this! It says there is hidden treasure near the old oak tree.' },
-      { speaker: 'Mark', text: 'Are you serious? Let us go and find it right now!' },
-      { speaker: 'Narrator', text: 'They grabbed their bags and ran to the garden. The old oak tree stood at the corner.' },
-      { speaker: 'Sarah', text: 'Look! There is a small box under the roots.' },
-      { speaker: 'Mark', text: 'Open it! What is inside?' },
-      { speaker: 'Narrator', text: 'Inside, they found old photographs and letters — the real treasure of family memories.' },
-    ],
-  ],
-  'تقرير إخباري': [
-    [
-      { speaker: 'Reporter', text: 'Good evening. Tonight we cover a special story from the local community.' },
-      { speaker: 'Narrator', text: 'The city opened a new public park today, bringing joy to hundreds of families.' },
-      { speaker: 'Reporter', text: 'The park includes a playground, a walking trail, and a small café.' },
-      { speaker: 'Narrator', text: 'The mayor said this park is a gift to the people of the city.' },
-      { speaker: 'Reporter', text: 'Families from across the neighborhood came to enjoy the opening day celebrations.' },
-      { speaker: 'Narrator', text: 'Local children were the happiest — they now have a safe and beautiful place to play.' },
-    ],
-    [
-      { speaker: 'Reporter', text: 'Breaking news: scientists have discovered a new species of colorful butterfly.' },
-      { speaker: 'Narrator', text: 'The butterfly was found in a tropical forest and has bright blue and green wings.' },
-      { speaker: 'Reporter', text: 'Researchers say this discovery shows that nature still holds many secrets.' },
-      { speaker: 'Narrator', text: 'The team spent three years studying the forest before making this exciting find.' },
-      { speaker: 'Reporter', text: 'The new species has been named after the lead scientist, Dr. Maria Chen.' },
-    ],
-  ],
-  'قصة رومانسية': [
-    [
-      { speaker: 'Sarah', text: 'I cannot believe we met here again. This is our favorite café.' },
-      { speaker: 'Mark', text: 'Some places have a special feeling. I think this one brought us together.' },
-      { speaker: 'Sarah', text: 'Do you remember the first time we sat at this table?' },
-      { speaker: 'Mark', text: 'Of course! You spilled your coffee and I tried to help but made it worse.' },
-      { speaker: 'Sarah', text: 'We laughed for an hour! I knew then that you were someone special.' },
-      { speaker: 'Mark', text: 'And here we are, years later, still laughing at the same table.' },
-    ],
-    [
-      { speaker: 'Sarah', text: 'I got your letter. Did you really mean everything you wrote?' },
-      { speaker: 'Mark', text: 'Every single word. I have wanted to say those things for a long time.' },
-      { speaker: 'Sarah', text: 'I did not know you felt this way. You always seemed so calm.' },
-      { speaker: 'Mark', text: 'I was nervous! Writing a letter felt easier than saying it in person.' },
-      { speaker: 'Sarah', text: 'Well, I am glad you did. Your words made me very happy.' },
-      { speaker: 'Mark', text: 'Really? Then maybe we could have dinner together this weekend?' },
-      { speaker: 'Sarah', text: 'I would love that.' },
-    ],
-  ],
+function _firstSentence(text) {
+  // Extract first sentence and cap at ~120 chars
+  const m = text.match(/^[^.!?]*[.!?]/)
+  const s = m ? m[0].trim() : text.trim()
+  return s.length > 140 ? s.slice(0, 137).replace(/\s\S+$/, '') + '...' : s
 }
+
+function _buildStory(genre, words) {
+  const shuffled = [...words].sort(() => Math.random() - 0.5)
+  const picked = shuffled.slice(0, Math.min(5, words.length))
+
+  if (genre === 'حوار حياة يومية') {
+    const speakers = ['Sarah', 'Mark']
+    const lines = []
+    lines.push({ speaker: 'Sarah', text: `I have been thinking about what we learned today — especially the word "${picked[0].word}".` })
+    picked.forEach((w, i) => {
+      const sp = speakers[i % 2]
+      lines.push({ speaker: sp, text: _firstSentence(w.example) })
+      if (i < picked.length - 1) {
+        const other = speakers[(i + 1) % 2]
+        lines.push({ speaker: other, text: `That is a great example of "${picked[i + 1]?.word || w.word}". Can you say more?` })
+      }
+    })
+    lines.push({ speaker: 'Mark', text: `These are exactly the kinds of words that make the difference in ${words[0]?.arabic ? 'real communication' : 'English'}.` })
+    return lines
+  }
+
+  if (genre === 'قصة مغامرة') {
+    const lines = []
+    lines.push({ speaker: 'Narrator', text: `The journey began unexpectedly — as the best adventures always do.` })
+    picked.forEach((w, i) => {
+      if (i % 2 === 0) {
+        lines.push({ speaker: 'Narrator', text: _firstSentence(w.example) })
+      } else {
+        lines.push({ speaker: i % 4 === 1 ? 'Sarah' : 'Mark', text: _firstSentence(w.example) })
+      }
+    })
+    lines.push({ speaker: 'Narrator', text: `And so they moved forward — carrying new understanding, and the words to express it.` })
+    return lines
+  }
+
+  if (genre === 'تقرير إخباري') {
+    const lines = []
+    lines.push({ speaker: 'Reporter', text: `In today's report, we examine several key ideas that are shaping our world.` })
+    picked.forEach((w, i) => {
+      lines.push({ speaker: i % 2 === 0 ? 'Reporter' : 'Narrator', text: _firstSentence(w.example) })
+    })
+    lines.push({ speaker: 'Reporter', text: `These concepts — ${picked.map(w => `"${w.word}"`).join(', ')} — are essential for understanding today's issues. This has been your evening briefing.` })
+    return lines
+  }
+
+  if (genre === 'قصة رومانسية') {
+    const lines = []
+    lines.push({ speaker: 'Sarah', text: `There are things I have never quite known how to say. But today I learned the right words.` })
+    picked.forEach((w, i) => {
+      lines.push({ speaker: i % 2 === 0 ? 'Sarah' : 'Mark', text: _firstSentence(w.example) })
+    })
+    lines.push({ speaker: 'Mark', text: `Knowing the right word for something — it changes how you see it entirely.` })
+    lines.push({ speaker: 'Sarah', text: `Yes. And how you feel it, too.` })
+    return lines
+  }
+
+  return picked.map((w, i) => ({ speaker: i % 2 === 0 ? 'Sarah' : 'Mark', text: _firstSentence(w.example) }))
+}
+
+const GENRES = ['حوار حياة يومية', 'قصة مغامرة', 'تقرير إخباري', 'قصة رومانسية']
 
 function VocabStoryGen({ words, dayTitle, levelId, allLearnedWords = [] }) {
   const [open, setOpen] = useState(false)
@@ -2335,13 +2317,10 @@ function VocabStoryGen({ words, dayTitle, levelId, allLearnedWords = [] }) {
   const [lines, setLines] = useState([])
   const [usedWords, setUsedWords] = useState([])
 
-  const genres = Object.keys(STORY_BANK)
-
   const generate = () => {
-    const bank = STORY_BANK[genre] || STORY_BANK['حوار حياة يومية']
-    const chosen = bank[Math.floor(Math.random() * bank.length)]
-    setLines(chosen)
-    const allText = chosen.map(l => l.text).join(' ').toLowerCase()
+    const story = _buildStory(genre, words)
+    setLines(story)
+    const allText = story.map(l => l.text).join(' ').toLowerCase()
     setUsedWords(words.filter(w => allText.includes(w.word.toLowerCase())).map(w => w.word))
   }
 
@@ -2367,7 +2346,7 @@ function VocabStoryGen({ words, dayTitle, levelId, allLearnedWords = [] }) {
         <>
           <div className="el-story-title">اختر نوع القصة:</div>
           <div className="el-story-settings">
-            {genres.map(g => (
+            {GENRES.map(g => (
               <button key={g} className={`el-story-setting-btn${genre === g ? ' active' : ''}`} onClick={() => setGenre(g)}>{g}</button>
             ))}
           </div>
