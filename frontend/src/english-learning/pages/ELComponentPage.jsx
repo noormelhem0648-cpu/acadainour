@@ -62,13 +62,22 @@ function VoiceSelector({ onClose }) {
   const [pitch, setPitch] = useState(() => getPitch() ?? 1.0)
 
   useEffect(() => {
+    if (!window.speechSynthesis) return
+    let stopped = false
     const load = () => {
+      if (stopped) return
       const all = window.speechSynthesis.getVoices()
-      setVoices(all.filter(v => v.lang.startsWith('en')))
+      if (all.length) setVoices(all.filter(v => v.lang.startsWith('en')))
     }
-    if (window.speechSynthesis.getVoices().length > 0) load()
+    load()
     window.speechSynthesis.addEventListener('voiceschanged', load)
-    return () => window.speechSynthesis.removeEventListener('voiceschanged', load)
+    // Mobile fallback: poll a few times in case voiceschanged never fires
+    const timers = [100, 500, 1000, 2000, 3500].map(ms => setTimeout(load, ms))
+    return () => {
+      stopped = true
+      window.speechSynthesis.removeEventListener('voiceschanged', load)
+      timers.forEach(clearTimeout)
+    }
   }, [])
 
   const usVoices = voices.filter(v => v.lang === 'en-US' || v.lang.startsWith('en-US')).sort((a, b) => {
@@ -167,7 +176,7 @@ function VoiceSelector({ onClose }) {
         <div className="el-voice-list">
           {currentVoices.length === 0 && (
             <div className="el-voice-empty">
-              لا توجد أصوات متاحة — تأكد من استخدام Chrome أو Edge على Windows
+              جاري تحميل الأصوات... إذا لم تظهر، اضغط على أي زر ▶ لتفعيل الصوت
             </div>
           )}
           {currentVoices.map(v => (
