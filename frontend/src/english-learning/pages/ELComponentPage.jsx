@@ -61,15 +61,18 @@ function VoiceSelector({ onClose }) {
   const [rate, setRate] = useState(() => getRate() ?? 0.9)
   const [pitch, setPitch] = useState(() => getPitch() ?? 1.0)
   const [accentOpen, setAccentOpen] = useState(false)
+  const [activating, setActivating] = useState(false)
+  const [unsupported, setUnsupported] = useState(false)
 
   const loadVoices = () => {
     const all = window.speechSynthesis?.getVoices() || []
-    if (all.length) setVoices(all.filter(v => v.lang.startsWith('en')))
-    return all.length > 0
+    const en = all.filter(v => v.lang.startsWith('en'))
+    if (en.length) setVoices(en)
+    return en.length > 0
   }
 
   useEffect(() => {
-    if (!window.speechSynthesis) return
+    if (!window.speechSynthesis) { setUnsupported(true); return }
     let stopped = false
     const load = () => { if (!stopped) loadVoices() }
     load()
@@ -83,15 +86,27 @@ function VoiceSelector({ onClose }) {
   }, [])
 
   const activateVoices = () => {
-    // iOS requires a real text utterance from a user gesture to expose voices
-    window.speechSynthesis.cancel()
-    const u = new SpeechSynthesisUtterance('Hello')
-    u.volume = 0.01
-    u.onend = () => { loadVoices(); setTimeout(loadVoices, 300) }
-    u.onerror = () => { loadVoices(); setTimeout(loadVoices, 300) }
+    if (activating) return
+    setActivating(true)
+    // Speak a real audible (but brief) utterance — this is the only reliable trigger across all browsers
+    const u = new SpeechSynthesisUtterance('OK')
+    u.rate = 2; u.volume = 0.5
+    const tryLoad = () => {
+      if (loadVoices()) { setActivating(false); return }
+    }
+    u.onend = () => { tryLoad(); setTimeout(tryLoad, 300); setTimeout(tryLoad, 800) }
+    u.onerror = () => { tryLoad(); setTimeout(tryLoad, 300) }
     window.speechSynthesis.speak(u)
-    // also poll
-    [300, 700, 1500].forEach(ms => setTimeout(loadVoices, ms))
+    // aggressive polling after gesture
+    const polls = [400, 900, 1600, 2500, 4000, 6000].map(ms =>
+      setTimeout(() => { if (loadVoices()) setActivating(false) }, ms)
+    )
+    // after 8s if still nothing → browser doesn't support voice listing
+    setTimeout(() => {
+      polls.forEach(clearTimeout)
+      setActivating(false)
+      if (!loadVoices()) setUnsupported(true)
+    }, 8000)
   }
 
   const usVoices = voices.filter(v => v.lang === 'en-US' || v.lang.startsWith('en-US')).sort((a, b) => {
@@ -192,12 +207,33 @@ function VoiceSelector({ onClose }) {
         <div className="el-voice-list">
           {currentVoices.length === 0 && (
             <div className="el-voice-empty">
-              <div style={{ marginBottom: 12, color: 'var(--el-muted)', fontSize: '.85rem', direction: 'rtl' }}>
-                لم تُحمَّل الأصوات بعد
-              </div>
-              <button className="el-voice-activate-btn" onClick={activateVoices}>
-                🎙️ اضغط هنا لتفعيل الأصوات
-              </button>
+              {unsupported ? (
+                <>
+                  <div style={{ fontSize: '2rem' }}>🔊</div>
+                  <div style={{ direction: 'rtl', textAlign: 'center', color: 'var(--el-text)', fontWeight: 700, fontSize: '.95rem' }}>
+                    متصفحك لا يدعم عرض قائمة الأصوات
+                  </div>
+                  <div style={{ direction: 'rtl', textAlign: 'center', color: 'var(--el-muted)', fontSize: '.82rem' }}>
+                    الصوت سيعمل تلقائياً بالصوت الافتراضي للجهاز.<br/>
+                    يمكنك ضبط السرعة والنبرة أدناه.
+                  </div>
+                  <button className="el-nav-btn primary" style={{ marginTop: 8 }} onClick={save}>
+                    💾 حفظ السرعة والنبرة
+                  </button>
+                </>
+              ) : activating ? (
+                <>
+                  <div style={{ fontSize: '1.8rem' }}>⏳</div>
+                  <div style={{ color: 'var(--el-muted)', fontSize: '.88rem', direction: 'rtl' }}>جاري تحميل الأصوات...</div>
+                </>
+              ) : (
+                <>
+                  <div style={{ color: 'var(--el-muted)', fontSize: '.85rem', direction: 'rtl' }}>لم تُحمَّل الأصوات بعد</div>
+                  <button className="el-voice-activate-btn" onClick={activateVoices}>
+                    🎙️ اضغط هنا لتفعيل الأصوات
+                  </button>
+                </>
+              )}
             </div>
           )}
           {currentVoices.map(v => (
