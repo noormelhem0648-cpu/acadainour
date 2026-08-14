@@ -1,43 +1,66 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
 
 export default function OrientLockBtn() {
   const [show, setShow] = useState(false)
-  return (
-    <>
-      <button className="el-icon-btn" title="قفل دوران الشاشة" onClick={() => setShow(true)}>
-        🔄
-      </button>
-      {show && (
-        <div className="el-orient-tip-overlay" onClick={() => setShow(false)}>
-          <div className="el-orient-tip" onClick={e => e.stopPropagation()}>
-            <div className="el-orient-tip-title">🔒 قفل دوران الشاشة</div>
-            <div className="el-orient-tip-body">
+
+  const overlay = show
+    ? createPortal(
+        <div
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)',
+            zIndex: 99999, display: 'flex', alignItems: 'center',
+            justifyContent: 'center', padding: 24,
+          }}
+          onClick={() => setShow(false)}
+        >
+          <div
+            style={{
+              background: 'var(--el-bg2)', borderRadius: 16, padding: '24px 20px 20px',
+              width: '100%', maxWidth: 340, border: '1.5px solid var(--el-border)',
+              boxShadow: '0 8px 32px rgba(0,0,0,.25)',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--el-accent)', marginBottom: 14, direction: 'rtl' }}>
+              🔒 قفل دوران الشاشة
+            </div>
+            <div style={{ direction: 'rtl', lineHeight: 1.7, fontSize: '.9rem', color: 'var(--el-text)' }}>
               {isIOS ? (
-                <div className="el-orient-tip-row">
+                <>
                   🍎 <strong>آيفون / آيباد:</strong><br />
-                  اسحب من الزاوية العلوية اليمنى لفتح Control Center
+                  اسحب من الزاوية العلوية اليمنى ← Control Center<br />
                   ← اضغط على رمز القفل الدائري
-                </div>
+                </>
               ) : (
-                <div className="el-orient-tip-row">
+                <>
                   🤖 <strong>أندرويد:</strong><br />
-                  اسحب من أعلى الشاشة لفتح الإعدادات السريعة
-                  ← اضغط على <strong>"تدوير تلقائي"</strong> لتفعيل أو إيقاف قفل الاتجاه
-                </div>
+                  اسحب من أعلى الشاشة لفتح الإعدادات السريعة<br />
+                  ← اضغط على <strong>"تدوير تلقائي"</strong> لإيقافه
+                </>
               )}
             </div>
             <button
               className="el-nav-btn primary"
-              style={{ marginTop: 12, width: '100%' }}
+              style={{ marginTop: 16, width: '100%' }}
               onClick={() => setShow(false)}
             >
               حسناً
             </button>
           </div>
-        </div>
-      )}
+        </div>,
+        document.body
+      )
+    : null
+
+  return (
+    <>
+      <button className="el-icon-btn" title="قفل دوران الشاشة" onClick={() => setShow(true)}>
+        🔄
+      </button>
+      {overlay}
     </>
   )
 }
