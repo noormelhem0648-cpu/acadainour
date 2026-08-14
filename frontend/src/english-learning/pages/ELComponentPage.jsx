@@ -71,8 +71,17 @@ function VoiceSelector({ onClose }) {
     }
     load()
     window.speechSynthesis.addEventListener('voiceschanged', load)
-    // Mobile fallback: poll a few times in case voiceschanged never fires
-    const timers = [100, 500, 1000, 2000, 3500].map(ms => setTimeout(load, ms))
+    // iOS Safari: voices only load after the first speak() triggered by a user gesture.
+    // The modal opens via a button tap so we're inside a gesture — speak a silent utterance
+    // to force voice loading, then re-check.
+    try {
+      const u = new SpeechSynthesisUtterance('')
+      u.volume = 0
+      u.onend = load
+      window.speechSynthesis.speak(u)
+    } catch (e) {}
+    // Additional polling for slower devices / Android
+    const timers = [100, 500, 1000, 2000, 3500, 6000].map(ms => setTimeout(load, ms))
     return () => {
       stopped = true
       window.speechSynthesis.removeEventListener('voiceschanged', load)
