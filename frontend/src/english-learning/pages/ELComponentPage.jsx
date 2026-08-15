@@ -1875,8 +1875,9 @@ function CorrectionDisplay({ corrections, originalText }) {
   if (!corrections.length) return null
   let highlighted = originalText
   for (const c of corrections) {
+    const escaped = c.original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     highlighted = highlighted.replace(
-      c.original,
+      new RegExp(escaped, 'g'),
       `%%DEL%%${c.original}%%/DEL%%%%INS%%${c.fixed}%%/INS%%`
     )
   }
