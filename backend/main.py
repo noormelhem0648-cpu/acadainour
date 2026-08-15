@@ -496,8 +496,11 @@ def _parse_dt(val, default):
         return default
     import datetime
     try:
-        # Accept "YYYY-MM-DDTHH:MM" (from <input type=datetime-local>) as local→naive UTC
-        return datetime.datetime.fromisoformat(val.replace("Z", ""))
+        # Normalize to UTC naive datetime regardless of input timezone offset
+        dt = datetime.datetime.fromisoformat(val.replace("Z", "+00:00"))
+        if dt.tzinfo is not None:
+            dt = dt.astimezone(datetime.timezone.utc).replace(tzinfo=None)
+        return dt
     except Exception:
         return default
 
