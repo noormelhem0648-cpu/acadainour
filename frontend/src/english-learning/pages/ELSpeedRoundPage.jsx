@@ -26,6 +26,10 @@ export default function ELSpeedRoundPage({ darkMode, setDarkMode }) {
   const [results, setResults] = useState([])
   const [feedback, setFeedback] = useState(null) // {correct, word}
   const timerRef = useRef(null)
+  const scoreRef = useRef(0) // always-current mirror of score for use inside callbacks
+
+  // Keep scoreRef in sync (runs before any effect that reads it)
+  useEffect(() => { scoreRef.current = score }, [score])
 
   // Load best score
   const BEST_KEY = `speed_best_${levelId}_${dayId}`
@@ -65,14 +69,14 @@ export default function ELSpeedRoundPage({ darkMode, setDarkMode }) {
     return () => clearTimeout(t)
   }, [phase, countdown, words, buildOptions])
 
-  // Timer effect
+  // Timer effect — uses setPhase (stable ref) instead of endGame to avoid stale closure
   useEffect(() => {
     if (phase !== 'game') return
     timerRef.current = setInterval(() => {
       setTimeLeft(t => {
         if (t <= 1) {
           clearInterval(timerRef.current)
-          endGame()
+          setPhase('result') // stable setter — no stale score captured
           return 0
         }
         return t - 1
@@ -81,12 +85,15 @@ export default function ELSpeedRoundPage({ darkMode, setDarkMode }) {
     return () => clearInterval(timerRef.current)
   }, [phase])
 
-  const endGame = useCallback(() => {
-    clearInterval(timerRef.current)
-    setPhase('result')
-    progress.addXP?.('speedRound', { score })
-    if (score > bestScore) localStorage.setItem(BEST_KEY, String(score))
-  }, [score, bestScore, BEST_KEY, progress])
+  // Save XP and best score when phase transitions to 'result'.
+  // Reads scoreRef.current which is always up-to-date (synced above, same render).
+  useEffect(() => {
+    if (phase !== 'result') return
+    const finalScore = scoreRef.current
+    progress.addXP?.('speedRound', { score: finalScore })
+    const saved = parseInt(localStorage.getItem(BEST_KEY) || '0')
+    if (finalScore > saved) localStorage.setItem(BEST_KEY, String(finalScore))
+  }, [phase]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const answer = useCallback((opt) => {
     if (chosen || phase !== 'game') return
@@ -102,14 +109,14 @@ export default function ELSpeedRoundPage({ darkMode, setDarkMode }) {
       setChosen(null)
       const nextIdx = currentIdx + 1
       if (nextIdx >= words.length) {
-        setScore(newScore)
-        endGame()
+        if (correct) setScore(newScore) // ensure final score is committed before phase change
+        setPhase('result')              // triggers the save effect above
       } else {
         setCurrentIdx(nextIdx)
         setOptions(buildOptions(words[nextIdx], words))
       }
     }, correct ? 400 : 900)
-  }, [chosen, phase, words, currentIdx, score, endGame, buildOptions])
+  }, [chosen, phase, words, currentIdx, score, buildOptions])
 
   if (!day) return <div className="el-app"><p style={{ padding: 32 }}>Not found.</p></div>
 
