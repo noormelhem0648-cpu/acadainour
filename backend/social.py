@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session
 from jose import jwt, JWTError
 
 from db import get_db, User, Friendship, ChatGroup, GroupMember, SocialMessage, Challenge, ChallengeParticipant
-from auth import get_current_user, SECRET_KEY, ALGORITHM
+from auth import get_current_user, require_user, SECRET_KEY, ALGORITHM
 
 router = APIRouter(prefix="/social", tags=["social"])
 
@@ -140,7 +140,7 @@ class ChallengeProgressBody(BaseModel):
 @router.get("/search")
 def search_users(
     q: str = Query(..., min_length=1),
-    me: User = Depends(get_current_user),
+    me: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     results = (
@@ -159,7 +159,7 @@ def search_users(
 
 @router.get("/friends")
 def list_friends(
-    me: User = Depends(get_current_user),
+    me: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     rows = db.query(Friendship).filter(
@@ -188,7 +188,7 @@ def list_friends(
 @router.post("/friends/request", status_code=201)
 async def send_friend_request(
     body: FriendRequestBody,
-    me: User = Depends(get_current_user),
+    me: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     if body.addressee_id == me.id:
@@ -223,7 +223,7 @@ async def send_friend_request(
 @router.put("/friends/{fid}/accept")
 async def accept_friend_request(
     fid: int,
-    me: User = Depends(get_current_user),
+    me: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     f = db.query(Friendship).get(fid)
@@ -247,7 +247,7 @@ async def accept_friend_request(
 @router.delete("/friends/{fid}")
 def remove_friend(
     fid: int,
-    me: User = Depends(get_current_user),
+    me: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     f = db.query(Friendship).get(fid)
@@ -262,7 +262,7 @@ def remove_friend(
 
 @router.get("/groups")
 def list_groups(
-    me: User = Depends(get_current_user),
+    me: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     memberships = db.query(GroupMember).filter(GroupMember.user_id == me.id).all()
@@ -286,7 +286,7 @@ def list_groups(
 @router.post("/groups", status_code=201)
 def create_group(
     body: GroupCreateBody,
-    me: User = Depends(get_current_user),
+    me: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     g = ChatGroup(name=body.name.strip(), creator_id=me.id)
@@ -302,7 +302,7 @@ def create_group(
 async def add_member(
     gid: int,
     body: AddMemberBody,
-    me: User = Depends(get_current_user),
+    me: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     g = db.query(ChatGroup).get(gid)
@@ -337,7 +337,7 @@ async def add_member(
 def remove_member(
     gid: int,
     uid: int,
-    me: User = Depends(get_current_user),
+    me: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     g = db.query(ChatGroup).get(gid)
@@ -385,7 +385,7 @@ def get_messages(
     chat_id: str,
     before_id: Optional[int] = None,
     limit: int = Query(50, le=100),
-    me: User = Depends(get_current_user),
+    me: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     _assert_chat_access(chat_id, me.id, db)
@@ -408,7 +408,7 @@ def get_messages(
 @router.post("/messages", status_code=201)
 async def send_message(
     body: SendMessageBody,
-    me: User = Depends(get_current_user),
+    me: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     _assert_chat_access(body.chat_id, me.id, db)
@@ -467,7 +467,7 @@ async def send_message(
 
 @router.get("/challenges")
 def list_challenges(
-    me: User = Depends(get_current_user),
+    me: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     rows = db.query(ChallengeParticipant).filter(ChallengeParticipant.user_id == me.id).all()
@@ -507,7 +507,7 @@ def list_challenges(
 @router.post("/challenges", status_code=201)
 async def create_challenge(
     body: ChallengeCreateBody,
-    me: User = Depends(get_current_user),
+    me: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     deadline_dt = None
@@ -534,7 +534,7 @@ async def create_challenge(
 async def invite_to_challenge(
     cid: int,
     body: ChallengeInviteBody,
-    me: User = Depends(get_current_user),
+    me: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     c = db.query(Challenge).get(cid)
@@ -569,7 +569,7 @@ async def invite_to_challenge(
 def update_challenge_progress(
     cid: int,
     body: ChallengeProgressBody,
-    me: User = Depends(get_current_user),
+    me: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     p = db.query(ChallengeParticipant).filter(

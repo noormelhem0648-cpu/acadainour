@@ -3,6 +3,8 @@ import json
 import base64
 import hashlib
 import time
+import datetime
+import secrets
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Depends, Request
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -227,7 +229,6 @@ def login(request: Request, req: LoginRequest, db: Session = Depends(get_db)):
 @app.post("/auth/forgot-password")
 @limiter.limit("5/minute")
 def forgot_password(request: Request, req: ForgotPasswordRequest, db: Session = Depends(get_db)):
-    import secrets, datetime
     email = req.email.lower().strip()
     user = db.query(User).filter(User.email == email).first()
     # Always return success (don't reveal whether email exists)
@@ -253,7 +254,6 @@ def forgot_password(request: Request, req: ForgotPasswordRequest, db: Session = 
 
 @app.post("/auth/reset-password")
 def reset_password(req: ResetPasswordRequest, db: Session = Depends(get_db)):
-    import datetime
     if len(req.new_password) < 6:
         raise HTTPException(status_code=400, detail="كلمة السر لازم 6 أحرف على الأقل.")
     token_hash = hashlib.sha256(req.token.encode()).hexdigest()
@@ -412,7 +412,6 @@ def _is_subject_blocked(subject_code: str, db: Session, user: Optional[User] = N
     """Return active restriction for a subject, or None. Instructors are never blocked."""
     if user is not None and getattr(user, "role", "") == "instructor":
         return None
-    import datetime
     now = datetime.datetime.utcnow()
     return db.query(Restriction).filter(
         Restriction.subject_code == subject_code.upper(),
@@ -448,7 +447,6 @@ def _check_daily_limit(user: User, db: Session):
     """Raise 429 if the user exceeded their daily message quota. Increments on success."""
     if not user:
         return
-    import datetime
     today = datetime.date.today().isoformat()
     # Re-fetch with a row-level lock to prevent race conditions under concurrent requests
     locked_user = db.query(User).filter(User.id == user.id).with_for_update().first()
@@ -476,7 +474,6 @@ def check_restriction(subject_code: str, user: Optional[User] = Depends(get_curr
 
 @app.get("/restrictions")
 def list_restrictions(user: User = Depends(require_instructor), db: Session = Depends(get_db)):
-    import datetime
     now = datetime.datetime.utcnow()
     rows = db.query(Restriction).filter(Restriction.instructor_id == user.id).order_by(Restriction.start_time.desc()).all()
     return [
@@ -496,7 +493,6 @@ def list_restrictions(user: User = Depends(require_instructor), db: Session = De
 def _parse_dt(val, default):
     if not val:
         return default
-    import datetime
     try:
         # Normalize to UTC naive datetime regardless of input timezone offset
         dt = datetime.datetime.fromisoformat(val.replace("Z", "+00:00"))
@@ -509,7 +505,6 @@ def _parse_dt(val, default):
 
 @app.post("/restrictions")
 def create_restriction(req: RestrictionRequest, user: User = Depends(require_instructor), db: Session = Depends(get_db)):
-    import datetime
     now = datetime.datetime.utcnow()
     start = _parse_dt(req.start_time, now)
     end = _parse_dt(req.end_time, now + datetime.timedelta(days=365))
@@ -585,7 +580,7 @@ async def ask_assistant(request: Request, body: ChatRequest, user: User = Depend
             else:
                 convo = db.query(Conversation).filter(Conversation.id == convo_id, Conversation.user_id == user.id).first()
                 if convo:
-                    convo.updated_at = __import__("datetime").datetime.utcnow()
+                    convo.updated_at = datetime.datetime.utcnow()
 
             db.add(Message(conversation_id=convo_id, role="user", content=request.message))
             db.add(Message(conversation_id=convo_id, role="assistant", content=answer))
@@ -640,7 +635,7 @@ async def ask_assistant_stream(request: Request, body: ChatRequest, user: User =
         else:
             convo = db.query(Conversation).filter(Conversation.id == convo_id, Conversation.user_id == user.id).first()
             if convo:
-                convo.updated_at = __import__("datetime").datetime.utcnow()
+                convo.updated_at = datetime.datetime.utcnow()
                 db.commit()
 
     def event_stream():
@@ -838,7 +833,7 @@ async def upload_and_ask_stream(
     else:
         convo = db.query(Conversation).filter(Conversation.id == convo_id, Conversation.user_id == user.id).first()
         if convo:
-            convo.updated_at = __import__("datetime").datetime.utcnow()
+            convo.updated_at = datetime.datetime.utcnow()
             db.commit()
 
     try:
@@ -1034,7 +1029,7 @@ class ProgressSyncRequest(BaseModel):
 
 @app.get("/progress/me")
 def get_progress(
-    me: User = Depends(get_current_user),
+    me: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     p = db.query(StudentProgress).filter(StudentProgress.user_id == me.id).first()
@@ -1057,7 +1052,7 @@ def get_progress(
 @app.put("/progress/me")
 def save_progress(
     req: ProgressSyncRequest,
-    me: User = Depends(get_current_user),
+    me: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     p = db.query(StudentProgress).filter(StudentProgress.user_id == me.id).first()

@@ -671,7 +671,7 @@ Use the mixed Arabic+English style.`;
           const rtl = isRTL(msg.content);
           return (
             <div
-              key={idx}
+              key={msg.time ? `${msg.time}-${idx}` : idx}
               className={"message " + (msg.role === "user" ? "user-message" : "assistant-message") + (msg.isError ? " error-message" : "")}
               dir={rtl ? "rtl" : "ltr"}
               style={{ textAlign: rtl ? "right" : "left" }}
