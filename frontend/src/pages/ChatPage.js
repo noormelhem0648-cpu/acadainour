@@ -47,6 +47,25 @@ const LOADING_STEPS = [
   "توليد الإجابة..."
 ];
 
+const FILE_LOADING_STEPS = [
+  "جاري رفع الملف...",
+  "قراءة المحتوى...",
+  "تحليل الملف...",
+  "توليد الإجابة..."
+];
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+}
+
+function fileLabel(file) {
+  if (!file) return "";
+  const ext = file.name.split(".").pop().toUpperCase();
+  return `📎 ${file.name} (${ext} · ${formatBytes(file.size)})`;
+}
+
 export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout }) {
   const navigate = useNavigate();
   const { subjectCode } = useParams();
@@ -95,6 +114,10 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
   const textareaRef = useRef(null);
   const messagesRef = useRef(messages);
   const loadingInterval = useRef(null);
+  const abortRef = useRef(null);
+
+  // Cancel any in-flight request when the component unmounts
+  useEffect(() => () => { abortRef.current?.abort(); }, []);
 
   useEffect(() => { messagesRef.current = messages; }, [messages]);
 
@@ -184,20 +207,23 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
     } catch (e) {}
   };
 
-  // Loading step animation
+  const [isFileLoading, setIsFileLoading] = useState(false);
+
+  // Loading step animation — uses file-specific steps when processing a file
   useEffect(() => {
     if (loading) {
       setLoadingStep(0);
       let step = 0;
+      const steps = isFileLoading ? FILE_LOADING_STEPS : LOADING_STEPS;
       loadingInterval.current = setInterval(() => {
-        step = Math.min(step + 1, LOADING_STEPS.length - 1);
+        step = Math.min(step + 1, steps.length - 1);
         setLoadingStep(step);
       }, 2000);
     } else {
       if (loadingInterval.current) clearInterval(loadingInterval.current);
     }
     return () => { if (loadingInterval.current) clearInterval(loadingInterval.current); };
-  }, [loading]);
+  }, [loading, isFileLoading]);
 
   const copyMessage = (text, idx) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -212,7 +238,9 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
 
   const MAX_FILE_MB = 10;
   const ALLOWED_IMAGE = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
-  const ALLOWED_FILE_EXT = [".pdf", ".docx", ".txt", ".pptx", ".xlsx", ".csv"];
+  // DOCX/PPTX/XLSX are listed here so the backend can return a friendly message,
+  // but PDF + TXT/CSV have full content analysis support.
+  const ALLOWED_FILE_EXT = [".pdf", ".txt", ".csv", ".docx", ".pptx", ".xlsx"];
 
   const validateFile = (file, { image }) => {
     if (file.size > MAX_FILE_MB * 1024 * 1024) {
@@ -222,7 +250,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
       if (!ALLOWED_IMAGE.includes(file.type)) return "الصور المسموحة: PNG, JPG, WEBP فقط.";
     } else {
       const ok = ALLOWED_FILE_EXT.some(ext => file.name.toLowerCase().endsWith(ext));
-      if (!ok) return "الملفات المسموحة: PDF, DOCX, TXT, PPTX, XLSX, CSV.";
+      if (!ok) return "الملفات المدعومة: PDF, TXT, CSV (بالكامل) · DOCX, PPTX, XLSX (حوّلها لـ PDF أولاً).";
     }
     return null;
   };
@@ -377,7 +405,27 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
   const sendMessage = async () => {
     if (loading) return;
     if (!input.trim() && !attachedImage && !attachedFile) return;
-    const userMessage = input.trim() || (attachedImage ? "Image attached" : "File attached");
+
+    // Cancel any previous in-flight request
+    abortRef.current?.abort();
+    abortRef.current = new AbortController();
+    const signal = abortRef.current.signal;
+
+    const hasFile = !!(attachedImage || attachedFile);
+    const fileForMsg = attachedImage || attachedFile;
+    const typedText = input.trim();
+
+    // Build user-visible message: show filename + text
+    let userMessage;
+    if (hasFile) {
+      const label = fileLabel(fileForMsg);
+      userMessage = typedText ? `${label}\n${typedText}` : label;
+    } else {
+      userMessage = typedText;
+    }
+    // The actual query sent to the AI is just the typed text (or a default prompt if empty)
+    const aiQuery = typedText || (attachedImage ? "اشرح هذه الصورة" : "حلّل هذا الملف واشرح محتواه");
+
     addMessage("user", userMessage);
     setInput("");
     setLoading(true);
@@ -385,32 +433,62 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
     const currentMsgs = messagesRef.current;
     const historyMsgs = currentMsgs.slice(0, -1);
 
-    if (attachedImage || attachedFile) {
-      // Files use the non-streaming endpoint
+    if (hasFile) {
+      // Stream through /upload-and-ask/stream
+      setIsFileLoading(true);
+      const formData = new FormData();
+      formData.append("subject_code", subjectCode);
+      formData.append("message", aiQuery);
+      formData.append("history", JSON.stringify(historyMsgs.map(m => ({ role: m.role === "assistant" ? "model" : "user", content: m.content }))));
+      formData.append("file", fileForMsg);
+
+      addMessage("assistant", "");
       try {
-        const formData = new FormData();
-        formData.append("subject_code", subjectCode);
-        formData.append("message", userMessage);
-        formData.append("history", JSON.stringify(historyMsgs.map(m => ({ role: m.role === "assistant" ? "model" : "user", content: m.content }))));
-        if (attachedImage) formData.append("file", attachedImage);
-        else if (attachedFile) formData.append("file", attachedFile);
-        const res = await fetch(API_URL + "/upload-and-ask", {
+        const res = await fetch(API_URL + "/upload-and-ask/stream", {
           method: "POST",
           headers: token ? { Authorization: `Bearer ${token}` } : {},
           body: formData,
+          signal,
         });
-        const data = await res.json();
-        addMessage("assistant", data.answer || data.detail || "No response.");
-        clearAttachments();
+        if (!res.ok || !res.body) throw new Error("stream failed");
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n\n");
+          buffer = lines.pop();
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith("data:")) continue;
+            try {
+              const data = JSON.parse(trimmed.slice(5).trim());
+              if (data.type === "chunk") appendToLast(data.text);
+            } catch {}
+          }
+        }
       } catch (err) {
-        addMessage("assistant", "عذراً، حصل خطأ بالاتصال. حاول مرة ثانية. 🔄", { isError: true });
+        if (err.name !== "AbortError") {
+          setMessages(prev => {
+            const copy = [...prev];
+            copy[copy.length - 1] = { role: "assistant", content: "عذراً، حصل خطأ بالاتصال. حاول مرة ثانية. 🔄", time: Date.now(), isError: true };
+            messagesRef.current = copy;
+            return copy;
+          });
+        }
       }
+      clearAttachments();
+      setIsFileLoading(false);
       setLoading(false);
       return;
     }
 
-    // Text message → stream the response
-    await streamInto(userMessage, historyMsgs, "عذراً، حصل خطأ بالاتصال. حاول مرة ثانية. 🔄");
+    // Text-only message → stream the response
+    await streamInto(aiQuery, historyMsgs, "عذراً، حصل خطأ بالاتصال. حاول مرة ثانية. 🔄");
     setLoading(false);
   };
 
@@ -572,8 +650,15 @@ Use the mixed Arabic+English style.`;
               {msg.role === "assistant"
                 ? (msg.content
                     ? <ReactMarkdown>{msg.content}</ReactMarkdown>
-                    : <div className="loading-dots"><span className="dot" /><span className="dot" /><span className="dot" /></div>)
-                : (<p>{msg.content}</p>)}
+                    : (
+                      <div className="loading-indicator">
+                        <div className="loading-dots"><span className="dot" /><span className="dot" /><span className="dot" /></div>
+                        <span className="loading-step-text">
+                          {(isFileLoading ? FILE_LOADING_STEPS : LOADING_STEPS)[loadingStep]}
+                        </span>
+                      </div>
+                    ))
+                : (<p style={{ whiteSpace: "pre-wrap" }}>{msg.content}</p>)}
               {!(msg.role === "assistant" && !msg.content) && (
               <div className="msg-footer">
                 <span className="msg-time">{formatTime(msg.time)}</span>
@@ -666,11 +751,50 @@ Use the mixed Arabic+English style.`;
       </div>
 
       {(attachedImage || attachedFile) && (
-        <div className="attachment-preview" role="status" aria-label="File attached">
-          {imagePreview && <img src={imagePreview} alt="Attached preview" className="img-preview" />}
-          {attachedFile && <span className="file-name">{attachedFile.name}</span>}
-          <button className="remove-attach" onClick={clearAttachments} aria-label="Remove attachment">✕</button>
-        </div>
+        <>
+          <div className="attachment-preview" role="status" aria-label="File attached">
+            {imagePreview && <img src={imagePreview} alt="Attached preview" className="img-preview" />}
+            {attachedImage && !imagePreview && (
+              <span className="file-name">🖼️ {attachedImage.name} · {formatBytes(attachedImage.size)}</span>
+            )}
+            {attachedFile && (
+              <span className="file-name">
+                {attachedFile.name.endsWith(".pdf") ? "📄" : "📝"} {attachedFile.name}
+                <span className="file-size"> · {formatBytes(attachedFile.size)}</span>
+              </span>
+            )}
+            <button className="remove-attach" onClick={clearAttachments} aria-label="Remove attachment">✕</button>
+          </div>
+          {/* Quick actions for the attached file */}
+          <div className="file-chips" role="group" aria-label="Quick actions for file">
+            {(attachedImage
+              ? [
+                  ["🔍 اشرح الصورة", "اشرح هذه الصورة بالتفصيل — ما الذي تراه؟"],
+                  ["📝 نصّ الصورة", "استخرج كل النص الموجود في هذه الصورة بدقة"],
+                  ["❓ أسئلة من الصورة", "اصنع 5 أسئلة دراسية من محتوى هذه الصورة مع إجاباتها"],
+                ]
+              : [
+                  ["📋 لخّص الملف", "لخّص هذا الملف في نقاط رئيسية واضحة ومنظّمة"],
+                  ["📝 Quiz من الملف", "اصنع 6 أسئلة كويز متنوعة من محتوى هذا الملف مع الإجابات"],
+                  ["🔑 المفاهيم الرئيسية", "استخرج أهم المفاهيم والمصطلحات من هذا الملف واشرح كل واحد"],
+                  ["🃏 Flashcards", "حوّل محتوى هذا الملف إلى flashcards للمراجعة. كل بطاقة: **Q:** ... **A:** ..."],
+                  ["📊 جدول ملخص", "لخّص أهم محتوى هذا الملف في جدول Markdown واضح"],
+                ]
+            ).map(([label, prompt]) => (
+              <button
+                key={label}
+                className="file-chip"
+                disabled={loading}
+                onClick={() => {
+                  setInput(prompt);
+                  setTimeout(() => textareaRef.current?.focus(), 50);
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </>
       )}
 
       <div className="input-area" role="form" aria-label="Message input">

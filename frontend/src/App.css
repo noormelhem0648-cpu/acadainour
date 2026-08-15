@@ -298,6 +298,46 @@ body {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.loading-step-text {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  animation: fadeIn 0.4s ease;
+}
+.file-size {
+  opacity: 0.65;
+  font-size: 0.8em;
+}
+.file-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 16px 0;
+}
+.file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  transition: background var(--transition), border-color var(--transition);
+  white-space: nowrap;
+}
+.file-chip:hover {
+  background: var(--accent-light);
+  border-color: var(--accent);
+  color: var(--accent);
+}
 
 /* ── Message Footer ───────────────────────────────────────── */
 .msg-footer {
