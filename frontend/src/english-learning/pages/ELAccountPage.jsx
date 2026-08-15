@@ -325,7 +325,8 @@ export default function ELAccountPage({ darkMode, setDarkMode, onLogout }) {
               className="el-acct-action-btn danger"
               onClick={() => {
                 if (window.confirm('هل أنت متأكد؟ سيتم حذف كل بيانات التقدم المحلية!')) {
-                  ['el_xp','el_streak','el_hardWords','el_badges','el_notebook','el_errors']
+                  ['english_xp','english_streak','english_hard_words','english_badges',
+                   'english_notebook','english_errors','english_progress','english_sm2']
                     .forEach(k => localStorage.removeItem(k))
                   showToast('تم حذف البيانات المحلية')
                   window.location.reload()
