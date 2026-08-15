@@ -1,7 +1,7 @@
 ﻿import { useNavigate } from 'react-router-dom'
 import { API_BASE as BACKEND } from '../../config'
 import { readSSEStream } from '../utils/stream'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { LEVELS } from '../data/curriculum'
 import { useProgress, ALL_BADGES, XP_VALUES } from '../hooks/useProgress'
 import '../EL.css'
@@ -218,8 +218,8 @@ function RadarChart({ skills, darkMode }) {
 export default function ELProgressPage({ darkMode, setDarkMode }) {
   const navigate = useNavigate()
   const progress = useProgress()
-  const skills = progress.skillProgress()
-  const earnedBadges = progress.getEarnedBadges()
+  const skills = useMemo(() => progress.skillProgress(), [progress])
+  const earnedBadges = useMemo(() => progress.getEarnedBadges(), [progress])
   const MS_PER_DAY = 86_400_000
   const weeklyXP = (progress.xpData.history || [])
     .filter(h => Date.now() - h.date < 7 * MS_PER_DAY)
