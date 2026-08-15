@@ -195,8 +195,7 @@ function DailyChallenge({ onClose }) {
 }
 
 /* ─── Pop Quiz ─── */
-function PopQuiz({ onClose }) {
-  const { hardWords } = useProgress()
+function PopQuiz({ onClose, hardWords }) {
   const [q, setQ] = useState(null)
   const [chosen, setChosen] = useState(null)
 
@@ -271,7 +270,7 @@ export default function ELHomePage({ darkMode, setDarkMode }) {
 
       {/* Pop quiz (25% chance if has hard words) */}
       {showQuiz && !showWotd && progress.hardWords?.length >= 4 && (
-        <PopQuiz onClose={() => setShowQuiz(false)} />
+        <PopQuiz onClose={() => setShowQuiz(false)} hardWords={progress.hardWords} />
       )}
 
       <div className="el-page">
