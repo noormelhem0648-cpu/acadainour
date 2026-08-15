@@ -195,11 +195,24 @@ class KeyContributeRequest(BaseModel):
 
 # ── Auth Endpoints ──────────────────────────────────────────
 
+def _validate_email(email: str) -> bool:
+    import re
+    return bool(re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', email))
+
+def _smart_title(text: str, max_len: int = 40) -> str:
+    if len(text) <= max_len:
+        return text
+    truncated = text[:max_len]
+    last_space = truncated.rfind(" ")
+    return (truncated[:last_space] if last_space > 10 else truncated) + "…"
+
 @app.post("/auth/register")
 @limiter.limit("10/minute")
 def register(request: Request, req: RegisterRequest, db: Session = Depends(get_db)):
     if not req.name.strip() or not req.email.strip() or not req.password.strip():
         raise HTTPException(status_code=400, detail="All fields are required.")
+    if not _validate_email(req.email.strip()):
+        raise HTTPException(status_code=400, detail="بريد إلكتروني غير صالح — Invalid email address.")
     if len(req.password) < 6:
         raise HTTPException(status_code=400, detail="Password must be at least 6 characters.")
     existing = db.query(User).filter(User.email == req.email.lower().strip()).first()
@@ -253,7 +266,8 @@ def forgot_password(request: Request, req: ForgotPasswordRequest, db: Session = 
     return {"ok": True, "message": "إذا كان الإيميل مسجّل، رح توصلك رسالة خلال دقائق."}
 
 @app.post("/auth/reset-password")
-def reset_password(req: ResetPasswordRequest, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def reset_password(request: Request, req: ResetPasswordRequest, db: Session = Depends(get_db)):
     if len(req.new_password) < 6:
         raise HTTPException(status_code=400, detail="كلمة السر لازم 6 أحرف على الأقل.")
     token_hash = hashlib.sha256(req.token.encode()).hexdigest()
@@ -420,10 +434,15 @@ def _is_subject_blocked(subject_code: str, db: Session, user: Optional[User] = N
     ).first()
 
 
+def _sanitize_subject(code: str) -> str:
+    """Normalize subject code: uppercase alphanumeric only, max 20 chars."""
+    import re
+    return re.sub(r"[^A-Za-z0-9]", "", code).upper()[:20]
+
 def _get_book_context(subject_code: str, query: str, top_k: int = 5) -> str:
     """Search the course FAISS index and return joined relevant chunks (or '')."""
     try:
-        chunks = search(subject_code, query, top_k=top_k)
+        chunks = search(_sanitize_subject(subject_code), query, top_k=top_k)
         if chunks:
             return "\n\n".join(chunks)
     except Exception as e:
@@ -571,7 +590,7 @@ async def ask_assistant(request: Request, body: ChatRequest, user: User = Depend
         convo_id = request.conversation_id
         if user:
             if not convo_id:
-                title = request.message[:40]
+                title = _smart_title(request.message)
                 convo = Conversation(user_id=user.id, subject_code=request.subject_code, title=title)
                 db.add(convo)
                 db.commit()
@@ -627,7 +646,7 @@ async def ask_assistant_stream(request: Request, body: ChatRequest, user: User =
     convo_id = request.conversation_id
     if user and not restriction and not limit_error:
         if not convo_id:
-            convo = Conversation(user_id=user.id, subject_code=request.subject_code, title=request.message[:40])
+            convo = Conversation(user_id=user.id, subject_code=request.subject_code, title=_smart_title(request.message))
             db.add(convo)
             db.commit()
             db.refresh(convo)
@@ -825,7 +844,7 @@ async def upload_and_ask_stream(
     # Resolve or create conversation
     convo_id = conversation_id
     if not convo_id:
-        convo = Conversation(user_id=user.id, subject_code=subject_code, title=message[:40])
+        convo = Conversation(user_id=user.id, subject_code=subject_code, title=_smart_title(message))
         db.add(convo)
         db.commit()
         db.refresh(convo)

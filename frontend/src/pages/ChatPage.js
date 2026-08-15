@@ -838,12 +838,18 @@ Use the mixed Arabic+English style.`;
           className="message-input"
           placeholder="اسأل عن المادة... Ask about your course..."
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => {
+            setInput(e.target.value);
+            const el = e.target;
+            el.style.height = "auto";
+            el.style.height = Math.min(el.scrollHeight, 160) + "px";
+          }}
           onKeyDown={handleKeyDown}
           rows={1}
           maxLength={4000}
           dir={isRTL(input) ? "rtl" : "ltr"}
           aria-label="Type your message"
+          style={{ resize: "none", overflowY: "auto" }}
         />
         <button
           className="send-btn"
