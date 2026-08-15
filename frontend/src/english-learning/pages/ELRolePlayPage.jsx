@@ -188,7 +188,7 @@ WHY: [جملة عربية قصيرة تشرح السبب]`
     inputRef.current?.focus()
   }, [input, messages, loading, topic, levelId, dayId, day, ttsEnabled, roundCount])
 
-  if (!day) return <div className="el-app"><div className="el-page"><p style={{ padding: 32 }}>Not found.</p></div></div>
+  if (!day) return <div className={`el-app${darkMode ? ' el-dark' : ''}`}><div className="el-page"><p style={{ padding: 32 }}>Not found.</p></div></div>
 
   return (
     <div className={`el-app${darkMode ? ' el-dark' : ''}`}>

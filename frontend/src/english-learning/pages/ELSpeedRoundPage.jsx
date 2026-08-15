@@ -118,7 +118,7 @@ export default function ELSpeedRoundPage({ darkMode, setDarkMode }) {
     }, correct ? 400 : 900)
   }, [chosen, phase, words, currentIdx, score, buildOptions])
 
-  if (!day) return <div className="el-app"><p style={{ padding: 32 }}>Not found.</p></div>
+  if (!day) return <div className={`el-app${darkMode ? ' el-dark' : ''}`}><div className="el-page"><p style={{ padding: 32 }}>Not found.</p></div></div>
 
   const timerPct = (timeLeft / 60) * 100
   const timerColor = timeLeft > 30 ? '#10b981' : timeLeft > 10 ? '#f59e0b' : '#ef4444'

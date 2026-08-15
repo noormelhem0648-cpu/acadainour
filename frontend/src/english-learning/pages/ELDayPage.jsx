@@ -35,7 +35,7 @@ export default function ELDayPage({ darkMode, setDarkMode }) {
   const level = LEVELS.find(l => l.id === levelId)
   const day = getDay(levelId, Number(dayId))
 
-  if (!day) return <div className="el-app"><div className="el-page"><p style={{ padding: 32 }}>Day not found.</p></div></div>
+  if (!day) return <div className={`el-app${darkMode ? ' el-dark' : ''}`}><div className="el-page"><p style={{ padding: 32 }}>Day not found.</p></div></div>
 
   const dp = progress.dayProgress(levelId, Number(dayId))
 

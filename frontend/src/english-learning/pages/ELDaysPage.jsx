@@ -22,7 +22,7 @@ export default function ELDaysPage({ darkMode, setDarkMode }) {
   const level = LEVELS.find(l => l.id === levelId)
   const days = LEVEL_DAYS[levelId] || []
 
-  if (!level) return <div className="el-app"><div className="el-page"><p style={{ padding: 32 }}>Level not found.</p></div></div>
+  if (!level) return <div className={`el-app${darkMode ? ' el-dark' : ''}`}><div className="el-page"><p style={{ padding: 32 }}>Level not found.</p></div></div>
 
   return (
     <div className={`el-app${darkMode ? ' el-dark' : ''}`}>

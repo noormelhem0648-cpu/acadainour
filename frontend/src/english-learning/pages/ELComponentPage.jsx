@@ -512,7 +512,7 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
     return () => clearTimeout(t)
   }, [donePending, progress]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!day || !comp) return <div className="el-app"><div className="el-page"><p style={{ padding: 32 }}>Not found.</p></div></div>
+  if (!day || !comp) return <div className={`el-app${darkMode ? ' el-dark' : ''}`}><div className="el-page"><p style={{ padding: 32 }}>Not found.</p></div></div>
 
   const progressKey = `${levelId}-${dayId}-${componentId}`
   const done = progress.isDone(progressKey)

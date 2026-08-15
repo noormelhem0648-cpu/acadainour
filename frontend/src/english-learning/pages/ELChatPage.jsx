@@ -32,7 +32,7 @@ export default function ELChatPage({ darkMode, setDarkMode }) {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  if (!day) return <div className="el-app"><div className="el-page"><p style={{ padding: 32 }}>Not found.</p></div></div>
+  if (!day) return <div className={`el-app${darkMode ? ' el-dark' : ''}`}><div className="el-page"><p style={{ padding: 32 }}>Not found.</p></div></div>
 
   const send = async () => {
     const text = input.trim()
