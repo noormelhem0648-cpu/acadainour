@@ -600,6 +600,8 @@ body {
 }
 .send-btn:hover:not(:disabled) { background: var(--accent-dark); transform: scale(1.05); }
 .send-btn:disabled { opacity: 0.35; cursor: not-allowed; box-shadow: none; }
+.send-btn.stop-btn { background: #e53935; box-shadow: 0 2px 8px rgba(229,57,53,0.25); font-size: 1rem; }
+.send-btn.stop-btn:hover { background: #c62828; transform: scale(1.05); }
 
 /* ── Markdown Tables ──────────────────────────────────────── */
 .assistant-message table {
@@ -832,6 +834,12 @@ body {
 }
 
 /* ── History Sidebar ──────────────────────────────────────── */
+.history-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 149;
+}
 .history-sidebar {
   position: fixed;
   top: 0; left: 0;

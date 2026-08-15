@@ -851,16 +851,30 @@ Use the mixed Arabic+English style.`;
           aria-label="Type your message"
           style={{ resize: "none", overflowY: "auto" }}
         />
-        <button
-          className="send-btn"
-          onClick={sendMessage}
-          disabled={loading || (!input.trim() && !attachedImage && !attachedFile)}
-          aria-label="Send message"
-        >
-          {loading ? "⏳" : "➤"}
-        </button>
+        {loading ? (
+          <button
+            className="send-btn stop-btn"
+            onClick={() => abortRef.current?.abort()}
+            aria-label="Stop generation"
+            title="إيقاف الإجابة"
+          >
+            ■
+          </button>
+        ) : (
+          <button
+            className="send-btn"
+            onClick={sendMessage}
+            disabled={!input.trim() && !attachedImage && !attachedFile}
+            aria-label="Send message"
+          >
+            ➤
+          </button>
+        )}
       </div>
 
+      {showHistory && (
+        <div className="history-overlay" onClick={() => setShowHistory(false)} aria-hidden="true" />
+      )}
       {showHistory && (
         <div className="history-sidebar">
           <div className="history-header">
