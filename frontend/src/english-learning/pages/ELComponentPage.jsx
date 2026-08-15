@@ -1237,17 +1237,18 @@ function ReadingComp({ day, levelId, dayId }) {
   })
   const saveHL = (arr) => { setHighlights(arr); localStorage.setItem(hlKey, JSON.stringify(arr)) }
 
-  // reading progress bar
+  // reading progress bar — the section itself doesn't scroll; the window does
   useEffect(() => {
-    const el = sectionRef.current
-    if (!el) return
     const onScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = el
-      const pct = scrollHeight <= clientHeight ? 100 : Math.round((scrollTop / (scrollHeight - clientHeight)) * 100)
-      setScrollPct(pct)
+      const el = sectionRef.current
+      if (!el) return
+      const { top, height } = el.getBoundingClientRect()
+      const scrolled = Math.max(0, -top)
+      const scrollable = Math.max(1, height - window.innerHeight)
+      setScrollPct(Math.min(100, Math.round((scrolled / scrollable) * 100)))
     }
-    el.addEventListener('scroll', onScroll)
-    return () => el.removeEventListener('scroll', onScroll)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
   const handleDoubleClick = useCallback(e => {
