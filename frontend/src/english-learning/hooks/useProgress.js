@@ -258,7 +258,7 @@ export function useProgress() {
   }, [])
 
   /* ── badges ── */
-  const getEarnedBadges = useCallback((currentState) => {
+  const getEarnedBadges = useCallback(() => {
     const context = {
       progress,
       streak,
