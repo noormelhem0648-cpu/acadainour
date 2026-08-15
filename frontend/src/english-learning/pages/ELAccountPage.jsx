@@ -115,7 +115,7 @@ export default function ELAccountPage({ darkMode, setDarkMode, onLogout }) {
       const res = await fetch(`${API_BASE}/auth/me`, {
         method: 'DELETE',
         headers: authHeaders(token),
-        body: JSON.stringify({ current_password: deletePwd, new_password: '' }),
+        body: JSON.stringify({ current_password: deletePwd }),
       })
       if (!res.ok) throw new Error((await res.json()).detail)
       // Clear everything locally
