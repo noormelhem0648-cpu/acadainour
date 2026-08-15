@@ -341,7 +341,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
   };
 
   // Stream a response token-by-token. Returns conversation_id.
-  const streamAPI = async (userMessage, msgHistory, convoId, onChunk) => {
+  const streamAPI = async (userMessage, msgHistory, convoId, onChunk, signal) => {
     const history = msgHistory.map(m => ({
       role: m.role === "assistant" ? "model" : "user",
       content: m.content,
@@ -352,6 +352,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
     const res = await fetch(API_URL + "/ask/stream", {
       method: "POST",
       headers,
+      signal,
       body: JSON.stringify({ subject_code: subjectCode, message: userMessage, history, conversation_id: convoId || null }),
     });
     if (res.status === 401) { handleAuthExpired(); throw new Error("auth expired"); }
@@ -382,10 +383,10 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
   };
 
   // Add an empty assistant message and stream the answer into it.
-  const streamInto = async (userMessage, historyMsgs, errorText = "صار خطأ — حاول مرة ثانية 🔄") => {
+  const streamInto = async (userMessage, historyMsgs, errorText = "صار خطأ — حاول مرة ثانية 🔄", signal) => {
     addMessage("assistant", "");
     try {
-      await streamAPI(userMessage, historyMsgs, null, (chunk) => appendToLast(chunk));
+      await streamAPI(userMessage, historyMsgs, null, (chunk) => appendToLast(chunk), signal);
     } catch (err) {
       if (err && err.message === "auth expired") return;  // already logging out
       try {
@@ -488,7 +489,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
     }
 
     // Text-only message → stream the response
-    await streamInto(aiQuery, historyMsgs, "عذراً، حصل خطأ بالاتصال. حاول مرة ثانية. 🔄");
+    await streamInto(aiQuery, historyMsgs, "عذراً، حصل خطأ بالاتصال. حاول مرة ثانية. 🔄", signal);
     setLoading(false);
   };
 
@@ -499,13 +500,17 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
     const userMessage = messages[userIdx].content;
     const historyBefore = messages.slice(0, userIdx);
 
+    abortRef.current?.abort();
+    abortRef.current = new AbortController();
+    const signal = abortRef.current.signal;
+
     setMessages(prev => {
       const updated = [...prev.slice(0, idx)];
       messagesRef.current = updated;
       return updated;
     });
     setLoading(true);
-    await streamInto(userMessage, historyBefore, "عذراً، حصل خطأ. حاول مرة ثانية. 🔄");
+    await streamInto(userMessage, historyBefore, "عذراً، حصل خطأ. حاول مرة ثانية. 🔄", signal);
     setLoading(false);
   };
 
@@ -517,13 +522,17 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
     const userMessage = messages[idx].content;
     const historyBefore = messages.slice(0, idx);
 
+    abortRef.current?.abort();
+    abortRef.current = new AbortController();
+    const signal = abortRef.current.signal;
+
     setMessages(prev => {
       const updated = [...prev.slice(0, idx + 1)];
       messagesRef.current = updated;
       return updated;
     });
     setLoading(true);
-    await streamInto(userMessage, historyBefore, "عذراً، حصل خطأ بالاتصال. حاول مرة ثانية. 🔄");
+    await streamInto(userMessage, historyBefore, "عذراً، حصل خطأ بالاتصال. حاول مرة ثانية. 🔄", signal);
     setLoading(false);
   };
 
@@ -541,6 +550,12 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
   };
   const TYPE_LABEL = { mix: "Mix", mcq: "MCQ", fillblank: "Fill Blank", short: "Short Answer", truefalse: "True/False" };
 
+  const _abortAndSignal = () => {
+    abortRef.current?.abort();
+    abortRef.current = new AbortController();
+    return abortRef.current.signal;
+  };
+
   const generateQuiz = async (topic, type) => {
     if (loading) return;
     setShowQuizModal(false);
@@ -551,7 +566,7 @@ Question type: ${TYPE_INSTR[type || "mix"]}
 Make 6-8 questions. Number each one. Put all correct answers at the end under "## Answers".`;
     addMessage("user", `📝 Quiz — ${TYPE_LABEL[type || "mix"]} · ${quizLevel}${topic ? " · " + topic : ""}`);
     setLoading(true);
-    await streamInto(quizPrompt, messagesRef.current.slice(0, -1), "ما قدرت أعمل الكويز. حاول مرة ثانية 🔄");
+    await streamInto(quizPrompt, messagesRef.current.slice(0, -1), "ما قدرت أعمل الكويز. حاول مرة ثانية 🔄", _abortAndSignal());
     setLoading(false);
     setQuizTopic("");
   };
@@ -571,7 +586,7 @@ At the very end add: ## Answer Key — with all correct answers.
 Use the mixed Arabic+English style.`;
     addMessage("user", `📄 Exam — ${TYPE_LABEL[examType]} · ${examDifficulty}${examTopic.trim() ? " · " + examTopic.trim() : ""}`);
     setLoading(true);
-    await streamInto(examPrompt, messagesRef.current.slice(0, -1), "ما قدرت أعمل الامتحان. حاول مرة ثانية 🔄");
+    await streamInto(examPrompt, messagesRef.current.slice(0, -1), "ما قدرت أعمل الامتحان. حاول مرة ثانية 🔄", _abortAndSignal());
     setLoading(false);
     setExamTopic("");
   };
@@ -580,7 +595,7 @@ Use the mixed Arabic+English style.`;
     if (loading) return;
     addMessage("user", displayText || prompt);
     setLoading(true);
-    await streamInto(prompt, messagesRef.current.slice(0, -1), "صار خطأ — حاول مرة ثانية 🔄");
+    await streamInto(prompt, messagesRef.current.slice(0, -1), "صار خطأ — حاول مرة ثانية 🔄", _abortAndSignal());
     setLoading(false);
   };
 
@@ -589,7 +604,7 @@ Use the mixed Arabic+English style.`;
     const prompt = `أعطيني ملخص واضح ومنظّم عن هاي المادة (${subjectCode}) بالضبط: عن شو بتحكي، أهم المواضيع اللي بتغطيها، وليش مهمة للطالب. لا توجّهني لأي مادة ثانية — هاي هي المادة المقصودة.`;
     addMessage("user", "📋 ملخص المادة");
     setLoading(true);
-    await streamInto(prompt, messagesRef.current.slice(0, -1), "ما قدرت أعمل الملخص. حاول مرة ثانية 🔄");
+    await streamInto(prompt, messagesRef.current.slice(0, -1), "ما قدرت أعمل الملخص. حاول مرة ثانية 🔄", _abortAndSignal());
     setLoading(false);
   };
 
