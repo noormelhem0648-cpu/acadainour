@@ -1,4 +1,5 @@
 import os
+import secrets
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import jwt, JWTError
@@ -8,13 +9,18 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from db import get_db, User
 
-_FALLBACK_SECRET = "SUPER_SECRET_KEY_FOR_SMART_STUDENT_N_2026"
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", _FALLBACK_SECRET)
-if SECRET_KEY == _FALLBACK_SECRET:
+_env_secret = os.getenv("JWT_SECRET_KEY", "")
+if _env_secret:
+    SECRET_KEY = _env_secret
+else:
+    # No env secret → generate a random one per process.
+    # All existing tokens are invalidated on restart, which is intentional:
+    # it forces production to always set JWT_SECRET_KEY explicitly.
+    SECRET_KEY = secrets.token_hex(64)
     print("=" * 60)
-    print("⚠️  SECURITY WARNING: JWT_SECRET_KEY is not set!")
-    print("⚠️  Using the public fallback key — anyone can forge logins.")
-    print("⚠️  Add JWT_SECRET_KEY (long random string) to your env NOW.")
+    print("⚠️  SECURITY: JWT_SECRET_KEY is not set in the environment.")
+    print("⚠️  A random secret was generated — ALL tokens will be invalidated on restart.")
+    print("⚠️  Set JWT_SECRET_KEY to a long random string in your env to persist logins.")
     print("=" * 60)
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_DAYS = 7
