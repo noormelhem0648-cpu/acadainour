@@ -2,6 +2,7 @@
 import { authHeaders } from '../utils/auth'
 import { API_BASE as API } from '../../config'
 import { speak } from '../utils/tts'
+import { readSSEStream } from '../utils/stream'
 
 
 async function lookupWord(word, signal) {
@@ -20,18 +21,7 @@ EXAMPLE: [one short example sentence using the word]`
     body: JSON.stringify({ message: prompt, history: [], subject_info: 'You are a dictionary. Return only the labeled lines, no extra text.' })
   })
   if (!res.ok) throw new Error('lookup failed')
-  const reader = res.body.getReader()
-  const decoder = new TextDecoder()
-  let buffer = '', full = ''
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-    buffer += decoder.decode(value, { stream: true })
-    const lines = buffer.split('\n'); buffer = lines.pop()
-    for (const line of lines) {
-      if (line.startsWith('data: ')) { const c = line.slice(6); if (c !== '[DONE]') full += c }
-    }
-  }
+  const full = await readSSEStream(res.body.getReader())
   const get = (label) => { const m = full.match(new RegExp(`${label}:\\s*(.+)`, 'i')); return m ? m[1].trim() : '' }
   return {
     word,

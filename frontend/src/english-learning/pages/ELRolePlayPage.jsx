@@ -6,6 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { getDay } from '../data/curriculum'
 import { getRolePlayTopic } from '../data/roleplay_topics'
 import { useProgress } from '../hooks/useProgress'
+import { readSSEStream } from '../utils/stream'
 import '../EL.css'
 import OrientLockBtn from '../components/OrientLockBtn'
 
@@ -18,23 +19,7 @@ async function aiAsk(message, systemPrompt) {
     body: JSON.stringify({ message, history: [], subject_info: systemPrompt })
   })
   if (!res.ok) throw new Error(res.status)
-  const reader = res.body.getReader()
-  const decoder = new TextDecoder()
-  let buffer = '', full = ''
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-    buffer += decoder.decode(value, { stream: true })
-    const lines = buffer.split('\n'); buffer = lines.pop()
-    for (const line of lines) {
-      if (line.startsWith('data: ')) {
-        const chunk = line.slice(6)
-        if (chunk === '[DONE]') break
-        full += chunk
-      }
-    }
-  }
-  return full
+  return readSSEStream(res.body.getReader())
 }
 
 /* ── TTS helpers — delegated to shared tts.js ── */
@@ -127,29 +112,13 @@ Stay completely in character. Keep your response to 1-2 sentences. Encourage use
 
       if (!res.ok) throw new Error('server')
 
-      const reader = res.body.getReader()
-      const decoder = new TextDecoder()
-      let buffer = '', full = ''
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        buffer = lines.pop()
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const chunk = line.slice(6)
-            if (chunk === '[DONE]') break
-            full += chunk
-            setMessages(prev => {
-              const copy = [...prev]
-              copy[copy.length - 1] = { role: 'ai', content: full, typing: false }
-              return copy
-            })
-          }
-        }
-      }
+      const full = await readSSEStream(res.body.getReader(), (_, accumulated) => {
+        setMessages(prev => {
+          const copy = [...prev]
+          copy[copy.length - 1] = { role: 'ai', content: accumulated, typing: false }
+          return copy
+        })
+      })
 
       const replyText = full.trim()
 

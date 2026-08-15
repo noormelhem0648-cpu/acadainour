@@ -2,6 +2,7 @@
 import { API_BASE as API } from '../../config'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getDay } from '../data/curriculum'
+import { readSSEStream } from '../utils/stream'
 import '../EL.css'
 import OrientLockBtn from '../components/OrientLockBtn'
 
@@ -67,30 +68,13 @@ IMPORTANT RULE: If the student asks you to solve their homework, exam, or assign
 
       if (!res.ok) throw new Error('Server error')
 
-      const reader = res.body.getReader()
-      const decoder = new TextDecoder()
-      let buffer = ''
-      let full = ''
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        buffer = lines.pop()
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const chunk = line.slice(6)
-            if (chunk === '[DONE]') break
-            full += chunk
-            setMessages(m => {
-              const copy = [...m]
-              copy[copy.length - 1] = { role: 'assistant', content: full }
-              return copy
-            })
-          }
-        }
-      }
+      await readSSEStream(res.body.getReader(), (_, full) => {
+        setMessages(m => {
+          const copy = [...m]
+          copy[copy.length - 1] = { role: 'assistant', content: full }
+          return copy
+        })
+      })
     } catch {
       setMessages(m => {
         const copy = [...m]

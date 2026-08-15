@@ -7,6 +7,7 @@ import WordLookupProvider from '../components/WordLookup'
 import OrientLockBtn from '../components/OrientLockBtn'
 import { authHeaders } from '../utils/auth'
 import { speak, speakAtRate, stopTTS, clearVoiceCache, getRate, getPitch, saveRate, savePitch } from '../utils/tts'
+import { readSSEStream } from '../utils/stream'
 import '../EL.css'
 
 const EL = '/english-learning'
@@ -23,24 +24,7 @@ async function aiAsk(userMessage, systemPrompt, history = []) {
     })
   })
   if (!res.ok) throw new Error(`${res.status}`)
-  const reader = res.body.getReader()
-  const decoder = new TextDecoder()
-  let buffer = '', full = ''
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-    buffer += decoder.decode(value, { stream: true })
-    const lines = buffer.split('\n')
-    buffer = lines.pop()
-    for (const line of lines) {
-      if (line.startsWith('data: ')) {
-        const chunk = line.slice(6)
-        if (chunk === '[DONE]') break
-        full += chunk
-      }
-    }
-  }
-  return full
+  return readSSEStream(res.body.getReader())
 }
 
 /* ─── Inline Markdown renderer ─── */
@@ -367,30 +351,13 @@ function StudyBuddy({ companionPrompt, dayContext, avatarState, setAvatarState, 
       })
       if (!res.ok) throw new Error('server')
 
-      const reader = res.body.getReader()
-      const decoder = new TextDecoder()
-      let buffer = ''
-      let full = ''
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        buffer = lines.pop()
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const chunk = line.slice(6)
-            if (chunk === '[DONE]') break
-            full += chunk
-            setMessages(prev => {
-              const copy = [...prev]
-              copy[copy.length - 1] = { role: 'assistant', content: full }
-              return copy
-            })
-          }
-        }
-      }
+      await readSSEStream(res.body.getReader(), (_, accumulated) => {
+        setMessages(prev => {
+          const copy = [...prev]
+          copy[copy.length - 1] = { role: 'assistant', content: accumulated }
+          return copy
+        })
+      })
       setAvatarState('idle')
     } catch (e) {
       if (e.name === 'AbortError') return
