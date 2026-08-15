@@ -9,7 +9,7 @@ import OrientLockBtn from '../components/OrientLockBtn'
 
 
 /* ── Vocab Growth Chart ── */
-function VocabGrowthChart({ darkMode }) {
+function VocabGrowthChart({ darkMode, sm2Data }) {
   const canvasRef = useRef(null)
   useEffect(() => {
     const canvas = canvasRef.current
@@ -20,7 +20,7 @@ function VocabGrowthChart({ darkMode }) {
     ctx.clearRect(0, 0, W, H)
 
     // Collect words learned per day from SM-2 data
-    const smData = JSON.parse(localStorage.getItem('english_sm2') || '{}')
+    const smData = sm2Data || {}
     const byDate = {}
     Object.values(smData).forEach(w => {
       if (w.lastReview) {
@@ -86,7 +86,7 @@ function VocabGrowthChart({ darkMode }) {
         ctx.fillText(dates[i].slice(5), toX(i), padT + chartH + 14)
       }
     })
-  }, [darkMode])
+  }, [darkMode, sm2Data])
 
   return <canvas ref={canvasRef} width={460} height={180} className="el-vocgrowth-canvas" />
 }
@@ -357,7 +357,7 @@ export default function ELProgressPage({ darkMode, setDarkMode }) {
           {/* Vocab Growth Chart */}
           <div className="el-vocgrowth-section">
             <h3 className="el-section-title">📈 نمو مفرداتك المراجَعة</h3>
-            <VocabGrowthChart darkMode={darkMode} />
+            <VocabGrowthChart darkMode={darkMode} sm2Data={progress.sm2Data} />
           </div>
 
           {/* Weekly AI Report */}
