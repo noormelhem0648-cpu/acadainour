@@ -116,6 +116,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
   const loadingInterval = useRef(null);
   const abortRef = useRef(null);
   const conversationIdRef = useRef(null);
+  const chatIdRef = useRef(Date.now());
 
   // Cancel any in-flight request when the component unmounts
   useEffect(() => () => { abortRef.current?.abort(); }, []);
@@ -156,14 +157,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
   // Auto-save current chat (only when not actively streaming — avoids hundreds of writes)
   useEffect(() => {
     if (messages.length <= 1 || loading) return;
-    const chatId = messages[0]?.chatId || Date.now();
-    if (!messages[0].chatId) {
-      setMessages(prev => {
-        const updated = [{ ...prev[0], chatId }, ...prev.slice(1)];
-        messagesRef.current = updated;
-        return updated;
-      });
-    }
+    const chatId = chatIdRef.current;
     try {
       const saved = JSON.parse(localStorage.getItem(`noura_chats_${subjectCode}`) || "[]");
       const existing = saved.findIndex(c => c.id === chatId);
@@ -182,17 +176,20 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
   }, [messages, subjectCode, loading]);
 
   const startNewChat = () => {
+    chatIdRef.current = Date.now();
+    conversationIdRef.current = null;
     setMessages([{
       role: "assistant",
       content: "أهلاً! أنا **Noura AI** — مساعدك الأكاديمي لمادة **" + subjectCode + "** 🎓\nاسألني أي سؤال عن المادة وراح أجاوبك من الكتاب أولاً.\n\nHi! I'm **Noura AI** — your study buddy for **" + subjectCode + "**. Ask me anything!",
       time: Date.now(),
-      chatId: Date.now(),
     }]);
     setLikedMsgs({});
     setShowHistory(false);
   };
 
   const loadChat = (chat) => {
+    chatIdRef.current = chat.id;
+    conversationIdRef.current = null;
     setMessages(chat.messages);
     messagesRef.current = chat.messages;
     setLikedMsgs({});
