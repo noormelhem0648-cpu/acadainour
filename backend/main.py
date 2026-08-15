@@ -231,7 +231,8 @@ def forgot_password(request: Request, req: ForgotPasswordRequest, db: Session = 
     # Always return success (don't reveal whether email exists)
     if user:
         reset_token = secrets.token_urlsafe(32)
-        user.reset_token = reset_token
+        # Store only the hash — the raw token travels only in the email link
+        user.reset_token = hashlib.sha256(reset_token.encode()).hexdigest()
         user.reset_expiry = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
         db.commit()
         frontend_url = os.getenv("FRONTEND_URL", "https://acadai-frontend.onrender.com")
@@ -253,7 +254,8 @@ def reset_password(req: ResetPasswordRequest, db: Session = Depends(get_db)):
     import datetime
     if len(req.new_password) < 6:
         raise HTTPException(status_code=400, detail="كلمة السر لازم 6 أحرف على الأقل.")
-    user = db.query(User).filter(User.reset_token == req.token).first()
+    token_hash = hashlib.sha256(req.token.encode()).hexdigest()
+    user = db.query(User).filter(User.reset_token == token_hash).first()
     if not user or not user.reset_expiry or user.reset_expiry < datetime.datetime.utcnow():
         raise HTTPException(status_code=400, detail="الرابط غير صالح أو منتهي. اطلب رابط جديد.")
     user.hashed_password = hash_password(req.new_password)
