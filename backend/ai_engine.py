@@ -173,7 +173,20 @@ def _build_contents(user_query, chat_history, context_from_books, image_data, im
             f"3. ONLY redirect when the student asks about a SPECIFIC academic concept that is clearly the core topic of a DIFFERENT subject (e.g. asking 'what is a phoneme' while inside an Essay Writing course). In that case say: 'هذا الموضوع مش من مادة [الحالية]، هو من مادة [الكود + الاسم]. افتحيها من القائمة وبساعدك فيها 👍' then optionally give a short general explanation — but NEVER claim it is from this subject's book.\n"
             f"When in doubt, do NOT redirect — just help.]\n\n"
         )
-    if context_from_books and context_from_books.strip():
+    has_file = bool(image_data or file_data)
+    if has_file:
+        # File-upload mode: book context is supplementary, not primary.
+        # The file itself is passed as a Part — the prompt focuses the AI on it.
+        if context_from_books and context_from_books.strip():
+            full_prompt = (
+                f"{subject_line}"
+                f"[SUPPLEMENTARY — course textbook excerpts, use ONLY if the uploaded file "
+                f"doesn't fully answer the question:]\n{context_from_books}\n\n---\n\n"
+                f"{user_query}"
+            )
+        else:
+            full_prompt = f"{subject_line}{user_query}"
+    elif context_from_books and context_from_books.strip():
         full_prompt = (
             f"{subject_line}"
             f"The following is relevant content retrieved from the course textbook:\n\n"
