@@ -69,16 +69,18 @@ export default function ELIPAPage({ darkMode, setDarkMode }) {
   const [search, setSearch] = useState('')
   const [activeTab, setActiveTab] = useState('guide') // guide | lookup
 
-  const filtered = search
-    ? IPA_GUIDE.filter(s =>
-        s.symbol.includes(search) ||
-        s.example.toLowerCase().includes(search.toLowerCase()) ||
-        s.arabic.includes(search)
-      )
-    : IPA_GUIDE
+  // Split on the original array so category boundaries are always correct,
+  // then apply the search filter to each group independently.
+  const ALL_VOWELS     = IPA_GUIDE.slice(0, 18)
+  const ALL_CONSONANTS = IPA_GUIDE.slice(18)
 
-  const vowels = filtered.filter((_, i) => i < 18)
-  const consonants = filtered.filter((_, i) => i >= 18)
+  const match = (s) =>
+    s.symbol.includes(search) ||
+    s.example.toLowerCase().includes(search.toLowerCase()) ||
+    s.arabic.includes(search)
+
+  const vowels     = search ? ALL_VOWELS.filter(match)     : ALL_VOWELS
+  const consonants = search ? ALL_CONSONANTS.filter(match) : ALL_CONSONANTS
 
   return (
     <div className={`el-app${darkMode ? ' el-dark' : ''}`}>
