@@ -885,7 +885,10 @@ async def generate_quiz(request: Request, body: QuizRequest, user: User = Depend
 
 
 @app.post("/quiz/check")
-async def check_quiz_answer(request: QuizCheckRequest):
+async def check_quiz_answer(
+    request: QuizCheckRequest,
+    current_user: User = Depends(require_user),
+):
     prompt = (
         f"Question: {request.question}\n"
         f"Correct answer: {request.correct_answer}\n"
