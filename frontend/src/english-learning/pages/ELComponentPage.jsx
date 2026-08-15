@@ -1408,9 +1408,27 @@ function ListeningComp({ day, levelId, dayId }) {
 
     const questions = []
 
-    // TF: use real sentences — the sentence IS in the passage so correct = TRUE
-    if (sentences[0]) questions.push({ type: 'TF', q: `True or False: "${sentences[0].slice(0, 80)}"`, correct: 'TRUE' })
-    if (sentences[2]) questions.push({ type: 'TF', q: `True or False: "${sentences[2].slice(0, 80)}"`, correct: 'TRUE' })
+    // Words clearly NOT in the passage — used for both T/F and MCQ
+    const notInPassage = ['volcano','satellite','cathedral','microscope','asteroid','parliament']
+      .filter(w => !text.toLowerCase().includes(w))
+
+    // T/F: one TRUE (exact sentence from passage) + one FALSE (sentence with a key word swapped)
+    if (sentences[0]) {
+      questions.push({ type: 'TF', q: `True or False: "${sentences[0].slice(0, 80)}"`, correct: 'TRUE' })
+    }
+    if (sentences[1] && notInPassage.length > 0) {
+      // Swap the first long word with a word not in the passage to create a FALSE sentence
+      const words = sentences[1].split(' ')
+      const swapIdx = words.findIndex(w => w.replace(/[^a-zA-Z]/g, '').length >= 5)
+      if (swapIdx !== -1) {
+        const falseSent = [...words]
+        falseSent[swapIdx] = notInPassage[0]
+        questions.push({ type: 'TF', q: `True or False: "${falseSent.join(' ').slice(0, 90)}"`, correct: 'FALSE' })
+      } else if (sentences[2]) {
+        // fallback: use a different real sentence as TRUE
+        questions.push({ type: 'TF', q: `True or False: "${sentences[2].slice(0, 80)}"`, correct: 'TRUE' })
+      }
+    }
 
     // FILL: extract real blanks from passage sentences
     for (const sent of sentences.slice(0, 5)) {
@@ -1421,8 +1439,7 @@ function ListeningComp({ day, levelId, dayId }) {
 
     // MCQ: which word appears in the passage
     const realWord = uniqueWords[0] || 'language'
-    const fakeWords = ['volcano','satellite','cathedral','microscope','asteroid','parliament']
-      .filter(w => !text.toLowerCase().includes(w)).slice(0, 3)
+    const fakeWords = notInPassage.slice(0, 3)
     if (fakeWords.length === 3) {
       const opts = [realWord, ...fakeWords]
       questions.push({ type: 'MCQ', q: 'Which of these words appears in the passage?', options: opts, correct: 0 })
