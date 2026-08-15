@@ -30,7 +30,7 @@ function getColor(pct) {
 
 export default function ELErrorsPage({ darkMode, setDarkMode }) {
   const navigate = useNavigate()
-  const { errors, resetAll } = useProgress()
+  const { errors } = useProgress()
 
   const entries = Object.entries(errors)
   const total = entries.reduce((sum, [, v]) => sum + v, 0)
