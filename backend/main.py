@@ -720,18 +720,48 @@ async def upload_and_ask(
     MAX_UPLOAD = 10 * 1024 * 1024  # 10 MB
     if len(file_bytes) > MAX_UPLOAD:
         raise HTTPException(status_code=413, detail="الملف كبير جداً (الحد 10MB). — File too large (max 10MB).")
-    encoded = base64.b64encode(file_bytes).decode("utf-8")
-    mime_type = file.content_type
+    mime_type = file.content_type or ""
+    fname = (file.filename or "").lower()
 
     image_data = None
     image_mime_type = None
+    file_data = None
+    file_data_mime = None
     extra_context = ""
 
-    if mime_type and mime_type.startswith("image/"):
-        image_data = encoded
+    if mime_type.startswith("image/"):
+        # Images: pass inline to Gemini (already supported)
+        image_data = base64.b64encode(file_bytes).decode("utf-8")
         image_mime_type = mime_type
+
+    elif mime_type == "application/pdf" or fname.endswith(".pdf"):
+        # PDFs: Gemini understands them natively — pass bytes directly
+        file_data = file_bytes
+        file_data_mime = "application/pdf"
+        extra_context = f"\n[Student uploaded a PDF: '{file.filename}'. Read it and answer the question based on its content.]"
+
+    elif mime_type in ("text/plain", "text/csv") or fname.endswith((".txt", ".csv")):
+        # Plain text / CSV: decode and inject into the prompt
+        try:
+            text_content = file_bytes.decode("utf-8", errors="replace")
+            # Cap at 12 000 chars to stay within context limits
+            if len(text_content) > 12000:
+                text_content = text_content[:12000] + "\n\n[... الملف طويل — تم اقتصاره عند 12000 حرف ...]"
+            extra_context = (
+                f"\n\n[Student uploaded a text file: '{file.filename}']\n\n"
+                f"=== File content start ===\n{text_content}\n=== File content end ===\n\n"
+                f"Answer the student's question using the file content above."
+            )
+        except Exception:
+            extra_context = f"\n[Could not read '{file.filename}' — ask the student to try again.]"
+
     else:
-        extra_context = f"\n[Note: Student uploaded a file named '{file.filename}' — type: {mime_type}]"
+        # Unsupported format (DOCX, PPTX, XLSX …)
+        extra_context = (
+            f"\n[Student tried to upload '{file.filename}' ({mime_type}), "
+            f"but this format cannot be read directly. "
+            f"Tell the student warmly to convert it to PDF or TXT and upload again.]"
+        )
 
     context_from_books = _get_book_context(subject_code, message, top_k=5)
 
@@ -741,6 +771,8 @@ async def upload_and_ask(
         context_from_books=context_from_books,
         image_data=image_data,
         image_mime_type=image_mime_type,
+        file_data=file_data,
+        file_data_mime=file_data_mime,
         subject_info=get_subject_info(subject_code),
     )
 

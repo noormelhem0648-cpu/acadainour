@@ -156,7 +156,7 @@ def _is_rate_limit_error(error_str):
     return any(kw in error_str for kw in ["429", "rate", "quota", "resource_exhausted", "resource has been exhausted"])
 
 
-def _build_contents(user_query, chat_history, context_from_books, image_data, image_mime_type, subject_info=""):
+def _build_contents(user_query, chat_history, context_from_books, image_data, image_mime_type, subject_info="", file_data=None, file_data_mime=None):
     subject_line = ""
     if subject_info:
         try:
@@ -201,6 +201,9 @@ def _build_contents(user_query, chat_history, context_from_books, image_data, im
         import base64
         image_bytes = base64.b64decode(image_data)
         current_parts.append(types.Part.from_bytes(data=image_bytes, mime_type=image_mime_type))
+    elif file_data and file_data_mime:
+        # Non-image file (PDF, etc.) — pass bytes directly; Gemini reads them natively
+        current_parts.append(types.Part.from_bytes(data=file_data, mime_type=file_data_mime))
 
     current_parts.append(types.Part.from_text(text=full_prompt))
     contents.append(types.Content(role="user", parts=current_parts))
@@ -213,10 +216,12 @@ def generate_academic_response_stream(
     context_from_books: str = "",
     image_data: str = None,
     image_mime_type: str = None,
-    subject_info: str = ""
+    subject_info: str = "",
+    file_data: bytes = None,
+    file_data_mime: str = None,
 ):
     """Yield response text chunks as they are generated (for streaming)."""
-    contents = _build_contents(user_query, chat_history, context_from_books, image_data, image_mime_type, subject_info)
+    contents = _build_contents(user_query, chat_history, context_from_books, image_data, image_mime_type, subject_info, file_data, file_data_mime)
     num_keys = max(len(_clients), 1)
 
     for attempt in range(num_keys * 2):
@@ -251,9 +256,11 @@ def generate_academic_response(
     context_from_books: str = "",
     image_data: str = None,
     image_mime_type: str = None,
-    subject_info: str = ""
+    subject_info: str = "",
+    file_data: bytes = None,
+    file_data_mime: str = None,
 ) -> str:
-    contents = _build_contents(user_query, chat_history, context_from_books, image_data, image_mime_type, subject_info)
+    contents = _build_contents(user_query, chat_history, context_from_books, image_data, image_mime_type, subject_info, file_data, file_data_mime)
 
     # Try every key at least once, then do a second round with short backoff
     num_keys = max(len(_clients), 1)
