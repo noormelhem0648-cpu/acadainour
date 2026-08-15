@@ -428,7 +428,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
     // The actual query sent to the AI is just the typed text (or a default prompt if empty)
     const aiQuery = typedText || (attachedImage ? "اشرح هذه الصورة" : "حلّل هذا الملف واشرح محتواه");
 
-    addMessage("user", userMessage);
+    addMessage("user", userMessage, hasFile ? { isFileMessage: true } : {});
     setInput("");
     setLoading(true);
 
@@ -500,7 +500,19 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
     if (loading) return;
     const userIdx = idx - 1;
     if (userIdx < 0 || messages[userIdx].role !== "user") return;
-    const userMessage = messages[userIdx].content;
+    const userMsg = messages[userIdx];
+
+    // File-upload messages can't be regenerated without re-uploading the file
+    if (userMsg.isFileMessage) {
+      setMessages(prev => {
+        const updated = [...prev];
+        updated[idx] = { role: "assistant", content: "لإعادة توليد إجابة عن ملف، أعد رفع الملف مرة ثانية. 🔄", time: Date.now(), isError: true };
+        messagesRef.current = updated;
+        return updated;
+      });
+      return;
+    }
+
     const historyBefore = messages.slice(0, userIdx);
 
     abortRef.current?.abort();
@@ -513,7 +525,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
       return updated;
     });
     setLoading(true);
-    await streamInto(userMessage, historyBefore, "عذراً، حصل خطأ. حاول مرة ثانية. 🔄", signal);
+    await streamInto(userMsg.content, historyBefore, "عذراً، حصل خطأ. حاول مرة ثانية. 🔄", signal);
     setLoading(false);
   };
 
