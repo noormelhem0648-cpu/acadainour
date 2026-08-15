@@ -344,12 +344,27 @@ def key_stats(db: Session = Depends(get_db)):
 # ── Conversation Endpoints ──────────────────────────────────
 
 @app.get("/conversations")
-def list_conversations(subject_code: str, user: User = Depends(require_user), db: Session = Depends(get_db)):
-    convos = db.query(Conversation).filter(
+def list_conversations(
+    subject_code: str,
+    skip: int = 0,
+    limit: int = 30,
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    limit = min(max(limit, 1), 100)
+    skip = max(skip, 0)
+    q = db.query(Conversation).filter(
         Conversation.user_id == user.id,
         Conversation.subject_code == subject_code,
-    ).order_by(Conversation.updated_at.desc()).limit(30).all()
-    return [{"id": c.id, "title": c.title, "subject_code": c.subject_code, "updated_at": str(c.updated_at)} for c in convos]
+    ).order_by(Conversation.updated_at.desc())
+    total = q.count()
+    convos = q.offset(skip).limit(limit).all()
+    return {
+        "total": total,
+        "skip": skip,
+        "limit": limit,
+        "items": [{"id": c.id, "title": c.title, "subject_code": c.subject_code, "updated_at": str(c.updated_at)} for c in convos],
+    }
 
 @app.post("/conversations")
 def create_conversation(subject_code: str = "", title: str = "New Chat", user: User = Depends(require_user), db: Session = Depends(get_db)):
