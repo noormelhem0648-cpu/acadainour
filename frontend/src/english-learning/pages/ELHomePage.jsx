@@ -36,9 +36,13 @@ function usePWAInstall() {
   )
   useEffect(() => {
     const handler = e => { e.preventDefault(); setPrompt(e) }
+    const onInstalled = () => { setInstalled(true); setPrompt(null) }
     window.addEventListener('beforeinstallprompt', handler)
-    window.addEventListener('appinstalled', () => { setInstalled(true); setPrompt(null) })
-    return () => window.removeEventListener('beforeinstallprompt', handler)
+    window.addEventListener('appinstalled', onInstalled)
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler)
+      window.removeEventListener('appinstalled', onInstalled)
+    }
   }, [])
   const install = async () => {
     if (prompt) {
