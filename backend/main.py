@@ -127,6 +127,8 @@ def send_email(to_email: str, subject: str, body_html: str) -> bool:
 
 def _load_db_keys():
     """Pull all active contributed keys from DB into the AI engine."""
+    if not SessionLocal:
+        return
     try:
         db = SessionLocal()
         keys = [row.api_key for row in db.query(ContributedKey).filter(ContributedKey.active == True).all()]
@@ -934,6 +936,9 @@ from db import get_db as _get_db_gen
 
 @app.websocket("/ws/social/{user_id}")
 async def ws_social(ws: FWS, user_id: int, token: str = ""):
+    if not SessionLocal:
+        await ws.close(code=1008)
+        return
     db = SessionLocal()
     try:
         await websocket_endpoint(ws, user_id, token, db)
@@ -963,7 +968,7 @@ def get_profile(me: User = Depends(require_user)):
 @app.put("/auth/me")
 def update_profile(
     req: UpdateProfileRequest,
-    me: User = Depends(get_current_user),
+    me: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     if req.name and req.name.strip():
@@ -977,7 +982,7 @@ def update_profile(
 @app.delete("/auth/me")
 def delete_account(
     req: ChangePasswordRequest,
-    me: User = Depends(get_current_user),
+    me: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     if not verify_password(req.current_password, me.hashed_password):
@@ -1004,7 +1009,7 @@ def delete_account(
 @app.put("/auth/me/password")
 def change_password(
     req: ChangePasswordRequest,
-    me: User = Depends(get_current_user),
+    me: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     if not verify_password(req.current_password, me.hashed_password):

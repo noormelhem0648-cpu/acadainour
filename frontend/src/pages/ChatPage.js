@@ -390,7 +390,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
       if (err && err.message === "auth expired") return;
       if (err && err.name === "AbortError") return;
       try {
-        const result = await callAPI(userMessage, historyMsgs);
+        const result = await callAPI(userMessage, historyMsgs, conversationIdRef.current);
         appendToLast(result.answer);
         if (result.conversation_id) conversationIdRef.current = result.conversation_id;
       } catch {
@@ -534,7 +534,8 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
     const lastUserIdx = [...messages].reverse().findIndex(m => m.role === "user");
     if (lastUserIdx === -1) return;
     const idx = messages.length - 1 - lastUserIdx;
-    const userMessage = messages[idx].content;
+    const userMsg = messages[idx];
+    if (userMsg.isFileMessage) return; // can't retry without re-uploading the file
     const historyBefore = messages.slice(0, idx);
 
     abortRef.current?.abort();
@@ -547,7 +548,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
       return updated;
     });
     setLoading(true);
-    await streamInto(userMessage, historyBefore, "عذراً، حصل خطأ بالاتصال. حاول مرة ثانية. 🔄", signal);
+    await streamInto(userMsg.content, historyBefore, "عذراً، حصل خطأ بالاتصال. حاول مرة ثانية. 🔄", signal);
     setLoading(false);
   };
 
