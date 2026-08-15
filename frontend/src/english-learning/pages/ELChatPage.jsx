@@ -24,6 +24,9 @@ export default function ELChatPage({ darkMode, setDarkMode }) {
     setMessages([{ role: 'assistant', content: getGreeting(day) }])
   }, [day])
 
+  // Cancel any in-flight request when the user navigates away
+  useEffect(() => () => { abortRef.current?.abort() }, [])
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
