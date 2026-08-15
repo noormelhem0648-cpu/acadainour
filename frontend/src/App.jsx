@@ -54,6 +54,10 @@ function App() {
     setToken(null);
     localStorage.removeItem("noura_token");
     localStorage.removeItem("noura_user");
+    // Clear per-subject chat history so another user on the same device can't read prior chats
+    Object.keys(localStorage)
+      .filter(k => k.startsWith("noura_chats_"))
+      .forEach(k => localStorage.removeItem(k));
   };
 
   const themeProps = { darkMode, setDarkMode, user, token, onLogout: handleLogout };
