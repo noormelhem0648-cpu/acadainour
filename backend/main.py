@@ -688,6 +688,75 @@ async def ask_assistant_stream(request: Request, body: ChatRequest, user: User =
     return StreamingResponse(event_stream(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
+def _parse_upload(file_bytes: bytes, filename: str, mime_type: str):
+    """Parse an uploaded file into (image_data, image_mime, file_data, file_mime, extra_context).
+    Returns a dict with keys: image_data, image_mime_type, file_data, file_data_mime, extra_context.
+    """
+    fname = (filename or "").lower()
+    mime = mime_type or ""
+
+    if mime.startswith("image/"):
+        return dict(
+            image_data=base64.b64encode(file_bytes).decode("utf-8"),
+            image_mime_type=mime,
+            file_data=None, file_data_mime=None,
+            extra_context=(
+                f"\n\n[STUDENT UPLOADED IMAGE: '{filename}']\n"
+                "INSTRUCTIONS: Analyse the image above carefully. "
+                "Use it as your primary source. Reference specific parts you see in it."
+            ),
+        )
+
+    if mime == "application/pdf" or fname.endswith(".pdf"):
+        return dict(
+            image_data=None, image_mime_type=None,
+            file_data=file_bytes, file_data_mime="application/pdf",
+            extra_context=(
+                f"\n\n[STUDENT UPLOADED PDF: '{filename}']\n"
+                "INSTRUCTIONS: Read the attached PDF document thoroughly. "
+                "It is your ABSOLUTE PRIMARY source — answer the question directly from what you read in it. "
+                "Quote or reference specific sections/pages you find. "
+                "Only add course-book knowledge as a supplement if the PDF doesn't fully answer the question."
+            ),
+        )
+
+    if mime in ("text/plain", "text/csv") or fname.endswith((".txt", ".csv")):
+        try:
+            text = file_bytes.decode("utf-8", errors="replace")
+            truncated = ""
+            if len(text) > 14000:
+                text = text[:14000]
+                truncated = "\n\n⚠️ [الملف طويل — تم عرض أول 14,000 حرف فقط]"
+            return dict(
+                image_data=None, image_mime_type=None,
+                file_data=None, file_data_mime=None,
+                extra_context=(
+                    f"\n\n[STUDENT UPLOADED TEXT FILE: '{filename}']\n"
+                    f"=== DOCUMENT START ===\n{text}{truncated}\n=== DOCUMENT END ===\n\n"
+                    "INSTRUCTIONS: The document above is the student's PRIMARY source. "
+                    "Answer the question based on its content first. "
+                    "Reference specific parts of the document in your answer."
+                ),
+            )
+        except Exception:
+            return dict(
+                image_data=None, image_mime_type=None,
+                file_data=None, file_data_mime=None,
+                extra_context=f"\n[تعذّر قراءة الملف '{filename}' — أخبر الطالب بلطف أن يعيد الرفع.]",
+            )
+
+    # Unsupported (DOCX, PPTX, XLSX …)
+    return dict(
+        image_data=None, image_mime_type=None,
+        file_data=None, file_data_mime=None,
+        extra_context=(
+            f"\n[الطالب رفع '{filename}' ({mime}) — هذا النوع غير مدعوم مباشرةً. "
+            "أخبره بلطف أن يحوّل الملف إلى PDF أو TXT ويرفعه مرة ثانية. "
+            "اشرح له كيف يعمل ذلك بسهولة.]"
+        ),
+    )
+
+
 @app.post("/upload-and-ask")
 async def upload_and_ask(
     subject_code: str = Form(...),
@@ -698,15 +767,10 @@ async def upload_and_ask(
     db: Session = Depends(get_db),
 ):
     _check_message_length(message)
-    # Block if subject is restricted (closes the upload bypass)
     restriction = _is_subject_blocked(subject_code, db, user)
     if restriction:
         reason = restriction.reason or "لا يوجد سبب محدد"
-        return {
-            "answer": f"🔒 **هاي المادة محجوبة حالياً من قِبَل الدكتور.**\n\n📋 السبب: {reason}",
-            "subject_code": subject_code,
-            "blocked": True,
-        }
+        return {"answer": f"🔒 **هاي المادة محجوبة حالياً من قِبَل الدكتور.**\n\n📋 السبب: {reason}", "subject_code": subject_code, "blocked": True}
 
     _check_daily_limit(user, db)
 
@@ -716,71 +780,87 @@ async def upload_and_ask(
         chat_history = []
 
     file_bytes = await file.read()
-    # Guard against oversized uploads that could exhaust server memory
-    MAX_UPLOAD = 10 * 1024 * 1024  # 10 MB
+    MAX_UPLOAD = 10 * 1024 * 1024
     if len(file_bytes) > MAX_UPLOAD:
-        raise HTTPException(status_code=413, detail="الملف كبير جداً (الحد 10MB). — File too large (max 10MB).")
-    mime_type = file.content_type or ""
-    fname = (file.filename or "").lower()
+        raise HTTPException(status_code=413, detail="الملف كبير جداً (الحد 10MB).")
 
-    image_data = None
-    image_mime_type = None
-    file_data = None
-    file_data_mime = None
-    extra_context = ""
-
-    if mime_type.startswith("image/"):
-        # Images: pass inline to Gemini (already supported)
-        image_data = base64.b64encode(file_bytes).decode("utf-8")
-        image_mime_type = mime_type
-
-    elif mime_type == "application/pdf" or fname.endswith(".pdf"):
-        # PDFs: Gemini understands them natively — pass bytes directly
-        file_data = file_bytes
-        file_data_mime = "application/pdf"
-        extra_context = f"\n[Student uploaded a PDF: '{file.filename}'. Read it and answer the question based on its content.]"
-
-    elif mime_type in ("text/plain", "text/csv") or fname.endswith((".txt", ".csv")):
-        # Plain text / CSV: decode and inject into the prompt
-        try:
-            text_content = file_bytes.decode("utf-8", errors="replace")
-            # Cap at 12 000 chars to stay within context limits
-            if len(text_content) > 12000:
-                text_content = text_content[:12000] + "\n\n[... الملف طويل — تم اقتصاره عند 12000 حرف ...]"
-            extra_context = (
-                f"\n\n[Student uploaded a text file: '{file.filename}']\n\n"
-                f"=== File content start ===\n{text_content}\n=== File content end ===\n\n"
-                f"Answer the student's question using the file content above."
-            )
-        except Exception:
-            extra_context = f"\n[Could not read '{file.filename}' — ask the student to try again.]"
-
-    else:
-        # Unsupported format (DOCX, PPTX, XLSX …)
-        extra_context = (
-            f"\n[Student tried to upload '{file.filename}' ({mime_type}), "
-            f"but this format cannot be read directly. "
-            f"Tell the student warmly to convert it to PDF or TXT and upload again.]"
-        )
-
+    parsed = _parse_upload(file_bytes, file.filename, file.content_type or "")
     context_from_books = _get_book_context(subject_code, message, top_k=5)
 
     answer = generate_academic_response(
-        user_query=message + extra_context,
+        user_query=message + parsed["extra_context"],
         chat_history=chat_history,
         context_from_books=context_from_books,
-        image_data=image_data,
-        image_mime_type=image_mime_type,
-        file_data=file_data,
-        file_data_mime=file_data_mime,
+        image_data=parsed["image_data"],
+        image_mime_type=parsed["image_mime_type"],
+        file_data=parsed["file_data"],
+        file_data_mime=parsed["file_data_mime"],
         subject_info=get_subject_info(subject_code),
     )
 
-    return {
-        "answer": answer,
-        "subject_code": subject_code,
-        "source": "course_materials" if context_from_books else "general_knowledge",
-    }
+    return {"answer": answer, "subject_code": subject_code, "source": "course_materials" if context_from_books else "general_knowledge"}
+
+
+@app.post("/upload-and-ask/stream")
+async def upload_and_ask_stream(
+    subject_code: str = Form(...),
+    message: str = Form(...),
+    history: str = Form(default="[]"),
+    file: UploadFile = File(...),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    """Streaming version of /upload-and-ask — yields SSE chunks so the UI can animate the response."""
+    _check_message_length(message)
+    restriction = _is_subject_blocked(subject_code, db, user)
+    if restriction:
+        reason = restriction.reason or "لا يوجد سبب محدد"
+        blocked_msg = f"🔒 **هاي المادة محجوبة حالياً من قِبَل الدكتور.**\n\n📋 السبب: {reason}"
+
+        def _blocked():
+            yield f"data: {json.dumps({'type': 'chunk', 'text': blocked_msg})}\n\n"
+            yield f"data: {json.dumps({'type': 'done'})}\n\n"
+
+        return StreamingResponse(_blocked(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+    _check_daily_limit(user, db)
+
+    try:
+        chat_history = json.loads(history)
+    except Exception:
+        chat_history = []
+
+    file_bytes = await file.read()
+    MAX_UPLOAD = 10 * 1024 * 1024
+    if len(file_bytes) > MAX_UPLOAD:
+        raise HTTPException(status_code=413, detail="الملف كبير جداً (الحد 10MB).")
+
+    parsed = _parse_upload(file_bytes, file.filename, file.content_type or "")
+    context_from_books = _get_book_context(subject_code, message, top_k=5)
+    user_query = message + parsed["extra_context"]
+    subject_info = get_subject_info(subject_code)
+
+    def event_stream():
+        full_answer = ""
+        try:
+            for chunk in generate_academic_response_stream(
+                user_query=user_query,
+                chat_history=chat_history,
+                context_from_books=context_from_books,
+                image_data=parsed["image_data"],
+                image_mime_type=parsed["image_mime_type"],
+                file_data=parsed["file_data"],
+                file_data_mime=parsed["file_data_mime"],
+                subject_info=subject_info,
+            ):
+                full_answer += chunk
+                yield f"data: {json.dumps({'type': 'chunk', 'text': chunk})}\n\n"
+        except Exception as e:
+            print(f"[/upload-and-ask/stream Error] {e}")
+            yield f"data: {json.dumps({'type': 'chunk', 'text': 'صار خطأ — حاول مرة ثانية 🔄'})}\n\n"
+        yield f"data: {json.dumps({'type': 'done'})}\n\n"
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
 @app.post("/quiz")
