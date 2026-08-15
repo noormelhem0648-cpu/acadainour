@@ -1845,11 +1845,15 @@ function ShadowingComp({ day, levelId }) {
         })}
       </div>
 
-      {s.youtubeUrl && (
-        <a href={s.youtubeUrl} target="_blank" rel="noopener noreferrer" className="el-yt-btn">
-          ▶ افتح YouTube للتدريب
-        </a>
-      )}
+      {(() => {
+        const ytUrl = s.youtubeUrl ||
+          `https://www.youtube.com/results?search_query=${encodeURIComponent((s.chunk || '') + ' english pronunciation practice shadowing')}`
+        return (
+          <a href={ytUrl} target="_blank" rel="noopener noreferrer" className="el-yt-btn">
+            🔍 ابحث على YouTube — تدرّب مع متحدث أصيل
+          </a>
+        )
+      })()}
 
       <DialoguePartner day={day} />
     </div>
@@ -2025,31 +2029,25 @@ const DETECTIVE_BANK = {
     { text: 'My sister and me went to the park.', error: 'me', fix: 'I', hint: 'نستخدم I كفاعل وليس me' },
     { text: 'There is many students in the class.', error: 'is', fix: 'are', hint: 'مع الجمع نستخدم are وليس is' },
     { text: "She don't wants to eat vegetables.", error: "don't wants", fix: "doesn't want", hint: "مع she نستخدم doesn't وبعدها المصدر بدون s" },
-    { text: 'I am have a good idea.', error: 'am have', fix: 'have', hint: 'لا نضع am قبل have في المضارع البسيط' },
     { text: 'He is more tall than his brother.', error: 'more tall', fix: 'taller', hint: 'الصفات القصيرة نضيف er وليس more' },
     { text: 'Yesterday I go to the cinema.', error: 'go', fix: 'went', hint: 'في الماضي نستخدم went وليس go' },
     { text: 'She can sings very well.', error: 'sings', fix: 'sing', hint: 'بعد can نستخدم المصدر بدون s' },
-    { text: 'This are my favourite shoes.', error: 'are', fix: 'is', hint: 'مع this نستخدم is' },
     { text: 'We goed to the beach last summer.', error: 'goed', fix: 'went', hint: 'go فعل شاذ — ماضيه went وليس goed' },
-    { text: 'She is more prettier than her sister.', error: 'more prettier', fix: 'prettier', hint: 'لا نستخدم more مع الصفات التي تنتهي بـ er' },
     { text: 'I have saw that movie before.', error: 'saw', fix: 'seen', hint: 'بعد have نستخدم التصريف الثالث (seen وليس saw)' },
-    { text: "He don't never eat meat.", error: "don't never", fix: "doesn't ever", hint: 'لا يصح استخدام نفيين معاً في الإنجليزية' },
   ],
   medium: [
     { text: 'I have went to Paris last year.', error: 'went', fix: 'been', hint: 'بعد have نستخدم التصريف الثالث (been وليس went)' },
     { text: 'She is working here since 2020.', error: 'is working', fix: 'has been working', hint: 'مع since نستخدم المضارع التام المستمر' },
     { text: 'I look forward to hear from you.', error: 'hear', fix: 'hearing', hint: 'بعد look forward to نستخدم الفعل + ing' },
     { text: 'He suggested to take a break.', error: 'to take', fix: 'taking', hint: 'بعد suggest نستخدم الفعل + ing وليس to + infinitive' },
-    { text: 'The meeting was attended by hundred people.', error: 'hundred', fix: 'hundreds of', hint: 'مع الأعداد الكبيرة غير المحددة نستخدم hundreds of' },
     { text: 'I am used to wake up early.', error: 'wake', fix: 'waking', hint: 'بعد be used to نستخدم الفعل + ing' },
-    { text: 'She explained me the problem.', error: 'explained me', fix: 'explained the problem to me', hint: 'explain لا يأخذ مفعولاً به مباشراً للشخص' },
     { text: 'I wish I can speak better English.', error: 'can', fix: 'could', hint: 'بعد wish نستخدم الماضي البسيط للتعبير عن الأمنية' },
     { text: 'He told that he was tired.', error: 'told', fix: 'said', hint: 'said + that — told يحتاج مفعولاً به (told me that)' },
     { text: 'Despite of the rain, they went out.', error: 'Despite of', fix: 'Despite', hint: 'despite لا يتبعها of — نقول despite the rain' },
     { text: 'The news are shocking today.', error: 'are', fix: 'is', hint: 'news اسم غير معدود يؤخذ معه is' },
     { text: 'I have been knowing her for years.', error: 'have been knowing', fix: 'have known', hint: 'الأفعال الحالية (stative verbs) لا تُستخدم بالمستمر' },
     { text: 'She made me to feel uncomfortable.', error: 'to feel', fix: 'feel', hint: 'بعد make + مفعول به نستخدم المصدر بدون to' },
-    { text: 'We discussed about the project yesterday.', error: 'about', fix: '', hint: 'discuss لا يحتاج about — نقول discuss the project' },
+    { text: 'We discussed about the project yesterday.', error: 'about', fix: '[احذف about]', fixes: ['[احذف about]', 'talked about'], hint: 'discuss لا يحتاج about — نقول discuss the project، أو نغيّر إلى talked about' },
     { text: 'He is very good in English.', error: 'in', fix: 'at', hint: 'نقول good at وليس good in' },
     { text: 'I prefer tea than coffee.', error: 'than', fix: 'to', hint: 'نقول prefer...to وليس prefer...than' },
     { text: 'By the time she arrived, he already left.', error: 'left', fix: 'had already left', hint: 'الحدث الذي انتهى قبل حدث آخر يستخدم Past Perfect' },
@@ -2059,7 +2057,7 @@ const DETECTIVE_BANK = {
   ],
   hard: [
     { text: 'Had I known earlier, I would have told you.', error: 'none', fix: 'Correct!', hint: 'هذه الجملة صحيحة — الشرطي المقلوب بدون if' },
-    { text: 'The data shows that unemployment have risen.', error: 'have', fix: 'has', hint: 'data كلمة جمع لكن في الإنجليزي الرسمي الحديث تؤخذ معها is/has' },
+    { text: 'The data shows that unemployment have risen.', error: 'have', fix: 'has', hint: 'data في الإنجليزية الرسمية الحديثة تؤخذ معها is/has' },
     { text: 'It is important that he attends the meeting.', error: 'attends', fix: 'attend', hint: 'بعد It is important that نستخدم subjunctive (المصدر بلا s)' },
     { text: 'She would have went if she had known.', error: 'went', fix: 'gone', hint: 'بعد would have نستخدم التصريف الثالث (gone)' },
     { text: 'The committee have not yet reached their decision.', error: 'none', fix: 'Correct (British English)!', hint: 'في البريطانية الأسماء الجمعية تأخذ have — صحيح!' },
@@ -2068,12 +2066,62 @@ const DETECTIVE_BANK = {
     { text: 'The number of students are increasing each year.', error: 'are', fix: 'is', hint: 'The number of + جمع يتبعه فعل مفرد' },
     { text: 'No sooner did she arrived than it started to rain.', error: 'arrived', fix: 'arrive', hint: 'بعد No sooner did نستخدم المصدر (base form)' },
     { text: 'He denied to have taken the money.', error: 'to have taken', fix: 'having taken', hint: 'deny يتبعه verb-ing وليس to-infinitive' },
-    { text: 'This is one of the most unique buildings I have seen.', error: 'most unique', fix: 'most remarkable', hint: 'unique معناها فريد بالمطلق — لا يقبل التدرج' },
+    { text: 'This is one of the most unique buildings I have seen.', error: 'most unique', fix: 'unique / most remarkable', fixes: ['unique', 'most remarkable'], hint: 'unique فريد بالمطلق — لا يقبل التدرج؛ يمكن قول unique أو most remarkable' },
     { text: 'I regret to inform you that your application was rejected.', error: 'none', fix: 'Correct!', hint: 'regret to do = أتأسف على إخبارك — صحيح تماماً' },
     { text: 'She suggested that we would meet earlier.', error: 'would meet', fix: 'meet', hint: 'بعد suggest + that نستخدم subjunctive (base form) بدون would' },
     { text: 'Providing that you work hard, you shall succeed.', error: 'none', fix: 'Correct!', hint: 'providing that = بشرط أن — صحيح في الإنجليزية الرسمية' },
     { text: 'The police is investigating the incident.', error: 'is', fix: 'are', hint: 'police اسم جمع دائماً — يؤخذ معه are/were' },
   ],
+}
+
+/* Build lesson-specific exercises from the day's grammar patterns */
+function buildLessonBank(day) {
+  const items = []
+  if (!day?.grammar?.patterns) return items
+
+  day.grammar.patterns.forEach(pattern => {
+    // 1. Correction exercises ("صحّح" / "Correct")
+    pattern.exercises?.forEach(ex => {
+      if (!/صحّح|correct|Correct/.test(ex.question)) return
+      const quoted = ex.question.match(/[''""]([^''""\n]{4,80})[''""]/)
+      if (!quoted) return
+      const wrongSentence = quoted[1].trim()
+      // Pull hint from parentheses in the answer
+      const hintMatch = ex.answer.match(/\(([^)]{5,})\)/)
+      const hint = hintMatch ? hintMatch[1] : (pattern.explanation || pattern.name).split('.')[0]
+      // Extract correct text (before any parenthesis)
+      const correctText = ex.answer.replace(/\(.*?\)/g, '').replace(/\.$/, '').trim()
+      // Diff wrong vs correct to find the error word(s)
+      const wWords = wrongSentence.replace(/[.!?]$/, '').split(/\s+/)
+      const cWords = correctText.split(/\s+/)
+      const errArr = [], fixArr = []
+      wWords.forEach((w, i) => {
+        const wc = w.toLowerCase().replace(/[.,!?'"]/g, '')
+        const cc = (cWords[i] || '').toLowerCase().replace(/[.,!?'"]/g, '')
+        if (wc !== cc) { errArr.push(w.replace(/[.,!?'"]/g, '')); fixArr.push(cWords[i]?.replace(/[.,!?'"]/g, '') || '') }
+      })
+      if (errArr.length === 0 || errArr.length > 4) return
+      items.push({ text: wrongSentence, error: errArr.join(' '), fix: fixArr.join(' '), hint, lessonSpecific: true })
+    })
+
+    // 2. Examples as correct sentences
+    pattern.examples?.forEach(example => {
+      items.push({
+        text: example,
+        error: 'none',
+        fix: 'Correct!',
+        hint: `جملة صحيحة — ${pattern.name}`,
+        lessonSpecific: true,
+      })
+    })
+  })
+  return items
+}
+
+function _shuffle(arr) {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]] }
+  return a
 }
 
 function GrammarDetective({ day }) {
@@ -2084,6 +2132,7 @@ function GrammarDetective({ day }) {
   const [clicked, setClicked] = useState({})
   const [revealed, setRevealed] = useState({})
   const [generated, setGenerated] = useState(false)
+  const [usingLesson, setUsingLesson] = useState(false)
 
   const LEVELS = [
     { key: 'easy',   label: '🟢 سهل' },
@@ -2092,11 +2141,16 @@ function GrammarDetective({ day }) {
   ]
 
   const generate = () => {
-    const pool = [...(DETECTIVE_BANK[difficulty] || DETECTIVE_BANK.medium)]
-    // Shuffle and pick `count` exercises
-    for (let i = pool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [pool[i], pool[j]] = [pool[j], pool[i]]
+    const lessonBank = buildLessonBank(day)
+    let pool
+    if (lessonBank.length >= 2) {
+      // Mix: lesson-specific first, pad with static if needed
+      const staticPool = _shuffle(DETECTIVE_BANK[difficulty] || DETECTIVE_BANK.medium)
+      pool = _shuffle([...lessonBank, ...staticPool.slice(0, Math.max(0, count - lessonBank.length))])
+      setUsingLesson(true)
+    } else {
+      pool = _shuffle(DETECTIVE_BANK[difficulty] || DETECTIVE_BANK.medium)
+      setUsingLesson(false)
     }
     setSentences(pool.slice(0, count))
     setClicked({})
@@ -2107,10 +2161,7 @@ function GrammarDetective({ day }) {
   const handleWord = (sIdx, wIdx, word, sentence) => {
     const key = `${sIdx}_${wIdx}`
     if (clicked[key]) return
-    if (sentence.error === 'none') {
-      setClicked(c => ({ ...c, [key]: 'wrong' }))
-      return
-    }
+    if (sentence.error === 'none') { setClicked(c => ({ ...c, [key]: 'wrong' })); return }
     const cleanWord = word.toLowerCase().replace(/[.,!?'"]/g, '')
     const errorWords = sentence.error.toLowerCase().split(/\s+/).map(w => w.replace(/[.,!?'"]/g, ''))
     const isError = errorWords.some(ew => cleanWord === ew || (ew.length > 3 && cleanWord.includes(ew)) || (cleanWord.length > 3 && ew.includes(cleanWord)))
@@ -2147,14 +2198,24 @@ function GrammarDetective({ day }) {
           </div>
           {generated && sentences.length > 0 && (
             <>
-              <div className="el-detective-desc">اضغط على الكلمة الخاطئة في كل جملة (بعض الجمل قد تكون صحيحة!):</div>
+              <div className="el-detective-desc">
+                {usingLesson ? '📚 الجمل مرتبطة بدرس اليوم — ' : ''}
+                اضغط على الكلمة الخاطئة في كل جملة (بعض الجمل قد تكون صحيحة!):
+              </div>
               {sentences.map((s, sIdx) => {
                 const words = s.text.split(' ')
                 const foundAll = s.error === 'none'
                   ? !!clicked[`${sIdx}_correct`]
                   : Object.entries(clicked).some(([k, v]) => k.startsWith(`${sIdx}_`) && v === 'right')
+                const allFixes = s.fixes || (s.fix ? [s.fix] : [])
+                const fixDisplay = allFixes.length > 1
+                  ? `اجابات مقبولة: ${allFixes.join(' أو ')}`
+                  : `الصواب: ${s.fix}`
                 return (
                   <div key={sIdx} className="el-detective-sentence">
+                    {s.lessonSpecific && (
+                      <div style={{ fontSize: '.72rem', color: 'var(--el-accent)', marginBottom: 3, fontWeight: 600 }}>📖 من درس اليوم</div>
+                    )}
                     <div className="el-detective-text">
                       {words.map((w, wIdx) => {
                         const key = `${sIdx}_${wIdx}`
@@ -2182,7 +2243,7 @@ function GrammarDetective({ day }) {
                       <div className="el-detective-result found">
                         {s.error === 'none'
                           ? `✅ صحيح! هذه الجملة صحيحة تماماً — ${s.hint}`
-                          : `✅ الخطأ: ${s.error} ← الصواب: ${s.fix} — ${s.hint}`}
+                          : `✅ الخطأ: ${s.error} ← ${fixDisplay} — ${s.hint}`}
                       </div>
                     ) : !revealed[sIdx] && s.error !== 'none' && (
                       <button
@@ -2195,7 +2256,12 @@ function GrammarDetective({ day }) {
                     )}
                     {revealed[sIdx] && !foundAll && (
                       <div className="el-detective-result">
-                        الخطأ: <strong>{s.error}</strong> ← الصواب: <strong>{s.fix}</strong> — {s.hint}
+                        الخطأ: <strong>{s.error}</strong> ← <strong>{fixDisplay}</strong> — {s.hint}
+                        {allFixes.length > 1 && (
+                          <div style={{ marginTop: 4, fontSize: '.8rem', opacity: .85 }}>
+                            💡 أكثر من إجابة صحيحة مقبولة
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
