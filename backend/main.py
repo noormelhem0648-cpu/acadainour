@@ -448,16 +448,19 @@ def _check_daily_limit(user: User, db: Session):
         return
     import datetime
     today = datetime.date.today().isoformat()
-    # Reset counter if it's a new day
-    if getattr(user, "daily_date", None) != today:
-        user.daily_date = today
-        user.daily_count = 0
-    if (user.daily_count or 0) >= DAILY_MESSAGE_LIMIT:
+    # Re-fetch with a row-level lock to prevent race conditions under concurrent requests
+    locked_user = db.query(User).filter(User.id == user.id).with_for_update().first()
+    if not locked_user:
+        return
+    if getattr(locked_user, "daily_date", None) != today:
+        locked_user.daily_date = today
+        locked_user.daily_count = 0
+    if (locked_user.daily_count or 0) >= DAILY_MESSAGE_LIMIT:
         raise HTTPException(
             status_code=429,
             detail=f"وصلت الحد اليومي ({DAILY_MESSAGE_LIMIT} رسالة). جرب بكرا 🌙 — You reached your daily limit of {DAILY_MESSAGE_LIMIT} messages. Try again tomorrow.",
         )
-    user.daily_count = (user.daily_count or 0) + 1
+    locked_user.daily_count = (locked_user.daily_count or 0) + 1
     db.commit()
 
 

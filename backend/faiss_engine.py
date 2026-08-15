@@ -11,6 +11,9 @@ os.makedirs(INDEXES_PATH, exist_ok=True)
 
 EMBED_MODEL = "gemini-embedding-001"
 
+# In-process cache: subject_code → (faiss_index, texts_list)
+_index_cache: dict = {}
+
 
 def get_embedding(text: str) -> list:
     """Get embedding vector for a text using Gemini Embeddings."""
@@ -64,6 +67,10 @@ def add_texts(subject_code: str, texts: list):
     with open(os.path.join(path, "texts.pkl"), "wb") as f:
         pickle.dump(valid_texts, f)
 
+    # Evict cached entry so next search re-loads the fresh index
+    code = path.split(os.sep)[-1]
+    _index_cache.pop(code, None)
+
     print(f"[FAISS] Index saved for {subject_code} — {len(valid_texts)} chunks.")
 
 
@@ -84,9 +91,13 @@ def search(subject_code: str, query: str, top_k: int = 5) -> list:
         print(f"[FAISS] Index for {subject_code} not rebuilt with current model — skipping.")
         return []
 
-    index = faiss.read_index(index_file)
-    with open(texts_file, "rb") as f:
-        texts = pickle.load(f)
+    code = get_index_path(subject_code).split(os.sep)[-1]
+    if code not in _index_cache:
+        _index_cache[code] = (
+            faiss.read_index(index_file),
+            pickle.load(open(texts_file, "rb")),
+        )
+    index, texts = _index_cache[code]
 
     try:
         query_vec = np.array([get_embedding(query)]).astype("float32")
