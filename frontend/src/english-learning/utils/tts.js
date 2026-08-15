@@ -25,7 +25,7 @@ const PRIORITY = {
 let _cache = {}
 
 // Normalize lang tag for comparison: 'en-GB' → 'en_gb', 'en-US' → 'en_us'
-function _normLang(s) { return s.toLowerCase().replace('-', '_') }
+function _normLang(s) { return s.toLowerCase().replace(/-/g, '_') }
 
 // True only when voice dialect matches exactly (en-US≠en-GB, en-GB-oxendict counts as GB)
 function _isDialect(voice, lang) {
