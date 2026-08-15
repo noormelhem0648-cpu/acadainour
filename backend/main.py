@@ -799,6 +799,7 @@ async def upload_and_ask_stream(
     subject_code: str = Form(...),
     message: str = Form(...),
     history: str = Form(default="[]"),
+    conversation_id: Optional[int] = Form(default=None),
     file: UploadFile = File(...),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
@@ -818,6 +819,20 @@ async def upload_and_ask_stream(
 
     _check_daily_limit(user, db)
 
+    # Resolve or create conversation
+    convo_id = conversation_id
+    if not convo_id:
+        convo = Conversation(user_id=user.id, subject_code=subject_code, title=message[:40])
+        db.add(convo)
+        db.commit()
+        db.refresh(convo)
+        convo_id = convo.id
+    else:
+        convo = db.query(Conversation).filter(Conversation.id == convo_id, Conversation.user_id == user.id).first()
+        if convo:
+            convo.updated_at = __import__("datetime").datetime.utcnow()
+            db.commit()
+
     try:
         chat_history = json.loads(history)
     except Exception:
@@ -834,6 +849,7 @@ async def upload_and_ask_stream(
     subject_info = get_subject_info(subject_code)
 
     def event_stream():
+        yield f"data: {json.dumps({'type': 'meta', 'conversation_id': convo_id})}\n\n"
         full_answer = ""
         try:
             for chunk in generate_academic_response_stream(
@@ -848,6 +864,13 @@ async def upload_and_ask_stream(
             ):
                 full_answer += chunk
                 yield f"data: {json.dumps({'type': 'chunk', 'text': chunk})}\n\n"
+            # Save messages to DB after stream completes
+            try:
+                db.add(Message(conversation_id=convo_id, role="user", content=message))
+                db.add(Message(conversation_id=convo_id, role="assistant", content=full_answer))
+                db.commit()
+            except Exception:
+                pass
         except Exception as e:
             print(f"[/upload-and-ask/stream Error] {e}")
             yield f"data: {json.dumps({'type': 'chunk', 'text': 'صار خطأ — حاول مرة ثانية 🔄'})}\n\n"

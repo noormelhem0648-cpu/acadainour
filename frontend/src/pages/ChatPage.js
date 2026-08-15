@@ -115,6 +115,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
   const messagesRef = useRef(messages);
   const loadingInterval = useRef(null);
   const abortRef = useRef(null);
+  const conversationIdRef = useRef(null);
 
   // Cancel any in-flight request when the component unmounts
   useEffect(() => () => { abortRef.current?.abort(); }, []);
@@ -386,12 +387,15 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
   const streamInto = async (userMessage, historyMsgs, errorText = "صار خطأ — حاول مرة ثانية 🔄", signal) => {
     addMessage("assistant", "");
     try {
-      await streamAPI(userMessage, historyMsgs, null, (chunk) => appendToLast(chunk), signal);
+      const newConvId = await streamAPI(userMessage, historyMsgs, conversationIdRef.current, (chunk) => appendToLast(chunk), signal);
+      if (newConvId) conversationIdRef.current = newConvId;
     } catch (err) {
-      if (err && err.message === "auth expired") return;  // already logging out
+      if (err && err.message === "auth expired") return;
+      if (err && err.name === "AbortError") return;
       try {
         const result = await callAPI(userMessage, historyMsgs);
         appendToLast(result.answer);
+        if (result.conversation_id) conversationIdRef.current = result.conversation_id;
       } catch {
         setMessages(prev => {
           const updated = [...prev];
@@ -441,6 +445,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
       formData.append("subject_code", subjectCode);
       formData.append("message", aiQuery);
       formData.append("history", JSON.stringify(historyMsgs.map(m => ({ role: m.role === "assistant" ? "model" : "user", content: m.content }))));
+      if (conversationIdRef.current) formData.append("conversation_id", conversationIdRef.current);
       formData.append("file", fileForMsg);
 
       addMessage("assistant", "");
@@ -468,7 +473,8 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
             if (!trimmed.startsWith("data:")) continue;
             try {
               const data = JSON.parse(trimmed.slice(5).trim());
-              if (data.type === "chunk") appendToLast(data.text);
+              if (data.type === "meta" && data.conversation_id) conversationIdRef.current = data.conversation_id;
+              else if (data.type === "chunk") appendToLast(data.text);
             } catch {}
           }
         }
