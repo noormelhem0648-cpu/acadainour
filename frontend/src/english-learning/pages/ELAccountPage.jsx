@@ -130,8 +130,7 @@ export default function ELAccountPage({ darkMode, setDarkMode, onLogout }) {
   const streak    = progress.streak?.current || 0
   const hardCount = progress.hardWords?.length || 0
   const dueCount  = progress.dueWords?.().length || 0
-  const badges    = progress.badges || []
-  const earnedBadges = badges.filter(b => b.earned)
+  const earnedBadges = progress.getEarnedBadges()
 
   // Member since formatting
   const memberSince = profile?.created_at
