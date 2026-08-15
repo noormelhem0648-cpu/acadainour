@@ -267,10 +267,6 @@ def reset_password(req: ResetPasswordRequest, db: Session = Depends(get_db)):
     db.commit()
     return {"ok": True, "message": "تم تغيير كلمة السر بنجاح! سجّل دخول بكلمتك الجديدة."}
 
-@app.get("/auth/me")
-def get_me(user: User = Depends(require_user)):
-    return {"id": user.id, "name": user.name, "email": user.email, "role": user.role}
-
 @app.get("/auth/make-instructor")
 def make_instructor(email: str, secret: str, db: Session = Depends(get_db)):
     """Promote a user to instructor. Requires ADMIN_SECRET env var."""
@@ -930,7 +926,7 @@ class ChangePasswordRequest(BaseModel):
     new_password: str
 
 @app.get("/auth/me")
-def get_profile(me: User = Depends(get_current_user)):
+def get_profile(me: User = Depends(require_user)):
     return {
         "id": me.id,
         "name": me.name,
