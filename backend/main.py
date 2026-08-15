@@ -16,7 +16,7 @@ from slowapi.errors import RateLimitExceeded
 from ai_engine import generate_academic_response, generate_academic_response_stream, _add_keys
 from subjects_meta import get_subject_info
 from faiss_engine import search
-from db import init_db, get_db, User, Conversation, Message, Restriction, ContributedKey, StudentProgress
+from db import init_db, get_db, SessionLocal, User, Conversation, Message, Restriction, ContributedKey, StudentProgress
 from auth import (
     hash_password, verify_password, create_access_token,
     get_current_user, require_user, require_instructor
@@ -127,11 +127,8 @@ def send_email(to_email: str, subject: str, body_html: str) -> bool:
 
 def _load_db_keys():
     """Pull all active contributed keys from DB into the AI engine."""
-    if not SessionLocal:
-        return
     try:
-        from db import SessionLocal as SL
-        db = SL()
+        db = SessionLocal()
         keys = [row.api_key for row in db.query(ContributedKey).filter(ContributedKey.active == True).all()]
         db.close()
         if keys:
@@ -139,8 +136,6 @@ def _load_db_keys():
             print(f"[Startup] Loaded {len(keys)} contributed key(s) from DB.")
     except Exception as e:
         print(f"[Startup] Could not load DB keys: {e}")
-
-from db import SessionLocal
 
 @app.on_event("startup")
 def startup():
@@ -908,10 +903,6 @@ from db import get_db as _get_db_gen
 
 @app.websocket("/ws/social/{user_id}")
 async def ws_social(ws: FWS, user_id: int, token: str = ""):
-    # Create a one-off DB session for the WebSocket lifetime
-    if not SessionLocal:
-        await ws.close(code=1008)
-        return
     db = SessionLocal()
     try:
         await websocket_endpoint(ws, user_id, token, db)
