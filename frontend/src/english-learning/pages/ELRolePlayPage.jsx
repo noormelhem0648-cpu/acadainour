@@ -13,9 +13,9 @@ import OrientLockBtn from '../components/OrientLockBtn'
 const EL = '/english-learning'
 
 /* ── Non-streaming AI call for structured data ── */
-async function aiAsk(message, systemPrompt) {
+async function aiAsk(message, systemPrompt, signal) {
   const res = await fetch(`${API}/english-tutor/stream`, {
-    method: 'POST', headers: authHeaders(),
+    method: 'POST', headers: authHeaders(), signal,
     body: JSON.stringify({ message, history: [], subject_info: systemPrompt })
   })
   if (!res.ok) throw new Error(res.status)
@@ -137,7 +137,7 @@ Stay completely in character. Keep your response to 1-2 sentences. Encourage use
 WRONG: [الكلمة أو العبارة الخاطئة من الجملة، أو: none]
 RIGHT: [النسخة الصحيحة، أو: none]
 WHY: [جملة عربية قصيرة تشرح السبب]`
-        const corrRaw = await aiAsk(corrPrompt, 'أنت مصحح لغوي. أجب فقط بالسطور الثلاثة المطلوبة.')
+        const corrRaw = await aiAsk(corrPrompt, 'أنت مصحح لغوي. أجب فقط بالسطور الثلاثة المطلوبة.', signal)
         const wM = corrRaw.match(/WRONG:\s*(.+)/i)
         const rM = corrRaw.match(/RIGHT:\s*(.+)/i)
         const yM = corrRaw.match(/WHY:\s*(.+)/i)
