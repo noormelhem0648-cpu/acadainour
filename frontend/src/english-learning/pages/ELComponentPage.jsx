@@ -1742,10 +1742,10 @@ function ShadowingComp({ day, levelId }) {
   const { shadowing: s } = day
   const [playingIdx, setPlayingIdx] = useState(null)
   const [shadLang, setShadLang] = useState('en-US')
-  const [recorded, setRecorded] = useState({})
   const [recording, setRecording] = useState(null)
-  const recognitionRef = useRef(null)
-  // H-3 fix: use curriculum-authored sentences if available, else fall back to bank
+  const [audioURLs, setAudioURLs] = useState({})
+  const mediaRecorderRef = useRef(null)
+  const chunksRef = useRef([])
   const sentences = (s.sentences && s.sentences.length >= 5)
     ? s.sentences.slice(0, 5)
     : getShadowingSentences(day.title, levelId)
@@ -1756,21 +1756,27 @@ function ShadowingComp({ day, levelId }) {
     speakAtRate(text, 0.82, shadLang, () => setPlayingIdx(null))
   }
 
-  const startRecord = (idx) => {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-    if (!SR) { alert('المتصفح لا يدعم التسجيل الصوتي'); return }
-    if (recording === idx) { recognitionRef.current?.stop(); setRecording(null); return }
-    const r = new SR()
-    r.lang = 'en-US'; r.interimResults = false
-    r.onresult = e => {
-      const heard = e.results[0][0].transcript || ''
-      setRecorded(prev => ({ ...prev, [idx]: heard }))
+  const startRecord = async (idx) => {
+    if (recording === idx) {
+      mediaRecorderRef.current?.stop()
+      return
     }
-    r.onerror = () => setRecording(null)
-    r.onend = () => setRecording(null)
-    recognitionRef.current = r
-    setRecording(idx)
-    r.start()
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      chunksRef.current = []
+      const mr = new MediaRecorder(stream)
+      mr.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data) }
+      mr.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
+        const url = URL.createObjectURL(blob)
+        setAudioURLs(prev => ({ ...prev, [idx]: url }))
+        stream.getTracks().forEach(t => t.stop())
+        setRecording(null)
+      }
+      mediaRecorderRef.current = mr
+      setRecording(idx)
+      mr.start()
+    } catch { alert('لم يُمنح إذن الميكروفون'); }
   }
 
   return (
@@ -1802,47 +1808,41 @@ function ShadowingComp({ day, levelId }) {
         <button className={`el-speed-ctrl-btn${shadLang === 'en-US' ? ' active' : ''}`} onClick={() => setShadLang('en-US')}>🇺🇸 US</button>
         <button className={`el-speed-ctrl-btn${shadLang === 'en-GB' ? ' active' : ''}`} onClick={() => setShadLang('en-GB')}>🇬🇧 UK</button>
       </div>
-      <div className="el-shadow-sentences-desc">استمع → كرّر → سجّل صوتك → قارن</div>
+      <div className="el-shadow-sentences-desc">استمع → كرّر → سجّل صوتك → اسمع تسجيلك</div>
       <div className="el-shadow-sentences-list">
-        {sentences.map((sent, i) => {
-          const match = recorded[i]
-          const isCorrect = match && match.toLowerCase().replace(/[^a-z ]/g, '') === sent.toLowerCase().replace(/[^a-z ]/g, '')
-          const isClose = match && !isCorrect && sent.toLowerCase().split(' ').filter(w => match.toLowerCase().includes(w)).length >= Math.ceil(sent.split(' ').length * 0.6)
-          return (
-            <div key={i} className="el-shadow-sentence-card">
-              <div className="el-shadow-sent-num">{i + 1}</div>
-              <div className="el-shadow-sent-body">
-                <div className="el-shadow-sent-text">{sent}</div>
-                <div className="el-shadow-sent-btns">
-                  <button
-                    className={`el-shadow-play-btn${playingIdx === i ? ' playing' : ''}`}
-                    onClick={() => playSentence(sent, i)}
-                    title="استمع"
-                  >
-                    {playingIdx === i ? '⏹ أوقف' : '🔊 استمع'}
-                  </button>
-                  <button
-                    className={`el-shadow-rec-btn${recording === i ? ' recording' : ''}`}
-                    onClick={() => startRecord(i)}
-                    title="سجّل"
-                  >
-                    {recording === i ? '⏹ أوقف التسجيل' : '🎤 سجّل'}
-                  </button>
-                </div>
-                {match && (
-                  <div className={`el-shadow-result${isCorrect ? ' perfect' : isClose ? ' close' : ' retry'}`}>
-                    {isCorrect
-                      ? '✅ ممتاز! النطق صحيح'
-                      : isClose
-                        ? `👍 قريب جداً — سمعنا: "${match}"`
-                        : `🔄 حاول مجدداً — سمعنا: "${match}"`
-                    }
-                  </div>
-                )}
+        {sentences.map((sent, i) => (
+          <div key={i} className="el-shadow-sentence-card">
+            <div className="el-shadow-sent-num">{i + 1}</div>
+            <div className="el-shadow-sent-body">
+              <div className="el-shadow-sent-text">{sent}</div>
+              <div className="el-shadow-sent-btns">
+                <button
+                  className={`el-shadow-play-btn${playingIdx === i ? ' playing' : ''}`}
+                  onClick={() => playSentence(sent, i)}
+                >
+                  {playingIdx === i ? '⏹ أوقف' : '🔊 استمع'}
+                </button>
+                <button
+                  className={`el-shadow-rec-btn${recording === i ? ' recording' : ''}`}
+                  onClick={() => startRecord(i)}
+                >
+                  {recording === i ? '⏹ أوقف' : '🎤 سجّل'}
+                </button>
               </div>
+              {audioURLs[i] && (
+                <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '.78rem', color: 'var(--el-accent)', fontWeight: 600 }}>🔁 تسجيلك:</span>
+                  <audio src={audioURLs[i]} controls style={{ height: 28, flex: 1, minWidth: 160 }} />
+                  <button
+                    className="el-nav-btn"
+                    style={{ fontSize: '.72rem', padding: '2px 8px' }}
+                    onClick={() => setAudioURLs(prev => { const n = { ...prev }; delete n[i]; return n })}
+                  >🗑</button>
+                </div>
+              )}
             </div>
-          )
-        })}
+          </div>
+        ))}
       </div>
 
       {(() => {
@@ -2131,6 +2131,7 @@ function GrammarDetective({ day }) {
   const [sentences, setSentences] = useState([])
   const [clicked, setClicked] = useState({})
   const [revealed, setRevealed] = useState({})
+  const [attempted, setAttempted] = useState({})
   const [generated, setGenerated] = useState(false)
   const [usingLesson, setUsingLesson] = useState(false)
 
@@ -2142,25 +2143,34 @@ function GrammarDetective({ day }) {
 
   const generate = () => {
     const lessonBank = buildLessonBank(day)
+    const staticPool = _shuffle(DETECTIVE_BANK[difficulty] || DETECTIVE_BANK.medium)
     let pool
     if (lessonBank.length >= 2) {
-      // Mix: lesson-specific first, pad with static if needed
-      const staticPool = _shuffle(DETECTIVE_BANK[difficulty] || DETECTIVE_BANK.medium)
-      pool = _shuffle([...lessonBank, ...staticPool.slice(0, Math.max(0, count - lessonBank.length))])
+      // Ensure at least half the questions have real errors (wrong sentences)
+      const lessonErrors = lessonBank.filter(x => x.error !== 'none')
+      const lessonCorrect = lessonBank.filter(x => x.error === 'none')
+      const staticErrors = staticPool.filter(x => x.error !== 'none')
+      // Target: ~50% errors, ~50% correct. Fill with static errors if lesson has few
+      const targetErrors = Math.max(1, Math.ceil(count / 2))
+      const allErrors = _shuffle([...lessonErrors, ...staticErrors])
+      const allCorrect = _shuffle([...lessonCorrect])
+      pool = _shuffle([...allErrors.slice(0, targetErrors), ...allCorrect.slice(0, count - targetErrors)])
       setUsingLesson(true)
     } else {
-      pool = _shuffle(DETECTIVE_BANK[difficulty] || DETECTIVE_BANK.medium)
+      pool = staticPool
       setUsingLesson(false)
     }
     setSentences(pool.slice(0, count))
     setClicked({})
     setRevealed({})
+    setAttempted({})
     setGenerated(true)
   }
 
   const handleWord = (sIdx, wIdx, word, sentence) => {
     const key = `${sIdx}_${wIdx}`
     if (clicked[key]) return
+    setAttempted(a => ({ ...a, [sIdx]: true }))
     if (sentence.error === 'none') { setClicked(c => ({ ...c, [key]: 'wrong' })); return }
     const cleanWord = word.toLowerCase().replace(/[.,!?'"]/g, '')
     const errorWords = sentence.error.toLowerCase().split(/\s+/).map(w => w.replace(/[.,!?'"]/g, ''))
@@ -2204,9 +2214,11 @@ function GrammarDetective({ day }) {
               </div>
               {sentences.map((s, sIdx) => {
                 const words = s.text.split(' ')
-                const foundAll = s.error === 'none'
-                  ? !!clicked[`${sIdx}_correct`]
-                  : Object.entries(clicked).some(([k, v]) => k.startsWith(`${sIdx}_`) && v === 'right')
+                const hasAttempted = !!attempted[sIdx]
+                const clickedCorrectBtn = !!clicked[`${sIdx}_correct`]
+                const clickedErrorWord = Object.entries(clicked).some(([k, v]) => k.startsWith(`${sIdx}_`) && v === 'right')
+                const foundAll = s.error === 'none' ? clickedCorrectBtn : clickedErrorWord
+                const wrongClick = s.error === 'none' && hasAttempted && !clickedCorrectBtn
                 const allFixes = s.fixes || (s.fix ? [s.fix] : [])
                 const fixDisplay = allFixes.length > 1
                   ? `اجابات مقبولة: ${allFixes.join(' أو ')}`
@@ -2230,7 +2242,8 @@ function GrammarDetective({ day }) {
                         )
                       })}
                     </div>
-                    {s.error === 'none' && !foundAll && !revealed[sIdx] && (
+                    {/* Show "correct sentence" button only after user has tried clicking a word */}
+                    {s.error === 'none' && hasAttempted && !foundAll && !revealed[sIdx] && (
                       <button
                         className="el-nav-btn"
                         style={{ marginTop: 8, padding: '4px 10px', fontSize: '.78rem', background: '#f0fdf4', borderColor: '#86efac', color: '#15803d' }}
@@ -2239,13 +2252,18 @@ function GrammarDetective({ day }) {
                         ✅ هذه الجملة صحيحة (لا خطأ)
                       </button>
                     )}
+                    {wrongClick && !foundAll && !revealed[sIdx] && (
+                      <div style={{ fontSize: '.78rem', color: '#f59e0b', marginTop: 4 }}>
+                        ⚠️ انتبه — هل تعتقد أن الجملة خاطئة؟ ابحث أكثر، أو اضغط "أظهر الإجابة"
+                      </div>
+                    )}
                     {foundAll ? (
                       <div className="el-detective-result found">
                         {s.error === 'none'
-                          ? `✅ صحيح! هذه الجملة صحيحة تماماً — ${s.hint}`
+                          ? `✅ صحيح! هذه الجملة صحيحة — ${s.hint}`
                           : `✅ الخطأ: ${s.error} ← ${fixDisplay} — ${s.hint}`}
                       </div>
-                    ) : !revealed[sIdx] && s.error !== 'none' && (
+                    ) : hasAttempted && !revealed[sIdx] && s.error !== 'none' && (
                       <button
                         className="el-nav-btn"
                         style={{ marginTop: 8, padding: '4px 12px', fontSize: '.78rem' }}
@@ -2544,52 +2562,167 @@ function FillGapExercise({ words, allLearnedWords = [] }) {
   )
 }
 
-/* ─── Dialogue Partner (Shadowing) ─── */
+/* ─── Dialogue Partner — real turn-based conversation ─── */
 function DialoguePartner({ day }) {
-  const [open, setOpen] = useState(false)
-  const [currentLine, setCurrentLine] = useState(0)
-  const [playingKey, trigger] = useTTS()
   const { shadowing: s } = day
-  const lines = [
-    { role: 'A', text: s.chunk, isStudent: false },
-    { role: 'B', text: s.nativeForm, isStudent: true },
-    { role: 'A', text: s.steps?.[0] || 'Listen carefully and repeat.', isStudent: false },
-    { role: 'B', text: s.chunk, isStudent: true },
-  ]
-  const advance = () => {
-    if (currentLine < lines.length - 1) setCurrentLine(c => c + 1)
-    else setCurrentLine(0)
+  const [open, setOpen] = useState(false)
+  const [step, setStep] = useState(0)
+  const [aPlayed, setAPlayed] = useState(false)
+  const [recording, setRecording] = useState(false)
+  const [userAudio, setUserAudio] = useState(null)
+  const [done, setDone] = useState(false)
+  const mrRef = useRef(null)
+  const chunksRef = useRef([])
+
+  // Build dialogue lines from shadowing data
+  const lines = (() => {
+    if (s.dialogue && Array.isArray(s.dialogue)) return s.dialogue
+    // Auto-build a short 4-line dialogue from the shadowing chunk
+    return [
+      { role: 'A', text: s.chunk },
+      { role: 'B', text: s.chunk },
+      { role: 'A', text: s.steps?.[1] || `Can you say it again? — ${s.chunk}` },
+      { role: 'B', text: s.chunk },
+    ]
+  })()
+
+  const current = lines[step] || lines[lines.length - 1]
+  const isMyTurn = current.role === 'B'
+
+  // Auto-play A's line when step changes to A
+  useEffect(() => {
+    if (!open || isMyTurn) return
+    setAPlayed(false)
+    setUserAudio(null)
+    const t = setTimeout(() => {
+      speakAtRate(current.text, 0.85, 'en-US', () => setAPlayed(true))
+      setAPlayed(true)
+    }, 400)
+    return () => clearTimeout(t)
+  }, [step, open]) // eslint-disable-line
+
+  const startRecording = async () => {
+    if (recording) { mrRef.current?.stop(); return }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      chunksRef.current = []
+      const mr = new MediaRecorder(stream)
+      mr.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data) }
+      mr.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
+        setUserAudio(URL.createObjectURL(blob))
+        stream.getTracks().forEach(t => t.stop())
+        setRecording(false)
+      }
+      mrRef.current = mr
+      setRecording(true)
+      mr.start()
+    } catch { alert('لم يُمنح إذن الميكروفون') }
   }
+
+  const nextStep = () => {
+    if (step + 1 >= lines.length) { setDone(true); return }
+    setStep(s => s + 1)
+    setUserAudio(null)
+    setAPlayed(false)
+  }
+
+  const restart = () => {
+    stopTTS()
+    setStep(0); setDone(false); setUserAudio(null); setAPlayed(false); setRecording(false)
+  }
+
   return (
     <div className="el-dialogue-section">
-      <button className="el-roleplay-toggle" style={{ marginBottom: open ? 14 : 0 }} onClick={() => setOpen(o => !o)}>
-        🎙️ {open ? 'إغلاق Dialogue Partner' : 'Dialogue Partner — اقرأ دورك بصوت عالٍ'}
+      <button className="el-roleplay-toggle" style={{ marginBottom: open ? 14 : 0 }}
+        onClick={() => { setOpen(o => !o); if (open) { stopTTS(); restart() } }}>
+        🎙️ {open ? 'إغلاق Dialogue Partner' : 'Dialogue Partner — محادثة حقيقية'}
       </button>
       {open && (
         <>
-          <div style={{ fontSize: '.85rem', color: 'var(--el-muted)', marginBottom: 12 }}>
-            الدور B (الأخضر) هو دورك — اقرأه بصوت عالٍ. الدور A يُشغّل تلقائياً.
+          <div style={{ fontSize: '.82rem', color: 'var(--el-muted)', marginBottom: 12 }}>
+            أنت الدور <strong style={{ color: '#22c55e' }}>B</strong> — المساعد يلعب دور <strong>A</strong> ويتكلم تلقائياً 🤖
           </div>
-          <div className="el-dialogue-script">
-            {lines.map((line, i) => (
-              <div key={i} className={`el-dialogue-line${line.isStudent ? ' student-role' : ''}`}>
-                <div className="el-dialogue-role">{line.role}</div>
-                <div className="el-dialogue-text">{line.text}</div>
-                {!line.isStudent && (
-                  <button className="el-speak-btn" onClick={() => trigger(line.text, 'en-US', `dial-${i}`)}>
-                    {playingKey === `dial-${i}` ? '⏹' : '🔊'}
+
+          {done ? (
+            <div style={{ textAlign: 'center', padding: '20px 0' }}>
+              <div style={{ fontSize: '2rem', marginBottom: 8 }}>🎉</div>
+              <div style={{ fontWeight: 700, color: 'var(--el-accent)', marginBottom: 12 }}>أنهيت المحادثة! ممتاز!</div>
+              <button className="el-nav-btn primary" onClick={restart}>🔄 أعد المحادثة</button>
+            </div>
+          ) : (
+            <>
+              {/* Conversation history */}
+              <div className="el-dialogue-script" style={{ marginBottom: 12 }}>
+                {lines.slice(0, step).map((line, i) => (
+                  <div key={i} className={`el-dialogue-line${line.role === 'B' ? ' student-role' : ''}`}>
+                    <div className="el-dialogue-role">{line.role}</div>
+                    <div className="el-dialogue-text" style={{ opacity: .6 }}>{line.text}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Current line */}
+              <div className={`el-dialogue-line${isMyTurn ? ' student-role' : ''}`}
+                style={{ border: '2px solid var(--el-accent)', borderRadius: 12, padding: '10px 14px', marginBottom: 14 }}>
+                <div className="el-dialogue-role" style={{ fontSize: '1rem', fontWeight: 800 }}>{current.role}</div>
+                <div className="el-dialogue-text" style={{ fontSize: '1.05rem' }}>
+                  {isMyTurn ? current.text : current.text}
+                </div>
+                {!isMyTurn && (
+                  <button className="el-speak-btn" style={{ marginRight: 8 }}
+                    onClick={() => speakAtRate(current.text, 0.85, 'en-US', () => setAPlayed(true))}>
+                    🔊
                   </button>
                 )}
               </div>
-            ))}
-          </div>
-          <div className="el-tts-pair" style={{ justifyContent: 'center', marginTop: 10 }}>
-            <button className="el-nav-btn" onClick={() => { setCurrentLine(0); trigger(lines[0].text, 'en-US', 'dial-0') }}>🔄 أعد من البداية</button>
-            <button className="el-nav-btn primary" onClick={advance}>التالي →</button>
-          </div>
-          <div style={{ textAlign: 'center', marginTop: 8, fontSize: '.8rem', color: 'var(--el-accent)' }}>
-            السطر الحالي: {currentLine + 1} / {lines.length}
-          </div>
+
+              {isMyTurn ? (
+                /* B turn — user records */
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}>
+                  <div style={{ fontSize: '.85rem', color: 'var(--el-muted)' }}>دورك! سجّل صوتك وأنت تقول هذه الجملة:</div>
+                  <button
+                    className={`el-shadow-rec-btn${recording ? ' recording' : ''}`}
+                    style={{ fontSize: '1rem', padding: '10px 28px', borderRadius: 14 }}
+                    onClick={startRecording}
+                  >
+                    {recording ? '⏹ أوقف التسجيل' : '🎤 سجّل دورك'}
+                  </button>
+                  {userAudio && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
+                      <span style={{ fontSize: '.8rem', color: 'var(--el-accent)' }}>🔁 صوتك:</span>
+                      <audio src={userAudio} controls style={{ height: 28, flex: 1 }} />
+                    </div>
+                  )}
+                  <button
+                    className="el-nav-btn primary"
+                    disabled={!userAudio && !recording}
+                    onClick={nextStep}
+                    style={{ marginTop: 4 }}
+                  >
+                    {step + 1 >= lines.length ? '✅ انتهت المحادثة' : 'التالي →'}
+                  </button>
+                </div>
+              ) : (
+                /* A turn — wait for TTS */
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}>
+                  <div style={{ fontSize: '.85rem', color: 'var(--el-muted)' }}>
+                    {aPlayed ? 'استمعت؟ تابع →' : '🔊 المساعد يتكلم...'}
+                  </div>
+                  <button className="el-nav-btn primary" onClick={nextStep}>
+                    {aPlayed ? 'التالي →' : 'تخطّى →'}
+                  </button>
+                </div>
+              )}
+
+              <div style={{ textAlign: 'center', marginTop: 10, fontSize: '.78rem', color: 'var(--el-muted)' }}>
+                السطر {step + 1} / {lines.length}
+              </div>
+              <button className="el-nav-btn" style={{ display: 'block', margin: '8px auto 0', fontSize: '.78rem' }} onClick={restart}>
+                🔄 أعد من البداية
+              </button>
+            </>
+          )}
         </>
       )}
     </div>
