@@ -1744,7 +1744,9 @@ function ShadowingComp({ day, levelId }) {
   const [shadLang, setShadLang] = useState('en-US')
   const [recording, setRecording] = useState(null)
   const [audioURLs, setAudioURLs] = useState({})
+  const [scores, setScores] = useState({})   // { idx: { heard, pct, label, color } }
   const mediaRecorderRef = useRef(null)
+  const recognitionRef = useRef(null)
   const chunksRef = useRef([])
   const sentences = (s.sentences && s.sentences.length >= 5)
     ? s.sentences.slice(0, 5)
@@ -1756,11 +1758,28 @@ function ShadowingComp({ day, levelId }) {
     speakAtRate(text, 0.82, shadLang, () => setPlayingIdx(null))
   }
 
+  const evalPronunciation = (heard, target) => {
+    const h = heard.toLowerCase().replace(/[^a-z ]/g, '').trim()
+    const t = target.toLowerCase().replace(/[^a-z ]/g, '').trim()
+    if (!h) return null
+    const tWords = t.split(' ')
+    const matched = tWords.filter(w => h.includes(w)).length
+    const pct = Math.round((matched / tWords.length) * 100)
+    if (pct === 100) return { heard, pct, label: '✅ ممتاز! النطق مثالي', color: '#22c55e' }
+    if (pct >= 70)   return { heard, pct, label: `👍 جيد جداً — ${pct}%`, color: '#84cc16' }
+    if (pct >= 40)   return { heard, pct, label: `🔄 قريب — ${pct}%، حاول مجدداً`, color: '#f59e0b' }
+    return               { heard, pct, label: `💪 استمع مجدداً — ${pct}%`, color: '#ef4444' }
+  }
+
   const startRecord = async (idx) => {
     if (recording === idx) {
       mediaRecorderRef.current?.stop()
+      recognitionRef.current?.stop()
       return
     }
+    // Clear previous score for this sentence
+    setScores(prev => { const n = { ...prev }; delete n[idx]; return n })
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       chunksRef.current = []
@@ -1776,7 +1795,22 @@ function ShadowingComp({ day, levelId }) {
       mediaRecorderRef.current = mr
       setRecording(idx)
       mr.start()
-    } catch { alert('لم يُمنح إذن الميكروفون'); }
+
+      // Run SpeechRecognition in parallel for scoring
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+      if (SR) {
+        const r = new SR()
+        r.lang = 'en-US'; r.interimResults = false; r.maxAlternatives = 3
+        r.onresult = e => {
+          const heard = Array.from(e.results[0]).map(alt => alt.transcript).join(' ')
+          const result = evalPronunciation(heard, sentences[idx])
+          if (result) setScores(prev => ({ ...prev, [idx]: result }))
+        }
+        r.onerror = () => {}
+        recognitionRef.current = r
+        r.start()
+      }
+    } catch { alert('لم يُمنح إذن الميكروفون') }
   }
 
   return (
@@ -1830,14 +1864,33 @@ function ShadowingComp({ day, levelId }) {
                 </button>
               </div>
               {audioURLs[i] && (
-                <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '.78rem', color: 'var(--el-accent)', fontWeight: 600 }}>🔁 تسجيلك:</span>
-                  <audio src={audioURLs[i]} controls style={{ height: 28, flex: 1, minWidth: 160 }} />
-                  <button
-                    className="el-nav-btn"
-                    style={{ fontSize: '.72rem', padding: '2px 8px' }}
-                    onClick={() => setAudioURLs(prev => { const n = { ...prev }; delete n[i]; return n })}
-                  >🗑</button>
+                <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '.78rem', color: 'var(--el-accent)', fontWeight: 600 }}>🔁 تسجيلك:</span>
+                    <audio src={audioURLs[i]} controls style={{ height: 28, flex: 1, minWidth: 160 }} />
+                    <button
+                      className="el-nav-btn"
+                      style={{ fontSize: '.72rem', padding: '2px 8px' }}
+                      onClick={() => {
+                        setAudioURLs(prev => { const n = { ...prev }; delete n[i]; return n })
+                        setScores(prev => { const n = { ...prev }; delete n[i]; return n })
+                      }}
+                    >🗑</button>
+                  </div>
+                  {scores[i] && (
+                    <div style={{
+                      padding: '6px 12px', borderRadius: 8, fontSize: '.83rem', fontWeight: 600,
+                      background: scores[i].color + '22', color: scores[i].color,
+                      border: `1px solid ${scores[i].color}55`
+                    }}>
+                      {scores[i].label}
+                      {scores[i].pct < 100 && (
+                        <div style={{ fontSize: '.75rem', fontWeight: 400, marginTop: 2, opacity: .85 }}>
+                          سمعنا: "{scores[i].heard}"
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
