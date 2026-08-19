@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 
 import { API_BASE as API_URL } from '../config'
+import { track } from '../utils/analytics'
 import { setToken } from '../utils/auth'
 
 function isRTL(text) {
@@ -610,6 +611,7 @@ Use the mixed Arabic+English style.`;
   const sendPrompt = async (prompt, displayText) => {
     if (loading) return;
     addMessage("user", displayText || prompt);
+    track("chat_sent", { subject: subjectCode });
     setLoading(true);
     await streamInto(prompt, messagesRef.current.slice(0, -1), "صار خطأ — حاول مرة ثانية 🔄", _abortAndSignal());
     setLoading(false);

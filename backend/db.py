@@ -155,6 +155,17 @@ class ChallengeParticipant(Base):
     challenge = relationship("Challenge", back_populates="participants")
 
 
+class AnalyticsEvent(Base):
+    __tablename__ = "analytics_events"
+    id = Column(Integer, primary_key=True, index=True)
+    event_name = Column(String(50), nullable=False, index=True)   # e.g. page_view, chat_sent, signup
+    path = Column(String(200), nullable=True)
+    session_id = Column(String(64), nullable=False, index=True)   # anonymous, client-generated
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
+    meta = Column(Text, nullable=True)                            # optional JSON string
+    created_at = Column(DateTime, server_default=func.now(), index=True)
+
+
 def _migrate():
     """Add new columns to existing tables (create_all does not alter tables)."""
     from sqlalchemy import text

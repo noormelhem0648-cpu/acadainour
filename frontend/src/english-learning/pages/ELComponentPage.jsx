@@ -8,6 +8,7 @@ import OrientLockBtn from '../components/OrientLockBtn'
 import { authHeaders } from '../utils/auth'
 import { speak, speakAtRate, stopTTS, clearVoiceCache, getRate, getPitch, saveRate, savePitch } from '../utils/tts'
 import { readSSEStream } from '../utils/stream'
+import { track } from '../../utils/analytics'
 import '../EL.css'
 
 const EL = '/english-learning'
@@ -1791,6 +1792,7 @@ function ShadowingComp({ day, levelId }) {
         setAudioURLs(prev => ({ ...prev, [idx]: url }))
         stream.getTracks().forEach(t => t.stop())
         setRecording(null)
+        track('shadowing_recorded')
       }
       mediaRecorderRef.current = mr
       setRecording(idx)
@@ -2195,6 +2197,7 @@ function GrammarDetective({ day }) {
   ]
 
   const generate = () => {
+    track('grammar_detective_used')
     const lessonBank = buildLessonBank(day)
     const staticPool = _shuffle(DETECTIVE_BANK[difficulty] || DETECTIVE_BANK.medium)
     let pool
@@ -2666,6 +2669,7 @@ function DialoguePartner({ day }) {
         setUserAudio(URL.createObjectURL(blob))
         stream.getTracks().forEach(t => t.stop())
         setRecording(false)
+        track('dialogue_partner_used')
       }
       mrRef.current = mr
       setRecording(true)

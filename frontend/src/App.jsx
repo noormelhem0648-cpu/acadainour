@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { trackPageView } from "./utils/analytics";
 import HomePage from "./pages/HomePage";
 import YearsPage from "./pages/YearsPage";
 import SubjectsPage from "./pages/SubjectsPage";
@@ -23,6 +24,15 @@ import ELReviewPage from "./english-learning/pages/ELReviewPage";
 import ELSocialPage from "./english-learning/pages/ELSocialPage";
 import ELAccountPage from "./english-learning/pages/ELAccountPage";
 import { useProgressSync } from "./english-learning/useProgressSync";
+import { track } from "./utils/analytics";
+
+function PageViewTracker() {
+  const location = useLocation();
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location.pathname]);
+  return null;
+}
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("theme") === "dark");
@@ -47,9 +57,11 @@ function App() {
   const handleLogin = (userData, tokenStr) => {
     setUser(userData);
     setToken(tokenStr);
+    track("login");
   };
 
   const handleLogout = () => {
+    track("logout");
     setUser(null);
     setToken(null);
     localStorage.removeItem("noura_token");
@@ -73,6 +85,7 @@ function App() {
 
   return (
     <Router>
+      <PageViewTracker />
       <Routes>
         <Route path="/" element={user?.role === "instructor" ? <Navigate to="/instructor" replace /> : <HomePage {...themeProps} />} />
         <Route path="/years" element={<YearsPage {...themeProps} />} />

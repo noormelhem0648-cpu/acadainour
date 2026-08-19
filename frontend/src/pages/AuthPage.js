@@ -1,6 +1,7 @@
 ﻿import React, { useState, useEffect } from "react";
 import { API_BASE as API_URL } from '../config'
 import { setToken } from '../utils/auth'
+import { track } from '../utils/analytics'
 
 export default function AuthPage({ onLogin }) {
   // mode: "login" | "register" | "forgot" | "reset"
@@ -42,6 +43,7 @@ export default function AuthPage({ onLogin }) {
       if (!res.ok) { setError(data.detail || "Something went wrong."); setLoading(false); return; }
       setToken(data.token);
       localStorage.setItem("noura_user", JSON.stringify(data.user));
+      if (mode === "register") track("signup");
       onLogin(data.user, data.token);
     } catch {
       setError("Connection error. Please try again.");

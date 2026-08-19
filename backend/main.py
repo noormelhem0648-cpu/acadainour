@@ -18,7 +18,7 @@ from slowapi.errors import RateLimitExceeded
 from ai_engine import generate_academic_response, generate_academic_response_stream, _add_keys
 from subjects_meta import get_subject_info
 from faiss_engine import search
-from db import init_db, get_db, SessionLocal, User, Conversation, Message, Restriction, ContributedKey, StudentProgress
+from db import init_db, get_db, SessionLocal, User, Conversation, Message, Restriction, ContributedKey, StudentProgress, AnalyticsEvent
 from auth import (
     hash_password, verify_password, create_access_token,
     get_current_user, require_user, require_instructor
@@ -403,6 +403,84 @@ def root():
 def health():
     """Ultra-light endpoint for uptime pingers (UptimeRobot/cron-job.org)."""
     return {"ok": True}
+
+
+# ──────────────────────────────────────────────
+# Lightweight first-party analytics (no external service)
+# ──────────────────────────────────────────────
+ALLOWED_EVENT_NAMES = {
+    "page_view", "signup", "login", "chat_sent", "lesson_started",
+    "lesson_completed", "quiz_started", "quiz_completed", "shadowing_recorded",
+    "grammar_detective_used", "dialogue_partner_used", "file_uploaded",
+    "key_contributed", "logout",
+}
+
+class AnalyticsTrackRequest(BaseModel):
+    event_name: str
+    path: str = ""
+    session_id: str
+    meta: Optional[str] = None
+
+@app.post("/analytics/track")
+@limiter.limit("60/minute")
+def track_event(
+    request: Request,
+    body: AnalyticsTrackRequest,
+    db: Session = Depends(get_db),
+    user: Optional[User] = Depends(get_current_user),
+):
+    if body.event_name not in ALLOWED_EVENT_NAMES:
+        raise HTTPException(status_code=400, detail="Unknown event_name.")
+    if not SessionLocal:
+        return {"ok": True}
+    ev = AnalyticsEvent(
+        event_name=body.event_name,
+        path=body.path[:200] if body.path else None,
+        session_id=body.session_id[:64],
+        user_id=user.id if user else None,
+        meta=(body.meta[:2000] if body.meta else None),
+    )
+    db.add(ev)
+    db.commit()
+    return {"ok": True}
+
+@app.get("/analytics/summary")
+def analytics_summary(days: int = 7, user: User = Depends(require_instructor), db: Session = Depends(get_db)):
+    """Instructor-only dashboard data: DAU, top events, top pages, funnel drop-off."""
+    days = min(max(days, 1), 90)
+    since = datetime.datetime.utcnow() - datetime.timedelta(days=days)
+
+    rows = db.query(AnalyticsEvent).filter(AnalyticsEvent.created_at >= since).all()
+
+    dau = {}
+    event_counts = {}
+    page_counts = {}
+    unique_sessions = set()
+    unique_users = set()
+
+    for r in rows:
+        day_key = str(r.created_at.date()) if r.created_at else "unknown"
+        dau.setdefault(day_key, set()).add(r.session_id)
+        event_counts[r.event_name] = event_counts.get(r.event_name, 0) + 1
+        if r.path:
+            page_counts[r.path] = page_counts.get(r.path, 0) + 1
+        unique_sessions.add(r.session_id)
+        if r.user_id:
+            unique_users.add(r.user_id)
+
+    dau_series = sorted([{"date": d, "active_sessions": len(s)} for d, s in dau.items()], key=lambda x: x["date"])
+    top_events = sorted(event_counts.items(), key=lambda x: -x[1])[:15]
+    top_pages = sorted(page_counts.items(), key=lambda x: -x[1])[:15]
+
+    return {
+        "range_days": days,
+        "total_events": len(rows),
+        "unique_sessions": len(unique_sessions),
+        "unique_logged_in_users": len(unique_users),
+        "daily_active_sessions": dau_series,
+        "top_events": [{"event_name": k, "count": v} for k, v in top_events],
+        "top_pages": [{"path": k, "count": v} for k, v in top_pages],
+    }
 
 
 # ──────────────────────────────────────────────

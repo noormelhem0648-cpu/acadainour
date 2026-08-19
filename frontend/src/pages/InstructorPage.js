@@ -12,6 +12,9 @@ export default function InstructorPage({ darkMode, setDarkMode, user, token, onL
   const [endInput, setEndInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState(null);
+  const [analytics, setAnalytics] = useState(null);
+  const [analyticsDays, setAnalyticsDays] = useState(7);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
   const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
 
@@ -22,7 +25,16 @@ export default function InstructorPage({ darkMode, setDarkMode, user, token, onL
     } catch {}
   };
 
-  useEffect(() => { fetchRestrictions(); }, []);
+  const fetchAnalytics = async (days = analyticsDays) => {
+    setAnalyticsLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/analytics/summary?days=${days}`, { headers });
+      if (res.ok) setAnalytics(await res.json());
+    } catch {}
+    setAnalyticsLoading(false);
+  };
+
+  useEffect(() => { fetchRestrictions(); fetchAnalytics(); }, []); // eslint-disable-line
 
   const blockSubject = async () => {
     if (!subjectInput.trim()) return;
@@ -90,6 +102,86 @@ export default function InstructorPage({ darkMode, setDarkMode, user, token, onL
       </header>
 
       <main className="instructor-main">
+        {/* Analytics Dashboard */}
+        <div className="inst-card">
+          <h2 className="inst-card-title">
+            📊 الاستخدام
+            <div style={{ display: "flex", gap: 6, marginRight: "auto" }}>
+              {[7, 14, 30].map(d => (
+                <button
+                  key={d}
+                  className="inst-unblock-btn"
+                  style={{ padding: "3px 10px", fontSize: ".78rem", opacity: analyticsDays === d ? 1 : .55 }}
+                  onClick={() => { setAnalyticsDays(d); fetchAnalytics(d); }}
+                >{d} يوم</button>
+              ))}
+            </div>
+          </h2>
+          {analyticsLoading && !analytics ? (
+            <p className="inst-empty">جاري التحميل...</p>
+          ) : !analytics || analytics.total_events === 0 ? (
+            <p className="inst-empty">لا يوجد استخدام مسجّل بعد خلال هذه الفترة</p>
+          ) : (
+            <>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", margin: "10px 0 16px" }}>
+                <div style={{ flex: "1 1 140px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px" }}>
+                  <div style={{ fontSize: ".75rem", color: "var(--text-muted)" }}>جلسات نشطة</div>
+                  <div style={{ fontSize: "1.6rem", fontWeight: 800 }}>{analytics.unique_sessions}</div>
+                </div>
+                <div style={{ flex: "1 1 140px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px" }}>
+                  <div style={{ fontSize: ".75rem", color: "var(--text-muted)" }}>مستخدمين مسجّلين</div>
+                  <div style={{ fontSize: "1.6rem", fontWeight: 800 }}>{analytics.unique_logged_in_users}</div>
+                </div>
+                <div style={{ flex: "1 1 140px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px" }}>
+                  <div style={{ fontSize: ".75rem", color: "var(--text-muted)" }}>إجمالي الأحداث</div>
+                  <div style={{ fontSize: "1.6rem", fontWeight: 800 }}>{analytics.total_events}</div>
+                </div>
+              </div>
+
+              {analytics.daily_active_sessions.length > 0 && (
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: ".82rem", fontWeight: 700, marginBottom: 6 }}>نشاط يومي (جلسات فريدة)</div>
+                  <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 60, borderBottom: "1px solid var(--border)" }}>
+                    {analytics.daily_active_sessions.map(d => {
+                      const max = Math.max(...analytics.daily_active_sessions.map(x => x.active_sessions), 1);
+                      const h = Math.max(4, Math.round((d.active_sessions / max) * 56));
+                      return (
+                        <div key={d.date} title={`${d.date}: ${d.active_sessions}`}
+                          style={{ flex: 1, height: h, background: "var(--accent, #6366f1)", borderRadius: "3px 3px 0 0", minWidth: 8 }} />
+                      );
+                    })}
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: ".68rem", color: "var(--text-muted)", marginTop: 4 }}>
+                    <span>{analytics.daily_active_sessions[0]?.date}</span>
+                    <span>{analytics.daily_active_sessions[analytics.daily_active_sessions.length - 1]?.date}</span>
+                  </div>
+                </div>
+              )}
+
+              <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+                <div style={{ flex: "1 1 240px" }}>
+                  <div style={{ fontSize: ".82rem", fontWeight: 700, marginBottom: 6 }}>🏆 أكثر الأحداث</div>
+                  {analytics.top_events.map(e => (
+                    <div key={e.event_name} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", fontSize: ".82rem", borderBottom: "1px solid var(--border)" }}>
+                      <span>{e.event_name}</span>
+                      <span style={{ fontWeight: 700 }}>{e.count}</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ flex: "1 1 240px" }}>
+                  <div style={{ fontSize: ".82rem", fontWeight: 700, marginBottom: 6 }}>📄 أكثر الصفحات زيارة</div>
+                  {analytics.top_pages.map(p => (
+                    <div key={p.path} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", fontSize: ".82rem", borderBottom: "1px solid var(--border)" }}>
+                      <span style={{ direction: "ltr", textAlign: "right" }}>{p.path}</span>
+                      <span style={{ fontWeight: 700 }}>{p.count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
         {/* Block Form */}
         <div className="inst-card">
           <h2 className="inst-card-title">🔒 حجب مادة</h2>
