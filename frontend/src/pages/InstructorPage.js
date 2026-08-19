@@ -15,6 +15,10 @@ export default function InstructorPage({ darkMode, setDarkMode, user, token, onL
   const [analytics, setAnalytics] = useState(null);
   const [analyticsDays, setAnalyticsDays] = useState(7);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [userSearch, setUserSearch] = useState("");
+  const [userResults, setUserResults] = useState([]);
+  const [userSearchLoading, setUserSearchLoading] = useState(false);
+  const [planMsg, setPlanMsg] = useState(null);
 
   const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
 
@@ -34,7 +38,31 @@ export default function InstructorPage({ darkMode, setDarkMode, user, token, onL
     setAnalyticsLoading(false);
   };
 
-  useEffect(() => { fetchRestrictions(); fetchAnalytics(); }, []); // eslint-disable-line
+  const searchUsers = async (q = userSearch) => {
+    setUserSearchLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/admin/users?search=${encodeURIComponent(q)}`, { headers });
+      if (res.ok) setUserResults(await res.json());
+    } catch {}
+    setUserSearchLoading(false);
+  };
+
+  const setUserPlan = async (id, plan) => {
+    setPlanMsg(null);
+    try {
+      const res = await fetch(`${API_URL}/admin/users/${id}/plan`, {
+        method: "PATCH", headers, body: JSON.stringify({ plan }),
+      });
+      if (res.ok) {
+        setUserResults(rows => rows.map(u => u.id === id ? { ...u, plan } : u));
+        setPlanMsg({ type: "success", text: plan === "premium" ? "✅ تمت الترقية لـ Premium" : "تم الإرجاع لـ Free" });
+      } else {
+        setPlanMsg({ type: "error", text: "خطأ بالتحديث" });
+      }
+    } catch { setPlanMsg({ type: "error", text: "خطأ بالاتصال" }); }
+  };
+
+  useEffect(() => { fetchRestrictions(); fetchAnalytics(); searchUsers(""); }, []); // eslint-disable-line
 
   const blockSubject = async () => {
     if (!subjectInput.trim()) return;
@@ -179,6 +207,51 @@ export default function InstructorPage({ darkMode, setDarkMode, user, token, onL
                 </div>
               </div>
             </>
+          )}
+        </div>
+
+        {/* Subscriptions / Plan management */}
+        <div className="inst-card">
+          <h2 className="inst-card-title">💳 الاشتراكات</h2>
+          <p className="inst-card-desc">
+            ما في بوابة دفع إلكترونية لسا — استلمي الدفع يدوياً (تحويل بنكي، كليك، أو نقداً)، وبعدها رقّي حساب الطالب هون.
+          </p>
+          <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+            <input
+              className="inst-input"
+              placeholder="ابحث بالاسم أو الإيميل..."
+              value={userSearch}
+              onChange={e => setUserSearch(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && searchUsers()}
+              style={{ flex: 1 }}
+            />
+            <button className="inst-block-btn" onClick={() => searchUsers()} disabled={userSearchLoading}>
+              {userSearchLoading ? "..." : "🔍 بحث"}
+            </button>
+          </div>
+          {planMsg && <div className={`inst-msg ${planMsg.type}`}>{planMsg.text}</div>}
+          {userResults.length === 0 ? (
+            <p className="inst-empty">لا يوجد مستخدمين</p>
+          ) : (
+            <div className="inst-list">
+              {userResults.map(u => (
+                <div key={u.id} className="inst-row active">
+                  <div className="inst-row-info">
+                    <span className="inst-subject-badge" style={{ background: u.plan === "premium" ? "#f0ad4e" : "#94a3b8" }}>
+                      {u.plan === "premium" ? "💎 Premium" : "Free"}
+                    </span>
+                    <span className="inst-reason">{u.name} — {u.email}</span>
+                    <span className="inst-reason" style={{ opacity: .6 }}>({u.daily_count} رسالة اليوم)</span>
+                  </div>
+                  <button
+                    className="inst-unblock-btn"
+                    onClick={() => setUserPlan(u.id, u.plan === "premium" ? "free" : "premium")}
+                  >
+                    {u.plan === "premium" ? "إرجاع لـ Free" : "💎 رقّي لـ Premium"}
+                  </button>
+                </div>
+              ))}
+            </div>
           )}
         </div>
 

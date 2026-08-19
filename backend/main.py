@@ -484,6 +484,40 @@ def analytics_summary(days: int = 7, user: User = Depends(require_instructor), d
 
 
 # ──────────────────────────────────────────────
+# Manual plan management (Premium is granted by an instructor after
+# receiving payment out-of-band — no payment gateway is wired up yet)
+# ──────────────────────────────────────────────
+@app.get("/admin/users")
+def admin_list_users(search: str = "", user: User = Depends(require_instructor), db: Session = Depends(get_db)):
+    q = db.query(User)
+    if search.strip():
+        like = f"%{search.strip()}%"
+        q = q.filter((User.email.ilike(like)) | (User.name.ilike(like)))
+    rows = q.order_by(User.created_at.desc()).limit(50).all()
+    return [
+        {
+            "id": u.id, "name": u.name, "email": u.email, "role": u.role,
+            "plan": u.plan or "free", "daily_count": u.daily_count or 0,
+        }
+        for u in rows
+    ]
+
+class SetPlanRequest(BaseModel):
+    plan: str  # "free" | "premium"
+
+@app.patch("/admin/users/{user_id}/plan")
+def admin_set_plan(user_id: int, body: SetPlanRequest, user: User = Depends(require_instructor), db: Session = Depends(get_db)):
+    if body.plan not in ("free", "premium"):
+        raise HTTPException(status_code=400, detail="plan must be 'free' or 'premium'.")
+    target = db.query(User).filter(User.id == user_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found.")
+    target.plan = body.plan
+    db.commit()
+    return {"ok": True, "id": target.id, "plan": target.plan}
+
+
+# ──────────────────────────────────────────────
 # English Learning — AI Tutor Chat (no auth required)
 # ──────────────────────────────────────────────
 class EnglishChatRequest(BaseModel):
@@ -543,7 +577,8 @@ def _get_book_context(subject_code: str, query: str, top_k: int = 5) -> str:
     return ""
 
 
-DAILY_MESSAGE_LIMIT = 100
+FREE_DAILY_LIMIT = 15
+PREMIUM_DAILY_LIMIT = 300
 MAX_MESSAGE_LEN = 4000
 
 
@@ -567,10 +602,12 @@ def _check_daily_limit(user: User, db: Session):
     if getattr(locked_user, "daily_date", None) != today:
         locked_user.daily_date = today
         locked_user.daily_count = 0
-    if (locked_user.daily_count or 0) >= DAILY_MESSAGE_LIMIT:
+    limit = PREMIUM_DAILY_LIMIT if locked_user.plan == "premium" else FREE_DAILY_LIMIT
+    if (locked_user.daily_count or 0) >= limit:
+        upgrade_hint = "" if locked_user.plan == "premium" else " رقّي حسابك لـ Premium لرسائل أكتر 💎 — Upgrade to Premium for more messages."
         raise HTTPException(
             status_code=429,
-            detail=f"وصلت الحد اليومي ({DAILY_MESSAGE_LIMIT} رسالة). جرب بكرا 🌙 — You reached your daily limit of {DAILY_MESSAGE_LIMIT} messages. Try again tomorrow.",
+            detail=f"وصلت الحد اليومي ({limit} رسالة). جرب بكرا 🌙{upgrade_hint} — You reached your daily limit of {limit} messages. Try again tomorrow.",
         )
     locked_user.daily_count = (locked_user.daily_count or 0) + 1
     db.commit()
@@ -1069,6 +1106,7 @@ def get_profile(me: User = Depends(require_user)):
         "name": me.name,
         "email": me.email,
         "role": me.role,
+        "plan": me.plan or "free",
         "created_at": me.created_at.isoformat() if me.created_at else None,
     }
 

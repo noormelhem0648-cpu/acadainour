@@ -25,6 +25,7 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False, index=True)
     hashed_password = Column(Text, nullable=False)
     role = Column(String(20), default="student")  # student / instructor
+    plan = Column(String(20), default="free")  # free / premium — controls daily message quota
     created_at = Column(DateTime, server_default=func.now())
     # Daily usage limit tracking
     daily_count = Column(Integer, default=0)
@@ -174,6 +175,7 @@ def _migrate():
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS daily_date VARCHAR(10) DEFAULT ''",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token VARCHAR(200)",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_expiry TIMESTAMP",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS plan VARCHAR(20) DEFAULT 'free'",
         "ALTER TABLE social_messages ADD COLUMN IF NOT EXISTS msg_type VARCHAR(10) DEFAULT 'text'",
         "ALTER TABLE social_messages ADD COLUMN IF NOT EXISTS voice_data TEXT",
     ]
