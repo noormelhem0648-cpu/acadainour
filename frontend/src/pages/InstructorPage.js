@@ -310,6 +310,11 @@ export default function InstructorPage({ darkMode, setDarkMode, user, token, onL
                     </span>
                     <span className="inst-reason">{u.name} — {u.email}</span>
                     <span className="inst-reason" style={{ opacity: .6 }}>({u.daily_count} رسالة اليوم)</span>
+                    {u.plan === "premium" && u.premium_expires_at && (
+                      <span className="inst-reason" style={{ opacity: .6, fontSize: ".75rem" }}>
+                        ينتهي: {new Date(u.premium_expires_at).toLocaleDateString("ar-EG", { year: "numeric", month: "short", day: "numeric" })}
+                      </span>
+                    )}
                   </div>
                   <button
                     className="inst-unblock-btn"

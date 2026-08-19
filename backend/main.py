@@ -494,10 +494,17 @@ def admin_list_users(search: str = "", user: User = Depends(require_instructor),
         like = f"%{search.strip()}%"
         q = q.filter((User.email.ilike(like)) | (User.name.ilike(like)))
     rows = q.order_by(User.created_at.desc()).limit(50).all()
+    changed = False
+    for u in rows:
+        if _ensure_plan_current(u):
+            changed = True
+    if changed:
+        db.commit()
     return [
         {
             "id": u.id, "name": u.name, "email": u.email, "role": u.role,
             "plan": u.plan or "free", "daily_count": u.daily_count or 0,
+            "premium_expires_at": u.premium_expires_at.isoformat() if u.premium_expires_at else None,
         }
         for u in rows
     ]
@@ -512,9 +519,12 @@ def admin_set_plan(user_id: int, body: SetPlanRequest, user: User = Depends(requ
     target = db.query(User).filter(User.id == user_id).first()
     if not target:
         raise HTTPException(status_code=404, detail="User not found.")
-    target.plan = body.plan
+    if body.plan == "premium":
+        _grant_premium(target)
+    else:
+        _revert_to_free(target)
     db.commit()
-    return {"ok": True, "id": target.id, "plan": target.plan}
+    return {"ok": True, "id": target.id, "plan": target.plan, "premium_expires_at": target.premium_expires_at.isoformat() if target.premium_expires_at else None}
 
 
 # ──────────────────────────────────────────────
@@ -605,7 +615,7 @@ def card_checkout_callback(user_id: int, paymentId: str = "", Id: str = "", db: 
         if data.get("IsSuccess") and status == "Paid":
             student = db.query(User).filter(User.id == user_id).first()
             if student:
-                student.plan = "premium"
+                _grant_premium(student)
                 db.commit()
             return RedirectResponse(f"{frontend_url}/?upgrade=success")
         return RedirectResponse(f"{frontend_url}/?upgrade=failed")
@@ -690,8 +700,8 @@ def admin_review_payment(payment_id: int, body: ReviewPaymentRequest, user: User
     proof.reviewed_at = datetime.datetime.utcnow()
     if body.action == "approve":
         student = db.query(User).filter(User.id == proof.user_id).first()
-        if student:
-            student.plan = proof.plan_requested
+        if student and proof.plan_requested == "premium":
+            _grant_premium(student)
     db.commit()
     return {"ok": True, "id": proof.id, "status": proof.status}
 
@@ -769,6 +779,25 @@ def _check_message_length(message: str):
         )
 
 
+PREMIUM_DURATION_DAYS = 30
+
+def _grant_premium(user: User, days: int = PREMIUM_DURATION_DAYS):
+    """Upgrade a user to premium for `days` days from now (renews from now, not from any previous expiry)."""
+    user.plan = "premium"
+    user.premium_expires_at = datetime.datetime.utcnow() + datetime.timedelta(days=days)
+
+def _revert_to_free(user: User):
+    user.plan = "free"
+    user.premium_expires_at = None
+
+def _ensure_plan_current(user: User) -> bool:
+    """If premium has expired, downgrade in-place. Returns True if a downgrade happened (caller must commit)."""
+    if user.plan == "premium" and user.premium_expires_at and user.premium_expires_at < datetime.datetime.utcnow():
+        _revert_to_free(user)
+        return True
+    return False
+
+
 def _check_daily_limit(user: User, db: Session):
     """Raise 429 if the user exceeded their daily message quota. Increments on success."""
     if not user:
@@ -781,6 +810,7 @@ def _check_daily_limit(user: User, db: Session):
     if getattr(locked_user, "daily_date", None) != today:
         locked_user.daily_date = today
         locked_user.daily_count = 0
+    _ensure_plan_current(locked_user)
     limit = PREMIUM_DAILY_LIMIT if locked_user.plan == "premium" else FREE_DAILY_LIMIT
     if (locked_user.daily_count or 0) >= limit:
         upgrade_hint = "" if locked_user.plan == "premium" else " رقّي حسابك لـ Premium لرسائل أكتر 💎 — Upgrade to Premium for more messages."
@@ -1279,13 +1309,16 @@ class ChangePasswordRequest(BaseModel):
     new_password: str
 
 @app.get("/auth/me")
-def get_profile(me: User = Depends(require_user)):
+def get_profile(me: User = Depends(require_user), db: Session = Depends(get_db)):
+    if _ensure_plan_current(me):
+        db.commit()
     return {
         "id": me.id,
         "name": me.name,
         "email": me.email,
         "role": me.role,
         "plan": me.plan or "free",
+        "premium_expires_at": me.premium_expires_at.isoformat() if me.premium_expires_at else None,
         "created_at": me.created_at.isoformat() if me.created_at else None,
     }
 

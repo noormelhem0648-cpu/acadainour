@@ -42,6 +42,7 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [paymentInfo, setPaymentInfo] = useState(null);
   const [myPlan, setMyPlan] = useState("free");
+  const [premiumExpiresAt, setPremiumExpiresAt] = useState(null);
   const [myPayments, setMyPayments] = useState([]);
   const [proofImage, setProofImage] = useState(null); // { data: base64, preview: dataURL }
   const [proofMethod, setProofMethod] = useState("Bank Transfer");
@@ -55,7 +56,7 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
     fetch(`${API_URL}/keys/my`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json()).then(d => setHasKey(!!d.has_key)).catch(() => setHasKey(false));
     fetch(`${API_URL}/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json()).then(d => setMyPlan(d.plan || "free")).catch(() => {});
+      .then(r => r.json()).then(d => { setMyPlan(d.plan || "free"); setPremiumExpiresAt(d.premium_expires_at || null); }).catch(() => {});
   }, [token]);
 
   // Handle the redirect back from MyFatoorah's hosted checkout page
@@ -67,7 +68,7 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
     window.history.replaceState({}, "", window.location.pathname);
     if (upgrade === "success" && token) {
       fetch(`${API_URL}/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
-        .then(r => r.json()).then(d => setMyPlan(d.plan || "free")).catch(() => {});
+        .then(r => r.json()).then(d => { setMyPlan(d.plan || "free"); setPremiumExpiresAt(d.premium_expires_at || null); }).catch(() => {});
     }
   }, [token]);
 
@@ -320,6 +321,30 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
               <div style={{ textAlign: "center", padding: "16px 0" }}>
                 <div style={{ fontSize: "2rem", marginBottom: 8 }}>✅</div>
                 <p style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>حسابك Premium بالفعل — استمتعي! 🎉</p>
+                {premiumExpiresAt && (
+                  <p style={{ color: "var(--text-muted)", fontSize: "0.8rem", marginTop: 4 }}>
+                    ينتهي بتاريخ: {new Date(premiumExpiresAt).toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric" })}
+                  </p>
+                )}
+                {paymentInfo?.card_checkout_available && (
+                  <button
+                    className="quiz-modal-btn primary"
+                    style={{ marginTop: 12, width: "100%" }}
+                    onClick={startCardCheckout}
+                    disabled={cardCheckoutLoading}
+                  >
+                    {cardCheckoutLoading ? "جاري التحويل..." : "🔄 جدّدي الاشتراك الآن"}
+                  </button>
+                )}
+                {submitStatus && submitStatus.type !== "loading" && (
+                  <div style={{
+                    marginTop: 10, padding: "8px 12px", borderRadius: 8, fontSize: "0.83rem",
+                    background: submitStatus.type === "success" ? "#e8f5e9" : "#fdecea",
+                    color: submitStatus.type === "success" ? "#2e7d32" : "#c62828",
+                  }}>
+                    {submitStatus.text}
+                  </div>
+                )}
                 <button className="quiz-modal-btn cancel" style={{ marginTop: 12 }} onClick={() => setShowUpgradeModal(false)}>إغلاق</button>
               </div>
             ) : (
