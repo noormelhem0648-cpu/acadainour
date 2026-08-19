@@ -522,11 +522,11 @@ def admin_set_plan(user_id: int, body: SetPlanRequest, user: User = Depends(requ
 # Student pays out-of-band (bank transfer / Cliq / cash), uploads a screenshot,
 # an instructor reviews it in /admin/payments and approves → auto-upgrades to premium.
 # ──────────────────────────────────────────────
-PREMIUM_PRICE = "3 JOD / شهرياً"
+PREMIUM_PRICE = os.getenv("PREMIUM_PRICE", "3 JOD / شهرياً")
 PAYMENT_INSTRUCTIONS = {
-    "bank_name": "بنك الاتحاد (Bank Al Etihad)",
-    "account_holder": "",   # TODO: fill in the account holder name
-    "iban": "",              # TODO: fill in your IBAN / account number
+    "bank_name": os.getenv("PAYMENT_BANK_NAME", "بنك الاتحاد (Bank Al Etihad)"),
+    "account_holder": os.getenv("PAYMENT_ACCOUNT_HOLDER", ""),
+    "iban": os.getenv("PAYMENT_IBAN", ""),
     "note": "بعد التحويل، ارفعي صورة سكرين شوت من عملية التحويل هون.",
 }
 MAX_PAYMENT_IMAGE_CHARS = 3_500_000  # ~2.5MB decoded
