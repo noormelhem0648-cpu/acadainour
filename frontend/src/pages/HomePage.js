@@ -63,7 +63,9 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
       fetch(`${API_URL}/payments/info`).then(r => r.json()).then(setPaymentInfo).catch(() => {});
     }
     fetch(`${API_URL}/payments/mine`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json()).then(setMyPayments).catch(() => {});
+      .then(r => r.json())
+      .then(d => setMyPayments(Array.isArray(d) ? d : []))
+      .catch(() => setMyPayments([]));
   };
 
   const handleProofFile = (e) => {
@@ -100,7 +102,9 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
         track("payment_proof_submitted");
         setProofImage(null); setProofNote("");
         fetch(`${API_URL}/payments/mine`, { headers: { Authorization: `Bearer ${token}` } })
-          .then(r => r.json()).then(setMyPayments).catch(() => {});
+          .then(r => r.json())
+          .then(d => setMyPayments(Array.isArray(d) ? d : []))
+          .catch(() => {});
       } else {
         setSubmitStatus({ type: "error", text: d.detail || "صار خطأ" });
       }
@@ -277,7 +281,7 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
                   <div style={{ marginTop: 6, opacity: 0.8 }}>{paymentInfo?.instructions?.note || "بعد التحويل، ارفعي صورة سكرين شوت من عملية التحويل تحت."}</div>
                 </div>
 
-                {myPayments.some(p => p.status === "pending") && (
+                {Array.isArray(myPayments) && myPayments.some(p => p.status === "pending") && (
                   <div style={{ background: "#fff8e1", color: "#b8860b", borderRadius: 8, padding: "8px 12px", fontSize: "0.8rem", marginBottom: 12 }}>
                     ⏳ عندك طلب دفع قيد المراجعة حالياً.
                   </div>
