@@ -564,35 +564,34 @@ def create_card_checkout(request: Request, user: User = Depends(require_user), d
     import requests as _requests
     backend_url = os.getenv("BACKEND_URL", "https://acadai-backend-avvo.onrender.com")
     frontend_url = os.getenv("FRONTEND_URL", "https://acadai-frontend.onrender.com")
-    try:
-        resp = _requests.post(
-            f"{MYFATOORAH_BASE_URL}/v2/SendPayment",
-            headers={"Authorization": f"Bearer {MYFATOORAH_API_KEY}", "Content-Type": "application/json"},
-            json={
-                "CustomerName": user.name,
-                "CustomerEmail": user.email,
-                "NotificationOption": "LNK",
-                "InvoiceValue": PREMIUM_PRICE_JOD,
-                "DisplayCurrencyIso": "JOD",
-                "Language": "AR",
-                "CallBackUrl": f"{backend_url}/payments/callback?user_id={user.id}",
-                "ErrorUrl": f"{frontend_url}/?upgrade=failed",
-            },
-            timeout=15,
-        )
-        data = resp.json()
-        print(f"[MyFatoorah] SendPayment status={resp.status_code} body={resp.text[:1000]}")
-        if not data.get("IsSuccess"):
+    payload = {
+        "CustomerName": user.name,
+        "CustomerEmail": user.email,
+        "NotificationOption": "LNK",
+        "InvoiceValue": PREMIUM_PRICE_JOD,
+        "DisplayCurrencyIso": "jod",
+        "Language": "en",
+        "CallBackUrl": f"{backend_url}/payments/callback?user_id={user.id}",
+        "ErrorUrl": f"{frontend_url}/?upgrade=failed",
+    }
+    print(f"[MyFatoorah] SendPayment payload={payload}")
+    headers = {"Authorization": f"Bearer {MYFATOORAH_API_KEY}", "Content-Type": "application/json"}
+    # MyFatoorah's docs are inconsistent about the path (/v2/SendPayment vs /Payment/SendPayment)
+    # across API versions — try both before giving up.
+    last_msg = "تعذّر إنشاء رابط الدفع."
+    for path in ("/v2/SendPayment", "/Payment/SendPayment"):
+        try:
+            resp = _requests.post(f"{MYFATOORAH_BASE_URL}{path}", headers=headers, json=payload, timeout=15)
+            data = resp.json()
+            print(f"[MyFatoorah] POST {path} status={resp.status_code} body={resp.text[:1000]}")
+            if data.get("IsSuccess"):
+                return {"invoice_url": data["Data"]["InvoiceURL"], "invoice_id": data["Data"]["InvoiceId"]}
             errors = data.get("ValidationErrors") or []
             error_detail = "; ".join(f"{e.get('Name', '')}: {e.get('Error', '')}" for e in errors) if errors else ""
-            msg = error_detail or data.get("Message", "تعذّر إنشاء رابط الدفع.")
-            raise HTTPException(status_code=502, detail=f"MyFatoorah: {msg}")
-        return {"invoice_url": data["Data"]["InvoiceURL"], "invoice_id": data["Data"]["InvoiceId"]}
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"[MyFatoorah] SendPayment error: {e}")
-        raise HTTPException(status_code=502, detail="تعذّر الاتصال ببوابة الدفع.")
+            last_msg = error_detail or data.get("Message", last_msg)
+        except Exception as e:
+            print(f"[MyFatoorah] POST {path} error: {e}")
+    raise HTTPException(status_code=502, detail=f"MyFatoorah: {last_msg}")
 
 @app.get("/payments/callback")
 def card_checkout_callback(user_id: int, paymentId: str = "", Id: str = "", db: Session = Depends(get_db)):
