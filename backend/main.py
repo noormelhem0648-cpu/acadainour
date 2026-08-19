@@ -571,8 +571,12 @@ def create_card_checkout(request: Request, user: User = Depends(require_user), d
             timeout=15,
         )
         data = resp.json()
+        print(f"[MyFatoorah] SendPayment status={resp.status_code} body={resp.text[:1000]}")
         if not data.get("IsSuccess"):
-            raise HTTPException(status_code=502, detail=data.get("Message", "تعذّر إنشاء رابط الدفع."))
+            errors = data.get("ValidationErrors") or []
+            error_detail = "; ".join(f"{e.get('Name', '')}: {e.get('Error', '')}" for e in errors) if errors else ""
+            msg = error_detail or data.get("Message", "تعذّر إنشاء رابط الدفع.")
+            raise HTTPException(status_code=502, detail=f"MyFatoorah: {msg}")
         return {"invoice_url": data["Data"]["InvoiceURL"], "invoice_id": data["Data"]["InvoiceId"]}
     except HTTPException:
         raise
