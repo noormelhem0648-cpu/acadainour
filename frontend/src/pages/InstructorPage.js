@@ -19,6 +19,9 @@ export default function InstructorPage({ darkMode, setDarkMode, user, token, onL
   const [userResults, setUserResults] = useState([]);
   const [userSearchLoading, setUserSearchLoading] = useState(false);
   const [planMsg, setPlanMsg] = useState(null);
+  const [payments, setPayments] = useState([]);
+  const [paymentsLoading, setPaymentsLoading] = useState(false);
+  const [paymentsMsg, setPaymentsMsg] = useState(null);
 
   const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
 
@@ -62,7 +65,31 @@ export default function InstructorPage({ darkMode, setDarkMode, user, token, onL
     } catch { setPlanMsg({ type: "error", text: "خطأ بالاتصال" }); }
   };
 
-  useEffect(() => { fetchRestrictions(); fetchAnalytics(); searchUsers(""); }, []); // eslint-disable-line
+  const fetchPayments = async () => {
+    setPaymentsLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/admin/payments?status=pending`, { headers });
+      if (res.ok) setPayments(await res.json());
+    } catch {}
+    setPaymentsLoading(false);
+  };
+
+  const reviewPayment = async (id, action) => {
+    setPaymentsMsg(null);
+    try {
+      const res = await fetch(`${API_URL}/admin/payments/${id}`, {
+        method: "PATCH", headers, body: JSON.stringify({ action }),
+      });
+      if (res.ok) {
+        setPayments(rows => rows.filter(p => p.id !== id));
+        setPaymentsMsg({ type: "success", text: action === "approve" ? "✅ تمت الموافقة والترقية لـ Premium" : "تم الرفض" });
+      } else {
+        setPaymentsMsg({ type: "error", text: "خطأ بالمراجعة" });
+      }
+    } catch { setPaymentsMsg({ type: "error", text: "خطأ بالاتصال" }); }
+  };
+
+  useEffect(() => { fetchRestrictions(); fetchAnalytics(); searchUsers(""); fetchPayments(); }, []); // eslint-disable-line
 
   const blockSubject = async () => {
     if (!subjectInput.trim()) return;
@@ -207,6 +234,47 @@ export default function InstructorPage({ darkMode, setDarkMode, user, token, onL
                 </div>
               </div>
             </>
+          )}
+        </div>
+
+        {/* Pending payment proofs */}
+        <div className="inst-card">
+          <h2 className="inst-card-title">
+            📥 طلبات دفع بانتظار المراجعة
+            <span className="inst-badge">{payments.length}</span>
+          </h2>
+          {paymentsMsg && <div className={`inst-msg ${paymentsMsg.type}`}>{paymentsMsg.text}</div>}
+          {paymentsLoading ? (
+            <p className="inst-empty">جاري التحميل...</p>
+          ) : payments.length === 0 ? (
+            <p className="inst-empty">لا توجد طلبات دفع قيد المراجعة</p>
+          ) : (
+            <div className="inst-list">
+              {payments.map(p => (
+                <div key={p.id} className="inst-row active" style={{ flexDirection: "column", alignItems: "stretch", gap: 10 }}>
+                  <div style={{ display: "flex", gap: 12, alignItems: "flex-start", flexWrap: "wrap" }}>
+                    <img
+                      src={`data:image/png;base64,${p.image_data}`}
+                      alt="إثبات الدفع"
+                      style={{ width: 100, height: 100, objectFit: "cover", borderRadius: 8, border: "1px solid var(--border)", cursor: "pointer" }}
+                      onClick={() => window.open(`data:image/png;base64,${p.image_data}`, "_blank")}
+                    />
+                    <div style={{ flex: 1, minWidth: 160 }}>
+                      <div style={{ fontWeight: 700 }}>{p.user_name}</div>
+                      <div style={{ fontSize: ".8rem", color: "var(--text-muted)" }}>{p.user_email}</div>
+                      <div style={{ fontSize: ".8rem", marginTop: 4 }}>
+                        {p.amount} — {p.method} — طلب: <strong>{p.plan_requested}</strong>
+                      </div>
+                      {p.note && <div style={{ fontSize: ".78rem", color: "var(--text-muted)", marginTop: 2 }}>"{p.note}"</div>}
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button className="inst-block-btn" style={{ flex: 1 }} onClick={() => reviewPayment(p.id, "approve")}>✅ موافقة وترقية</button>
+                    <button className="inst-unblock-btn" style={{ flex: 1 }} onClick={() => reviewPayment(p.id, "reject")}>❌ رفض</button>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
 

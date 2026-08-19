@@ -156,6 +156,21 @@ class ChallengeParticipant(Base):
     challenge = relationship("Challenge", back_populates="participants")
 
 
+class PaymentProof(Base):
+    __tablename__ = "payment_proofs"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    plan_requested = Column(String(20), nullable=False)   # "premium"
+    amount = Column(String(30), nullable=False)            # e.g. "3 JOD"
+    method = Column(String(50), nullable=False)             # e.g. "Cliq", "Bank Transfer", "Cash"
+    note = Column(Text, nullable=True)
+    image_data = Column(Text, nullable=False)               # base64-encoded screenshot
+    status = Column(String(20), default="pending")          # pending / approved / rejected
+    reviewed_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+    reviewed_at = Column(DateTime, nullable=True)
+
+
 class AnalyticsEvent(Base):
     __tablename__ = "analytics_events"
     id = Column(Integer, primary_key=True, index=True)

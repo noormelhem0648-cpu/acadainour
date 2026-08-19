@@ -2,6 +2,7 @@
 import { useNavigate } from "react-router-dom";
 
 import { API_BASE as API_URL } from '../config'
+import { track } from '../utils/analytics'
 
 function useInstallPrompt() {
   const [prompt, setPrompt] = useState(null);
@@ -38,11 +39,73 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
   const { prompt: installPrompt, installed, install } = useInstallPrompt();
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [paymentInfo, setPaymentInfo] = useState(null);
+  const [myPlan, setMyPlan] = useState("free");
+  const [myPayments, setMyPayments] = useState([]);
+  const [proofImage, setProofImage] = useState(null); // { data: base64, preview: dataURL }
+  const [proofMethod, setProofMethod] = useState("Bank Transfer");
+  const [proofNote, setProofNote] = useState("");
+  const [submitStatus, setSubmitStatus] = useState(null);
+
   useEffect(() => {
     if (!token) return;
     fetch(`${API_URL}/keys/my`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json()).then(d => setHasKey(!!d.has_key)).catch(() => setHasKey(false));
+    fetch(`${API_URL}/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json()).then(d => setMyPlan(d.plan || "free")).catch(() => {});
   }, [token]);
+
+  const openUpgradeModal = () => {
+    setShowUpgradeModal(true);
+    setSubmitStatus(null);
+    if (!paymentInfo) {
+      fetch(`${API_URL}/payments/info`).then(r => r.json()).then(setPaymentInfo).catch(() => {});
+    }
+    fetch(`${API_URL}/payments/mine`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json()).then(setMyPayments).catch(() => {});
+  };
+
+  const handleProofFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024) { setSubmitStatus({ type: "error", text: "الصورة كبيرة جداً (حد أقصى 3MB)" }); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataURL = reader.result;
+      const base64 = dataURL.split(",")[1] || "";
+      setProofImage({ data: base64, preview: dataURL });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const submitProof = async () => {
+    if (!proofImage) { setSubmitStatus({ type: "error", text: "ارفعي صورة إثبات التحويل أولاً" }); return; }
+    setSubmitStatus({ type: "loading" });
+    try {
+      const res = await fetch(`${API_URL}/payments/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          plan_requested: "premium",
+          amount: paymentInfo?.price || "3 JOD",
+          method: proofMethod,
+          note: proofNote,
+          image_data: proofImage.data,
+        }),
+      });
+      const d = await res.json();
+      if (res.ok) {
+        setSubmitStatus({ type: "success", text: "✅ تم إرسال الإثبات! راح تتم مراجعته وترقية حسابك خلال وقت قصير." });
+        track("payment_proof_submitted");
+        setProofImage(null); setProofNote("");
+        fetch(`${API_URL}/payments/mine`, { headers: { Authorization: `Bearer ${token}` } })
+          .then(r => r.json()).then(setMyPayments).catch(() => {});
+      } else {
+        setSubmitStatus({ type: "error", text: d.detail || "صار خطأ" });
+      }
+    } catch { setSubmitStatus({ type: "error", text: "خطأ بالاتصال" }); }
+  };
 
   const submitKey = async () => {
     if (!keyInput.trim()) return;
@@ -72,6 +135,13 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
             onClick={() => setShowKeyModal(true)}
             title={hasKey ? "مفتاحك مضاف ✓" : "أضف مفتاح Gemini"}
           >🔑</button>
+        )}
+        {token && (
+          <button
+            className={"header-action-btn" + (myPlan === "premium" ? " key-active" : "")}
+            onClick={openUpgradeModal}
+            title={myPlan === "premium" ? "حسابك Premium ✓" : "ترقية لـ Premium"}
+          >{myPlan === "premium" ? "💎" : "⬆️"}</button>
         )}
         {!installed && (
           <button
@@ -179,6 +249,87 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
               </div>
             )}
             <button className="quiz-modal-btn cancel" onClick={() => setShowInstallInfo(false)}>حسناً</button>
+          </div>
+        </div>
+      )}
+
+      {showUpgradeModal && (
+        <div className="quiz-modal-overlay" onClick={() => setShowUpgradeModal(false)} role="dialog" aria-modal="true">
+          <div className="quiz-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 420 }}>
+            <h3>💎 ترقية لـ Premium</h3>
+
+            {myPlan === "premium" ? (
+              <div style={{ textAlign: "center", padding: "16px 0" }}>
+                <div style={{ fontSize: "2rem", marginBottom: 8 }}>✅</div>
+                <p style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>حسابك Premium بالفعل — استمتعي! 🎉</p>
+                <button className="quiz-modal-btn cancel" style={{ marginTop: 12 }} onClick={() => setShowUpgradeModal(false)}>إغلاق</button>
+              </div>
+            ) : (
+              <>
+                <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", margin: "4px 0 14px" }}>
+                  السعر: <strong>{paymentInfo?.price || "3 JOD / شهرياً"}</strong> — رسائل غير محدودة تقريباً بدل الحد اليومي المجاني.
+                </p>
+
+                <div style={{ background: "var(--bg-secondary, #f4f4f4)", borderRadius: 10, padding: "10px 14px", fontSize: "0.82rem", marginBottom: 14, lineHeight: 1.8 }}>
+                  <div><strong>حوّلي إلى:</strong> {paymentInfo?.instructions?.bank_name || "بنك الاتحاد"}</div>
+                  {paymentInfo?.instructions?.account_holder && <div><strong>اسم صاحب الحساب:</strong> {paymentInfo.instructions.account_holder}</div>}
+                  {paymentInfo?.instructions?.iban && <div><strong>رقم الحساب / IBAN:</strong> {paymentInfo.instructions.iban}</div>}
+                  <div style={{ marginTop: 6, opacity: 0.8 }}>{paymentInfo?.instructions?.note || "بعد التحويل، ارفعي صورة سكرين شوت من عملية التحويل تحت."}</div>
+                </div>
+
+                {myPayments.some(p => p.status === "pending") && (
+                  <div style={{ background: "#fff8e1", color: "#b8860b", borderRadius: 8, padding: "8px 12px", fontSize: "0.8rem", marginBottom: 12 }}>
+                    ⏳ عندك طلب دفع قيد المراجعة حالياً.
+                  </div>
+                )}
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProofFile}
+                  style={{ marginBottom: 10, fontSize: "0.82rem", width: "100%" }}
+                />
+                {proofImage && (
+                  <img src={proofImage.preview} alt="إثبات التحويل" style={{ maxWidth: "100%", maxHeight: 140, borderRadius: 8, marginBottom: 10, display: "block" }} />
+                )}
+
+                <select
+                  className="quiz-topic-input"
+                  value={proofMethod}
+                  onChange={e => setProofMethod(e.target.value)}
+                  style={{ marginBottom: 10 }}
+                >
+                  <option value="Bank Transfer">تحويل بنكي</option>
+                  <option value="Cliq">Cliq</option>
+                  <option value="Cash">نقداً</option>
+                </select>
+
+                <input
+                  className="quiz-topic-input"
+                  placeholder="ملاحظة (اختياري)"
+                  value={proofNote}
+                  onChange={e => setProofNote(e.target.value)}
+                  style={{ marginBottom: 10 }}
+                />
+
+                {submitStatus && submitStatus.type !== "loading" && (
+                  <div style={{
+                    marginBottom: 10, padding: "8px 12px", borderRadius: 8, fontSize: "0.83rem",
+                    background: submitStatus.type === "success" ? "#e8f5e9" : "#fdecea",
+                    color: submitStatus.type === "success" ? "#2e7d32" : "#c62828",
+                  }}>
+                    {submitStatus.text}
+                  </div>
+                )}
+
+                <div className="quiz-modal-actions">
+                  <button className="quiz-modal-btn primary" onClick={submitProof} disabled={submitStatus?.type === "loading" || !proofImage}>
+                    {submitStatus?.type === "loading" ? "جاري الإرسال..." : "📤 إرسال إثبات الدفع"}
+                  </button>
+                  <button className="quiz-modal-btn cancel" onClick={() => setShowUpgradeModal(false)}>إلغاء</button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

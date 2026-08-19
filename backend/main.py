@@ -18,7 +18,7 @@ from slowapi.errors import RateLimitExceeded
 from ai_engine import generate_academic_response, generate_academic_response_stream, _add_keys
 from subjects_meta import get_subject_info
 from faiss_engine import search
-from db import init_db, get_db, SessionLocal, User, Conversation, Message, Restriction, ContributedKey, StudentProgress, AnalyticsEvent
+from db import init_db, get_db, SessionLocal, User, Conversation, Message, Restriction, ContributedKey, StudentProgress, AnalyticsEvent, PaymentProof
 from auth import (
     hash_password, verify_password, create_access_token,
     get_current_user, require_user, require_instructor
@@ -412,7 +412,7 @@ ALLOWED_EVENT_NAMES = {
     "page_view", "signup", "login", "chat_sent", "lesson_started",
     "lesson_completed", "quiz_started", "quiz_completed", "shadowing_recorded",
     "grammar_detective_used", "dialogue_partner_used", "file_uploaded",
-    "key_contributed", "logout",
+    "key_contributed", "logout", "payment_proof_submitted",
 }
 
 class AnalyticsTrackRequest(BaseModel):
@@ -515,6 +515,106 @@ def admin_set_plan(user_id: int, body: SetPlanRequest, user: User = Depends(requ
     target.plan = body.plan
     db.commit()
     return {"ok": True, "id": target.id, "plan": target.plan}
+
+
+# ──────────────────────────────────────────────
+# Payment proof upload (self-serve checkout without a payment gateway)
+# Student pays out-of-band (bank transfer / Cliq / cash), uploads a screenshot,
+# an instructor reviews it in /admin/payments and approves → auto-upgrades to premium.
+# ──────────────────────────────────────────────
+PREMIUM_PRICE = "3 JOD / شهرياً"
+PAYMENT_INSTRUCTIONS = {
+    "bank_name": "بنك الاتحاد (Bank Al Etihad)",
+    "account_holder": "",   # TODO: fill in the account holder name
+    "iban": "",              # TODO: fill in your IBAN / account number
+    "note": "بعد التحويل، ارفعي صورة سكرين شوت من عملية التحويل هون.",
+}
+MAX_PAYMENT_IMAGE_CHARS = 3_500_000  # ~2.5MB decoded
+
+@app.get("/payments/info")
+def payment_info():
+    return {"price": PREMIUM_PRICE, "instructions": PAYMENT_INSTRUCTIONS}
+
+class PaymentSubmitRequest(BaseModel):
+    plan_requested: str = "premium"
+    amount: str
+    method: str
+    note: Optional[str] = None
+    image_data: str  # base64, no data: prefix required
+
+@app.post("/payments/submit")
+@limiter.limit("5/hour")
+def submit_payment(request: Request, body: PaymentSubmitRequest, user: User = Depends(require_user), db: Session = Depends(get_db)):
+    if len(body.image_data) > MAX_PAYMENT_IMAGE_CHARS:
+        raise HTTPException(status_code=400, detail="الصورة كبيرة جداً — اختاري صورة أصغر.")
+    if body.plan_requested not in ("premium",):
+        raise HTTPException(status_code=400, detail="plan_requested غير مدعوم.")
+    proof = PaymentProof(
+        user_id=user.id,
+        plan_requested=body.plan_requested,
+        amount=body.amount[:30],
+        method=body.method[:50],
+        note=(body.note[:1000] if body.note else None),
+        image_data=body.image_data,
+        status="pending",
+    )
+    db.add(proof)
+    db.commit()
+    return {"ok": True, "id": proof.id, "status": "pending"}
+
+@app.get("/payments/mine")
+def my_payments(user: User = Depends(require_user), db: Session = Depends(get_db)):
+    rows = db.query(PaymentProof).filter(PaymentProof.user_id == user.id).order_by(PaymentProof.created_at.desc()).limit(10).all()
+    return [
+        {"id": p.id, "plan_requested": p.plan_requested, "amount": p.amount, "status": p.status, "created_at": p.created_at.isoformat() if p.created_at else None}
+        for p in rows
+    ]
+
+@app.get("/admin/payments")
+def admin_list_payments(status: str = "pending", user: User = Depends(require_instructor), db: Session = Depends(get_db)):
+    q = db.query(PaymentProof)
+    if status in ("pending", "approved", "rejected"):
+        q = q.filter(PaymentProof.status == status)
+    rows = q.order_by(PaymentProof.created_at.desc()).limit(50).all()
+    out = []
+    for p in rows:
+        student = db.query(User).filter(User.id == p.user_id).first()
+        out.append({
+            "id": p.id,
+            "user_id": p.user_id,
+            "user_name": student.name if student else "?",
+            "user_email": student.email if student else "?",
+            "plan_requested": p.plan_requested,
+            "amount": p.amount,
+            "method": p.method,
+            "note": p.note,
+            "image_data": p.image_data,
+            "status": p.status,
+            "created_at": p.created_at.isoformat() if p.created_at else None,
+        })
+    return out
+
+class ReviewPaymentRequest(BaseModel):
+    action: str  # "approve" | "reject"
+
+@app.patch("/admin/payments/{payment_id}")
+def admin_review_payment(payment_id: int, body: ReviewPaymentRequest, user: User = Depends(require_instructor), db: Session = Depends(get_db)):
+    if body.action not in ("approve", "reject"):
+        raise HTTPException(status_code=400, detail="action must be 'approve' or 'reject'.")
+    proof = db.query(PaymentProof).filter(PaymentProof.id == payment_id).first()
+    if not proof:
+        raise HTTPException(status_code=404, detail="Payment proof not found.")
+    if proof.status != "pending":
+        raise HTTPException(status_code=400, detail="Already reviewed.")
+    proof.status = "approved" if body.action == "approve" else "rejected"
+    proof.reviewed_by = user.id
+    proof.reviewed_at = datetime.datetime.utcnow()
+    if body.action == "approve":
+        student = db.query(User).filter(User.id == proof.user_id).first()
+        if student:
+            student.plan = proof.plan_requested
+    db.commit()
+    return {"ok": True, "id": proof.id, "status": proof.status}
 
 
 # ──────────────────────────────────────────────
