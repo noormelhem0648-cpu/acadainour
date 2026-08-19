@@ -47,6 +47,8 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
   const [proofMethod, setProofMethod] = useState("Bank Transfer");
   const [proofNote, setProofNote] = useState("");
   const [submitStatus, setSubmitStatus] = useState(null);
+  const [cardCheckoutLoading, setCardCheckoutLoading] = useState(false);
+  const [upgradeBanner, setUpgradeBanner] = useState(null); // "success" | "failed" | null
 
   useEffect(() => {
     if (!token) return;
@@ -55,6 +57,40 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
     fetch(`${API_URL}/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json()).then(d => setMyPlan(d.plan || "free")).catch(() => {});
   }, [token]);
+
+  // Handle the redirect back from MyFatoorah's hosted checkout page
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const upgrade = params.get("upgrade");
+    if (!upgrade) return;
+    setUpgradeBanner(upgrade);
+    window.history.replaceState({}, "", window.location.pathname);
+    if (upgrade === "success" && token) {
+      fetch(`${API_URL}/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json()).then(d => setMyPlan(d.plan || "free")).catch(() => {});
+    }
+  }, [token]);
+
+  const startCardCheckout = async () => {
+    setCardCheckoutLoading(true);
+    setSubmitStatus(null);
+    try {
+      const res = await fetch(`${API_URL}/payments/checkout`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const d = await res.json();
+      if (res.ok && d.invoice_url) {
+        window.location.href = d.invoice_url;
+      } else {
+        setSubmitStatus({ type: "error", text: d.detail || "الدفع بالبطاقة غير متاح حالياً" });
+        setCardCheckoutLoading(false);
+      }
+    } catch {
+      setSubmitStatus({ type: "error", text: "خطأ بالاتصال" });
+      setCardCheckoutLoading(false);
+    }
+  };
 
   const openUpgradeModal = () => {
     setShowUpgradeModal(true);
@@ -183,6 +219,24 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
         </div>
       </main>
 
+      {upgradeBanner && (
+        <div
+          style={{
+            position: "fixed", top: 16, left: "50%", transform: "translateX(-50%)", zIndex: 300,
+            background: upgradeBanner === "success" ? "#e8f5e9" : "#fdecea",
+            color: upgradeBanner === "success" ? "#2e7d32" : "#c62828",
+            padding: "12px 20px", borderRadius: 12, fontSize: "0.9rem", fontWeight: 600,
+            boxShadow: "0 4px 16px rgba(0,0,0,0.15)", maxWidth: "90%", textAlign: "center",
+          }}
+        >
+          {upgradeBanner === "success" ? "🎉 تمت الترقية لـ Premium بنجاح!" : "❌ لم تتم عملية الدفع — جربي مرة ثانية"}
+          <button
+            onClick={() => setUpgradeBanner(null)}
+            style={{ marginRight: 10, background: "none", border: "none", cursor: "pointer", fontWeight: 700, color: "inherit" }}
+          >✕</button>
+        </div>
+      )}
+
       {showKeyModal && (
         <div className="quiz-modal-overlay" onClick={() => { setShowKeyModal(false); setKeyStatus(null); }} role="dialog" aria-modal="true">
           <div className="quiz-modal" onClick={e => e.stopPropagation()}>
@@ -274,18 +328,34 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
                   السعر: <strong>{paymentInfo?.price || "3 JOD / شهرياً"}</strong> — رسائل غير محدودة تقريباً بدل الحد اليومي المجاني.
                 </p>
 
-                <div style={{ background: "var(--bg-secondary, #f4f4f4)", borderRadius: 10, padding: "10px 14px", fontSize: "0.82rem", marginBottom: 14, lineHeight: 1.8 }}>
-                  <div><strong>حوّلي إلى:</strong> {paymentInfo?.instructions?.bank_name || "بنك الاتحاد"}</div>
-                  {paymentInfo?.instructions?.account_holder && <div><strong>اسم صاحب الحساب:</strong> {paymentInfo.instructions.account_holder}</div>}
-                  {paymentInfo?.instructions?.iban && <div><strong>رقم الحساب / IBAN:</strong> {paymentInfo.instructions.iban}</div>}
-                  <div style={{ marginTop: 6, opacity: 0.8 }}>{paymentInfo?.instructions?.note || "بعد التحويل، ارفعي صورة سكرين شوت من عملية التحويل تحت."}</div>
-                </div>
-
                 {Array.isArray(myPayments) && myPayments.some(p => p.status === "pending") && (
                   <div style={{ background: "#fff8e1", color: "#b8860b", borderRadius: 8, padding: "8px 12px", fontSize: "0.8rem", marginBottom: 12 }}>
                     ⏳ عندك طلب دفع قيد المراجعة حالياً.
                   </div>
                 )}
+
+                {paymentInfo?.card_checkout_available && (
+                  <button
+                    className="quiz-modal-btn primary"
+                    style={{ width: "100%", marginBottom: 14 }}
+                    onClick={startCardCheckout}
+                    disabled={cardCheckoutLoading}
+                  >
+                    {cardCheckoutLoading ? "جاري التحويل لصفحة الدفع..." : "💳 ادفعي بالبطاقة (فيزا/ماستركارد)"}
+                  </button>
+                )}
+
+                <details style={{ marginBottom: 14 }}>
+                  <summary style={{ fontSize: "0.82rem", color: "var(--text-muted)", cursor: "pointer" }}>
+                    أو حوّلي بنكياً وارفعي إثبات يدوياً
+                  </summary>
+                  <div style={{ background: "var(--bg-secondary, #f4f4f4)", borderRadius: 10, padding: "10px 14px", fontSize: "0.82rem", marginTop: 10, lineHeight: 1.8 }}>
+                    <div><strong>حوّلي إلى:</strong> {paymentInfo?.instructions?.bank_name || "بنك الاتحاد"}</div>
+                    {paymentInfo?.instructions?.account_holder && <div><strong>اسم صاحب الحساب:</strong> {paymentInfo.instructions.account_holder}</div>}
+                    {paymentInfo?.instructions?.iban && <div><strong>رقم الحساب / IBAN:</strong> {paymentInfo.instructions.iban}</div>}
+                    <div style={{ marginTop: 6, opacity: 0.8 }}>{paymentInfo?.instructions?.note || "بعد التحويل، ارفعي صورة سكرين شوت من عملية التحويل تحت."}</div>
+                  </div>
+                </details>
 
                 <input
                   type="file"

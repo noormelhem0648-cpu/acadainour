@@ -6,7 +6,7 @@ import time
 import datetime
 import secrets
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Depends, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Optional
@@ -533,7 +533,82 @@ MAX_PAYMENT_IMAGE_CHARS = 3_500_000  # ~2.5MB decoded
 
 @app.get("/payments/info")
 def payment_info():
-    return {"price": PREMIUM_PRICE, "instructions": PAYMENT_INSTRUCTIONS}
+    return {"price": PREMIUM_PRICE, "instructions": PAYMENT_INSTRUCTIONS, "card_checkout_available": bool(MYFATOORAH_API_KEY)}
+
+
+# ──────────────────────────────────────────────
+# Automated card checkout via MyFatoorah (Send Payment + Get Payment Status).
+# Falls back gracefully — if MYFATOORAH_API_KEY isn't set, /payments/checkout
+# just returns a 503 and the frontend keeps offering the manual proof-upload flow.
+# ──────────────────────────────────────────────
+MYFATOORAH_API_KEY = os.getenv("MYFATOORAH_API_KEY", "")
+MYFATOORAH_MODE = os.getenv("MYFATOORAH_MODE", "test")  # "test" or "live"
+MYFATOORAH_BASE_URL = "https://api.myfatoorah.com" if MYFATOORAH_MODE == "live" else "https://apitest.myfatoorah.com"
+PREMIUM_PRICE_JOD = float(os.getenv("PREMIUM_PRICE_JOD", "3.000"))
+
+@app.post("/payments/checkout")
+@limiter.limit("10/hour")
+def create_card_checkout(request: Request, user: User = Depends(require_user), db: Session = Depends(get_db)):
+    if not MYFATOORAH_API_KEY:
+        raise HTTPException(status_code=503, detail="الدفع بالبطاقة غير متاح حالياً — استخدمي التحويل البنكي.")
+    import requests as _requests
+    backend_url = os.getenv("BACKEND_URL", "https://acadai-backend-avvo.onrender.com")
+    frontend_url = os.getenv("FRONTEND_URL", "https://acadai-frontend.onrender.com")
+    try:
+        resp = _requests.post(
+            f"{MYFATOORAH_BASE_URL}/v2/SendPayment",
+            headers={"Authorization": f"Bearer {MYFATOORAH_API_KEY}", "Content-Type": "application/json"},
+            json={
+                "CustomerName": user.name,
+                "CustomerEmail": user.email,
+                "NotificationOption": "LNK",
+                "InvoiceValue": PREMIUM_PRICE_JOD,
+                "DisplayCurrencyIso": "JOD",
+                "Language": "AR",
+                "CallBackUrl": f"{backend_url}/payments/callback?user_id={user.id}",
+                "ErrorUrl": f"{frontend_url}/?upgrade=failed",
+            },
+            timeout=15,
+        )
+        data = resp.json()
+        if not data.get("IsSuccess"):
+            raise HTTPException(status_code=502, detail=data.get("Message", "تعذّر إنشاء رابط الدفع."))
+        return {"invoice_url": data["Data"]["InvoiceURL"], "invoice_id": data["Data"]["InvoiceId"]}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[MyFatoorah] SendPayment error: {e}")
+        raise HTTPException(status_code=502, detail="تعذّر الاتصال ببوابة الدفع.")
+
+@app.get("/payments/callback")
+def card_checkout_callback(user_id: int, paymentId: str = "", Id: str = "", db: Session = Depends(get_db)):
+    """MyFatoorah redirects the browser here after checkout. We independently
+    verify payment status server-side (never trust the redirect alone) before upgrading."""
+    frontend_url = os.getenv("FRONTEND_URL", "https://acadai-frontend.onrender.com")
+    key = paymentId or Id
+    if not key or not MYFATOORAH_API_KEY:
+        return RedirectResponse(f"{frontend_url}/?upgrade=failed")
+    import requests as _requests
+    try:
+        resp = _requests.post(
+            f"{MYFATOORAH_BASE_URL}/v2/GetPaymentStatus",
+            headers={"Authorization": f"Bearer {MYFATOORAH_API_KEY}", "Content-Type": "application/json"},
+            json={"Key": key, "KeyType": "PaymentId"},
+            timeout=15,
+        )
+        data = resp.json()
+        status = data.get("Data", {}).get("InvoiceStatus", "")
+        if data.get("IsSuccess") and status == "Paid":
+            student = db.query(User).filter(User.id == user_id).first()
+            if student:
+                student.plan = "premium"
+                db.commit()
+            return RedirectResponse(f"{frontend_url}/?upgrade=success")
+        return RedirectResponse(f"{frontend_url}/?upgrade=failed")
+    except Exception as e:
+        print(f"[MyFatoorah] GetPaymentStatus error: {e}")
+        return RedirectResponse(f"{frontend_url}/?upgrade=failed")
+
 
 class PaymentSubmitRequest(BaseModel):
     plan_requested: str = "premium"
