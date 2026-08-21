@@ -3,6 +3,7 @@ import { API_BASE as BACKEND } from '../../config'
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { getDay, COMPONENTS } from '../data/curriculum'
 import { useProgress, XP_VALUES } from '../hooks/useProgress'
+import { usePlan, isDayLocked, FREE_DAY_LIMIT } from '../hooks/usePlan'
 import WordLookupProvider from '../components/WordLookup'
 import OrientLockBtn from '../components/OrientLockBtn'
 import { authHeaders } from '../utils/auth'
@@ -471,6 +472,7 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
   const { levelId, dayId, componentId } = useParams()
   const navigate = useNavigate()
   const progress = useProgress()
+  const { plan, loading: planLoading } = usePlan()
   const day = getDay(levelId, Number(dayId))
 
   // pre-load browser voices so TTSBtn can pick the right accent immediately
@@ -514,6 +516,27 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
   }, [donePending, progress]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!day || !comp) return <div className={`el-app${darkMode ? ' el-dark' : ''}`}><div className="el-page"><p style={{ padding: 32 }}>Not found.</p></div></div>
+
+  if (!planLoading && isDayLocked(dayId, plan)) {
+    return (
+      <div className={`el-app${darkMode ? ' el-dark' : ''}`}>
+        <div className="el-page">
+          <header className="el-top-bar">
+            <button className="el-icon-btn" onClick={() => navigate(`${EL}/level/${levelId}/day/${dayId}`)}>←</button>
+            <span className="el-top-bar-title">Day {day.id} — {levelId}</span>
+          </header>
+          <div style={{ textAlign: 'center', padding: '60px 24px' }}>
+            <div style={{ fontSize: '3rem', marginBottom: 12 }}>🔒</div>
+            <h2 style={{ marginBottom: 8 }}>هذا الدرس لـ Premium</h2>
+            <p style={{ color: 'var(--el-muted, #888)', marginBottom: 20 }}>
+              أول {FREE_DAY_LIMIT} أيام من كل مستوى مجانية. رقّي حسابك لفتح باقي الأيام.
+            </p>
+            <button className="el-nav-btn primary" onClick={() => navigate('/')}>💎 ترقية لـ Premium</button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const progressKey = `${levelId}-${dayId}-${componentId}`
   const done = progress.isDone(progressKey)

@@ -269,6 +269,9 @@
 .el-app .el-day-prog-fill { height: 100%; background: var(--el-accent); border-radius: 10px; transition: width .3s; }
 .el-app .el-day-prog-txt { font-size: .72rem; color: var(--el-muted); }
 .el-app .el-day-done-badge { position: absolute; top: 10px; right: 10px; background: var(--el-green); color: #fff; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: .7rem; font-weight: 700; }
+.el-app .el-day-card.locked { opacity: .6; }
+.el-app .el-day-card.locked:hover { border-color: var(--el-border); transform: none; }
+.el-app .el-day-locked-badge { display: inline-flex; align-items: center; gap: 4px; font-size: .72rem; font-weight: 700; color: #f0ad4e; background: rgba(240,173,78,.12); border-radius: 8px; padding: 3px 8px; }
 
 /* ── Day Page ── */
 .el-app .el-day-hero { background: var(--el-bg2); border-bottom: 1px solid var(--el-border); padding: 28px 20px 20px; }

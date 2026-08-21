@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { getDay, COMPONENTS, LEVELS } from '../data/curriculum'
 import { useProgress } from '../hooks/useProgress'
+import { usePlan, isDayLocked, FREE_DAY_LIMIT } from '../hooks/usePlan'
 import '../EL.css'
 import OrientLockBtn from '../components/OrientLockBtn'
 
@@ -32,10 +33,32 @@ export default function ELDayPage({ darkMode, setDarkMode }) {
   const { levelId, dayId } = useParams()
   const navigate = useNavigate()
   const progress = useProgress()
+  const { plan, loading: planLoading } = usePlan()
   const level = LEVELS.find(l => l.id === levelId)
   const day = getDay(levelId, Number(dayId))
 
   if (!day) return <div className={`el-app${darkMode ? ' el-dark' : ''}`}><div className="el-page"><p style={{ padding: 32 }}>Day not found.</p></div></div>
+
+  if (!planLoading && isDayLocked(dayId, plan)) {
+    return (
+      <div className={`el-app${darkMode ? ' el-dark' : ''}`}>
+        <div className="el-page">
+          <header className="el-top-bar">
+            <button className="el-icon-btn" onClick={() => navigate(`${EL}/level/${levelId}`)}>←</button>
+            <span className="el-top-bar-title">Day {day.id} — {levelId}</span>
+          </header>
+          <div style={{ textAlign: 'center', padding: '60px 24px' }}>
+            <div style={{ fontSize: '3rem', marginBottom: 12 }}>🔒</div>
+            <h2 style={{ marginBottom: 8 }}>هذا الدرس لـ Premium</h2>
+            <p style={{ color: 'var(--el-muted, #888)', marginBottom: 20 }}>
+              أول {FREE_DAY_LIMIT} أيام من كل مستوى مجانية. رقّي حسابك لفتح باقي الأيام.
+            </p>
+            <button className="el-nav-btn primary" onClick={() => navigate('/')}>💎 ترقية لـ Premium</button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const dp = progress.dayProgress(levelId, Number(dayId))
 
