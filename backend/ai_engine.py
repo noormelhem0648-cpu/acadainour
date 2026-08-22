@@ -274,6 +274,37 @@ def generate_academic_response_stream(
     yield "⏳ وصلنا للحد المجاني على كل المفاتيح — جرب بعد شوي.\n\n⏳ All keys reached their limit — try again shortly."
 
 
+def transcribe_audio(audio_bytes: bytes, mime_type: str = "audio/webm") -> str:
+    """One-shot speech-to-text via Gemini's native audio understanding.
+    Used for shadowing pronunciation scoring — replaces the browser's
+    SpeechRecognition API, which isn't supported on iOS Safari or most
+    non-Chrome mobile browsers."""
+    prompt = (
+        "Transcribe the English speech in this audio exactly as spoken. "
+        "Output ONLY the transcribed text in plain lowercase English, "
+        "no punctuation, no commentary, no quotes. If no clear speech is "
+        "audible, output exactly: [inaudible]"
+    )
+    contents = [types.Part.from_bytes(data=audio_bytes, mime_type=mime_type), prompt]
+
+    num_keys = max(len(_clients), 1)
+    for attempt in range(num_keys * 2):
+        client = _get_client()
+        try:
+            response = client.models.generate_content(
+                model="gemini-2.5-flash-lite",
+                contents=contents,
+            )
+            return (response.text or "").strip()
+        except Exception as e:
+            print(f"[AI Engine Transcribe Error] attempt {attempt + 1}: {e}")
+            if num_keys > 1:
+                _rotate_key()
+                continue
+            break
+    raise RuntimeError("Transcription failed on all available keys")
+
+
 def generate_academic_response(
     user_query: str,
     chat_history: list,

@@ -1769,8 +1769,8 @@ function ShadowingComp({ day, levelId }) {
   const [recording, setRecording] = useState(null)
   const [audioURLs, setAudioURLs] = useState({})
   const [scores, setScores] = useState({})   // { idx: { heard, pct, label, color } }
+  const [scoring, setScoring] = useState({}) // { idx: true } while transcription is in flight
   const mediaRecorderRef = useRef(null)
-  const recognitionRef = useRef(null)
   const chunksRef = useRef([])
   const sentences = (s.sentences && s.sentences.length >= 5)
     ? s.sentences.slice(0, 5)
@@ -1795,10 +1795,26 @@ function ShadowingComp({ day, levelId }) {
     return               { heard, pct, label: `💪 استمع مجدداً — ${pct}%`, color: '#ef4444' }
   }
 
+  const scoreRecording = async (idx, blob) => {
+    setScoring(prev => ({ ...prev, [idx]: true }))
+    try {
+      const form = new FormData()
+      form.append('audio', blob, 'recording.webm')
+      const res = await fetch(`${BACKEND}/english-tutor/transcribe`, { method: 'POST', body: form })
+      const d = await res.json()
+      if (res.ok && d.transcript && d.transcript !== '[inaudible]') {
+        const result = evalPronunciation(d.transcript, sentences[idx])
+        if (result) setScores(prev => ({ ...prev, [idx]: result }))
+      } else if (res.ok) {
+        setScores(prev => ({ ...prev, [idx]: { heard: '', pct: 0, label: '🎤 ما سمعنا كلام واضح — جرّبي مرة ثانية', color: '#ef4444' } }))
+      }
+    } catch { /* transcription is best-effort — recording itself already succeeded */ }
+    setScoring(prev => { const n = { ...prev }; delete n[idx]; return n })
+  }
+
   const startRecord = async (idx) => {
     if (recording === idx) {
       mediaRecorderRef.current?.stop()
-      recognitionRef.current?.stop()
       return
     }
     // Clear previous score for this sentence
@@ -1816,25 +1832,11 @@ function ShadowingComp({ day, levelId }) {
         stream.getTracks().forEach(t => t.stop())
         setRecording(null)
         track('shadowing_recorded')
+        scoreRecording(idx, blob)
       }
       mediaRecorderRef.current = mr
       setRecording(idx)
       mr.start()
-
-      // Run SpeechRecognition in parallel for scoring
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-      if (SR) {
-        const r = new SR()
-        r.lang = 'en-US'; r.interimResults = false; r.maxAlternatives = 3
-        r.onresult = e => {
-          const heard = Array.from(e.results[0]).map(alt => alt.transcript).join(' ')
-          const result = evalPronunciation(heard, sentences[idx])
-          if (result) setScores(prev => ({ ...prev, [idx]: result }))
-        }
-        r.onerror = () => {}
-        recognitionRef.current = r
-        r.start()
-      }
     } catch { alert('لم يُمنح إذن الميكروفون') }
   }
 
@@ -1899,17 +1901,23 @@ function ShadowingComp({ day, levelId }) {
                       onClick={() => {
                         setAudioURLs(prev => { const n = { ...prev }; delete n[i]; return n })
                         setScores(prev => { const n = { ...prev }; delete n[i]; return n })
+                        setScoring(prev => { const n = { ...prev }; delete n[i]; return n })
                       }}
                     >🗑</button>
                   </div>
-                  {scores[i] && (
+                  {scoring[i] && (
+                    <div style={{ padding: '6px 12px', borderRadius: 8, fontSize: '.83rem', color: 'var(--el-muted)' }}>
+                      ⏳ جاري تحليل النطق...
+                    </div>
+                  )}
+                  {scores[i] && !scoring[i] && (
                     <div style={{
                       padding: '6px 12px', borderRadius: 8, fontSize: '.83rem', fontWeight: 600,
                       background: scores[i].color + '22', color: scores[i].color,
                       border: `1px solid ${scores[i].color}55`
                     }}>
                       {scores[i].label}
-                      {scores[i].pct < 100 && (
+                      {scores[i].pct < 100 && scores[i].heard && (
                         <div style={{ fontSize: '.75rem', fontWeight: 400, marginTop: 2, opacity: .85 }}>
                           سمعنا: "{scores[i].heard}"
                         </div>

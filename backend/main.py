@@ -15,7 +15,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
-from ai_engine import generate_academic_response, generate_academic_response_stream, _add_keys
+from ai_engine import generate_academic_response, generate_academic_response_stream, _add_keys, transcribe_audio
 from subjects_meta import get_subject_info
 from faiss_engine import search
 from db import init_db, get_db, SessionLocal, User, Conversation, Message, Restriction, ContributedKey, StudentProgress, AnalyticsEvent, PaymentProof
@@ -735,6 +735,27 @@ async def english_tutor_stream(request: Request, req: EnglishChatRequest):
         except Exception as e:
             yield f"data: ⚠️ Error: {str(e)}\n\n"
             yield "data: [DONE]\n\n"
+
+MAX_TRANSCRIBE_AUDIO_BYTES = 8 * 1024 * 1024  # 8MB — a few seconds of speech is well under this
+
+@app.post("/english-tutor/transcribe")
+@limiter.limit("30/minute")
+async def transcribe_shadowing_audio(request: Request, audio: UploadFile = File(...)):
+    """Transcribes a shadowing/dialogue recording via Gemini — used for pronunciation
+    scoring instead of the browser's SpeechRecognition API (unsupported on iOS Safari
+    and most non-Chrome mobile browsers, which made scoring silently never appear)."""
+    data = await audio.read()
+    if len(data) > MAX_TRANSCRIBE_AUDIO_BYTES:
+        raise HTTPException(status_code=400, detail="التسجيل طويل جداً.")
+    if len(data) == 0:
+        raise HTTPException(status_code=400, detail="لا يوجد صوت بالتسجيل.")
+    mime_type = audio.content_type or "audio/webm"
+    try:
+        transcript = transcribe_audio(data, mime_type)
+        return {"transcript": transcript}
+    except Exception as e:
+        print(f"[Transcribe] error: {e}")
+        raise HTTPException(status_code=502, detail="تعذّر تحليل التسجيل الصوتي.")
 
     return StreamingResponse(event_stream(), media_type="text/event-stream",
                               headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
