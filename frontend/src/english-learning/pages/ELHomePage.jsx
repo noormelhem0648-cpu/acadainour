@@ -4,26 +4,6 @@ import { LEVELS, getDay } from '../data/curriculum'
 import { useProgress } from '../hooks/useProgress'
 import { speak } from '../utils/tts'
 import '../EL.css'
-import OrientLockBtn from '../components/OrientLockBtn'
-
-function UserAvatarBtn({ onClick }) {
-  const name = (() => { try { return JSON.parse(localStorage.getItem('noura_user'))?.name || '' } catch { return '' } })()
-  const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || '؟'
-  const colors = ['#6366f1','#8b5cf6','#ec4899','#14b8a6','#f59e0b']
-  const bg = colors[(name.charCodeAt(0) || 0) % colors.length]
-  return (
-    <button
-      onClick={onClick}
-      title="إعدادات الحساب"
-      style={{
-        width: 32, height: 32, borderRadius: '50%', background: bg,
-        color: '#fff', fontWeight: 800, fontSize: '.75rem', border: 'none',
-        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        flexShrink: 0,
-      }}
-    >{initials}</button>
-  )
-}
 
 function usePWAInstall() {
   const [prompt, setPrompt] = useState(null)
@@ -283,13 +263,6 @@ export default function ELHomePage({ darkMode, setDarkMode }) {
             <button className="el-icon-btn" onClick={() => navigate('/')} title="رجوع">←</button>
             <span className="el-brand-dot" />
             <span className="el-brand-name">English with Noura</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <OrientLockBtn />
-            <button className="el-icon-btn" onClick={() => setDarkMode(!darkMode)} title="Toggle theme">
-              {darkMode ? '☀️' : '🌙'}
-            </button>
-            <UserAvatarBtn onClick={() => navigate(`${EL}/account`)} />
           </div>
         </header>
 

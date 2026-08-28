@@ -29,8 +29,16 @@ function useInstallPrompt() {
   return { prompt, installed, install };
 }
 
+const ORIENT_LOCK_KEY = 'el_portrait_locked';
+
 export default function HomePage({ darkMode, setDarkMode, user, token, onLogout }) {
   const navigate = useNavigate();
+  const [orientLocked, setOrientLocked] = useState(() => localStorage.getItem(ORIENT_LOCK_KEY) === '1');
+  const toggleOrientLock = () => {
+    const next = !orientLocked;
+    setOrientLocked(next);
+    localStorage.setItem(ORIENT_LOCK_KEY, next ? '1' : '0');
+  };
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [keyInput, setKeyInput] = useState("");
   const [keyStatus, setKeyStatus] = useState(null);
@@ -192,6 +200,18 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
                 <span className="side-menu-item-icon">{darkMode ? "☀️" : "🌙"}</span>
                 <span>{darkMode ? "الوضع النهاري" : "الوضع الليلي"}</span>
               </button>
+
+              <button className="side-menu-item" onClick={toggleOrientLock}>
+                <span className="side-menu-item-icon">{orientLocked ? "🔒" : "🔓"}</span>
+                <span>{orientLocked ? "إلغاء قفل تدوير الشاشة" : "قفل تدوير الشاشة"}</span>
+              </button>
+
+              {token && (
+                <button className="side-menu-item" onClick={() => { setShowMenu(false); navigate("/english-learning/account"); }}>
+                  <span className="side-menu-item-icon">👤</span>
+                  <span>حساب تعلّم الإنجليزي</span>
+                </button>
+              )}
 
               {token && (
                 <button className="side-menu-item" onClick={() => { setShowMenu(false); setShowKeyModal(true); }}>
