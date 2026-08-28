@@ -129,13 +129,6 @@ export default function AuthPage({ onLogin }) {
                 نسيت كلمة السر؟
               </button>
             )}
-
-            <p className="auth-footer">
-              {mode === "login" ? "ما عندك حساب؟ " : "عندك حساب؟ "}
-              <button className="auth-switch" onClick={() => { setMode(mode === "login" ? "register" : "login"); clearMsgs(); }}>
-                {mode === "login" ? "سجل الآن" : "سجل دخول"}
-              </button>
-            </p>
           </>
         )}
 
