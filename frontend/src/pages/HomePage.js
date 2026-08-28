@@ -39,6 +39,7 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
   const { prompt: installPrompt, installed, install } = useInstallPrompt();
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 
+  const [showMenu, setShowMenu] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [paymentInfo, setPaymentInfo] = useState(null);
   const [myPlan, setMyPlan] = useState("free");
@@ -166,32 +167,63 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
   return (
     <div className="page home-page">
       <header className="header">
+        <button className="header-action-btn" onClick={() => setShowMenu(true)} title="القائمة" aria-label="فتح القائمة">☰</button>
         <span className="app-name" style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", fontSize: "1.6rem" }}>Noura AI</span>
-        {token && (
-          <button
-            className={"header-action-btn key-btn" + (hasKey ? " key-active" : "")}
-            onClick={() => setShowKeyModal(true)}
-            title={hasKey ? "مفتاحك مضاف ✓" : "أضف مفتاح Gemini"}
-          >🔑</button>
-        )}
-        {token && (
-          <button
-            className={"header-action-btn" + (myPlan === "premium" ? " key-active" : "")}
-            onClick={openUpgradeModal}
-            title={myPlan === "premium" ? "حسابك Premium ✓" : "ترقية لـ Premium"}
-          >{myPlan === "premium" ? "💎" : "⬆️"}</button>
-        )}
-        {!installed && (
-          <button
-            className="header-action-btn install-btn"
-            onClick={installPrompt ? install : () => setShowInstallInfo(true)}
-            title="تثبيت التطبيق"
-          >
-            📲 تثبيت
-          </button>
-        )}
-        {onLogout && <button className="header-action-btn" onClick={onLogout} title="خروج">🚪</button>}
       </header>
+
+      {showMenu && (
+        <>
+          <div className="side-menu-overlay" onClick={() => setShowMenu(false)} aria-hidden="true" />
+          <div className="side-menu" role="dialog" aria-modal="true">
+            <div className="side-menu-header">
+              <h3>القائمة</h3>
+              <button className="history-close" onClick={() => setShowMenu(false)} aria-label="إغلاق">✕</button>
+            </div>
+
+            {user && (
+              <div className="side-menu-account">
+                <div className="side-menu-account-name">{user.name || user.email}</div>
+                {user.email && <div className="side-menu-account-email">{user.email}</div>}
+              </div>
+            )}
+
+            <div className="side-menu-list">
+              <button className="side-menu-item" onClick={() => setDarkMode(!darkMode)}>
+                <span className="side-menu-item-icon">{darkMode ? "☀️" : "🌙"}</span>
+                <span>{darkMode ? "الوضع النهاري" : "الوضع الليلي"}</span>
+              </button>
+
+              {token && (
+                <button className="side-menu-item" onClick={() => { setShowMenu(false); setShowKeyModal(true); }}>
+                  <span className="side-menu-item-icon">🔑</span>
+                  <span>{hasKey ? "مفتاحك مضاف ✓" : "أضف مفتاح Gemini"}</span>
+                </button>
+              )}
+
+              {token && (
+                <button className="side-menu-item" onClick={() => { setShowMenu(false); openUpgradeModal(); }}>
+                  <span className="side-menu-item-icon">{myPlan === "premium" ? "💎" : "⬆️"}</span>
+                  <span>{myPlan === "premium" ? "حسابك Premium ✓" : "ترقية لـ Premium"}</span>
+                </button>
+              )}
+
+              {!installed && (
+                <button className="side-menu-item" onClick={() => { setShowMenu(false); installPrompt ? install() : setShowInstallInfo(true); }}>
+                  <span className="side-menu-item-icon">📲</span>
+                  <span>تثبيت التطبيق</span>
+                </button>
+              )}
+
+              {onLogout && (
+                <button className="side-menu-item side-menu-item-danger" onClick={onLogout}>
+                  <span className="side-menu-item-icon">🚪</span>
+                  <span>خروج</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </>
+      )}
 
       <main className="main-content">
         <div className="hero">
