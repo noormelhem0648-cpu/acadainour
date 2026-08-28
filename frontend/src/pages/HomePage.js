@@ -190,8 +190,17 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
 
             {user && (
               <div className="side-menu-account">
-                <div className="side-menu-account-name">{user.name || user.email}</div>
-                {user.email && <div className="side-menu-account-email">{user.email}</div>}
+                <div>
+                  <div className="side-menu-account-name">{user.name || user.email}</div>
+                  {user.email && <div className="side-menu-account-email">{user.email}</div>}
+                </div>
+                {token && (
+                  <button
+                    className="side-menu-avatar-btn"
+                    onClick={() => { setShowMenu(false); navigate("/english-learning/account"); }}
+                    title="حساب تعلّم الإنجليزي"
+                  >👤</button>
+                )}
               </div>
             )}
 
@@ -205,13 +214,6 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
                 <span className="side-menu-item-icon">{orientLocked ? "🔒" : "🔓"}</span>
                 <span>{orientLocked ? "إلغاء قفل تدوير الشاشة" : "قفل تدوير الشاشة"}</span>
               </button>
-
-              {token && (
-                <button className="side-menu-item" onClick={() => { setShowMenu(false); navigate("/english-learning/account"); }}>
-                  <span className="side-menu-item-icon">👤</span>
-                  <span>حساب تعلّم الإنجليزي</span>
-                </button>
-              )}
 
               {token && (
                 <button className="side-menu-item" onClick={() => { setShowMenu(false); setShowKeyModal(true); }}>

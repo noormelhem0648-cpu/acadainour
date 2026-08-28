@@ -877,11 +877,31 @@ body {
 }
 .side-menu-header h3 { font-size: 0.95rem; color: var(--text); }
 .side-menu-account {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   padding: 14px 16px;
   border-bottom: 1px solid var(--border);
 }
 .side-menu-account-name { font-weight: 700; font-size: 0.95rem; color: var(--text); }
 .side-menu-account-email { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+.side-menu-avatar-btn {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s;
+}
+.side-menu-avatar-btn:hover { transform: scale(1.06); }
 .side-menu-list {
   flex: 1;
   overflow-y: auto;
