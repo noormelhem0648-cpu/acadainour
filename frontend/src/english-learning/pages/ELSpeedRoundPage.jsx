@@ -131,7 +131,6 @@ export default function ELSpeedRoundPage({ darkMode, setDarkMode }) {
           <button className="el-icon-btn" onClick={() => navigate(`${EL}/level/${levelId}/day/${dayId}`)}>←</button>
           <span className="el-top-bar-title">⚡ Speed Round</span>
           <OrientLockBtn />
-          <button className="el-icon-btn" onClick={() => setDarkMode(!darkMode)}>{darkMode ? '☀️' : '🌙'}</button>
         </header>
 
         {/* INTRO */}

@@ -149,9 +149,6 @@ export default function InstructorPage({ darkMode, setDarkMode, user, token, onL
         </div>
         <div className="instructor-header-right">
           <button className="inst-try-btn" onClick={() => navigate("/years")}>🎓 جرّب كطالب</button>
-          <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
-            {darkMode ? "☀️" : "🌙"}
-          </button>
           <button className="inst-logout-btn" onClick={onLogout}>خروج 🚪</button>
         </div>
       </header>

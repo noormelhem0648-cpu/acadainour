@@ -166,10 +166,7 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
   return (
     <div className="page home-page">
       <header className="header">
-        <span className="app-name">Noura AI</span>
-        <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
-          {darkMode ? "☀️" : "🌙"}
-        </button>
+        <span className="app-name" style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", fontSize: "1.6rem" }}>Noura AI</span>
         {token && (
           <button
             className={"header-action-btn key-btn" + (hasKey ? " key-active" : "")}

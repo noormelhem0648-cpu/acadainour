@@ -100,7 +100,6 @@ IMPORTANT RULE: If the student asks you to solve their homework, exam, or assign
           <div style={{ display: 'flex', gap: 4 }}>
             <button className="el-icon-btn" title="محادثة جديدة" onClick={clear}>🔄</button>
             <OrientLockBtn />
-            <button className="el-icon-btn" onClick={() => setDarkMode(!darkMode)}>{darkMode ? '☀️' : '🌙'}</button>
           </div>
         </header>
 

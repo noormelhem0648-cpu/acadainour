@@ -57,7 +57,6 @@ export default function ELNotebookPage({ darkMode, setDarkMode }) {
           <div style={{ display: 'flex', gap: 6 }}>
             <button className="el-icon-btn" onClick={() => setNewNote(true)} title="ملاحظة جديدة">+</button>
             <OrientLockBtn />
-            <button className="el-icon-btn" onClick={() => setDarkMode(!darkMode)}>{darkMode ? '☀️' : '🌙'}</button>
           </div>
         </header>
 

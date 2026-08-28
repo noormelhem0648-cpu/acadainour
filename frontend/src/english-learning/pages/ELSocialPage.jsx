@@ -578,9 +578,6 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
             <button className="el-icon-btn" onClick={() => navigate(EL)}>←</button>
             <span className="el-social-logo">👥 المجتمع</span>
             <OrientLockBtn />
-            <button className="el-icon-btn" onClick={() => setDarkMode(!darkMode)}>
-              {darkMode ? '☀️' : '🌙'}
-            </button>
           </header>
 
           {/* Search */}

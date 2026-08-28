@@ -257,7 +257,6 @@ export default function ELProgressPage({ darkMode, setDarkMode }) {
           <button className="el-icon-btn" onClick={() => navigate(EL)}>←</button>
           <span className="el-top-bar-title">📊 تقدمي الكامل</span>
           <OrientLockBtn />
-          <button className="el-icon-btn" onClick={() => setDarkMode(!darkMode)}>{darkMode ? '☀️' : '🌙'}</button>
         </header>
 
         <div className="el-progress-page">

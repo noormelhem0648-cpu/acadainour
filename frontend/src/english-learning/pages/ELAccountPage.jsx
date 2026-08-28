@@ -163,9 +163,6 @@ export default function ELAccountPage({ darkMode, setDarkMode, onLogout }) {
           <button className="el-icon-btn" onClick={() => navigate(EL)}>←</button>
           <span className="el-top-bar-title">⚙️ إعدادات الحساب</span>
           <OrientLockBtn />
-          <button className="el-icon-btn" onClick={() => setDarkMode(!darkMode)}>
-            {darkMode ? '☀️' : '🌙'}
-          </button>
         </header>
 
         <div className="el-acct-page">
@@ -286,18 +283,6 @@ export default function ELAccountPage({ darkMode, setDarkMode, onLogout }) {
                 </div>
               </div>
             )}
-          </div>
-
-          {/* ── Preferences ── */}
-          <div className="el-acct-section">
-            <div className="el-acct-section-title">🎨 التفضيلات</div>
-            <div className="el-acct-pref-row" onClick={() => setDarkMode(!darkMode)}>
-              <div>
-                <div className="el-acct-pref-label">الوضع الليلي</div>
-                <div className="el-acct-pref-sub">تغيير مظهر التطبيق</div>
-              </div>
-              <div className={`el-acct-toggle${darkMode ? ' on' : ''}`} />
-            </div>
           </div>
 
           {/* ── Data ── */}

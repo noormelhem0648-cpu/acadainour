@@ -573,7 +573,6 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
             <button className="el-icon-btn" onClick={() => setShowVoicePicker(true)} title="اختر الصوت">🎙️</button>
             <button className={'el-icon-btn' + (buddyOpen ? ' active' : '')} onClick={() => setBuddyOpen(b => !b)} title="Study Buddy">🤖</button>
             <OrientLockBtn />
-            <button className="el-icon-btn" onClick={() => setDarkMode(!darkMode)}>{darkMode ? '☀️' : '🌙'}</button>
           </div>
         </header>
 

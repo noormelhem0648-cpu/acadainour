@@ -35,7 +35,6 @@ export default function ELDaysPage({ darkMode, setDarkMode }) {
           <button className="el-icon-btn" onClick={() => navigate(EL)}>←</button>
           <span className="el-top-bar-title">{level.name}</span>
           <OrientLockBtn />
-          <button className="el-icon-btn" onClick={() => setDarkMode(!darkMode)}>{darkMode ? '☀️' : '🌙'}</button>
         </header>
 
         <div className="el-days-hero">

@@ -12,9 +12,6 @@ export default function SubjectsPage({ darkMode, setDarkMode }) {
       <header className="header">
         <button className="back-btn" onClick={() => navigate("/years")}>Back</button>
         <span className="app-name">Noura AI</span>
-        <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
-          {darkMode ? "Light" : "Dark"}
-        </button>
       </header>
 
       <main className="main-content">

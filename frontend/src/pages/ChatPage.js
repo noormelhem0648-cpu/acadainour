@@ -663,9 +663,6 @@ Use the mixed Arabic+English style.`;
         <button className="header-action-btn" onClick={() => setShowHistory(!showHistory)} aria-label="Chat history">💬</button>
         <button className="quiz-header-btn" onClick={() => setShowQuizModal(true)} disabled={loading}>Quiz</button>
         <button className="quiz-header-btn" onClick={() => setShowExamModal(true)} disabled={loading}>Exam</button>
-        <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)} aria-label="Toggle dark mode">
-          {darkMode ? "☀️" : "🌙"}
-        </button>
       </header>
 
       <div className="messages-container" role="log" aria-label="Chat messages" aria-live="polite">
