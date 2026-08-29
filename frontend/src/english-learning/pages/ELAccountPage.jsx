@@ -199,49 +199,6 @@ export default function ELAccountPage({ darkMode, setDarkMode, onLogout }) {
             </div>
           </div>
 
-          {/* ── Progress stats ── */}
-          <div className="el-acct-section">
-            <div className="el-acct-section-title">📊 إحصائياتك</div>
-            <div className="el-acct-stats-grid">
-              <div className="el-acct-stat">
-                <div className="el-acct-stat-num" style={{ color: '#f59e0b' }}>🔥 {streak}</div>
-                <div className="el-acct-stat-label">يوم متتالي</div>
-              </div>
-              <div className="el-acct-stat">
-                <div className="el-acct-stat-num" style={{ color: '#6366f1' }}>⚡ {xp}</div>
-                <div className="el-acct-stat-label">نقطة XP</div>
-              </div>
-              <div className="el-acct-stat">
-                <div className="el-acct-stat-num" style={{ color: '#ec4899' }}>⭐ {hardCount}</div>
-                <div className="el-acct-stat-label">كلمة صعبة</div>
-              </div>
-              <div className="el-acct-stat">
-                <div className="el-acct-stat-num" style={{ color: '#10b981' }}>🎖 {earnedBadges.length}</div>
-                <div className="el-acct-stat-label">شارة مكتسبة</div>
-              </div>
-            </div>
-            {dueCount > 0 && (
-              <button className="el-acct-due-btn" onClick={() => navigate(`${EL}/review`)}>
-                🔁 لديك {dueCount} كلمة للمراجعة اليوم ←
-              </button>
-            )}
-          </div>
-
-          {/* ── Badges ── */}
-          {earnedBadges.length > 0 && (
-            <div className="el-acct-section">
-              <div className="el-acct-section-title">🏅 شاراتك</div>
-              <div className="el-acct-badges">
-                {earnedBadges.map(b => (
-                  <div key={b.id} className="el-acct-badge-chip" title={b.desc}>
-                    <span>{b.icon}</span>
-                    <span>{b.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* ── Security ── */}
           <div className="el-acct-section">
             <div className="el-acct-section-title">🔒 الأمان</div>

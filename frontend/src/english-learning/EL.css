@@ -239,6 +239,14 @@
 
 .el-app .el-how-it-works { margin-top: 48px; }
 .el-app .el-section-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 20px; color: var(--el-text); }
+.el-app .el-how-toggle {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; background: none; border: none; cursor: pointer; padding: 0;
+  margin-bottom: 20px;
+}
+.el-app .el-how-toggle .el-section-title { margin-bottom: 0; }
+.el-app .el-how-chevron { font-size: 1.1rem; color: var(--el-muted); transition: transform .2s; }
+.el-app .el-how-chevron.open { transform: rotate(180deg); color: var(--el-accent); }
 .el-app .el-how-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
 .el-app .el-how-card { background: var(--el-bg2); border: 1px solid var(--el-border); border-radius: var(--el-radius); padding: 18px; }
 .el-app .el-how-icon { font-size: 1.6rem; margin-bottom: 8px; }
@@ -1346,8 +1354,9 @@
 .el-app .el-weekly-report-icon { font-size: 1.5rem; }
 
 /* ── Streak Section (home) ── */
-.el-app .el-streak-section { background: var(--el-bg2); border: 1.5px solid var(--el-border); border-radius: var(--el-radius); padding: 14px 16px; margin-bottom: 14px; }
-.el-app .el-streak-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.el-app .el-streak-section { background: var(--el-bg2); border: 1.5px solid var(--el-border); border-radius: var(--el-radius); padding: 8px 16px; margin-bottom: 14px; cursor: pointer; transition: border-color .15s; }
+.el-app .el-streak-section:hover { border-color: var(--el-accent); }
+.el-app .el-streak-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
 .el-app .el-streak-info { display: flex; align-items: center; gap: 6px; }
 .el-app .el-streak-fire { font-size: 1.2rem; }
 .el-app .el-streak-count { font-size: 1.5rem; font-weight: 800; color: #f59e0b; }
@@ -2176,17 +2185,17 @@ body:has(.el-app[style*="rotate"]) {
 .el-streak-7 {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
-  margin-top: 12px;
+  gap: 4px;
+  margin-top: 6px;
 }
 .el-streak-7-day {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: 3px;
 }
 .el-streak-7-label {
-  font-size: .65rem;
+  font-size: .6rem;
   color: var(--el-muted);
   font-weight: 600;
   text-align: center;
@@ -2200,15 +2209,15 @@ body:has(.el-app[style*="rotate"]) {
   font-weight: 800;
 }
 .el-streak-7-dot {
-  width: 32px;
-  height: 32px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: var(--el-bg3);
-  border: 2px solid var(--el-border);
+  border: 1.5px solid var(--el-border);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: .75rem;
+  font-size: .65rem;
   font-weight: 800;
   color: transparent;
   transition: all .2s;

@@ -103,7 +103,7 @@ function WordOfDaySplash({ onClose }) {
 }
 
 /* ─── Streak Calendar (7 days) ─── */
-function StreakCalendar({ streak }) {
+function StreakCalendar({ streak, onClick }) {
   const history = streak?.history || []
   const today = new Date().toISOString().slice(0, 10)
   const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']
@@ -117,7 +117,7 @@ function StreakCalendar({ streak }) {
   })
 
   return (
-    <div className="el-streak-section">
+    <div className="el-streak-section" onClick={onClick} role="button" tabIndex={0} title="عرض تقدّمي الكامل">
       <div className="el-streak-header">
         <div className="el-streak-info">
           <span className="el-streak-fire">🔥</span>
@@ -136,44 +136,6 @@ function StreakCalendar({ streak }) {
           </div>
         ))}
       </div>
-    </div>
-  )
-}
-
-/* ─── Daily Challenge ─── */
-function DailyChallenge({ onClose }) {
-  const DAY = new Date().getDay()
-  const challenges = [
-    { icon: '📝', title: 'تحدي الكتابة', desc: 'اكتب 3 جمل تصف يومك بالإنجليزي', action: 'ابدأ التحدي' },
-    { icon: '🎯', title: 'تحدي المفردات', desc: 'استخدم كلمة جديدة في محادثة حقيقية اليوم', action: 'ابدأ التحدي' },
-    { icon: '🎧', title: 'تحدي الاستماع', desc: 'استمع لـ 5 دقائق بالإنجليزية (podcast/YouTube)', action: 'اقترح محتوى' },
-    { icon: '🗣️', title: 'تحدي الكلام', desc: 'تحدث بالإنجليزية مع AI 10 جولات متواصلة', action: 'ابدأ المحادثة' },
-    { icon: '📖', title: 'تحدي القراءة', desc: 'اقرأ فقرة إنجليزية وترجمها بكلامك', action: 'ابدأ التحدي' },
-    { icon: '⚡', title: 'تحدي السرعة', desc: 'أنجز Speed Round بنتيجة 7/10 أو أعلى', action: 'العب الآن' },
-    { icon: '🏋️', title: 'يوم المراجعة', desc: 'راجع أصعب 5 كلمات في قائمة الكلمات الصعبة', action: 'راجع الآن' },
-  ]
-  const today = challenges[DAY]
-
-  const DONE_KEY = 'el_challenge_' + new Date().toISOString().slice(0, 10)
-  const [done, setDone] = useState(!!localStorage.getItem(DONE_KEY))
-
-  const markDone = () => {
-    localStorage.setItem(DONE_KEY, '1')
-    setDone(true)
-  }
-
-  return (
-    <div className="el-challenge-card">
-      <div className="el-challenge-icon">{today.icon}</div>
-      <div className="el-challenge-body">
-        <div className="el-challenge-tag">تحدي اليوم ⚡</div>
-        <div className="el-challenge-title">{today.title}</div>
-        <div className="el-challenge-desc">{today.desc}</div>
-      </div>
-      {done
-        ? <div className="el-challenge-done">✓ مكتمل!</div>
-        : <button className="el-challenge-btn" onClick={markDone}>{today.action}</button>
-      }
     </div>
   )
 }
@@ -236,6 +198,7 @@ export default function ELHomePage({ darkMode, setDarkMode }) {
   const { showBanner, hasNativePrompt, install, dismiss } = usePWAInstall()
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
   const [showQuiz, setShowQuiz] = useState(() => Math.random() < 0.25)
+  const [showHowItWorks, setShowHowItWorks] = useState(false)
   const [showWotd, setShowWotd] = useState(true)
   const dueCount = progress.dueWords?.().length || 0
 
@@ -268,12 +231,8 @@ export default function ELHomePage({ darkMode, setDarkMode }) {
 
         <main className="el-home-main">
 
-          {/* 1 ── Streak (7 days, full names) */}
-          <StreakCalendar streak={progress.streak} />
-
-          {/* 2 ── Hero */}
+          {/* 1 ── Hero */}
           <div className="el-hero-block">
-            <div className="el-hero-badge">🎓 مجاناً تماماً</div>
             <h1 className="el-hero-title">
               تعلّم الإنجليزية<br />
               <span className="el-hero-accent">خطوة بخطوة</span>
@@ -282,6 +241,9 @@ export default function ELHomePage({ darkMode, setDarkMode }) {
               من الصفر المطلق إلى الطلاقة — 6 مستويات × 30 يوماً × 6 مهارات يومياً
             </p>
           </div>
+
+          {/* 2 ── Streak (7 days, full names) — click opens full progress */}
+          <StreakCalendar streak={progress.streak} onClick={() => navigate(`${EL}/progress`)} />
 
           {/* 3 ── Community + Hard words (2 big cards) */}
           <div className="el-home-feature-cards">
@@ -343,49 +305,12 @@ export default function ELHomePage({ darkMode, setDarkMode }) {
             })}
           </div>
 
-          {/* 5 ── XP + Badge + Notes stats */}
-          <div className="el-home-stats-row">
-            <div className="el-home-stat" onClick={() => navigate(`${EL}/progress`)}>
-              <span className="el-home-stat-icon">⭐</span>
-              <span className="el-home-stat-num">{progress.xpData?.total || 0}</span>
-              <span className="el-home-stat-label">XP</span>
-            </div>
-            <div className="el-home-stat" onClick={() => navigate(`${EL}/progress`)}>
-              <span className="el-home-stat-icon">🏅</span>
-              <span className="el-home-stat-num">{progress.getEarnedBadges().length}</span>
-              <span className="el-home-stat-label">أوسمة</span>
-            </div>
-            <div className="el-home-stat" onClick={() => navigate(`${EL}/notebook`)}>
-              <span className="el-home-stat-icon">📓</span>
-              <span className="el-home-stat-num">{Object.keys(progress.notebook || {}).length}</span>
-              <span className="el-home-stat-label">ملاحظات</span>
-            </div>
-          </div>
-
-          {/* 6 ── Daily Challenge */}
-          <DailyChallenge />
-
           {/* 7 ── Tool buttons */}
           <div className="el-home-tools">
-            <button className="el-tool-btn" onClick={() => navigate(`${EL}/progress`)}>
-              <span className="el-tool-icon">📊</span>
-              <span>تقدمي</span>
-            </button>
-            <button className="el-tool-btn" onClick={() => navigate(`${EL}/notebook`)}>
-              <span className="el-tool-icon">📓</span>
-              <span>مذكرتي</span>
-            </button>
             <button className="el-tool-btn" onClick={() => navigate(`${EL}/ipa`)}>
               <span className="el-tool-icon">🔤</span>
               <span>دليل IPA</span>
             </button>
-            <div className="el-tool-btn-wrap">
-              <button className="el-tool-btn" onClick={() => navigate(`${EL}/review`)}>
-                <span className="el-tool-icon">🔁</span>
-                <span>مراجعة</span>
-              </button>
-              {dueCount > 0 && <span className="el-review-badge">{dueCount}</span>}
-            </div>
           </div>
 
           {/* 8 ── Quick strips (errors dashboard) */}
@@ -417,25 +342,30 @@ export default function ELHomePage({ darkMode, setDarkMode }) {
             </div>
           )}
 
-          {/* 10 ── How it works */}
+          {/* 10 ── How it works (collapsible) */}
           <div className="el-how-it-works">
-            <h2 className="el-section-title">كيف يعمل النظام؟</h2>
-            <div className="el-how-grid">
-              {[
-                { icon: '🔤', title: 'مفردات + نطق', desc: 'كل يوم 20 كلمة مع IPA ودليل النطق العربي' },
-                { icon: '📐', title: 'قواعد تفاعلية', desc: 'شرح بالعربية + تمارين تصحّح فيها بنفسك' },
-                { icon: '📖', title: 'قراءة مفككة', desc: 'نص قصير مع تحليل كلمة بكلمة وترجمة' },
-                { icon: '🎧', title: 'استماع وإملاء', desc: 'حوارات واقعية مع تمارين فراغات تفاعلية' },
-                { icon: '🎙️', title: 'شادونج YouTube', desc: 'تقنية الشادونج مع فيديو حقيقي للتدريب' },
-                { icon: '✍️', title: 'كتابة + AI رفيق', desc: 'تحديات كتابة + محادثة حية مع AI مخصص' },
-              ].map(h => (
-                <div key={h.icon} className="el-how-card">
-                  <div className="el-how-icon">{h.icon}</div>
-                  <div className="el-how-title">{h.title}</div>
-                  <div className="el-how-desc">{h.desc}</div>
-                </div>
-              ))}
-            </div>
+            <button className="el-how-toggle" onClick={() => setShowHowItWorks(o => !o)}>
+              <h2 className="el-section-title" style={{ margin: 0 }}>كيف يعمل النظام؟</h2>
+              <span className={`el-how-chevron${showHowItWorks ? ' open' : ''}`}>▾</span>
+            </button>
+            {showHowItWorks && (
+              <div className="el-how-grid">
+                {[
+                  { icon: '🔤', title: 'مفردات + نطق', desc: 'كل يوم 20 كلمة مع IPA ودليل النطق العربي' },
+                  { icon: '📐', title: 'قواعد تفاعلية', desc: 'شرح بالعربية + تمارين تصحّح فيها بنفسك' },
+                  { icon: '📖', title: 'قراءة مفككة', desc: 'نص قصير مع تحليل كلمة بكلمة وترجمة' },
+                  { icon: '🎧', title: 'استماع وإملاء', desc: 'حوارات واقعية مع تمارين فراغات تفاعلية' },
+                  { icon: '🎙️', title: 'شادونج YouTube', desc: 'تقنية الشادونج مع فيديو حقيقي للتدريب' },
+                  { icon: '✍️', title: 'كتابة + AI رفيق', desc: 'تحديات كتابة + محادثة حية مع AI مخصص' },
+                ].map(h => (
+                  <div key={h.icon} className="el-how-card">
+                    <div className="el-how-icon">{h.icon}</div>
+                    <div className="el-how-title">{h.title}</div>
+                    <div className="el-how-desc">{h.desc}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </main>
       </div>
