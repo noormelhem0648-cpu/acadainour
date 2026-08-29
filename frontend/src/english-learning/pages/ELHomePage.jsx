@@ -234,8 +234,7 @@ export default function ELHomePage({ darkMode, setDarkMode }) {
           {/* 1 ── Hero */}
           <div className="el-hero-block">
             <h1 className="el-hero-title">
-              تعلّم الإنجليزية<br />
-              <span className="el-hero-accent">خطوة بخطوة</span>
+              تعلّم الإنجليزية — <span className="el-hero-accent">خطوة بخطوة</span>
             </h1>
             <p className="el-hero-sub">
               من الصفر المطلق إلى الطلاقة — 6 مستويات × 30 يوماً × 6 مهارات يومياً
@@ -269,6 +268,13 @@ export default function ELHomePage({ darkMode, setDarkMode }) {
                 <div className="el-feature-card-sub">
                   {dueCount > 0 ? `${dueCount} كلمة للمراجعة اليوم` : 'قائمة الكلمات المحفوظة'}
                 </div>
+              </div>
+            </button>
+            <button className="el-feature-card ipa" onClick={() => navigate(`${EL}/ipa`)}>
+              <span className="el-feature-card-icon">🔤</span>
+              <div>
+                <div className="el-feature-card-title">دليل IPA</div>
+                <div className="el-feature-card-sub">دليل النطق الصوتي الكامل</div>
               </div>
             </button>
           </div>
@@ -305,13 +311,6 @@ export default function ELHomePage({ darkMode, setDarkMode }) {
             })}
           </div>
 
-          {/* 7 ── Tool buttons */}
-          <div className="el-home-tools">
-            <button className="el-tool-btn" onClick={() => navigate(`${EL}/ipa`)}>
-              <span className="el-tool-icon">🔤</span>
-              <span>دليل IPA</span>
-            </button>
-          </div>
 
           {/* 8 ── Quick strips (errors dashboard) */}
           <div className="el-quick-strips">

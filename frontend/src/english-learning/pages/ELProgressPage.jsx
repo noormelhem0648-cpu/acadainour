@@ -3,7 +3,7 @@ import { API_BASE as BACKEND } from '../../config'
 import { readSSEStream } from '../utils/stream'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { LEVELS } from '../data/curriculum'
-import { useProgress, ALL_BADGES, XP_VALUES } from '../hooks/useProgress'
+import { useProgress, XP_VALUES } from '../hooks/useProgress'
 import '../EL.css'
 import OrientLockBtn from '../components/OrientLockBtn'
 
@@ -261,24 +261,6 @@ export default function ELProgressPage({ darkMode, setDarkMode }) {
 
         <div className="el-progress-page">
 
-          {/* XP Summary */}
-          <div className="el-xp-summary">
-            <div className="el-xp-total">
-              <div className="el-xp-num">{progress.xpData.total || 0}</div>
-              <div className="el-xp-label">نقطة XP إجمالية</div>
-            </div>
-            <div className="el-xp-divider" />
-            <div className="el-xp-week">
-              <div className="el-xp-num accent">{weeklyXP}</div>
-              <div className="el-xp-label">نقطة هذا الأسبوع</div>
-            </div>
-            <div className="el-xp-divider" />
-            <div className="el-xp-streak">
-              <div className="el-xp-num" style={{ color: '#f59e0b' }}>🔥 {progress.streak.current || 0}</div>
-              <div className="el-xp-label">أيام متتالية</div>
-            </div>
-          </div>
-
           {/* Overall progress */}
           <div className="el-prog-overall">
             <div className="el-prog-overall-label">التقدم الكلي</div>
@@ -312,21 +294,6 @@ export default function ELProgressPage({ darkMode, setDarkMode }) {
                     <div className="el-prog-bar-fill" style={{ width: lp.pct + '%' }} />
                   </div>
                   <div className="el-prog-level-done">{lp.done} / {lp.total} أقسام مكتملة</div>
-                </div>
-              )
-            })}
-          </div>
-
-          {/* Badges */}
-          <h3 className="el-section-title">🏅 الأوسمة</h3>
-          <div className="el-badges-grid">
-            {ALL_BADGES.map(badge => {
-              const earned = earnedBadges.some(b => b.id === badge.id)
-              return (
-                <div key={badge.id} className={`el-badge-card${earned ? ' earned' : ' locked'}`}>
-                  <div className="el-badge-icon">{earned ? badge.icon : '🔒'}</div>
-                  <div className="el-badge-name">{badge.name}</div>
-                  <div className="el-badge-desc">{badge.desc}</div>
                 </div>
               )
             })}

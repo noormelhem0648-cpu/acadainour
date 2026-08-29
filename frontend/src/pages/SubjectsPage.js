@@ -10,7 +10,7 @@ export default function SubjectsPage({ darkMode, setDarkMode }) {
   return (
     <div className="page">
       <header className="header">
-        <button className="back-btn" onClick={() => navigate("/years")}>Back</button>
+        <button className="back-btn" onClick={() => navigate("/years")} aria-label="Go back">←</button>
         <span className="app-name">Noura AI</span>
       </header>
 

@@ -656,7 +656,7 @@ Use the mixed Arabic+English style.`;
   return (
     <div className="page chat-page" role="main" aria-label="Noura AI Chat">
       <header className="header" role="banner">
-        <button className="back-btn" onClick={() => navigate(-1)} aria-label="Go back">Back</button>
+        <button className="back-btn" onClick={() => navigate(-1)} aria-label="Go back">←</button>
         <span className="app-name">{subjectCode}</span>
         <button className="header-action-btn" onClick={subjectSummary} disabled={loading} title="ملخص المادة">📋</button>
         <button className="header-action-btn" onClick={startNewChat} aria-label="New chat">➕</button>
