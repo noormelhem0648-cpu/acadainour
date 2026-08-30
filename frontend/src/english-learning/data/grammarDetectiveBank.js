@@ -701,6 +701,469 @@ export const GRAMMAR_DETECTIVE_BANK = {
       ],
     ],
   },
+
+  // B1 days have 1-3 grammar patterns; each day maps to an array of groups.
+  B1: {
+    1: [
+      [
+        { text: 'She had ate dinner before I arrived.', error: 'ate', fix: 'eaten', hint: 'بعد had نستخدم التصريف الثالث' },
+        { text: 'I had went to bed when she called.', error: 'went', fix: 'gone', hint: 'بعد had نستخدم التصريف الثالث' },
+        { text: 'He had saw the movie before we spoke.', error: 'saw', fix: 'seen', hint: 'بعد had نستخدم التصريف الثالث' },
+        { text: 'They had wrote the report before the meeting.', error: 'wrote', fix: 'written', hint: 'بعد had نستخدم التصريف الثالث' },
+        { text: 'We had did our homework before dinner.', error: 'did', fix: 'done', hint: 'بعد had نستخدم التصريف الثالث' },
+      ],
+      [
+        { text: "She hadn't ate before the show started.", error: 'ate', fix: 'eaten', hint: 'بعد hadn’t نستخدم التصريف الثالث' },
+        { text: 'Had you saw that before?', error: 'saw', fix: 'seen', hint: 'بعد had نستخدم التصريف الثالث' },
+        { text: "He hadn't wrote the email yet.", error: 'wrote', fix: 'written', hint: 'بعد hadn’t نستخدم التصريف الثالث' },
+        { text: 'Had she went home already?', error: 'went', fix: 'gone', hint: 'بعد had نستخدم التصريف الثالث' },
+        { text: "They hadn't did the work on time.", error: 'did', fix: 'done', hint: 'بعد hadn’t نستخدم التصريف الثالث' },
+      ],
+    ],
+    2: [
+      [
+        { text: 'I think she will passes the exam.', error: 'will passes', fix: 'will pass', hint: 'بعد will نستخدم المصدر' },
+        { text: "It'll probably rains later.", error: 'rains', fix: 'rain', hint: 'بعد will نستخدم المصدر' },
+        { text: 'He will helps us tomorrow.', error: 'will helps', fix: 'will help', hint: 'بعد will نستخدم المصدر' },
+        { text: "They won't comes to the party.", error: "won't comes", fix: "won't come", hint: 'بعد won’t نستخدم المصدر' },
+        { text: 'We will surely wins the match.', error: 'wins', fix: 'win', hint: 'بعد will نستخدم المصدر' },
+      ],
+      [
+        { text: "Look at those clouds, it's go to rain.", error: "it's go to rain", fix: "it's going to rain", hint: 'خطة/دليل ← going to' },
+        { text: 'She is going to studies medicine.', error: 'studies', fix: 'study', hint: 'بعد going to نستخدم المصدر' },
+        { text: 'They is going to move next month.', error: 'is', fix: 'are', hint: 'مع they نستخدم are' },
+        { text: 'He going to open a business.', error: 'He going', fix: "He's going", hint: 'ناقصة is' },
+        { text: 'We is going to travel soon.', error: 'is', fix: 'are', hint: 'مع we نستخدم are' },
+      ],
+      [
+        { text: 'She is flying to Paris next weeks.', error: 'weeks', fix: 'week', hint: 'next + مفرد وليس جمع' },
+        { text: 'We is seeing them next Sunday.', error: 'is', fix: 'are', hint: 'مع we نستخدم are' },
+        { text: 'He are starting his new job on Monday.', error: 'are', fix: 'is', hint: 'مع he نستخدم is' },
+        { text: 'They is leaving tomorrow morning.', error: 'is', fix: 'are', hint: 'مع they نستخدم are' },
+        { text: 'I are meeting her tomorrow at the office.', error: 'are', fix: 'am', hint: 'مع I نستخدم am' },
+      ],
+    ],
+    3: [
+      [
+        { text: 'If I had more money, I will travel the world.', error: 'will travel', fix: 'would travel', hint: 'الشرطية الثانية: would + مصدر' },
+        { text: 'If she was rich, she would buys a house.', error: 'would buys', fix: 'would buy', hint: 'بعد would نستخدم المصدر' },
+        { text: 'If they knew the answer, they would told you.', error: 'would told', fix: 'would tell', hint: 'بعد would نستخدم المصدر' },
+        { text: 'If he was taller, he would plays basketball.', error: 'would plays', fix: 'would play', hint: 'بعد would نستخدم المصدر' },
+        { text: 'If we had time, we will visit you.', error: 'will visit', fix: 'would visit', hint: 'الشرطية الثانية: would + مصدر' },
+      ],
+      [
+        { text: 'If I was you, I would apologize.', error: 'was', fix: 'were', hint: 'If I were you — نستخدم were دائماً' },
+        { text: 'If I were you, I will say sorry.', error: 'will say', fix: 'would say', hint: 'بعد if I were you نستخدم would' },
+        { text: 'If I were you, I would to accept it.', error: 'would to accept', fix: 'would accept', hint: 'بعد would نستخدم المصدر بدون to' },
+        { text: "If I was you, I wouldn't waited so long.", error: 'was', fix: 'were', hint: 'If I were you — نستخدم were' },
+        { text: 'If I were you, I would takes the job.', error: 'would takes', fix: 'would take', hint: 'بعد would نستخدم المصدر' },
+      ],
+    ],
+    4: [
+      [
+        { text: 'If she had studied, she would passed the exam.', error: 'would passed', fix: 'would have passed', hint: 'الشرطية الثالثة: would have + التصريف الثالث' },
+        { text: 'If I had known, I would tell you.', error: 'would tell', fix: 'would have told', hint: 'الشرطية الثالثة: would have + التصريف الثالث' },
+        { text: 'If they had left earlier, they would arrive on time.', error: 'would arrive', fix: 'would have arrived', hint: 'الشرطية الثالثة: would have + التصريف الثالث' },
+        { text: 'If he had worked harder, he would got promoted.', error: 'would got', fix: 'would have gotten', hint: 'الشرطية الثالثة: would have + التصريف الثالث' },
+        { text: 'If we had seen you, we would say hi.', error: 'would say', fix: 'would have said', hint: 'الشرطية الثالثة: would have + التصريف الثالث' },
+      ],
+      [
+        { text: 'If she had asked, I could helped her.', error: 'could helped', fix: 'could have helped', hint: 'الشرطية الثالثة: could have + التصريف الثالث' },
+        { text: 'If he had trained more, he might won.', error: 'might won', fix: 'might have won', hint: 'الشرطية الثالثة: might have + التصريف الثالث' },
+        { text: 'If they had left earlier, they could avoided the traffic.', error: 'could avoided', fix: 'could have avoided', hint: 'الشرطية الثالثة: could have + التصريف الثالث' },
+        { text: 'If I had known, I might told her.', error: 'might told', fix: 'might have told', hint: 'الشرطية الثالثة: might have + التصريف الثالث' },
+        { text: 'If we had tried, we could succeeded.', error: 'could succeeded', fix: 'could have succeeded', hint: 'الشرطية الثالثة: could have + التصريف الثالث' },
+      ],
+    ],
+    5: [
+      [
+        { text: 'He must have forget his keys.', error: 'forget', fix: 'forgotten', hint: 'بعد must have نستخدم التصريف الثالث' },
+        { text: 'She cannot have knew about this.', error: 'knew', fix: 'known', hint: 'بعد cannot have نستخدم التصريف الثالث' },
+        { text: 'They must have leave already.', error: 'leave', fix: 'left', hint: 'بعد must have نستخدم التصريف الثالث' },
+        { text: 'It cannot have rain, the ground is dry.', error: 'rain', fix: 'rained', hint: 'بعد cannot have نستخدم التصريف الثالث' },
+        { text: 'He must have took the wrong bus.', error: 'took', fix: 'taken', hint: 'بعد must have نستخدم التصريف الثالث' },
+      ],
+      [
+        { text: 'You should have listen to me.', error: 'listen', fix: 'listened', hint: 'بعد should have نستخدم التصريف الثالث' },
+        { text: 'She shouldn’t have say that.', error: 'say', fix: 'said', hint: 'بعد shouldn’t have نستخدم التصريف الثالث' },
+        { text: 'I should have call you earlier.', error: 'call', fix: 'called', hint: 'بعد should have نستخدم التصريف الثالث' },
+        { text: 'They shouldn’t have leave so early.', error: 'leave', fix: 'left', hint: 'بعد shouldn’t have نستخدم التصريف الثالث' },
+        { text: 'He should have study harder.', error: 'study', fix: 'studied', hint: 'بعد should have نستخدم التصريف الثالث' },
+      ],
+      [
+        { text: 'She could have forget her phone.', error: 'forget', fix: 'forgotten', hint: 'بعد could have نستخدم التصريف الثالث' },
+        { text: 'He might have take the earlier train.', error: 'take', fix: 'taken', hint: 'بعد might have نستخدم التصريف الثالث' },
+        { text: 'They could have miss the bus.', error: 'miss', fix: 'missed', hint: 'بعد could have نستخدم التصريف الثالث' },
+        { text: 'It might have break during shipping.', error: 'break', fix: 'broken', hint: 'بعد might have نستخدم التصريف الثالث' },
+        { text: 'She could have call before coming.', error: 'call', fix: 'called', hint: 'بعد could have نستخدم التصريف الثالث' },
+      ],
+    ],
+    6: [
+      [
+        { text: 'The letter is wrote every week.', error: 'wrote', fix: 'written', hint: 'المبني للمجهول يحتاج التصريف الثالث' },
+        { text: 'The cars was made in Japan.', error: 'was', fix: 'were', hint: 'مع cars (جمع) نستخدم were' },
+        { text: 'The reports is being reviewed now.', error: 'is', fix: 'are', hint: 'مع reports (جمع) نستخدم are' },
+        { text: 'The window was broke by the storm.', error: 'broke', fix: 'broken', hint: 'المبني للمجهول يحتاج التصريف الثالث' },
+        { text: 'The cake will be made tomorrow it.', error: 'it', fix: '[احذف it]', hint: 'زيادة كلمة لا داعي لها' },
+      ],
+      [
+        { text: 'The work has been did already.', error: 'did', fix: 'done', hint: 'المبني للمجهول يحتاج التصريف الثالث' },
+        { text: 'The letters have being sent.', error: 'being', fix: 'been', hint: 'الصيغة الصحيحة: have been' },
+        { text: 'The house had been build before they moved in.', error: 'build', fix: 'built', hint: 'المبني للمجهول يحتاج التصريف الثالث' },
+        { text: 'The reports has been finished.', error: 'has', fix: 'have', hint: 'مع reports (جمع) نستخدم have' },
+        { text: 'The project have been completed.', error: 'have', fix: 'has', hint: 'مع project (مفرد) نستخدم has' },
+      ],
+    ],
+    7: [
+      [
+        { text: 'Swim is my favorite hobby.', error: 'Swim', fix: 'Swimming', hint: 'الجيروند كفاعل: Swimming' },
+        { text: 'Read books helps you learn.', error: 'Read', fix: 'Reading', hint: 'الجيروند كفاعل: Reading' },
+        { text: 'Run every day keeps you healthy.', error: 'Run', fix: 'Running', hint: 'الجيروند كفاعل: Running' },
+        { text: 'Study hard is important for success.', error: 'Study', fix: 'Studying', hint: 'الجيروند كفاعل: Studying' },
+        { text: 'Travel opens your mind.', error: 'Travel', fix: 'Traveling', hint: 'الجيروند كفاعل: Traveling' },
+      ],
+      [
+        { text: 'She is interested in learn Spanish.', error: 'learn', fix: 'learning', hint: 'بعد حرف الجر نستخدم ing' },
+        { text: 'He is good at play chess.', error: 'play', fix: 'playing', hint: 'بعد حرف الجر نستخدم ing' },
+        { text: "I'm tired of wait for the bus.", error: 'wait', fix: 'waiting', hint: 'بعد حرف الجر نستخدم ing' },
+        { text: 'They are afraid of make mistakes.', error: 'make', fix: 'making', hint: 'بعد حرف الجر نستخدم ing' },
+        { text: 'We look forward to see you.', error: 'see', fix: 'seeing', hint: 'بعد look forward to نستخدم ing' },
+      ],
+    ],
+    8: [
+      [
+        { text: 'This soup is too hot for eat.', error: 'for eat', fix: 'to eat', hint: 'الصيغة: too + adj + to + مصدر' },
+        { text: 'She is too busy for talk now.', error: 'for talk', fix: 'to talk', hint: 'الصيغة: too + adj + to + مصدر' },
+        { text: 'He is too young for drive.', error: 'for drive', fix: 'to drive', hint: 'الصيغة: too + adj + to + مصدر' },
+        { text: 'The bag is too heavy for lift.', error: 'for lift', fix: 'to lift', hint: 'الصيغة: too + adj + to + مصدر' },
+        { text: "It's too late for call her.", error: 'for call', fix: 'to call', hint: 'الصيغة: too + adj + to + مصدر' },
+      ],
+      [
+        { text: "He isn't strong enough for lift it.", error: 'for lift', fix: 'to lift', hint: 'الصيغة: enough + to + مصدر' },
+        { text: 'She is smart enough for solve it.', error: 'for solve', fix: 'to solve', hint: 'الصيغة: enough + to + مصدر' },
+        { text: 'Is it warm enough for swim?', error: 'for swim', fix: 'to swim', hint: 'الصيغة: enough + to + مصدر' },
+        { text: "They aren't ready enough for compete.", error: 'for compete', fix: 'to compete', hint: 'الصيغة: enough + to + مصدر' },
+        { text: 'This car is fast enough for win.', error: 'for win', fix: 'to win', hint: 'الصيغة: enough + to + مصدر' },
+      ],
+      [
+        { text: 'She studied hard in order pass the exam.', error: 'in order pass', fix: 'in order to pass', hint: 'الصيغة: in order to + مصدر' },
+        { text: 'He left early so as avoid traffic.', error: 'so as avoid', fix: 'so as to avoid', hint: 'الصيغة: so as to + مصدر' },
+        { text: 'I saved money in order buy a car.', error: 'in order buy', fix: 'in order to buy', hint: 'الصيغة: in order to + مصدر' },
+        { text: 'They arrived early so as to gets good seats.', error: 'to gets', fix: 'to get', hint: 'بعد to نستخدم المصدر' },
+        { text: 'We practiced daily in order to improves.', error: 'to improves', fix: 'to improve', hint: 'بعد to نستخدم المصدر' },
+      ],
+    ],
+    9: [
+      [
+        { text: 'He stopped to smoke last year.', error: 'to smoke', fix: 'smoking', hint: 'stop + ing = إنهاء عادة' },
+        { text: 'He stopped to eat sugar for his health.', error: 'to eat', fix: 'eating', hint: 'stop + ing = إنهاء عادة' },
+        { text: 'She stopped to smoking years ago.', error: 'to smoking', fix: 'smoking', hint: 'stop + ing = إنهاء عادة' },
+        { text: 'He stopped to drink coffee at night.', error: 'to drink', fix: 'drinking', hint: 'stop + ing = إنهاء عادة' },
+        { text: 'I stopped to worry about it so much.', error: 'to worry', fix: 'worrying', hint: 'stop + ing = إنهاء عادة' },
+      ],
+      [
+        { text: 'I remember to visit Paris as a child.', error: 'to visit', fix: 'visiting', hint: 'remember + ing = ذكرى ماضية' },
+        { text: 'Please remember locking the door before you leave.', error: 'locking', fix: 'to lock', hint: 'remember + to = مهمة مستقبلية' },
+        { text: "Don't forget bringing your ID tomorrow.", error: 'bringing', fix: 'to bring', hint: 'forget + to = مهمة مستقبلية' },
+        { text: "I'll never forget to see that sunset.", error: 'to see', fix: 'seeing', hint: 'forget + ing = ذكرى ماضية' },
+        { text: 'Please remember send the email today.', error: 'send', fix: 'to send', hint: 'remember + to = مهمة مستقبلية' },
+      ],
+      [
+        { text: 'Try to restarted the computer.', error: 'to restarted', fix: 'restarting', hint: 'try + ing = تجربة حل' },
+        { text: 'He regretted to leave his hometown.', error: 'to leave', fix: 'leaving', hint: 'regret + ing = ندم على الماضي' },
+        { text: 'Try to eating less sugar.', error: 'to eating', fix: 'eating', hint: 'try + ing = تجربة حل' },
+        { text: 'They went on talk about the weather.', error: 'went on talk', fix: 'went on talking', hint: 'go on + ing = الاستمرار بنفس الفعل' },
+        { text: 'He tried to opened the jar.', error: 'to opened', fix: 'to open', hint: 'بعد to نستخدم المصدر' },
+      ],
+    ],
+    10: [
+      [
+        { text: 'She said she is happy.', error: 'is', fix: 'was', hint: 'الكلام المنقول: تحويل الزمن للماضي' },
+        { text: 'He told me he is coming.', error: 'is', fix: 'was', hint: 'الكلام المنقول: تحويل الزمن للماضي' },
+        { text: 'They said they will help.', error: 'will', fix: 'would', hint: 'الكلام المنقول: will تصبح would' },
+        { text: 'She said she can swim.', error: 'can', fix: 'could', hint: 'الكلام المنقول: can تصبح could' },
+        { text: 'He told me he has finished.', error: 'has', fix: 'had', hint: 'الكلام المنقول: has تصبح had' },
+      ],
+      [
+        { text: "She told him don't be late.", error: "don't be late", fix: 'not to be late', hint: 'الأمر المنقول: not to + مصدر' },
+        { text: 'He asked me to opened the door.', error: 'to opened', fix: 'to open', hint: 'بعد to نستخدم المصدر' },
+        { text: 'The teacher told us studying hard.', error: 'studying', fix: 'to study', hint: 'الأمر المنقول: to + مصدر' },
+        { text: "She advised him don't smoke.", error: "don't smoke", fix: 'not to smoke', hint: 'النصيحة المنقولة: not to + مصدر' },
+        { text: 'He told her to comes early.', error: 'to comes', fix: 'to come', hint: 'بعد to نستخدم المصدر' },
+      ],
+      [
+        { text: 'She asked me what did I want.', error: 'did I want', fix: 'I wanted', hint: 'السؤال المنقول بدون فعل مساعد' },
+        { text: 'He asked if I am ready.', error: 'am', fix: 'was', hint: 'الكلام المنقول: am تصبح was' },
+        { text: 'They asked where did we live.', error: 'did we live', fix: 'we lived', hint: 'السؤال المنقول بدون فعل مساعد' },
+        { text: 'She asked whether do I like it.', error: 'do I like', fix: 'I liked', hint: 'السؤال المنقول بدون فعل مساعد' },
+        { text: 'He asked what time is it.', error: 'is it', fix: 'it was', hint: 'السؤال المنقول بترتيب عادي وزمن الماضي' },
+      ],
+    ],
+    11: [
+      [
+        { text: 'My brother, that lives in Cairo, is a doctor.', error: 'that', fix: 'who', hint: 'للأشخاص في الجملة الوصفية نستخدم who' },
+        { text: 'This car, that I bought last year, is great.', error: 'that', fix: 'which', hint: 'للأشياء نستخدم which فقط (لا that)' },
+        { text: 'Mount Everest, that is the tallest mountain, is in Nepal.', error: 'that', fix: 'which', hint: 'للأشياء نستخدم which فقط' },
+        { text: 'My mom, that is a teacher, loves her job.', error: 'that', fix: 'who', hint: 'للأشخاص نستخدم who' },
+        { text: 'This book, that I read twice, is amazing.', error: 'that', fix: 'which', hint: 'للأشياء نستخدم which فقط' },
+      ],
+      [
+        { text: 'That’s the town, which I grew up, is beautiful.', error: 'which', fix: 'where', hint: 'للمكان نستخدم where' },
+        { text: 'My uncle, who’s car is red, is visiting.', error: 'who’s', fix: 'whose', hint: 'الملكية: whose وليس who’s' },
+        { text: '2020, which the pandemic started, was hard.', error: 'which', fix: 'when', hint: 'للوقت نستخدم when' },
+        { text: 'This is Sara, which bag was stolen, is upset.', error: 'which', fix: 'whose', hint: 'الملكية: whose' },
+        { text: 'That’s the café, which we met, is closed now.', error: 'which', fix: 'where', hint: 'للمكان نستخدم where' },
+      ],
+    ],
+    12: [
+      [
+        { text: 'It was raining. Despite, we went out.', error: 'Despite', fix: 'However', hint: 'بداية جملة جديدة تحتاج However' },
+        { text: 'Despite of the rain, we went out.', error: 'Despite of', fix: 'Despite', hint: 'Despite لا يتبعها of' },
+        { text: 'It was cold, nevertheless we swam.', error: 'nevertheless', fix: 'but', hint: 'nevertheless لا تُستخدم كأداة ربط بفاصلة وسط الجملة' },
+        { text: 'Despite it was raining, we went out.', error: 'Despite', fix: 'Although', hint: 'Despite تتبعها اسم/ing وليس جملة كاملة' },
+        { text: 'She failed the exam. Despite, she studied hard.', error: 'Despite', fix: 'However', hint: 'بداية جملة جديدة تحتاج However' },
+      ],
+      [
+        { text: 'She is talented. Moreover talented, she works hard.', error: 'Moreover talented', fix: 'Moreover', hint: 'لا نكرر الصفة بعد Moreover' },
+        { text: 'It rained heavily. Therefore, however we still went out.', error: 'however', fix: '[احذف however]', hint: 'لا نستخدم therefore و however معاً' },
+        { text: 'She lost her keys, therefore because she was late.', error: 'because', fix: '[احذف because]', hint: 'لا نستخدم therefore و because معاً' },
+        { text: 'The team practiced hard, furthermore they still lost.', error: 'furthermore', fix: 'however', hint: 'التناقض يحتاج however وليس furthermore' },
+        { text: 'She is kind, furthermore she are generous.', error: 'are', fix: 'is', hint: 'مع she نستخدم is' },
+      ],
+    ],
+    13: [
+      [
+        { text: 'She turned off it.', error: 'turned off it', fix: 'turned it off', hint: 'مع الضمير يجب الفصل: turned it off' },
+        { text: 'Can you turn down it?', error: 'turn down it', fix: 'turn it down', hint: 'مع الضمير: turn it down' },
+        { text: 'Please pick up it now.', error: 'pick up it', fix: 'pick it up', hint: 'مع الضمير: pick it up' },
+        { text: 'He put on it quickly.', error: 'put on it', fix: 'put it on', hint: 'مع الضمير: put it on' },
+        { text: 'I filled out it yesterday.', error: 'filled out it', fix: 'filled it out', hint: 'مع الضمير: filled it out' },
+      ],
+      [
+        { text: 'She looks the kids after every day.', error: 'looks the kids after', fix: 'looks after the kids', hint: 'فعل غير قابل للفصل: looks after' },
+        { text: 'He ran the man into at the station.', error: 'ran the man into', fix: 'ran into the man', hint: 'فعل غير قابل للفصل: ran into' },
+        { text: 'They came the solution across by chance.', error: 'came the solution across', fix: 'came across the solution', hint: 'فعل غير قابل للفصل: came across' },
+        { text: 'I got the bus off downtown.', error: 'got the bus off', fix: 'got off the bus', hint: 'فعل غير قابل للفصل: got off' },
+        { text: 'We ran the storm into on our trip.', error: 'ran the storm into', fix: 'ran into the storm', hint: 'فعل غير قابل للفصل: ran into' },
+      ],
+    ],
+    14: [
+      [
+        { text: 'I wish I am younger.', error: 'am', fix: 'were', hint: 'بعد wish نستخدم الماضي (were)' },
+        { text: 'She wishes she has a car.', error: 'has', fix: 'had', hint: 'بعد wish نستخدم الماضي' },
+        { text: 'I wish I can dance.', error: 'can', fix: 'could', hint: 'بعد wish نستخدم could' },
+        { text: 'He wishes he knows the truth.', error: 'knows', fix: 'knew', hint: 'بعد wish نستخدم الماضي' },
+        { text: 'We wish we lives closer.', error: 'lives', fix: 'lived', hint: 'بعد wish نستخدم الماضي' },
+      ],
+      [
+        { text: 'I wish I had study harder.', error: 'had study', fix: 'had studied', hint: 'بعد wish نستخدم الماضي التام' },
+        { text: "She wishes she hadn't say that.", error: "hadn't say", fix: "hadn't said", hint: 'بعد wish نستخدم الماضي التام' },
+        { text: 'I wish I had went there.', error: 'had went', fix: 'had gone', hint: 'بعد wish نستخدم الماضي التام' },
+        { text: 'He wishes he had saw it.', error: 'had saw', fix: 'had seen', hint: 'بعد wish نستخدم الماضي التام' },
+        { text: 'They wish they had did better.', error: 'had did', fix: 'had done', hint: 'بعد wish نستخدم الماضي التام' },
+      ],
+      [
+        { text: 'I wish you would stopped talking.', error: 'would stopped', fix: 'would stop', hint: 'بعد would نستخدم المصدر' },
+        { text: 'She wishes he would calls more.', error: 'would calls', fix: 'would call', hint: 'بعد would نستخدم المصدر' },
+        { text: 'I wish it would stops raining.', error: 'would stops', fix: 'would stop', hint: 'بعد would نستخدم المصدر' },
+        { text: 'He wishes she would listens to him.', error: 'would listens', fix: 'would listen', hint: 'بعد would نستخدم المصدر' },
+        { text: 'We wish they would arrives on time.', error: 'would arrives', fix: 'would arrive', hint: 'بعد would نستخدم المصدر' },
+      ],
+    ],
+    15: [
+      [
+        { text: 'I had my hair cutting yesterday.', error: 'cutting', fix: 'cut', hint: 'have something done: التصريف الثالث' },
+        { text: 'She had her car repair last week.', error: 'repair', fix: 'repaired', hint: 'have something done: التصريف الثالث' },
+        { text: 'We had the house painting last month.', error: 'painting', fix: 'painted', hint: 'have something done: التصريف الثالث' },
+        { text: 'He had his suit clean for the wedding.', error: 'clean', fix: 'cleaned', hint: 'have something done: التصريف الثالث' },
+        { text: 'They had their photo taking at the studio.', error: 'taking', fix: 'taken', hint: 'have something done: التصريف الثالث' },
+      ],
+      [
+        { text: 'I got my phone fixing yesterday.', error: 'fixing', fix: 'fixed', hint: 'get something done: التصريف الثالث' },
+        { text: 'She got her nails do at the salon.', error: 'do', fix: 'done', hint: 'get something done: التصريف الثالث' },
+        { text: 'We got the car wash yesterday.', error: 'wash', fix: 'washed', hint: 'get something done: التصريف الثالث' },
+        { text: 'He got his hair cutting today.', error: 'cutting', fix: 'cut', hint: 'get something done: التصريف الثالث' },
+        { text: 'They got the documents translate.', error: 'translate', fix: 'translated', hint: 'get something done: التصريف الثالث' },
+      ],
+      [
+        { text: 'I am having my car repairing tomorrow.', error: 'repairing', fix: 'repaired', hint: 'have something done: التصريف الثالث' },
+        { text: 'She will get her teeth check next week.', error: 'check', fix: 'checked', hint: 'get something done: التصريف الثالث' },
+        { text: 'He is getting his suit cleaning now.', error: 'cleaning', fix: 'cleaned', hint: 'get something done: التصريف الثالث' },
+        { text: 'We had had our house paint before selling.', error: 'paint', fix: 'painted', hint: 'have something done: التصريف الثالث' },
+        { text: 'They have got their papers translating.', error: 'translating', fix: 'translated', hint: 'get something done: التصريف الثالث' },
+      ],
+    ],
+    16: [
+      [
+        { text: 'It was John that broken the vase.', error: 'broken', fix: 'broke', hint: 'جملة الكليفت: that + فعل ماضٍ عادي' },
+        { text: 'It is Maria which helped me.', error: 'which', fix: 'who', hint: 'للأشخاص نستخدم who' },
+        { text: 'It was in Paris which we met her.', error: 'which', fix: 'that', hint: 'مع أماكن/أوقات نستخدم that' },
+        { text: 'It is my brother that live here.', error: 'live', fix: 'lives', hint: 'مع brother (مفرد) نضيف s' },
+        { text: 'It was yesterday that it happen.', error: 'happen', fix: 'happened', hint: 'الحدث بالماضي: happened' },
+      ],
+      [
+        { text: 'What I need is finding a job.', error: 'finding', fix: 'to find', hint: 'What-cleft: is + to + مصدر' },
+        { text: 'What she wants are respect.', error: 'are', fix: 'is', hint: 'مع respect (مفرد) نستخدم is' },
+        { text: 'What surprised me were his reaction.', error: 'were', fix: 'was', hint: 'مع reaction (مفرد) نستخدم was' },
+        { text: 'What I want is going home.', error: 'going', fix: 'to go', hint: 'What-cleft: is + to + مصدر' },
+        { text: 'What he did were amazing.', error: 'were', fix: 'was', hint: 'مع what he did (مفرد) نستخدم was' },
+      ],
+      [
+        { text: 'I do agrees with you.', error: 'do agrees', fix: 'do agree', hint: 'بعد do نستخدم المصدر' },
+        { text: 'She did said that clearly.', error: 'did said', fix: 'did say', hint: 'بعد did نستخدم المصدر' },
+        { text: 'Never I have seen such a mess.', error: 'Never I have', fix: 'Never have I', hint: 'بعد Never نقلب الترتيب: have I' },
+        { text: 'Rarely she goes out at night.', error: 'Rarely she goes', fix: 'Rarely does she go', hint: 'بعد Rarely نقلب الترتيب مع does' },
+        { text: 'Never he complains about anything.', error: 'Never he complains', fix: 'Never does he complain', hint: 'بعد Never نقلب الترتيب مع does' },
+      ],
+    ],
+    17: [
+      [
+        { text: "If she hadn't missed the flight, she would being here now.", error: 'would being', fix: 'would be', hint: 'النتيجة الحاضرة: would be' },
+        { text: 'If he had studied medicine, he would working as a doctor now.', error: 'would working', fix: 'would be working', hint: 'النتيجة الحاضرة: would be + ing' },
+        { text: "If they hadn't moved, they would living here still.", error: 'would living', fix: 'would be living', hint: 'النتيجة الحاضرة: would be + ing' },
+        { text: "If I hadn't lost my job, I would has more money now.", error: 'would has', fix: 'would have', hint: 'بعد would نستخدم المصدر have' },
+        { text: "If we hadn't sold the house, we would owning it now.", error: 'would owning', fix: 'would own', hint: 'بعد would نستخدم المصدر' },
+      ],
+      [
+        { text: "If she wasn't so shy, she would have talk to him.", error: 'would have talk', fix: 'would have talked', hint: 'النتيجة الماضية: would have + التصريف الثالث' },
+        { text: "If he weren't so lazy, he would have finish the project.", error: 'would have finish', fix: 'would have finished', hint: 'النتيجة الماضية: would have + التصريف الثالث' },
+        { text: "If I wasn't afraid of heights, I would have climb it.", error: 'would have climb', fix: 'would have climbed', hint: 'النتيجة الماضية: would have + التصريف الثالث' },
+        { text: "If they weren't so busy, they would have came to the party.", error: 'would have came', fix: 'would have come', hint: 'النتيجة الماضية: would have + التصريف الثالث' },
+        { text: "If she wasn't sick, she would have went with us.", error: 'would have went', fix: 'would have gone', hint: 'النتيجة الماضية: would have + التصريف الثالث' },
+      ],
+    ],
+    18: [
+      [
+        { text: 'Walk home, I saw an old friend.', error: 'Walk home', fix: 'Walking home', hint: 'جملة المشاركة تبدأ بـ ing' },
+        { text: 'Open the door, she smiled at me.', error: 'Open the door', fix: 'Opening the door', hint: 'جملة المشاركة تبدأ بـ ing' },
+        { text: 'Feel tired, he went to bed early.', error: 'Feel tired', fix: 'Feeling tired', hint: 'جملة المشاركة تبدأ بـ ing' },
+        { text: 'Look out the window, I saw the rain.', error: 'Look out', fix: 'Looking out', hint: 'جملة المشاركة تبدأ بـ ing' },
+        { text: 'Enter the room, she turned on the light.', error: 'Enter the room', fix: 'Entering the room', hint: 'جملة المشاركة تبدأ بـ ing' },
+      ],
+      [
+        { text: 'Have finished his work, he went home.', error: 'Have finished', fix: 'Having finished', hint: 'الفعل الأول اكتمل قبل الثاني: Having + التصريف الثالث' },
+        { text: 'Have eaten dinner, they watched a movie.', error: 'Have eaten', fix: 'Having eaten', hint: 'Having + التصريف الثالث' },
+        { text: 'Have studied all night, she passed the exam.', error: 'Have studied', fix: 'Having studied', hint: 'Having + التصريف الثالث' },
+        { text: 'Have cleaned the house, he relaxed.', error: 'Have cleaned', fix: 'Having cleaned', hint: 'Having + التصريف الثالث' },
+        { text: 'Have finished the report, she sent it.', error: 'Have finished', fix: 'Having finished', hint: 'Having + التصريف الثالث' },
+      ],
+      [
+        { text: 'Confuse by the instructions, he asked for help.', error: 'Confuse', fix: 'Confused', hint: 'المعنى السلبي يحتاج -ed' },
+        { text: 'Surprise by the news, she smiled.', error: 'Surprise', fix: 'Surprised', hint: 'المعنى السلبي يحتاج -ed' },
+        { text: 'Tire from work, he fell asleep on the couch.', error: 'Tire', fix: 'Tired', hint: 'المعنى السلبي يحتاج -ed' },
+        { text: 'Excite about the trip, they packed early.', error: 'Excite', fix: 'Excited', hint: 'المعنى السلبي يحتاج -ed' },
+        { text: 'Shock by the result, we stayed silent.', error: 'Shock', fix: 'Shocked', hint: 'المعنى السلبي يحتاج -ed' },
+      ],
+    ],
+    19: [
+      [
+        { text: 'She have worked here for five years.', error: 'have', fix: 'has', hint: 'مع she نستخدم has' },
+        { text: "If I would have more experience, I'd get promoted.", error: 'would have', fix: 'had', hint: 'الشرطية الثانية: if + past simple' },
+        { text: 'The report was wrote by the manager.', error: 'wrote', fix: 'written', hint: 'المبني للمجهول يحتاج التصريف الثالث' },
+        { text: 'He should have apply for the job earlier.', error: 'apply', fix: 'applied', hint: 'بعد should have نستخدم التصريف الثالث' },
+        { text: 'I look forward to meet the new team.', error: 'to meet', fix: 'to meeting', hint: 'بعد look forward to نستخدم ing' },
+      ],
+    ],
+    20: [
+      [
+        { text: 'The app was design by a small team.', error: 'design', fix: 'designed', hint: 'المبني للمجهول يحتاج التصريف الثالث' },
+        { text: 'If they had more funding, they would launched sooner.', error: 'would launched', fix: 'would have launched', hint: 'الشرطية الثالثة: would have + التصريف الثالث' },
+        { text: "She isn't used to use this software yet.", error: 'to use', fix: 'to using', hint: 'be used to + ing' },
+        { text: 'The device has been update recently.', error: 'update', fix: 'updated', hint: 'المبني للمجهول يحتاج التصريف الثالث' },
+        { text: 'He must have forgot to save the file.', error: 'forgot', fix: 'forgotten', hint: 'بعد must have نستخدم التصريف الثالث' },
+      ],
+    ],
+    21: [
+      [
+        { text: 'The forest is being destroy quickly.', error: 'destroy', fix: 'destroyed', hint: 'المبني للمجهول يحتاج التصريف الثالث' },
+        { text: 'Plastic waste are recycled every year.', error: 'are', fix: 'is', hint: 'waste غير معدود ← is' },
+        { text: 'The river was pollute by the factory.', error: 'pollute', fix: 'polluted', hint: 'المبني للمجهول يحتاج التصريف الثالث' },
+        { text: 'New laws will be pass next year.', error: 'pass', fix: 'passed', hint: 'المبني للمجهول يحتاج التصريف الثالث' },
+        { text: 'The park has been clean by volunteers.', error: 'clean', fix: 'cleaned', hint: 'المبني للمجهول يحتاج التصريف الثالث' },
+      ],
+    ],
+    22: [
+      [
+        { text: 'You should to drink more water.', error: 'should to drink', fix: 'should drink', hint: 'بعد should نستخدم المصدر بدون to' },
+        { text: 'She must have catch a cold.', error: 'catch', fix: 'caught', hint: 'بعد must have نستخدم التصريف الثالث' },
+        { text: 'He might has a fever.', error: 'might has', fix: 'might have', hint: 'بعد might نستخدم المصدر have' },
+        { text: 'They could have avoid the illness.', error: 'could have avoid', fix: 'could have avoided', hint: 'بعد could have نستخدم التصريف الثالث' },
+        { text: "You shouldn't skipped meals.", error: 'skipped', fix: 'skip', hint: 'بعد shouldn’t نستخدم المصدر' },
+      ],
+    ],
+    23: [
+      [
+        { text: 'In my view, this policy are unfair.', error: 'are', fix: 'is', hint: 'مع policy (مفرد) نستخدم is' },
+        { text: 'It could be argue that taxes are too high.', error: 'argue', fix: 'argued', hint: 'المبني للمجهول يحتاج التصريف الثالث' },
+        { text: 'Many people tends to disagree with this.', error: 'tends', fix: 'tend', hint: 'مع people (جمع) لا نضيف s' },
+        { text: 'It appears that the plan are working.', error: 'are', fix: 'is', hint: 'مع plan (مفرد) نستخدم is' },
+        { text: 'This suggests that the results is accurate.', error: 'is', fix: 'are', hint: 'مع results (جمع) نستخدم are' },
+      ],
+    ],
+    24: [
+      [
+        { text: 'By 2030, scientists will has found a cure.', error: 'will has', fix: 'will have', hint: 'المستقبل التام: will have + التصريف الثالث' },
+        { text: 'At noon tomorrow, we will running the experiment.', error: 'will running', fix: 'will be running', hint: 'المستقبل المستمر: will be + ing' },
+        { text: 'By next year, she will complete her PhD.', error: 'will complete', fix: 'will have completed', hint: 'المستقبل التام: will have + التصريف الثالث' },
+        { text: 'This time next week, they will conducting the test.', error: 'will conducting', fix: 'will be conducting', hint: 'المستقبل المستمر: will be + ing' },
+        { text: 'By the time we finish, the sample will have degrade.', error: 'degrade', fix: 'degraded', hint: 'بعد will have نستخدم التصريف الثالث' },
+      ],
+    ],
+    25: [
+      [
+        { text: 'The hotel, that we stayed at, was lovely.', error: 'that', fix: 'which', hint: 'جملة وصفية غير تعريفية: which وليس that' },
+        { text: 'Paris, that is the capital of France, is beautiful.', error: 'that', fix: 'which', hint: 'جملة وصفية غير تعريفية: which' },
+        { text: "The guide who's map we used was helpful.", error: "who's", fix: 'whose', hint: 'الملكية: whose وليس who’s' },
+        { text: 'The city where I visited it was amazing.', error: 'it', fix: '[احذف it]', hint: 'زيادة كلمة لا داعي لها' },
+        { text: 'The tourist which lost his passport was worried.', error: 'which', fix: 'who', hint: 'للأشخاص نستخدم who' },
+      ],
+    ],
+    26: [
+      [
+        { text: 'The company profit report were released today.', error: 'were', fix: 'was', hint: 'مع report (مفرد) نستخدم was' },
+        { text: 'A significant raise in prices were reported.', error: 'were', fix: 'was', hint: 'مع raise (مفرد) نستخدم was' },
+        { text: 'The rapidly growing the economy needs support.', error: 'rapidly growing the economy', fix: 'the rapidly growing economy', hint: 'ترتيب المحدد قبل الوصف' },
+        { text: 'Several new investment strategy have failed.', error: 'strategy', fix: 'strategies', hint: 'بعد several نستخدم جمع' },
+        { text: 'An unexpected rise in unemployment were noted.', error: 'were', fix: 'was', hint: 'مع rise (مفرد) نستخدم was' },
+      ],
+    ],
+    27: [
+      [
+        { text: 'The data suggest strongly that prices rise.', error: 'suggest strongly', fix: 'strongly suggest', hint: 'الحال يجي قبل الفعل هنا' },
+        { text: 'It could being argued that this is unfair.', error: 'could being', fix: 'could be', hint: 'بعد could نستخدم be' },
+        { text: 'Studies tend to shows a correlation.', error: 'shows', fix: 'show', hint: 'بعد to نستخدم المصدر' },
+        { text: 'This may indicates a larger problem.', error: 'indicates', fix: 'indicate', hint: 'بعد may نستخدم المصدر' },
+        { text: 'Results appears to support the theory.', error: 'appears', fix: 'appear', hint: 'مع results (جمع) لا نضيف s' },
+      ],
+    ],
+    28: [
+      [
+        { text: 'If I had known, I would helped you.', error: 'would helped', fix: 'would have helped', hint: 'مراجعة: الشرطية الثالثة' },
+        { text: 'The bridge was build in 1990.', error: 'build', fix: 'built', hint: 'مراجعة: المبني للمجهول' },
+        { text: 'She must have forget her umbrella.', error: 'forget', fix: 'forgotten', hint: 'مراجعة: must have + التصريف الثالث' },
+        { text: 'I wish I was taller.', error: 'was', fix: 'were', hint: 'مراجعة: wish + were' },
+        { text: 'Having finish his homework, he watched TV.', error: 'finish', fix: 'finished', hint: 'مراجعة: Having + التصريف الثالث' },
+      ],
+    ],
+    29: [
+      [
+        { text: 'On the other hand, the results was surprising.', error: 'was', fix: 'were', hint: 'مع results (جمع) نستخدم were' },
+        { text: 'Therefore, we concludes that changes are needed.', error: 'concludes', fix: 'conclude', hint: 'مع we لا نضيف s' },
+        { text: 'Despite of these findings, more research is needed.', error: 'Despite of', fix: 'Despite', hint: 'Despite لا يتبعها of' },
+        { text: 'This suggests that further study are necessary.', error: 'are', fix: 'is', hint: 'مع study (مفرد) نستخدم is' },
+        { text: 'In conclusion, the evidence support this claim.', error: 'support', fix: 'supports', hint: 'مع evidence (مفرد) نضيف s' },
+      ],
+    ],
+    30: [
+      [
+        { text: 'If she had studied, she would passed.', error: 'would passed', fix: 'would have passed', hint: 'مراجعة نهائية: الشرطية الثالثة' },
+        { text: 'The letter was wrote yesterday.', error: 'wrote', fix: 'written', hint: 'مراجعة نهائية: المبني للمجهول' },
+        { text: 'He must have forgot his keys.', error: 'forgot', fix: 'forgotten', hint: 'مراجعة نهائية: must have + التصريف الثالث' },
+        { text: 'I wish I could speaks French.', error: 'could speaks', fix: 'could speak', hint: 'مراجعة نهائية: بعد could نستخدم المصدر' },
+        { text: 'Having finished the work, she went home relax.', error: 'relax', fix: 'to relax', hint: 'مراجعة نهائية: to + مصدر للهدف' },
+      ],
+    ],
+  },
 }
 
 export function getDetectiveSentences(levelId, dayId) {
