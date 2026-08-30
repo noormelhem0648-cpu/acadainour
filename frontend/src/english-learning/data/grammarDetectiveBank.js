@@ -216,8 +216,496 @@ export const GRAMMAR_DETECTIVE_BANK = {
       { text: 'What time it is?', error: 'it is', fix: 'is it', hint: 'مراجعة: ترتيب أسئلة الوقت' },
     ],
   },
+
+  // A2 days have 2 grammar patterns each, so each day maps to an array of
+  // pattern-groups (5 sentences per group) instead of one flat array.
+  A2: {
+    1: [
+      [
+        { text: 'She go to school every day.', error: 'go', fix: 'goes', hint: 'مع she نضيف s للفعل' },
+        { text: 'I likes pizza.', error: 'likes', fix: 'like', hint: 'مع I لا نضيف s' },
+        { text: 'He play tennis on Sundays.', error: 'play', fix: 'plays', hint: 'مع he نضيف s' },
+        { text: 'They plays football together.', error: 'plays', fix: 'play', hint: 'مع they لا نضيف s' },
+        { text: 'It rain a lot in winter.', error: 'rain', fix: 'rains', hint: 'مع it نضيف s' },
+      ],
+      [
+        { text: "He don't like coffee.", error: "don't", fix: "doesn't", hint: 'مع he نستخدم doesn’t' },
+        { text: "I doesn't want any tea.", error: "doesn't", fix: "don't", hint: 'مع I نستخدم don’t' },
+        { text: "She don't works on Sundays.", error: "don't works", fix: "doesn't work", hint: 'مع she نستخدم doesn’t + مصدر' },
+        { text: "They doesn't live here.", error: "doesn't", fix: "don't", hint: 'مع they نستخدم don’t' },
+        { text: "We doesn't have a car.", error: "doesn't", fix: "don't", hint: 'مع we نستخدم don’t' },
+      ],
+    ],
+    2: [
+      [
+        { text: 'There is two cats in the garden.', error: 'is', fix: 'are', hint: 'مع الجمع نستخدم are' },
+        { text: 'There are a book on the table.', error: 'are', fix: 'is', hint: 'مع المفرد نستخدم is' },
+        { text: 'There is many people at the party.', error: 'is', fix: 'are', hint: 'مع الجمع نستخدم are' },
+        { text: 'There is three chairs here.', error: 'is', fix: 'are', hint: 'مع الجمع نستخدم are' },
+        { text: 'There are a pen on the desk.', error: 'are', fix: 'is', hint: 'مع المفرد نستخدم is' },
+      ],
+      [
+        { text: "There isn't any chairs left.", error: "isn't", fix: "aren't", hint: 'مع الجمع نستخدم aren’t' },
+        { text: "There aren't a solution to this.", error: "aren't", fix: "isn't", hint: 'مع المفرد نستخدم isn’t' },
+        { text: "There isn't no milk in the fridge.", error: 'no', fix: 'any', hint: 'لا نستخدم نفيين معاً — isn’t any' },
+        { text: "There aren't much time left.", error: "aren't", fix: "isn't", hint: 'time غير معدود ← isn’t' },
+        { text: "There isn't enough chairs.", error: "isn't", fix: "aren't", hint: 'مع الجمع نستخدم aren’t' },
+      ],
+    ],
+    3: [
+      [
+        { text: 'I need some advices.', error: 'advices', fix: 'advice', hint: 'advice اسم غير معدود بلا جمع' },
+        { text: 'She gave me many advice.', error: 'many', fix: 'much', hint: 'advice غير معدود ← much' },
+        { text: 'I bought a bread.', error: 'a bread', fix: 'some bread', hint: 'bread غير معدود، نستخدم some' },
+        { text: 'He has too many money.', error: 'many', fix: 'much', hint: 'money غير معدود ← much' },
+        { text: 'There is too much apples here.', error: 'much', fix: 'many', hint: 'apples معدود ← many' },
+      ],
+      [
+        { text: "I don't have some money.", error: 'some', fix: 'any', hint: 'مع النفي نستخدم any' },
+        { text: 'Do you have some questions?', error: 'some', fix: 'any', hint: 'مع السؤال نستخدم any' },
+        { text: 'I have any friends here.', error: 'any', fix: 'some', hint: 'مع الإثبات نستخدم some' },
+        { text: "There isn't some food left.", error: 'some', fix: 'any', hint: 'مع النفي نستخدم any' },
+        { text: 'I need any help right now.', error: 'any', fix: 'some', hint: 'مع الإثبات نستخدم some' },
+      ],
+    ],
+    4: [
+      [
+        { text: 'I am study now.', error: 'study', fix: 'studying', hint: 'المضارع المستمر يحتاج ing' },
+        { text: 'He are working now.', error: 'are', fix: 'is', hint: 'مع he نستخدم is' },
+        { text: 'They is playing outside.', error: 'is', fix: 'are', hint: 'مع they نستخدم are' },
+        { text: 'We am watching TV now.', error: 'am', fix: 'are', hint: 'مع we نستخدم are' },
+        { text: 'She is cook dinner now.', error: 'cook', fix: 'cooking', hint: 'يحتاج ing' },
+      ],
+      [
+        { text: 'Is you working today?', error: 'Is', fix: 'Are', hint: 'مع you نستخدم are' },
+        { text: 'Are she coming tonight?', error: 'Are', fix: 'Is', hint: 'مع she نستخدم is' },
+        { text: "He isn't studying not.", error: 'not', fix: '[احذف not]', hint: 'لا نكرر النفي' },
+        { text: 'Do you working now?', error: 'Do you working', fix: 'Are you working', hint: 'المضارع المستمر يستخدم Are' },
+        { text: 'Am they leaving soon?', error: 'Am', fix: 'Are', hint: 'مع they نستخدم are' },
+      ],
+    ],
+    5: [
+      [
+        { text: 'I am going to studies tonight.', error: 'studies', fix: 'study', hint: 'بعد going to نستخدم المصدر' },
+        { text: 'She going to visit us.', error: 'She going', fix: 'She’s going', hint: 'ناقصة is' },
+        { text: 'They is going to travel.', error: 'is', fix: 'are', hint: 'مع they نستخدم are' },
+        { text: "He isn't going to comes.", error: 'comes', fix: 'come', hint: 'بعد going to نستخدم المصدر' },
+        { text: "We amn't going to stay.", error: "amn't", fix: "aren't", hint: 'الصيغة الصحيحة aren’t/am not' },
+      ],
+      [
+        { text: 'Is you going to help me?', error: 'Is', fix: 'Are', hint: 'مع you نستخدم are' },
+        { text: 'Are he going to call?', error: 'Are', fix: 'Is', hint: 'مع he نستخدم is' },
+        { text: 'Am they going to leave?', error: 'Am', fix: 'Are', hint: 'مع they نستخدم are' },
+        { text: 'Is going you to the party?', error: 'Is going you', fix: 'Are you going', hint: 'ترتيب السؤال الصحيح' },
+        { text: 'Does she going to come?', error: 'Does she going', fix: 'Is she going', hint: 'مع going to نستخدم Is/Are' },
+      ],
+    ],
+    6: [
+      [
+        { text: 'I walk to school yesterday.', error: 'walk', fix: 'walked', hint: 'الماضي البسيط يحتاج ed' },
+        { text: 'She studyed all night.', error: 'studyed', fix: 'studied', hint: 'study تنتهي y ← ied' },
+        { text: 'He playd football yesterday.', error: 'playd', fix: 'played', hint: 'إضافة ed كاملة: played' },
+        { text: 'They watch a movie last night.', error: 'watch', fix: 'watched', hint: 'الماضي البسيط يحتاج ed' },
+        { text: 'We visit them last week.', error: 'visit', fix: 'visited', hint: 'الماضي البسيط يحتاج ed' },
+      ],
+      [
+        { text: "I didn't went there.", error: 'went', fix: 'go', hint: 'بعد didn’t نستخدم المصدر' },
+        { text: 'Did she went home?', error: 'went', fix: 'go', hint: 'بعد did نستخدم المصدر' },
+        { text: "He don't went to work yesterday.", error: "don't went", fix: "didn't go", hint: 'الماضي المنفي: didn’t + مصدر' },
+        { text: 'Did you cooked dinner?', error: 'cooked', fix: 'cook', hint: 'بعد did نستخدم المصدر' },
+        { text: "She didn't studied last night.", error: 'studied', fix: 'study', hint: 'بعد didn’t نستخدم المصدر' },
+      ],
+    ],
+    7: [
+      [
+        { text: 'Yesterday I go to the market.', error: 'go', fix: 'went', hint: 'go فعل شاذ ← went' },
+        { text: 'She eated breakfast at 7.', error: 'eated', fix: 'ate', hint: 'eat فعل شاذ ← ate' },
+        { text: 'He seen his friend yesterday.', error: 'seen', fix: 'saw', hint: 'see فعل شاذ في الماضي ← saw' },
+        { text: 'They buyed a new car.', error: 'buyed', fix: 'bought', hint: 'buy فعل شاذ ← bought' },
+        { text: 'We taked the bus to work.', error: 'taked', fix: 'took', hint: 'take فعل شاذ ← took' },
+      ],
+      [
+        { text: "I didn't went to the party.", error: 'went', fix: 'go', hint: 'بعد didn’t نستخدم المصدر لا الماضي' },
+        { text: 'Did she ate lunch already?', error: 'ate', fix: 'eat', hint: 'بعد did نستخدم المصدر' },
+        { text: "He didn't saw the movie.", error: 'saw', fix: 'see', hint: 'بعد didn’t نستخدم المصدر' },
+        { text: 'Did they bought the tickets?', error: 'bought', fix: 'buy', hint: 'بعد did نستخدم المصدر' },
+        { text: "We didn't took the train.", error: 'took', fix: 'take', hint: 'بعد didn’t نستخدم المصدر' },
+      ],
+    ],
+    8: [
+      [
+        { text: 'She saw I at the store.', error: 'I', fix: 'me', hint: 'بعد الفعل نستخدم ضمير المفعول به me' },
+        { text: 'Give it to he.', error: 'he', fix: 'him', hint: 'ضمير المفعول به: him' },
+        { text: 'I called she yesterday.', error: 'she', fix: 'her', hint: 'ضمير المفعول به: her' },
+        { text: 'They helped we with the project.', error: 'we', fix: 'us', hint: 'ضمير المفعول به: us' },
+        { text: 'Can you help I with this?', error: 'I', fix: 'me', hint: 'ضمير المفعول به: me' },
+      ],
+      [
+        { text: 'This gift is for I.', error: 'I', fix: 'me', hint: 'بعد حرف الجر نستخدم ضمير المفعول به' },
+        { text: 'He came with I to the party.', error: 'I', fix: 'me', hint: 'بعد حرف الجر نستخدم me' },
+        { text: 'This letter is from she.', error: 'she', fix: 'her', hint: 'بعد حرف الجر نستخدم her' },
+        { text: 'Look at they over there.', error: 'they', fix: 'them', hint: 'بعد حرف الجر نستخدم them' },
+        { text: 'Can you sit next to I?', error: 'I', fix: 'me', hint: 'بعد حرف الجر نستخدم me' },
+      ],
+    ],
+    9: [
+      [
+        { text: 'This book is more big than that one.', error: 'more big', fix: 'bigger', hint: 'الصفات القصيرة تأخذ er وليس more' },
+        { text: 'She is more tall than her brother.', error: 'more tall', fix: 'taller', hint: 'صفة قصيرة ← taller' },
+        { text: 'My car is fastest than yours.', error: 'fastest', fix: 'faster', hint: 'مقارنة بين اثنين نستخدم er' },
+        { text: 'He is more old than me.', error: 'more old', fix: 'older', hint: 'صفة قصيرة ← older' },
+        { text: 'This city is busyer than mine.', error: 'busyer', fix: 'busier', hint: 'busy تنتهي y ← ier' },
+      ],
+      [
+        { text: 'This test is more difficulter than the last one.', error: 'more difficulter', fix: 'more difficult', hint: 'لا نجمع more مع er معاً' },
+        { text: 'She is beautifuler than her sister.', error: 'beautifuler', fix: 'more beautiful', hint: 'الصفات الطويلة تأخذ more' },
+        { text: 'This movie is interestinger than that one.', error: 'interestinger', fix: 'more interesting', hint: 'الصفات الطويلة تأخذ more' },
+        { text: 'This phone is expensiver than that one.', error: 'expensiver', fix: 'more expensive', hint: 'الصفات الطويلة تأخذ more' },
+        { text: 'She is more intelligenter than him.', error: 'more intelligenter', fix: 'more intelligent', hint: 'لا نجمع more مع er معاً' },
+      ],
+    ],
+    10: [
+      [
+        { text: 'He is the most tall in the class.', error: 'most tall', fix: 'tallest', hint: 'صفة قصيرة ← the tallest' },
+        { text: 'This is the most fast car here.', error: 'most fast', fix: 'fastest', hint: 'صفة قصيرة ← the fastest' },
+        { text: 'This is the biggest most house.', error: 'biggest most', fix: 'biggest', hint: 'لا نكرر صيغة التفضيل' },
+        { text: 'He is the most young player.', error: 'most young', fix: 'youngest', hint: 'صفة قصيرة ← the youngest' },
+        { text: 'That was the most bad day ever.', error: 'most bad', fix: 'worst', hint: 'bad صفة شاذة ← the worst' },
+      ],
+      [
+        { text: "This is the beautifulest place I've seen.", error: 'beautifulest', fix: 'most beautiful', hint: 'صفة طويلة ← the most beautiful' },
+        { text: 'He is the intelligentest student.', error: 'intelligentest', fix: 'most intelligent', hint: 'صفة طويلة ← the most intelligent' },
+        { text: 'That was the difficultest exam.', error: 'difficultest', fix: 'most difficult', hint: 'صفة طويلة ← the most difficult' },
+        { text: 'She is the most kindest person.', error: 'most kindest', fix: 'kindest', hint: 'لا نكرر صيغة التفضيل' },
+        { text: 'This is the expensivest hotel.', error: 'expensivest', fix: 'most expensive', hint: 'صفة طويلة ← the most expensive' },
+      ],
+    ],
+    11: [
+      [
+        { text: 'Have you ever went to Japan?', error: 'went', fix: 'been', hint: 'بعد have نستخدم been/gone' },
+        { text: 'I never have seen that movie.', error: 'never have', fix: 'have never', hint: 'ترتيب: have + never + past participle' },
+        { text: 'She have never tried sushi.', error: 'have', fix: 'has', hint: 'مع she نستخدم has' },
+        { text: 'Has you ever eaten sushi?', error: 'Has', fix: 'Have', hint: 'مع you نستخدم have' },
+        { text: 'I never has been to Rome.', error: 'never has', fix: 'have never', hint: 'مع I نستخدم have never' },
+      ],
+      [
+        { text: 'I have finished already my homework.', error: 'finished already', fix: 'already finished', hint: 'already تجي قبل الفعل التام' },
+        { text: "She hasn't arrived already.", error: 'already', fix: 'yet', hint: 'مع النفي نستخدم yet' },
+        { text: 'I have just did that.', error: 'did', fix: 'done', hint: 'بعد have نستخدم التصريف الثالث' },
+        { text: 'Has she finish yet?', error: 'finish', fix: 'finished', hint: 'بعد has نستخدم التصريف الثالث' },
+        { text: "We haven't finish yet.", error: 'finish', fix: 'finished', hint: 'بعد haven’t نستخدم التصريف الثالث' },
+      ],
+    ],
+    12: [
+      [
+        { text: 'She can to swim very well.', error: 'can to swim', fix: 'can swim', hint: 'بعد can نستخدم المصدر بدون to' },
+        { text: 'He could speaks French as a child.', error: 'speaks', fix: 'speak', hint: 'بعد could نستخدم المصدر' },
+        { text: 'I can swimming fast.', error: 'swimming', fix: 'swim', hint: 'بعد can نستخدم المصدر' },
+        { text: 'They could ran fast when young.', error: 'ran', fix: 'run', hint: 'بعد could نستخدم المصدر' },
+        { text: 'Can she sings well?', error: 'sings', fix: 'sing', hint: 'بعد can نستخدم المصدر' },
+      ],
+      [
+        { text: 'You should to see a doctor.', error: 'should to see', fix: 'should see', hint: 'بعد should نستخدم المصدر بدون to' },
+        { text: "She shouldn't goes there alone.", error: 'goes', fix: 'go', hint: 'بعد shouldn’t نستخدم المصدر' },
+        { text: 'You should ate more vegetables.', error: 'ate', fix: 'eat', hint: 'بعد should نستخدم المصدر' },
+        { text: 'He should studies harder.', error: 'studies', fix: 'study', hint: 'بعد should نستخدم المصدر' },
+        { text: "They shouldn't worries so much.", error: 'worries', fix: 'worry', hint: 'بعد shouldn’t نستخدم المصدر' },
+      ],
+    ],
+    13: [
+      [
+        { text: 'You must to wear a seatbelt.', error: 'must to wear', fix: 'must wear', hint: 'بعد must نستخدم المصدر بدون to' },
+        { text: 'She have to goes to work.', error: 'goes', fix: 'go', hint: 'بعد have to نستخدم المصدر' },
+        { text: 'I must studying tonight.', error: 'studying', fix: 'study', hint: 'بعد must نستخدم المصدر' },
+        { text: "He don't have to worked today.", error: 'worked', fix: 'work', hint: 'بعد have to نستخدم المصدر' },
+        { text: 'They must respects the rules.', error: 'respects', fix: 'respect', hint: 'بعد must نستخدم المصدر' },
+      ],
+      [
+        { text: "He must works very hard, he's always tired.", error: 'must works', fix: 'must work', hint: 'بعد must نستخدم المصدر' },
+        { text: 'She must be knows the answer.', error: 'be knows', fix: 'know', hint: 'بعد must نستخدم المصدر فقط' },
+        { text: 'They must has a lot of money.', error: 'must has', fix: 'must have', hint: 'بعد must نستخدم المصدر have' },
+        { text: 'It must being raining, the ground is wet.', error: 'being', fix: 'be', hint: 'بعد must نستخدم be' },
+        { text: "He must speaks five languages, he's so smart.", error: 'speaks', fix: 'speak', hint: 'بعد must نستخدم المصدر' },
+      ],
+    ],
+    14: [
+      [
+        { text: 'I go always to school by bus.', error: 'go always', fix: 'always go', hint: 'الظرف يجي قبل الفعل العادي' },
+        { text: 'She usually is late.', error: 'usually is', fix: 'is usually', hint: 'مع be الظرف يجي بعده' },
+        { text: 'He never is on time.', error: 'never is', fix: 'is never', hint: 'مع be الظرف يجي بعده' },
+        { text: 'They always are happy.', error: 'always are', fix: 'are always', hint: 'مع be الظرف يجي بعده' },
+        { text: 'We sometimes goes to the gym.', error: 'goes', fix: 'go', hint: 'مع we لا نضيف s' },
+      ],
+      [
+        { text: 'How often you go to the gym?', error: 'you go', fix: 'do you go', hint: 'يحتاج do في السؤال' },
+        { text: 'How often she visits her mom?', error: 'she visits', fix: 'does she visit', hint: 'يحتاج does في السؤال' },
+        { text: 'How often do they went there?', error: 'went', fix: 'go', hint: 'بعد do نستخدم المصدر' },
+        { text: 'How often does you exercise?', error: 'does', fix: 'do', hint: 'مع you نستخدم do' },
+        { text: 'How often did you goes swimming?', error: 'goes', fix: 'go', hint: 'بعد did نستخدم المصدر' },
+      ],
+    ],
+    15: [
+      [
+        { text: 'I wake up in 7 AM.', error: 'in', fix: 'at', hint: 'نستخدم at مع الساعة' },
+        { text: 'My birthday is on July.', error: 'on', fix: 'in', hint: 'نستخدم in مع الشهور' },
+        { text: 'We meet at Monday.', error: 'at', fix: 'on', hint: 'نستخدم on مع الأيام' },
+        { text: 'School starts in 8 o’clock.', error: 'in', fix: 'at', hint: 'نستخدم at مع الساعة' },
+        { text: 'She was born at 1998.', error: 'at', fix: 'in', hint: 'نستخدم in مع السنوات' },
+      ],
+      [
+        { text: 'He is on the office right now.', error: 'on', fix: 'in', hint: 'نستخدم in مع الأماكن المغلقة' },
+        { text: 'The keys are in the table.', error: 'in', fix: 'on', hint: 'نستخدم on مع الأسطح' },
+        { text: 'I live on Amman.', error: 'on', fix: 'in', hint: 'نستخدم in مع المدن' },
+        { text: 'She is waiting in the bus stop.', error: 'in', fix: 'at', hint: 'نستخدم at مع نقطة محددة' },
+        { text: 'There is a picture in the wall.', error: 'in', fix: 'on', hint: 'نستخدم on مع الأسطح' },
+      ],
+    ],
+    16: [
+      [
+        { text: 'Wait, I going to answer that.', error: 'going to', fix: 'will', hint: 'قرار لحظي ← will' },
+        { text: 'I will helping you with that bag.', error: 'will helping', fix: 'will help', hint: 'بعد will نستخدم المصدر' },
+        { text: 'She will goes to get it.', error: 'will goes', fix: 'will get', hint: 'بعد will نستخدم المصدر' },
+        { text: 'We will bringing the drinks.', error: 'will bringing', fix: 'will bring', hint: 'بعد will نستخدم المصدر' },
+        { text: 'He will helps you now.', error: 'will helps', fix: 'will help', hint: 'بعد will نستخدم المصدر' },
+      ],
+      [
+        { text: 'I think it will rains tomorrow.', error: 'will rains', fix: 'will rain', hint: 'بعد will نستخدم المصدر' },
+        { text: "She won't goes to the party.", error: "won't goes", fix: "won't go", hint: 'بعد won’t نستخدم المصدر' },
+        { text: 'They will probably wins the game.', error: 'wins', fix: 'win', hint: 'بعد will نستخدم المصدر' },
+        { text: "It won't raining tomorrow.", error: 'raining', fix: 'rain', hint: 'بعد won’t نستخدم المصدر' },
+        { text: 'He will surely passes the exam.', error: 'passes', fix: 'pass', hint: 'بعد will نستخدم المصدر' },
+      ],
+    ],
+    17: [
+      [
+        { text: 'It was raining, because I stayed home.', error: 'because', fix: 'so', hint: 'النتيجة تجي بعد so' },
+        { text: "I was hungry, so I hadn't eaten.", error: 'so', fix: 'because', hint: 'السبب يجي بعد because' },
+        { text: 'He was late, so the traffic was heavy.', error: 'so', fix: 'because', hint: 'السبب يجي بعد because' },
+        { text: 'It was hot, so I opened the window because.', error: 'because', fix: '[احذف because]', hint: 'لا نستخدم حرفي عطف معاً' },
+        { text: 'She was tired, because she rested.', error: 'because', fix: 'so', hint: 'النتيجة تجي بعد so' },
+      ],
+      [
+        { text: 'Although it was raining, but we went out.', error: 'but', fix: '[احذف but]', hint: 'لا نستخدم although و but معاً' },
+        { text: 'It was cold. Although, we went swimming.', error: 'Although', fix: 'However', hint: 'بداية جملة جديدة تحتاج However' },
+        { text: 'Although she is young, however she is wise.', error: 'however', fix: '[احذف however]', hint: 'لا نستخدم although و however معاً' },
+        { text: 'He is rich. Although, he is unhappy.', error: 'Although', fix: 'However', hint: 'بداية جملة جديدة تحتاج However' },
+        { text: 'Although the exam was hard but I passed.', error: 'but', fix: '[احذف but]', hint: 'لا نستخدم although و but معاً' },
+      ],
+    ],
+    18: [
+      [
+        { text: 'What time you go to school?', error: 'you go', fix: 'do you go', hint: 'يحتاج do في السؤال' },
+        { text: 'Where did she went yesterday?', error: 'went', fix: 'go', hint: 'بعد did نستخدم المصدر' },
+        { text: 'Why he is late today?', error: 'he is', fix: 'is he', hint: 'ترتيب السؤال' },
+        { text: 'What did you bought?', error: 'bought', fix: 'buy', hint: 'بعد did نستخدم المصدر' },
+        { text: 'When does she comes home?', error: 'comes', fix: 'come', hint: 'بعد does نستخدم المصدر' },
+      ],
+      [
+        { text: 'Who is know the answer?', error: 'is know', fix: 'knows', hint: 'لا نحتاج is مع فعل بسيط' },
+        { text: 'What does happen next?', error: 'does happen', fix: 'happens', hint: 'كفاعل السؤال لا يحتاج does' },
+        { text: 'Who did break the window?', error: 'did break', fix: 'broke', hint: 'كفاعل السؤال لا يحتاج did' },
+        { text: 'What is means this word?', error: 'is means', fix: 'means', hint: 'لا نحتاج is مع فعل بسيط' },
+        { text: 'Who does live here?', error: 'does live', fix: 'lives', hint: 'كفاعل السؤال لا يحتاج does' },
+      ],
+    ],
+    19: [
+      [
+        { text: 'The man which called you is my uncle.', error: 'which', fix: 'who', hint: 'للأشخاص نستخدم who' },
+        { text: 'The book who I read was great.', error: 'who', fix: 'which', hint: 'للأشياء نستخدم which/that' },
+        { text: 'The woman which teaches us is kind.', error: 'which', fix: 'who', hint: 'للأشخاص نستخدم who' },
+        { text: 'The car who I bought is red.', error: 'who', fix: 'which', hint: 'للأشياء نستخدم which/that' },
+        { text: 'She is the girl which won the prize.', error: 'which', fix: 'who', hint: 'للأشخاص نستخدم who' },
+      ],
+      [
+        { text: "It's a person which fixes cars.", error: 'which', fix: 'who', hint: 'للأشخاص نستخدم who' },
+        { text: "It's a thing who you use to cut paper.", error: 'who', fix: 'which', hint: 'للأشياء نستخدم which/that' },
+        { text: 'He is the man which lives next door.', error: 'which', fix: 'who', hint: 'للأشخاص نستخدم who' },
+        { text: "It's a person that fix cars.", error: 'fix', fix: 'fixes', hint: 'مع person (مفرد) نضيف s للفعل' },
+        { text: "He's a man which I admire.", error: 'which', fix: 'who', hint: 'للأشخاص نستخدم who' },
+      ],
+    ],
+    20: [
+      [
+        { text: 'If you heats water, it boils.', error: 'heats', fix: 'heat', hint: 'بعد you نستخدم المصدر' },
+        { text: 'If it rain, the ground gets wet.', error: 'rain', fix: 'rains', hint: 'مع it نضيف s' },
+        { text: "If you don't waters plants, they die.", error: 'waters', fix: 'water', hint: 'بعد don’t نستخدم المصدر' },
+        { text: 'Ice melt if you heat it.', error: 'melt', fix: 'melts', hint: 'مع ice (مفرد) نضيف s' },
+        { text: 'If people eats too much sugar, they gain weight.', error: 'eats', fix: 'eat', hint: 'مع people (جمع) لا نضيف s' },
+      ],
+      [
+        { text: 'If it rains, I will stayed home.', error: 'will stayed', fix: 'will stay', hint: 'بعد will نستخدم المصدر' },
+        { text: 'If she study hard, she will pass.', error: 'study', fix: 'studies', hint: 'مع she نضيف s' },
+        { text: 'If you will come, we will be happy.', error: 'will come', fix: 'come', hint: 'جملة if بالمضارع البسيط' },
+        { text: "If he doesn't hurries, he will miss the bus.", error: 'hurries', fix: 'hurry', hint: 'بعد doesn’t نستخدم المصدر' },
+        { text: 'If they wins, they will celebrate.', error: 'wins', fix: 'win', hint: 'مع they لا نضيف s' },
+      ],
+    ],
+    21: [
+      [
+        { text: 'The cake are made by my mom.', error: 'are', fix: 'is', hint: 'مع cake (مفرد) نستخدم is' },
+        { text: 'English is spoke all over the world.', error: 'spoke', fix: 'spoken', hint: 'المبني للمجهول يحتاج التصريف الثالث' },
+        { text: 'The letters is sent every day.', error: 'is', fix: 'are', hint: 'مع letters (جمع) نستخدم are' },
+        { text: 'The windows is cleaned every week.', error: 'is', fix: 'are', hint: 'مع windows (جمع) نستخدم are' },
+        { text: 'The report were written by John.', error: 'were', fix: 'is', hint: 'مع report (مفرد) نستخدم is' },
+      ],
+      [
+        { text: 'The letter were written yesterday.', error: 'were', fix: 'was', hint: 'مع letter (مفرد) نستخدم was' },
+        { text: 'The cars was made in Germany.', error: 'was', fix: 'were', hint: 'مع cars (جمع) نستخدم were' },
+        { text: 'The book was wrote by a famous author.', error: 'wrote', fix: 'written', hint: 'المبني للمجهول يحتاج التصريف الثالث' },
+        { text: 'The bridge were built last year.', error: 'were', fix: 'was', hint: 'مع bridge (مفرد) نستخدم was' },
+        { text: 'The windows was broken during the storm.', error: 'was', fix: 'were', hint: 'مع windows (جمع) نستخدم were' },
+      ],
+    ],
+    22: [
+      [
+        { text: 'He said that he is tired.', error: 'is', fix: 'was', hint: 'الكلام المنقول يحوّل الفعل للماضي' },
+        { text: 'She told that she was busy.', error: 'told', fix: 'said', hint: 'told تحتاج مفعولاً به: told me' },
+        { text: 'He said me that he was hungry.', error: 'said me', fix: 'told me', hint: 'told تُستخدم مع مفعول به' },
+        { text: 'He told that he liked pizza.', error: 'told', fix: 'said', hint: 'told تحتاج مفعولاً به' },
+        { text: 'He said that he is at work now.', error: 'is', fix: 'was', hint: 'الكلام المنقول يحوّل الفعل للماضي' },
+      ],
+      [
+        { text: 'She asked if did I like it.', error: 'did I like', fix: 'I liked', hint: 'السؤال المنقول بدون فعل مساعد' },
+        { text: 'He asked me what I am doing.', error: 'am', fix: 'was', hint: 'الكلام المنقول يحوّل الفعل للماضي' },
+        { text: 'She asked if I am hungry.', error: 'am', fix: 'was', hint: 'الكلام المنقول يحوّل الفعل للماضي' },
+        { text: 'He asked where did she live.', error: 'did she live', fix: 'she lived', hint: 'السؤال المنقول بدون فعل مساعد' },
+        { text: 'They asked if do you like tea.', error: 'do you like', fix: 'I liked', hint: 'السؤال المنقول بدون فعل مساعد' },
+      ],
+    ],
+    23: [
+      [
+        { text: 'She turned off it.', error: 'turned off it', fix: 'turned it off', hint: 'مع الضمير يفصل الفعل: turned it off' },
+        { text: 'Please pick up it.', error: 'pick up it', fix: 'pick it up', hint: 'مع الضمير: pick it up' },
+        { text: 'I looked up it in the dictionary.', error: 'looked up it', fix: 'looked it up', hint: 'مع الضمير: looked it up' },
+        { text: 'Please throw away it.', error: 'throw away it', fix: 'throw it away', hint: 'مع الضمير: throw it away' },
+        { text: 'She switched on it.', error: 'switched on it', fix: 'switched it on', hint: 'مع الضمير: switched it on' },
+      ],
+      [
+        { text: 'I ran the problem into.', error: 'ran the problem into', fix: 'ran into the problem', hint: 'فعل غير قابل للفصل: ran into' },
+        { text: 'She looks the children after.', error: 'looks the children after', fix: 'looks after the children', hint: 'فعل غير قابل للفصل: looks after' },
+        { text: 'He got the bus off.', error: 'got the bus off', fix: 'got off the bus', hint: 'فعل غير قابل للفصل: got off' },
+        { text: 'They ran the thief after.', error: 'ran the thief after', fix: 'ran after the thief', hint: 'فعل غير قابل للفصل: ran after' },
+        { text: 'I came the answer across.', error: 'came the answer across', fix: 'came across the answer', hint: 'فعل غير قابل للفصل: came across' },
+      ],
+    ],
+    24: [
+      [
+        { text: 'This coffee is too hot to drinking.', error: 'to drinking', fix: 'to drink', hint: 'بعد too + adj نستخدم to + المصدر' },
+        { text: 'She is too young for drive.', error: 'for drive', fix: 'to drive', hint: 'الصيغة: too + adj + to + مصدر' },
+        { text: 'He is too tired for study.', error: 'for study', fix: 'to study', hint: 'الصيغة: too + adj + to + مصدر' },
+        { text: 'This box is too heavy for carry.', error: 'for carry', fix: 'to carry', hint: 'الصيغة: too + adj + to + مصدر' },
+        { text: 'The music is too loud for sleep.', error: 'for sleep', fix: 'to sleep', hint: 'الصيغة: too + adj + to + مصدر' },
+      ],
+      [
+        { text: "She isn't old enough for drive.", error: 'for drive', fix: 'to drive', hint: 'الصيغة: enough + to + مصدر' },
+        { text: "He doesn't have enough time for finish.", error: 'for finish', fix: 'to finish', hint: 'الصيغة: enough + to + مصدر' },
+        { text: 'Is he tall enough for reach it?', error: 'for reach', fix: 'to reach', hint: 'الصيغة: enough + to + مصدر' },
+        { text: "There isn't enough chairs enough.", error: 'chairs enough', fix: 'chairs', hint: 'لا نكرر enough' },
+        { text: "This coffee isn't hot enough for drink.", error: 'for drink', fix: 'to drink', hint: 'الصيغة: enough + to + مصدر' },
+      ],
+    ],
+    25: [
+      [
+        { text: 'Both of the boy are here.', error: 'boy', fix: 'boys', hint: 'بعد both of the نستخدم جمع' },
+        { text: 'Neither of the answers are correct.', error: 'are', fix: 'is', hint: 'مع neither نستخدم فعل مفرد' },
+        { text: 'Both of the girl like music.', error: 'girl', fix: 'girls', hint: 'بعد both of the نستخدم جمع' },
+        { text: 'Neither of us like coffee.', error: 'like', fix: 'likes', hint: 'مع neither نستخدم فعل مفرد' },
+        { text: 'Both of my sister are doctors.', error: 'sister', fix: 'sisters', hint: 'بعد both of my نستخدم جمع' },
+      ],
+      [
+        { text: 'All of the student were late.', error: 'student', fix: 'students', hint: 'بعد all of the نستخدم جمع' },
+        { text: 'Some of the water are dirty.', error: 'are', fix: 'is', hint: 'water غير معدود ← is' },
+        { text: 'None of the answer was correct.', error: 'answer', fix: 'answers', hint: 'بعد none of the نستخدم جمع' },
+        { text: 'Most of the students is smart.', error: 'is', fix: 'are', hint: 'مع students (جمع) نستخدم are' },
+        { text: 'Most of the book is boring.', error: 'book', fix: 'books', hint: 'بعد most of the نستخدم جمع (للمعدود)' },
+      ],
+    ],
+    26: [
+      [
+        { text: "I'd like eating pizza tonight.", error: 'eating', fix: 'to eat', hint: 'بعد would like نستخدم to + مصدر' },
+        { text: "I'd rather to stay home.", error: 'to stay', fix: 'stay', hint: 'بعد would rather نستخدم المصدر بدون to' },
+        { text: "He'd like go to the beach.", error: 'like go', fix: 'like to go', hint: 'بعد would like نستخدم to + مصدر' },
+        { text: "I'd prefer to going by car.", error: 'to going', fix: 'to go', hint: 'بعد to نستخدم المصدر' },
+        { text: "She'd rather goes home now.", error: 'goes', fix: 'go', hint: 'بعد would rather نستخدم المصدر' },
+      ],
+      [
+        { text: 'I wish I am taller.', error: 'am', fix: 'were', hint: 'بعد wish نستخدم الماضي (were)' },
+        { text: 'She wishes she has more time.', error: 'has', fix: 'had', hint: 'بعد wish نستخدم الماضي' },
+        { text: 'I wish I can fly.', error: 'can', fix: 'could', hint: 'بعد wish نستخدم could' },
+        { text: 'He wishes he lives in Paris.', error: 'lives', fix: 'lived', hint: 'بعد wish نستخدم الماضي' },
+        { text: 'We wish we knows the answer.', error: 'knows', fix: 'knew', hint: 'بعد wish نستخدم الماضي' },
+      ],
+    ],
+    27: [
+      [
+        { text: 'I have visited Paris in 2020.', error: 'have visited', fix: 'visited', hint: 'وقت محدد بالماضي ← الماضي البسيط' },
+        { text: 'She has finished the project last week.', error: 'has finished', fix: 'finished', hint: 'وقت محدد ← الماضي البسيط' },
+        { text: 'They have arrived yesterday.', error: 'have arrived', fix: 'arrived', hint: 'yesterday وقت محدد ← الماضي البسيط' },
+        { text: 'He has called me an hour ago.', error: 'has called', fix: 'called', hint: 'ago وقت محدد ← الماضي البسيط' },
+        { text: 'We have seen that movie last night.', error: 'have seen', fix: 'saw', hint: 'وقت محدد ← الماضي البسيط' },
+      ],
+      [
+        { text: 'I lived here since 2015.', error: 'lived', fix: 'have lived', hint: 'مستمر حتى الآن ← المضارع التام' },
+        { text: 'She worked at this company for five years.', error: 'worked', fix: 'has worked', hint: 'مستمر حتى الآن ← المضارع التام' },
+        { text: 'We knew each other since college.', error: 'knew', fix: 'have known', hint: 'مستمر حتى الآن ← المضارع التام' },
+        { text: 'I saw that movie already.', error: 'saw', fix: 'have seen', hint: 'already تحتاج المضارع التام' },
+        { text: "She didn't finish her work yet.", error: "didn't finish", fix: "hasn't finished", hint: 'yet تحتاج المضارع التام' },
+      ],
+    ],
+    28: [
+      [
+        { text: 'While I was walking, I see a strange man.', error: 'see', fix: 'saw', hint: 'الحدث المفاجئ يحتاج الماضي البسيط' },
+        { text: 'She had left before I arrive.', error: 'arrive', fix: 'arrived', hint: 'الحدث بالماضي يحتاج الماضي البسيط' },
+        { text: 'He was cook dinner when the phone rang.', error: 'was cook', fix: 'was cooking', hint: 'الخلفية تحتاج was/were + ing' },
+        { text: 'I had finish my work before she called.', error: 'had finish', fix: 'had finished', hint: 'الماضي التام يحتاج التصريف الثالث' },
+        { text: 'We was walking home when it started to rain.', error: 'was', fix: 'were', hint: 'مع we نستخدم were' },
+      ],
+      [
+        { text: 'At first, I was scared. Then, suddenly I feel relaxed.', error: 'feel', fix: 'felt', hint: 'قصة بالماضي ← felt' },
+        { text: 'Once upon a time, there lives a king.', error: 'lives', fix: 'lived', hint: 'قصة بالماضي ← lived' },
+        { text: 'After that, we goes home happily.', error: 'goes', fix: 'went', hint: 'قصة بالماضي ← went' },
+        { text: 'In the end, everyone were happy.', error: 'were', fix: 'was', hint: 'مع everyone (مفرد) نستخدم was' },
+        { text: 'Fortunately, nobody were hurt.', error: 'were', fix: 'was', hint: 'مع nobody (مفرد) نستخدم was' },
+      ],
+    ],
+    29: [
+      [
+        { text: 'In my opinion, this movie are great.', error: 'are', fix: 'is', hint: 'مع movie (مفرد) نستخدم is' },
+        { text: 'I think that she are right.', error: 'are', fix: 'is', hint: 'مع she نستخدم is' },
+        { text: 'I believe he are honest.', error: 'are', fix: 'is', hint: 'مع he نستخدم is' },
+        { text: 'In my opinion, they is wrong.', error: 'is', fix: 'are', hint: 'مع they نستخدم are' },
+        { text: 'I feel that it are too expensive.', error: 'are', fix: 'is', hint: 'مع it نستخدم is' },
+      ],
+      [
+        { text: 'For example, cats is popular pets.', error: 'is', fix: 'are', hint: 'مع cats (جمع) نستخدم are' },
+        { text: 'This means that she are busy.', error: 'are', fix: 'is', hint: 'مع she نستخدم is' },
+        { text: 'Such as apples, bananas is fruits.', error: 'is', fix: 'are', hint: 'مع bananas (جمع) نستخدم are' },
+        { text: 'Because of the rain, the game were cancelled.', error: 'were', fix: 'was', hint: 'مع game (مفرد) نستخدم was' },
+        { text: 'For example, dogs is loyal animals.', error: 'is', fix: 'are', hint: 'مع dogs (جمع) نستخدم are' },
+      ],
+    ],
+    30: [
+      [
+        { text: 'She have finished her homework already.', error: 'have', fix: 'has', hint: 'مراجعة: مع she نستخدم has' },
+        { text: 'They was late for the meeting.', error: 'was', fix: 'were', hint: 'مراجعة: مع they نستخدم were' },
+        { text: "He don't like spicy food.", error: "don't", fix: "doesn't", hint: 'مراجعة: مع he نستخدم doesn’t' },
+        { text: 'I seen that movie last year.', error: 'seen', fix: 'saw', hint: 'مراجعة: الماضي البسيط ← saw' },
+        { text: 'There is many people at the party.', error: 'is', fix: 'are', hint: 'مراجعة: مع الجمع نستخدم are' },
+      ],
+      [
+        { text: 'I can speaks basic English now.', error: 'speaks', fix: 'speak', hint: 'مراجعة: بعد can نستخدم المصدر' },
+        { text: 'She can writes short stories.', error: 'writes', fix: 'write', hint: 'مراجعة: بعد can نستخدم المصدر' },
+        { text: 'He can understands simple conversations.', error: 'understands', fix: 'understand', hint: 'مراجعة: بعد can نستخدم المصدر' },
+        { text: 'They can uses the past tense correctly.', error: 'uses', fix: 'use', hint: 'مراجعة: بعد can نستخدم المصدر' },
+        { text: 'We can describes our daily routine.', error: 'describes', fix: 'describe', hint: 'مراجعة: بعد can نستخدم المصدر' },
+      ],
+    ],
+  },
 }
 
 export function getDetectiveSentences(levelId, dayId) {
-  return GRAMMAR_DETECTIVE_BANK[levelId]?.[dayId] || null
+  const entry = GRAMMAR_DETECTIVE_BANK[levelId]?.[dayId]
+  if (!entry) return null
+  if (Array.isArray(entry[0])) return entry.flat()
+  return entry
 }
