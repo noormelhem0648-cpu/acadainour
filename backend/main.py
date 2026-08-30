@@ -67,6 +67,8 @@ def cache_set(key: str, value: str, ttl: int = 3600):
 _default_origins = [
     "https://acadai-frontend.onrender.com",
     "https://english-noura.onrender.com",   # English learning standalone site
+    "https://nourastudy.com",
+    "https://www.nourastudy.com",
     "http://localhost:3000",
     "http://localhost:5173",
     "http://localhost:5174",
