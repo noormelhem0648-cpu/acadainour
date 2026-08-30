@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_BASE } from '../../config'
 import '../EL.css'
-import OrientLockBtn from '../components/OrientLockBtn'
 
 const EL = '/english-learning'
 const WS_BASE = API_BASE.replace(/^https?/, s => s === 'https' ? 'wss' : 'ws')
@@ -577,7 +576,6 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
           <header className="el-social-sidebar-header">
             <button className="el-icon-btn" onClick={() => navigate(EL)}>←</button>
             <span className="el-social-logo">👥 المجتمع</span>
-            <OrientLockBtn />
           </header>
 
           {/* Search */}

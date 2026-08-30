@@ -4,7 +4,6 @@ import { ALL_DAYS, A2_ALL_DAYS, B1_ALL_DAYS, B2_ALL_DAYS, C1_ALL_DAYS, C2_ALL_DA
 import { useProgress } from '../hooks/useProgress'
 import { usePlan, isDayLocked, FREE_DAY_LIMIT } from '../hooks/usePlan'
 import '../EL.css'
-import OrientLockBtn from '../components/OrientLockBtn'
 
 const EL = '/english-learning'
 
@@ -21,7 +20,7 @@ export default function ELDaysPage({ darkMode, setDarkMode }) {
   const { levelId } = useParams()
   const navigate = useNavigate()
   const progress = useProgress()
-  const { plan } = usePlan()
+  const { plan, loading: planLoading } = usePlan()
   const [showLockModal, setShowLockModal] = useState(false)
   const level = LEVELS.find(l => l.id === levelId)
   const days = LEVEL_DAYS[levelId] || []
@@ -34,7 +33,6 @@ export default function ELDaysPage({ darkMode, setDarkMode }) {
         <header className="el-top-bar">
           <button className="el-icon-btn" onClick={() => navigate(EL)}>←</button>
           <span className="el-top-bar-title">{level.name}</span>
-          <OrientLockBtn />
         </header>
 
         <div className="el-days-hero">
@@ -52,7 +50,7 @@ export default function ELDaysPage({ darkMode, setDarkMode }) {
             const dp = progress.dayProgress(levelId, day.id)
             const allDone = dp.done === dp.total
             const started = dp.done > 0
-            const locked = isDayLocked(day.id, plan)
+            const locked = !planLoading && isDayLocked(day.id, plan)
             return (
               <button
                 key={day.id}

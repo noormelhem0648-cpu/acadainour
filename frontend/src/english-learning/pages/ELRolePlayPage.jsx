@@ -8,7 +8,6 @@ import { getRolePlayTopic } from '../data/roleplay_topics'
 import { useProgress } from '../hooks/useProgress'
 import { readSSEStream } from '../utils/stream'
 import '../EL.css'
-import OrientLockBtn from '../components/OrientLockBtn'
 
 const EL = '/english-learning'
 
@@ -51,8 +50,12 @@ export default function ELRolePlayPage({ darkMode, setDarkMode }) {
   const [roundCount, setRoundCount] = useState(0)
   const [lastReaction, setLastReaction] = useState(null)
   const [showTips, setShowTips] = useState(false)
+  const [recording, setRecording] = useState(false)
+  const [transcribing, setTranscribing] = useState(false)
   const bottomRef = useRef(null)
   const inputRef = useRef(null)
+  const mediaRecorderRef = useRef(null)
+  const chunksRef = useRef([])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -188,6 +191,35 @@ WHY: [جملة عربية قصيرة تشرح السبب]`
     inputRef.current?.focus()
   }, [input, messages, loading, topic, levelId, dayId, day, ttsEnabled, roundCount])
 
+  const toggleVoiceRecord = async () => {
+    if (recording) { mediaRecorderRef.current?.stop(); return }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      chunksRef.current = []
+      const mr = new MediaRecorder(stream)
+      mr.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data) }
+      mr.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop())
+        setRecording(false)
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
+        setTranscribing(true)
+        try {
+          const form = new FormData()
+          form.append('audio', blob, 'recording.webm')
+          const res = await fetch(`${API}/english-tutor/transcribe`, { method: 'POST', body: form })
+          const d = await res.json()
+          if (res.ok && d.transcript && d.transcript !== '[inaudible]') {
+            setInput(d.transcript)
+          }
+        } catch { /* transcription failed — student can just type instead */ }
+        setTranscribing(false)
+      }
+      mediaRecorderRef.current = mr
+      setRecording(true)
+      mr.start()
+    } catch { alert('لم يُمنح إذن الميكروفون') }
+  }
+
   if (!day) return <div className={`el-app${darkMode ? ' el-dark' : ''}`}><div className="el-page"><p style={{ padding: 32 }}>Not found.</p></div></div>
 
   return (
@@ -212,7 +244,6 @@ WHY: [جملة عربية قصيرة تشرح السبب]`
             >
               {ttsPlaying ? '🔊' : ttsEnabled ? '🔈' : '🔇'}
             </button>
-            <OrientLockBtn />
           </div>
         </header>
 
@@ -321,12 +352,20 @@ WHY: [جملة عربية قصيرة تشرح السبب]`
               <input
                 ref={inputRef}
                 className="el-rp-input"
-                placeholder="ردّ على الشخصية بالإنجليزية..."
+                placeholder={transcribing ? 'جاري تحويل صوتك لنص...' : 'ردّ على الشخصية بالإنجليزية...'}
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
-                disabled={loading}
+                disabled={loading || transcribing}
               />
+              <button
+                className={'el-rp-stop-btn' + (recording ? ' recording' : '')}
+                onClick={toggleVoiceRecord}
+                disabled={loading || transcribing}
+                title={recording ? 'أوقف التسجيل' : 'سجّلي ردّك بصوتك'}
+              >
+                {recording ? '⏹' : '🎤'}
+              </button>
               <button
                 className="el-rp-stop-btn"
                 onClick={() => { stopTTS(); setTtsPlaying(false) }}
@@ -334,7 +373,7 @@ WHY: [جملة عربية قصيرة تشرح السبب]`
               >
                 ⏹
               </button>
-              <button className="el-rp-send-btn" onClick={send} disabled={loading || !input.trim()}>
+              <button className="el-rp-send-btn" onClick={send} disabled={loading || transcribing || !input.trim()}>
                 {loading ? '⏳' : '↑'}
               </button>
             </div>

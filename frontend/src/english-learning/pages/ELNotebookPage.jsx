@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useProgress } from '../hooks/useProgress'
 import '../EL.css'
-import OrientLockBtn from '../components/OrientLockBtn'
 
 const EL = '/english-learning'
 
@@ -56,7 +55,6 @@ export default function ELNotebookPage({ darkMode, setDarkMode }) {
           <span className="el-top-bar-title">📓 مذكرتي</span>
           <div style={{ display: 'flex', gap: 6 }}>
             <button className="el-icon-btn" onClick={() => setNewNote(true)} title="ملاحظة جديدة">+</button>
-            <OrientLockBtn />
           </div>
         </header>
 

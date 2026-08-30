@@ -3,7 +3,6 @@ import { useProgress } from '../hooks/useProgress'
 import { useState, useEffect } from 'react'
 import { speak } from '../utils/tts'
 import '../EL.css'
-import OrientLockBtn from '../components/OrientLockBtn'
 
 const EL = '/english-learning'
 
@@ -37,7 +36,6 @@ export default function ELLedgerPage({ darkMode, setDarkMode }) {
         <header className="el-top-bar">
           <button className="el-icon-btn" onClick={() => navigate(EL)}>←</button>
           <span className="el-top-bar-title">⭐ كلماتي الصعبة</span>
-          <OrientLockBtn />
         </header>
 
         <div className="el-ledger-wrap">

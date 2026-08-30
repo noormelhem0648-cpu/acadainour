@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { LEVELS } from '../data/curriculum'
 import { useProgress } from '../hooks/useProgress'
 import '../EL.css'
-import OrientLockBtn from '../components/OrientLockBtn'
 
 
 /* ── Level Completion Certificate ── */
@@ -166,7 +165,6 @@ export default function ELProgressPage({ darkMode, setDarkMode }) {
         <header className="el-top-bar">
           <button className="el-icon-btn" onClick={() => navigate(EL)}>←</button>
           <span className="el-top-bar-title">📊 تقدمي الكامل</span>
-          <OrientLockBtn />
         </header>
 
         <div className="el-progress-page">

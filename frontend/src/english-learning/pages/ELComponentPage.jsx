@@ -1,11 +1,10 @@
 ﻿import { useNavigate, useParams } from 'react-router-dom'
 import { API_BASE as BACKEND } from '../../config'
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { getDay, COMPONENTS } from '../data/curriculum'
-import { useProgress, XP_VALUES } from '../hooks/useProgress'
+import { useProgress } from '../hooks/useProgress'
 import { usePlan, isDayLocked, FREE_DAY_LIMIT } from '../hooks/usePlan'
 import WordLookupProvider from '../components/WordLookup'
-import OrientLockBtn from '../components/OrientLockBtn'
 import { authHeaders } from '../utils/auth'
 import { speak, speakAtRate, stopTTS, clearVoiceCache, getRate, getPitch, saveRate, savePitch } from '../utils/tts'
 import { readSSEStream } from '../utils/stream'
@@ -301,172 +300,6 @@ function DualSpeak({ text, style }) {
   )
 }
 
-/* ─── Avatar expressions ─── */
-const AVATAR_STATES = {
-  idle:      { emoji: '🤖', label: 'جاهز', color: '#c9858a' },
-  thinking:  { emoji: '🤔', label: 'يفكر...', color: '#b45309' },
-  speaking:  { emoji: '🗣️', label: 'يتحدث', color: '#16a34a' },
-  happy:     { emoji: '😊', label: 'ممتاز!', color: '#16a34a' },
-  correcting:{ emoji: '✏️', label: 'يُصحّح', color: '#c9858a' },
-  listening: { emoji: '👂', label: 'يستمع', color: '#6366f1' },
-}
-
-/* ─── Study Buddy Panel ─── */
-function StudyBuddy({ companionPrompt, dayContext, avatarState, setAvatarState, messages, setMessages, inputText, setInputText }) {
-  const [loading, setLoading] = useState(false)
-  const messagesEndRef = useRef(null)
-  const recognitionRef = useRef(null)
-  const abortRef = useRef(null)
-  const sendRef = useRef(null)
-  const [isListening, setIsListening] = useState(false)
-
-  useEffect(() => () => { abortRef.current?.abort(); recognitionRef.current?.stop() }, [])
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
-
-  const sendMessage = useCallback(async (text) => {
-    if (!text.trim()) return
-    abortRef.current?.abort()
-    abortRef.current = new AbortController()
-    const signal = abortRef.current.signal
-
-    const userMsg = { role: 'user', content: text }
-    const history = [...messages, userMsg]
-    setMessages(prev => [...prev, userMsg, { role: 'assistant', content: '' }])
-    setInputText('')
-    setLoading(true)
-    setAvatarState('thinking')
-
-    try {
-      const subject_info = companionPrompt + '\n\nسياق الدرس: ' + dayContext + '\n\nIMPORTANT RULE: If the student asks you to solve their homework, exam, or assignment for them, refuse clearly and offer to help them understand and think through it instead. Say: "I can\'t solve it for you, but I can help you understand and guide you step by step!"'
-      const res = await fetch(`${BACKEND}/english-tutor/stream`, {
-        method: 'POST',
-        headers: authHeaders(),
-        signal,
-        body: JSON.stringify({
-          message: text,
-          history: history.slice(-8).map(m => ({ role: m.role, content: m.content })),
-          subject_info
-        })
-      })
-      if (!res.ok) throw new Error('server')
-
-      await readSSEStream(res.body.getReader(), (_, accumulated) => {
-        setMessages(prev => {
-          const copy = [...prev]
-          copy[copy.length - 1] = { role: 'assistant', content: accumulated }
-          return copy
-        })
-      })
-      setAvatarState('idle')
-    } catch (e) {
-      if (e.name === 'AbortError') return
-      setMessages(prev => {
-        const copy = [...prev]
-        copy[copy.length - 1] = { role: 'assistant', content: 'تعذّر الاتصال بالخادم. تأكد من اتصالك بالإنترنت.' }
-        return copy
-      })
-      setAvatarState('idle')
-    } finally {
-      setLoading(false)
-    }
-  }, [messages, companionPrompt, dayContext, setMessages, setAvatarState, setInputText])
-
-  // H-7: keep sendRef current so voice recognition never uses a stale closure
-  useEffect(() => { sendRef.current = sendMessage }, [sendMessage])
-
-  const startVoice = () => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-    if (!SpeechRecognition) { alert('المتصفح لا يدعم التعرف على الصوت'); return }
-    if (isListening) { recognitionRef.current?.stop(); return }
-    const r = new SpeechRecognition()
-    r.lang = 'en-US'
-    r.interimResults = false
-    r.onstart = () => { setIsListening(true); setAvatarState('listening') }
-    r.onresult = e => {
-      const t = e.results[0][0].transcript
-      setInputText(t)
-      setIsListening(false)
-      setAvatarState('idle')
-      sendRef.current?.(t)  // H-7: always calls the latest version
-    }
-    r.onerror = () => { setIsListening(false); setAvatarState('idle') }
-    r.onend = () => { setIsListening(false); setAvatarState('idle') }
-    recognitionRef.current = r
-    r.start()
-  }
-
-  const av = AVATAR_STATES[avatarState] || AVATAR_STATES.idle
-
-  return (
-    <div className="el-buddy-panel">
-      <div className="el-buddy-avatar-wrap">
-        <div className="el-buddy-avatar" style={{ borderColor: av.color }}>
-          <span className="el-buddy-emoji">{av.emoji}</span>
-          {avatarState === 'thinking' && <div className="el-buddy-pulse" />}
-        </div>
-        <div className="el-buddy-label" style={{ color: av.color }}>{av.label}</div>
-        <div className="el-buddy-name">Noura AI</div>
-      </div>
-
-      <div className="el-buddy-messages">
-        {messages.length === 0 && (
-          <div className="el-buddy-welcome">
-            <p>مرحباً! أنا هنا لمساعدتك في درس اليوم.</p>
-            <p>اكتب أو تحدث إليّ بالإنجليزية وسأُصحّح وأُرشدك.</p>
-          </div>
-        )}
-        {messages.map((m, i) => (
-          <div key={i} className={`el-buddy-msg ${m.role}`}>
-            {m.role === 'assistant' && (
-              <div style={{ float: 'left', marginLeft: 4 }}>
-                <DualSpeak text={m.content} />
-              </div>
-            )}
-            <span className="el-buddy-msg-text">{m.content}</span>
-          </div>
-        ))}
-        {loading && (
-          <div className="el-buddy-msg assistant">
-            <span className="el-buddy-typing">
-              <span />
-              <span />
-              <span />
-            </span>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-
-      <div className="el-buddy-input-row">
-        <input
-          className="el-buddy-input"
-          value={inputText}
-          onChange={e => setInputText(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && sendMessage(inputText)}
-          placeholder="اكتب بالإنجليزية أو اضغط 🎤"
-          disabled={loading}
-        />
-        <button
-          className={'el-buddy-mic' + (isListening ? ' listening' : '')}
-          onClick={startVoice}
-          title="تحدث"
-        >
-          🎤
-        </button>
-        <button
-          className="el-buddy-send"
-          onClick={() => sendMessage(inputText)}
-          disabled={loading || !inputText.trim()}
-        >
-          ↑
-        </button>
-      </div>
-    </div>
-  )
-}
 
 export default function ELComponentPage({ darkMode, setDarkMode }) {
   const { levelId, dayId, componentId } = useParams()
@@ -489,7 +322,6 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
   const [buddyMessages, setBuddyMessages] = useState([])
   const [buddyInput, setBuddyInput] = useState('')
   const [avatarState, setAvatarState] = useState('idle')
-  const [buddyOpen, setBuddyOpen] = useState(false)
   const [showXP, setShowXP] = useState(false)
   const [donePending, setDonePending] = useState(false)
   const [showVoicePicker, setShowVoicePicker] = useState(() => !localStorage.getItem('noura_voice_setup'))
@@ -558,12 +390,10 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
     }
   }
 
-  const dayContext = `Level ${levelId}, Day ${dayId}: ${day.title}. Component: ${comp.labelEn}.`
-
   return (
     <div className={`el-app${darkMode ? ' el-dark' : ''}`}>
       <WordLookupProvider>
-      {showXP && <XPPopAnimation amount={XP_VALUES[componentId] || 15} onDone={() => setShowXP(false)} />}
+      {showXP && <XPPopAnimation onDone={() => setShowXP(false)} />}
       {showVoicePicker && <VoiceSelector onClose={() => setShowVoicePicker(false)} />}
       <div className="el-page el-comp-page">
         <header className="el-top-bar">
@@ -571,8 +401,6 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
           <span className="el-top-bar-title">{comp.icon} {comp.labelEn}</span>
           <div style={{ display: 'flex', gap: 6 }}>
             <button className="el-icon-btn" onClick={() => setShowVoicePicker(true)} title="اختر الصوت">🎙️</button>
-            <button className={'el-icon-btn' + (buddyOpen ? ' active' : '')} onClick={() => setBuddyOpen(b => !b)} title="Study Buddy">🤖</button>
-            <OrientLockBtn />
           </div>
         </header>
 
@@ -587,7 +415,7 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
           ))}
         </div>
 
-        <div className={'el-study-room' + (buddyOpen ? ' buddy-open' : '')}>
+        <div className="el-study-room">
           <div className="el-content-panel">
             <div className="el-comp-body">
               {componentId === 'vocab'     && <VocabComp day={day} levelId={levelId} dayId={dayId} progress={progress} setAvatarState={setAvatarState} setBuddyMessages={setBuddyMessages} />}
@@ -616,19 +444,6 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
               </button>
             </div>
           </div>
-
-          {buddyOpen && (
-            <StudyBuddy
-              companionPrompt={day.writing?.companionPrompt || 'أنت مدرس لغة مساعد.'}
-              dayContext={dayContext}
-              avatarState={avatarState}
-              setAvatarState={setAvatarState}
-              messages={buddyMessages}
-              setMessages={setBuddyMessages}
-              inputText={buddyInput}
-              setInputText={setBuddyInput}
-            />
-          )}
         </div>
       </div>
       </WordLookupProvider>
@@ -837,7 +652,7 @@ function TeacherCorner({ words, dayTitle }) {
     setLoading(true)
     try {
       const aiReply = await aiAsk(userMsg.content, systemPrompt, msgsRef.current)
-      setMsgs(prev => [...prev, { role: 'assistant', content: aiReply || '...' }])
+      setMsgs(prev => [...prev, { role: 'assistant', content: aiReply || 'ما وصلني رد واضح — جرّبي تعيدي صياغة سؤالك أو اسأليني مرة ثانية 🙏' }])
     } catch {
       setMsgs(prev => [...prev, { role: 'assistant', content: 'تعذّر الاتصال. تحقق من الإنترنت.' }])
     } finally { setLoading(false) }
@@ -864,7 +679,7 @@ function TeacherCorner({ words, dayTitle }) {
                   setLoading(true)
                   try {
                     const reply = await aiAsk(q, systemPrompt, history)
-                    setMsgs(prev => [...prev, { role: 'assistant', content: reply || '...' }])
+                    setMsgs(prev => [...prev, { role: 'assistant', content: reply || 'ما وصلني رد واضح — جرّبي تسألي مرة ثانية 🙏' }])
                   } catch {
                     setMsgs(prev => [...prev, { role: 'assistant', content: 'تعذّر الاتصال.' }])
                   } finally { setLoading(false) }
@@ -2229,21 +2044,20 @@ function GrammarDetective({ day }) {
   const generate = () => {
     track('grammar_detective_used')
     const lessonBank = buildLessonBank(day)
-    const staticPool = _shuffle(DETECTIVE_BANK[difficulty] || DETECTIVE_BANK.medium)
     let pool
     if (lessonBank.length >= 2) {
-      // Ensure at least half the questions have real errors (wrong sentences)
+      // Stay strictly within today's lesson — never pad with the unrelated
+      // static bank, since mixing in a different grammar topic (e.g. Past
+      // Perfect during a Verb-to-Be lesson) makes the exercise feel random
+      // and disconnected from what the student is actually studying.
       const lessonErrors = lessonBank.filter(x => x.error !== 'none')
       const lessonCorrect = lessonBank.filter(x => x.error === 'none')
-      const staticErrors = staticPool.filter(x => x.error !== 'none')
-      // Target: ~50% errors, ~50% correct. Fill with static errors if lesson has few
-      const targetErrors = Math.max(1, Math.ceil(count / 2))
-      const allErrors = _shuffle([...lessonErrors, ...staticErrors])
-      const allCorrect = _shuffle([...lessonCorrect])
-      pool = _shuffle([...allErrors.slice(0, targetErrors), ...allCorrect.slice(0, count - targetErrors)])
+      const targetErrors = Math.min(lessonErrors.length, Math.max(1, Math.ceil(count / 2)))
+      const targetCorrect = Math.min(lessonCorrect.length, count - targetErrors)
+      pool = _shuffle([..._shuffle(lessonErrors).slice(0, targetErrors), ..._shuffle(lessonCorrect).slice(0, targetCorrect)])
       setUsingLesson(true)
     } else {
-      pool = staticPool
+      pool = _shuffle(DETECTIVE_BANK[difficulty] || DETECTIVE_BANK.medium)
       setUsingLesson(false)
     }
     setSentences(pool.slice(0, count))
@@ -2586,6 +2400,12 @@ function VocabStoryGen({ words, dayTitle, levelId, allLearnedWords = [] }) {
 }
 
 /* ─── Fill-the-Gap Exercise ─── */
+function _fillGapShuffle(arr) {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]] }
+  return a
+}
+
 function FillGapExercise({ words, allLearnedWords = [] }) {
   const [open, setOpen] = useState(false)
   const [useAll, setUseAll] = useState(false)
@@ -2593,12 +2413,25 @@ function FillGapExercise({ words, allLearnedWords = [] }) {
   const [checked, setChecked] = useState(false)
   const pool = useAll && allLearnedWords.length >= 4 ? allLearnedWords : words
 
-  const sentences = pool.filter(w => w.example && w.example.toLowerCase().includes(w.word.toLowerCase())).slice(0, 6).map(w => ({
-    sentence: w.example.replace(new RegExp(`\\b${w.word}\\b`, 'i'), '_____'),
-    answer: w.word, arabic: w.arabic
-  }))
+  // Word-bank style (not free typing): each sentence gets the correct word +
+  // 3 distractors from the same pool, so there's never more than one option
+  // that's actually "the expected answer" — no ambiguity from synonyms,
+  // typos, or grammatically-valid-but-wrong words.
+  const sentences = useMemo(() => {
+    const eligible = pool.filter(w => w.example && new RegExp(`\\b${w.word}\\b`, 'i').test(w.example))
+    return eligible.slice(0, 6).map(w => {
+      const distractorPool = eligible.filter(x => x.word.toLowerCase() !== w.word.toLowerCase())
+      const distractors = _fillGapShuffle(distractorPool).slice(0, 3).map(x => x.word)
+      return {
+        sentence: w.example.replace(new RegExp(`\\b${w.word}\\b`, 'i'), '_____'),
+        answer: w.word,
+        arabic: w.arabic,
+        options: _fillGapShuffle([w.word, ...distractors]),
+      }
+    })
+  }, [pool])
 
-  const score = sentences.filter((s, i) => (answers[i] || '').trim().toLowerCase() === s.answer.toLowerCase()).length
+  const score = sentences.filter((s, i) => answers[i] === s.answer).length
 
   return (
     <div className="el-fillgap-section">
@@ -2619,18 +2452,27 @@ function FillGapExercise({ words, allLearnedWords = [] }) {
             </div>
           )}
           {sentences.map((s, i) => {
-            const correct = (answers[i] || '').trim().toLowerCase() === s.answer.toLowerCase()
+            const selected = answers[i]
+            const correct = selected === s.answer
             const parts = s.sentence.split('_____')
             return (
               <div key={i} className="el-fillgap-item">
                 <div className="el-fillgap-sentence">
                   {parts[0]}
-                  <input
-                    className={`el-fillgap-input${checked ? (correct ? ' correct' : ' wrong') : ''}`}
-                    value={answers[i] || ''} onChange={e => setAnswers(a => ({ ...a, [i]: e.target.value }))}
-                    disabled={checked} placeholder="..." style={{ width: 120 }}
-                  />
+                  <span className={`el-fillgap-blank${checked ? (correct ? ' correct' : ' wrong') : selected ? ' filled' : ''}`}>
+                    {selected || '_____'}
+                  </span>
                   {parts[1]}
+                </div>
+                <div className="el-fillgap-options">
+                  {s.options.map(opt => (
+                    <button
+                      key={opt}
+                      className={`el-family-chip${selected === opt ? ' active' : ''}`}
+                      onClick={() => !checked && setAnswers(a => ({ ...a, [i]: opt }))}
+                      disabled={checked}
+                    >{opt}</button>
+                  ))}
                 </div>
                 {checked && !correct && <div className="el-fillgap-hint">الصواب: <strong>{s.answer}</strong> ({s.arabic})</div>}
               </div>
@@ -2638,7 +2480,7 @@ function FillGapExercise({ words, allLearnedWords = [] }) {
           })}
           <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
             {!checked
-              ? <button className="el-nav-btn primary" onClick={() => setChecked(true)} disabled={!Object.keys(answers).length}>تحقق</button>
+              ? <button className="el-nav-btn primary" onClick={() => setChecked(true)} disabled={Object.keys(answers).length < sentences.length}>تحقق</button>
               : <><div className="el-fillgap-score">{score === sentences.length ? 'ممتاز! كل الإجابات صحيحة ✅' : `${score} / ${sentences.length} صحيحة`}</div><button className="el-nav-btn" onClick={() => { setAnswers({}); setChecked(false) }}>مرة أخرى</button></>
             }
           </div>
@@ -3098,13 +2940,13 @@ function PronunciationRecorder({ words, allLearnedWords = [] }) {
 }
 
 /* ─── XP Pop Animation ─── */
-export function XPPopAnimation({ amount, onDone }) {
+export function XPPopAnimation({ onDone }) {
   useEffect(() => { const t = setTimeout(onDone, 1800); return () => clearTimeout(t) }, [onDone])
   return (
     <div className="el-xpop-overlay">
       <div className="el-xpop-bubble">
-        <div className="el-xpop-icon">⭐</div>
-        <div className="el-xpop-amount">+{amount} XP</div>
+        <div className="el-xpop-icon">✅</div>
+        <div className="el-xpop-amount">أحسنت! أنهيت درسك</div>
       </div>
     </div>
   )

@@ -1111,6 +1111,7 @@
 .el-app .el-rp-input:focus { outline: none; border-color: var(--el-accent); }
 .el-app .el-rp-send-btn { border: none; background: var(--el-accent); color: #fff; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; font-size: 1.1rem; font-weight: 700; flex-shrink: 0; }
 .el-app .el-rp-stop-btn { border: none; background: var(--el-bg3); color: var(--el-text2); border-radius: 50%; width: 36px; height: 36px; cursor: pointer; font-size: 1rem; flex-shrink: 0; }
+.el-app .el-rp-stop-btn.recording { background: #ef4444; color: #fff; animation: pulse 1s infinite; }
 .el-app .el-rp-review { flex: 1; overflow-y: auto; padding: 20px; }
 .el-app .el-rp-review-title { font-size: 1.3rem; font-weight: 800; text-align: center; margin-bottom: 16px; }
 .el-app .el-rp-review-stats { display: flex; justify-content: center; gap: 24px; margin-bottom: 20px; }
@@ -1451,9 +1452,11 @@
 .el-app .el-fillgap-item { border-bottom: 1px solid var(--el-border); padding: 12px 0; display: flex; flex-direction: column; gap: 6px; }
 .el-app .el-fillgap-item:last-child { border-bottom: none; }
 .el-app .el-fillgap-sentence { font-size: .9rem; color: var(--el-text); }
-.el-app .el-fillgap-input { border: 1.5px solid var(--el-border); border-radius: 8px; padding: 7px 12px; font-size: .9rem; background: var(--el-bg3); color: var(--el-text); width: 100%; max-width: 240px; }
-.el-app .el-fillgap-input.correct { border-color: var(--el-green); background: #dcfce7; }
-.el-app .el-fillgap-input.wrong { border-color: var(--el-red); background: #fee2e2; }
+.el-app .el-fillgap-blank { display: inline-block; border: 1.5px dashed var(--el-border); border-radius: 8px; padding: 3px 14px; font-size: .9rem; font-weight: 700; background: var(--el-bg3); color: var(--el-muted); min-width: 70px; text-align: center; }
+.el-app .el-fillgap-blank.filled { border-style: solid; color: var(--el-text); border-color: var(--el-accent); }
+.el-app .el-fillgap-blank.correct { border-style: solid; border-color: var(--el-green); background: #dcfce7; color: #15803d; }
+.el-app .el-fillgap-blank.wrong { border-style: solid; border-color: var(--el-red); background: #fee2e2; color: #b91c1c; }
+.el-app .el-fillgap-options { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
 .el-app .el-fillgap-score { font-weight: 700; font-size: .9rem; color: var(--el-green); margin-top: 10px; }
 
 /* ── Collocations ── */

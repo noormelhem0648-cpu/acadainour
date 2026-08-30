@@ -19,15 +19,28 @@ export function usePlan() {
   useEffect(() => {
     const token = getToken()
     if (!token) { setLoading(false); return }
-    fetch(`${API_URL}/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json())
-      .then(d => {
-        const p = d.plan || 'free'
-        setPlan(p)
-        try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ plan: p })) } catch {}
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false))
+
+    let cancelled = false
+    const fetchPlan = (attempt) => {
+      fetch(`${API_URL}/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => { if (!r.ok) throw new Error(String(r.status)); return r.json() })
+        .then(d => {
+          if (cancelled) return
+          const p = d.plan || 'free'
+          setPlan(p)
+          try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ plan: p })) } catch {}
+          setLoading(false)
+        })
+        .catch(() => {
+          if (cancelled) return
+          // Retry once after a short delay (cold-start / flaky network) before
+          // giving up — a stale "locked" read is worse than a brief extra wait.
+          if (attempt === 0) setTimeout(() => fetchPlan(1), 1500)
+          else setLoading(false)
+        })
+    }
+    fetchPlan(0)
+    return () => { cancelled = true }
   }, [])
 
   return { plan, isPremium: plan === 'premium', loading }

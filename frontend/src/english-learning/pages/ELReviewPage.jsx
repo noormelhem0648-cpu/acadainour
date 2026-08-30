@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { useProgress } from '../hooks/useProgress'
 import { speak } from '../utils/tts'
 import '../EL.css'
-import OrientLockBtn from '../components/OrientLockBtn'
 
 function DualSpeakBtns({ word, style }) {
   return (
@@ -64,7 +63,6 @@ export default function ELReviewPage({ darkMode, setDarkMode }) {
         <header className="el-top-bar">
           <button className="el-icon-btn" onClick={() => navigate(EL)}>←</button>
           <span className="el-top-bar-title">🔁 مراجعة SM-2 اليومية</span>
-          <OrientLockBtn />
         </header>
 
         <div className="el-review-page">
