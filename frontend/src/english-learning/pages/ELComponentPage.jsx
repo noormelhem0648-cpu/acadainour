@@ -3,6 +3,7 @@ import { API_BASE as BACKEND } from '../../config'
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { getDay, COMPONENTS } from '../data/curriculum'
 import { getDetectiveSentences } from '../data/grammarDetectiveBank'
+import { getFillGapSentences } from '../data/fillGapBank'
 import { useProgress } from '../hooks/useProgress'
 import { usePlan, isDayLocked, FREE_DAY_LIMIT } from '../hooks/usePlan'
 import WordLookupProvider from '../components/WordLookup'
@@ -601,7 +602,7 @@ function VocabComp({ day, levelId, dayId, progress, setAvatarState, setBuddyMess
 
       {/* Teacher Corner + new features */}
       <TeacherCorner words={v.words} dayTitle={day.title} />
-      <FillGapExercise words={v.words} allLearnedWords={progress.hardWords} />
+      <FillGapExercise words={v.words} allLearnedWords={progress.hardWords} levelId={levelId} dayId={dayId} />
       <VocabStoryGen words={v.words} dayTitle={day.title} levelId={levelId} allLearnedWords={progress.hardWords} />
     </div>
   )
@@ -2313,18 +2314,33 @@ function _fillGapShuffle(arr) {
   return a
 }
 
-function FillGapExercise({ words, allLearnedWords = [] }) {
+function FillGapExercise({ words, allLearnedWords = [], levelId, dayId }) {
   const [open, setOpen] = useState(false)
   const [useAll, setUseAll] = useState(false)
   const [answers, setAnswers] = useState({})
   const [checked, setChecked] = useState(false)
   const pool = useAll && allLearnedWords.length >= 4 ? allLearnedWords : words
 
+  const authored = getFillGapSentences(levelId, dayId)
+
   // Word-bank style (not free typing): each sentence gets the correct word +
   // 3 distractors from the same pool, so there's never more than one option
   // that's actually "the expected answer" — no ambiguity from synonyms,
   // typos, or grammatically-valid-but-wrong words.
   const sentences = useMemo(() => {
+    if (authored && !useAll) {
+      const answerSet = [...new Set(authored.map(s => s.answer))]
+      return authored.map(s => {
+        const distractorPool = answerSet.filter(a => a !== s.answer)
+        const distractors = _fillGapShuffle(distractorPool).slice(0, 3)
+        return {
+          sentence: s.sentence,
+          answer: s.answer,
+          arabic: s.arabic,
+          options: _fillGapShuffle([s.answer, ...distractors]),
+        }
+      })
+    }
     const eligible = pool.filter(w => w.example && new RegExp(`\\b${w.word}\\b`, 'i').test(w.example))
     return eligible.slice(0, 6).map(w => {
       const distractorPool = eligible.filter(x => x.word.toLowerCase() !== w.word.toLowerCase())
@@ -2336,7 +2352,7 @@ function FillGapExercise({ words, allLearnedWords = [] }) {
         options: _fillGapShuffle([w.word, ...distractors]),
       }
     })
-  }, [pool])
+  }, [pool, authored, useAll])
 
   const score = sentences.filter((s, i) => answers[i] === s.answer).length
 
