@@ -545,7 +545,12 @@ MAX_PAYMENT_IMAGE_CHARS = 3_500_000  # ~2.5MB decoded
 
 @app.get("/payments/info")
 def payment_info():
-    return {"price": PREMIUM_PRICE, "instructions": PAYMENT_INSTRUCTIONS, "card_checkout_available": bool(MYFATOORAH_API_KEY)}
+    return {
+        "price": PREMIUM_PRICE,
+        "instructions": PAYMENT_INSTRUCTIONS,
+        "card_checkout_available": bool(MYFATOORAH_API_KEY),
+        "lemonsqueezy_available": bool(os.getenv("LEMONSQUEEZY_CHECKOUT_URL", "")),
+    }
 
 
 # ──────────────────────────────────────────────
@@ -596,6 +601,74 @@ def create_card_checkout(request: Request, user: User = Depends(require_user), d
     except Exception as e:
         print(f"[MyFatoorah] POST /v2/SendPayment error: {e}")
         raise HTTPException(status_code=502, detail="تعذّر الاتصال ببوابة الدفع.")
+
+@app.get("/payments/lemonsqueezy/checkout-url")
+def lemonsqueezy_checkout_url(user: User = Depends(require_user)):
+    """Returns a personalised Lemon Squeezy checkout link for the logged-in
+    user, with their email and user_id embedded as custom checkout data so
+    the webhook below can match the purchase back to this account without
+    any manual step."""
+    base_url = os.getenv("LEMONSQUEEZY_CHECKOUT_URL", "")
+    if not base_url:
+        raise HTTPException(status_code=503, detail="الدفع بالبطاقة غير متاح حالياً.")
+    import urllib.parse
+    params = {
+        "checkout[email]": user.email,
+        "checkout[custom][user_id]": str(user.id),
+        "checkout[name]": user.name,
+    }
+    return {"checkout_url": f"{base_url}?{urllib.parse.urlencode(params)}"}
+
+
+LEMONSQUEEZY_WEBHOOK_SECRET = os.getenv("LEMONSQUEEZY_WEBHOOK_SECRET", "")
+
+@app.post("/payments/lemonsqueezy/webhook")
+async def lemonsqueezy_webhook(request: Request, db: Session = Depends(get_db)):
+    """Lemon Squeezy calls this automatically after every subscription event.
+    No manual approval — the account upgrades the instant payment succeeds,
+    per Lemon Squeezy's own requirement that access be granted immediately."""
+    raw_body = await request.body()
+    if LEMONSQUEEZY_WEBHOOK_SECRET:
+        import hmac as _hmac
+        signature = request.headers.get("X-Signature", "")
+        expected = _hmac.new(LEMONSQUEEZY_WEBHOOK_SECRET.encode(), raw_body, hashlib.sha256).hexdigest()
+        if not _hmac.compare_digest(expected, signature):
+            raise HTTPException(status_code=401, detail="Invalid signature")
+    try:
+        payload = json.loads(raw_body)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid payload")
+
+    event_name = payload.get("meta", {}).get("event_name", "")
+    custom_data = payload.get("meta", {}).get("custom_data", {}) or {}
+    attributes = payload.get("data", {}).get("attributes", {})
+    user_id = custom_data.get("user_id")
+    email = attributes.get("user_email", "")
+
+    student = None
+    if user_id:
+        student = db.query(User).filter(User.id == int(user_id)).first()
+    if not student and email:
+        student = db.query(User).filter(User.email == email).first()
+    if not student:
+        print(f"[LemonSqueezy] webhook {event_name}: no matching user (user_id={user_id}, email={email})")
+        return {"ok": True}
+
+    if event_name in ("subscription_created", "subscription_payment_success", "subscription_updated", "subscription_resumed"):
+        status = attributes.get("status", "")
+        if event_name == "subscription_updated" and status not in ("active", "on_trial"):
+            pass  # ignore updates that aren't active (e.g. past_due handled by payment_failed/cancelled events)
+        else:
+            _grant_premium(student)
+            db.commit()
+            print(f"[LemonSqueezy] {event_name}: granted premium to user {student.id}")
+    elif event_name in ("subscription_cancelled", "subscription_expired"):
+        _revert_to_free(student)
+        db.commit()
+        print(f"[LemonSqueezy] {event_name}: reverted user {student.id} to free")
+
+    return {"ok": True}
+
 
 @app.get("/payments/callback")
 def card_checkout_callback(user_id: int, paymentId: str = "", Id: str = "", db: Session = Depends(get_db)):

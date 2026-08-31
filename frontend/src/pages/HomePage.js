@@ -94,6 +94,26 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
     }
   };
 
+  const startLemonSqueezyCheckout = async () => {
+    setCardCheckoutLoading(true);
+    setSubmitStatus(null);
+    try {
+      const res = await fetch(`${API_URL}/payments/lemonsqueezy/checkout-url`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const d = await res.json();
+      if (res.ok && d.checkout_url) {
+        window.location.href = d.checkout_url;
+      } else {
+        setSubmitStatus({ type: "error", text: d.detail || "الدفع بالبطاقة غير متاح حالياً" });
+        setCardCheckoutLoading(false);
+      }
+    } catch {
+      setSubmitStatus({ type: "error", text: "خطأ بالاتصال" });
+      setCardCheckoutLoading(false);
+    }
+  };
+
   const openUpgradeModal = () => {
     setShowUpgradeModal(true);
     setSubmitStatus(null);
@@ -364,7 +384,17 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
                     ينتهي بتاريخ: {new Date(premiumExpiresAt).toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric" })}
                   </p>
                 )}
-                {paymentInfo?.card_checkout_available && (
+                {paymentInfo?.lemonsqueezy_available && (
+                  <button
+                    className="quiz-modal-btn primary"
+                    style={{ marginTop: 12, width: "100%" }}
+                    onClick={startLemonSqueezyCheckout}
+                    disabled={cardCheckoutLoading}
+                  >
+                    {cardCheckoutLoading ? "جاري التحويل..." : "🔄 جدّدي الاشتراك الآن"}
+                  </button>
+                )}
+                {!paymentInfo?.lemonsqueezy_available && paymentInfo?.card_checkout_available && (
                   <button
                     className="quiz-modal-btn primary"
                     style={{ marginTop: 12, width: "100%" }}
@@ -397,7 +427,17 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
                   </div>
                 )}
 
-                {paymentInfo?.card_checkout_available && (
+                {paymentInfo?.lemonsqueezy_available && (
+                  <button
+                    className="quiz-modal-btn primary"
+                    style={{ width: "100%", marginBottom: 14 }}
+                    onClick={startLemonSqueezyCheckout}
+                    disabled={cardCheckoutLoading}
+                  >
+                    {cardCheckoutLoading ? "جاري التحويل لصفحة الدفع..." : "💳 ادفعي بالبطاقة (فيزا/ماستركارد)"}
+                  </button>
+                )}
+                {!paymentInfo?.lemonsqueezy_available && paymentInfo?.card_checkout_available && (
                   <button
                     className="quiz-modal-btn primary"
                     style={{ width: "100%", marginBottom: 14 }}
