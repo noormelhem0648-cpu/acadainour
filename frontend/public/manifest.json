@@ -23,7 +23,7 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "/english-learning",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
