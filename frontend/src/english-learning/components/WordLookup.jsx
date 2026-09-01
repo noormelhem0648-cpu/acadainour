@@ -68,7 +68,7 @@ export default function WordLookupProvider({ children }) {
           if (node.nodeType === Node.TEXT_NODE) {
             const text = node.textContent
             const offset = range.startOffset
-            const wordMatch = text.slice(0, offset + 1).match(/[a-zA-Z']+$/)
+            const wordMatch = text.slice(0, offset).match(/[a-zA-Z']+$/)
             const wordStart = wordMatch ? wordMatch[0] : ''
             const afterMatch = text.slice(offset).match(/^[a-zA-Z']*/)
             const wordEnd = afterMatch ? afterMatch[0] : ''

@@ -811,6 +811,9 @@ async def english_tutor_stream(request: Request, req: EnglishChatRequest):
             yield f"data: ⚠️ Error: {str(e)}\n\n"
             yield "data: [DONE]\n\n"
 
+    return StreamingResponse(event_stream(), media_type="text/event-stream",
+                              headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
 MAX_TRANSCRIBE_AUDIO_BYTES = 8 * 1024 * 1024  # 8MB — a few seconds of speech is well under this
 
 @app.post("/english-tutor/transcribe")
@@ -831,9 +834,6 @@ async def transcribe_shadowing_audio(request: Request, audio: UploadFile = File(
     except Exception as e:
         print(f"[Transcribe] error: {e}")
         raise HTTPException(status_code=502, detail="تعذّر تحليل التسجيل الصوتي.")
-
-    return StreamingResponse(event_stream(), media_type="text/event-stream",
-                              headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 def _is_subject_blocked(subject_code: str, db: Session, user: Optional[User] = None) -> Optional[Restriction]:
     """Return active restriction for a subject, or None. Instructors are never blocked."""
