@@ -11,8 +11,11 @@ export async function readSSEStream(reader, onChunk) {
     buffer = lines.pop()
     for (const line of lines) {
       if (!line.startsWith('data: ')) continue
-      const chunk = line.slice(6)
-      if (chunk === '[DONE]') return full
+      const raw = line.slice(6)
+      if (raw === '[DONE]') return full
+      // Backend escapes literal newlines inside a chunk as "\n" so a single
+      // SSE line can carry multi-line markdown — undo that here.
+      const chunk = raw.replace(/\\n/g, '\n')
       full += chunk
       onChunk?.(chunk, full)
     }

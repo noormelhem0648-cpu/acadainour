@@ -805,7 +805,13 @@ async def english_tutor_stream(request: Request, req: EnglishChatRequest):
                 context_from_books="",
                 subject_info=req.subject_info,
             ):
-                yield f"data: {chunk}\n\n"
+                # SSE only recognizes lines starting with "data: " — any literal
+                # newline inside the chunk (Gemini streams whole markdown lines,
+                # not just single tokens) would otherwise silently truncate the
+                # chunk at the frontend, since the continuation line doesn't
+                # start with "data: " and gets dropped by the reader.
+                safe_chunk = chunk.replace("\n", "\\n")
+                yield f"data: {safe_chunk}\n\n"
             yield "data: [DONE]\n\n"
         except Exception as e:
             yield f"data: ⚠️ Error: {str(e)}\n\n"
