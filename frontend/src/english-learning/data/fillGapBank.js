@@ -1771,13 +1771,13 @@ export const FILLGAP_BANK = {
     2: [
       { sentence: 'He gave a _____ smile, clearly amused but also bitter.', answer: 'sardonic', arabic: 'ساخر بمرارة' },
       { sentence: 'She made a _____ observation, gently amused rather than harsh.', answer: 'wry', arabic: 'ساخر بهدوء' },
-      { sentence: 'She felt deeply _____ about accepting the new job offer.', answer: 'ambivalent', arabic: 'مزدوج المشاعر' },
-      { sentence: 'His _____ wit could cut through any pretension instantly.', answer: 'mordant', arabic: 'لاذع' },
+      { sentence: 'She felt deeply _____ about accepting the new job offer, torn between excitement and dread and unable to decide either way.', answer: 'ambivalent', arabic: 'مزدوج المشاعر' },
+      { sentence: 'His _____ wit was almost corrosive, stripping away any pretension the moment he opened his mouth.', answer: 'mordant', arabic: 'لاذع' },
       { sentence: 'The funeral music was appropriately _____ and heavy.', answer: 'lugubrious', arabic: 'كئيب' },
       { sentence: 'The sudden joke undercut the serious speech in a _____ way.', answer: 'bathetic', arabic: 'يهبط فجأة' },
       { sentence: 'She remained perfectly calm and composed, showing great _____.', answer: 'equanimity', arabic: 'رباطة الجأش' },
       { sentence: 'He delivered a moving _____ address on his last day at work.', answer: 'valedictory', arabic: 'وداعي' },
-      { sentence: 'Despite the setback, he remained _____ about the future.', answer: 'sanguine', arabic: 'متفائل' },
+      { sentence: 'Despite the setback, he remained stubbornly _____ about the future, fully convinced everything would work out fine.', answer: 'sanguine', arabic: 'متفائل' },
       { sentence: 'She gave a _____ smile, regretting her earlier mistake.', answer: 'rueful', arabic: 'نادم بلطف' },
     ],
     3: [
