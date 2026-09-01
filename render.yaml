@@ -21,9 +21,9 @@ services:
       - key: REDIS_URL
         sync: false        # paste your Upstash Redis URL here (optional)
       - key: ALLOWED_ORIGINS
-        value: "https://noura-ai.vercel.app,https://acadai-frontend.onrender.com"
+        value: "https://nourastudy.com,https://www.nourastudy.com,https://acadai-frontend.onrender.com"
       - key: FRONTEND_URL
-        value: "https://noura-ai.vercel.app"
+        value: "https://www.nourastudy.com"
       - key: SMTP_HOST
         sync: false
       - key: SMTP_PORT
