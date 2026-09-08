@@ -522,7 +522,7 @@ def admin_set_plan(user_id: int, body: SetPlanRequest, user: User = Depends(requ
     if not target:
         raise HTTPException(status_code=404, detail="User not found.")
     if body.plan == "premium":
-        _grant_premium(target)
+        _grant_premium_indefinite(target)
     else:
         _revert_to_free(target)
     db.commit()
@@ -666,6 +666,22 @@ async def lemonsqueezy_webhook(request: Request, db: Session = Depends(get_db)):
         _revert_to_free(student)
         db.commit()
         print(f"[LemonSqueezy] {event_name}: reverted user {student.id} to free")
+    elif event_name == "order_created":
+        # One-time (non-subscription) purchase. Lemon Squeezy never sends the
+        # subscription_* events for these, so this was previously falling
+        # through unhandled — payment succeeded but premium was never granted.
+        status = attributes.get("status", "")
+        refunded = attributes.get("refunded", False)
+        if status == "paid" and not refunded:
+            _grant_premium(student)
+            db.commit()
+            print(f"[LemonSqueezy] order_created: granted premium to user {student.id}")
+    elif event_name in ("order_refunded",):
+        _revert_to_free(student)
+        db.commit()
+        print(f"[LemonSqueezy] {event_name}: reverted user {student.id} to free")
+    else:
+        print(f"[LemonSqueezy] webhook {event_name}: unhandled event type, no action taken")
 
     return {"ok": True}
 
@@ -777,7 +793,7 @@ def admin_review_payment(payment_id: int, body: ReviewPaymentRequest, user: User
     if body.action == "approve":
         student = db.query(User).filter(User.id == proof.user_id).first()
         if student and proof.plan_requested == "premium":
-            _grant_premium(student)
+            _grant_premium_indefinite(student)
     db.commit()
     return {"ok": True, "id": proof.id, "status": proof.status}
 
@@ -888,6 +904,12 @@ def _grant_premium(user: User, days: int = PREMIUM_DURATION_DAYS):
     """Upgrade a user to premium for `days` days from now (renews from now, not from any previous expiry)."""
     user.plan = "premium"
     user.premium_expires_at = datetime.datetime.utcnow() + datetime.timedelta(days=days)
+
+def _grant_premium_indefinite(user: User):
+    """Admin manual override: premium with no expiry, so it never silently
+    reverts via _ensure_plan_current the way a time-boxed subscription grant does."""
+    user.plan = "premium"
+    user.premium_expires_at = None
 
 def _revert_to_free(user: User):
     user.plan = "free"

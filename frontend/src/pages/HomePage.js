@@ -43,6 +43,7 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [paymentInfo, setPaymentInfo] = useState(null);
   const [myPlan, setMyPlan] = useState("free");
+  const [planLoading, setPlanLoading] = useState(true);
   const [premiumExpiresAt, setPremiumExpiresAt] = useState(null);
   const [myPayments, setMyPayments] = useState([]);
   const [proofImage, setProofImage] = useState(null); // { data: base64, preview: dataURL }
@@ -53,11 +54,25 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
   const [upgradeBanner, setUpgradeBanner] = useState(null); // "success" | "failed" | null
 
   useEffect(() => {
-    if (!token) return;
+    if (!token) { setPlanLoading(false); return; }
     fetch(`${API_URL}/keys/my`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json()).then(d => setHasKey(!!d.has_key)).catch(() => setHasKey(false));
-    fetch(`${API_URL}/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json()).then(d => { setMyPlan(d.plan || "free"); setPremiumExpiresAt(d.premium_expires_at || null); }).catch(() => {});
+    const fetchPlan = (attempt) => {
+      fetch(`${API_URL}/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => { if (!r.ok) throw new Error(String(r.status)); return r.json() })
+        .then(d => {
+          setMyPlan(d.plan || "free");
+          setPremiumExpiresAt(d.premium_expires_at || null);
+          setPlanLoading(false);
+        })
+        .catch(() => {
+          // Retry once — a stale "free" flash from a flaky first request is
+          // worse than a brief extra wait (same fix as usePlan()'s hook).
+          if (attempt === 0) setTimeout(() => fetchPlan(1), 1500);
+          else setPlanLoading(false);
+        });
+    };
+    fetchPlan(0);
   }, [token]);
 
   // Handle the redirect back from MyFatoorah's hosted checkout page
@@ -231,8 +246,8 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
 
               {token && (
                 <button className="side-menu-item" onClick={() => { setShowMenu(false); openUpgradeModal(); }}>
-                  <span className="side-menu-item-icon">{myPlan === "premium" ? "💎" : "⬆️"}</span>
-                  <span>{myPlan === "premium" ? "حسابك Premium ✓" : "ترقية لـ Premium"}</span>
+                  <span className="side-menu-item-icon">{planLoading ? "⏳" : myPlan === "premium" ? "💎" : "⬆️"}</span>
+                  <span>{planLoading ? "جاري التحقق..." : myPlan === "premium" ? "حسابك Premium ✓" : "ترقية لـ Premium"}</span>
                 </button>
               )}
 
@@ -375,7 +390,12 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
           <div className="quiz-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 420 }}>
             <h3>💎 ترقية لـ Premium</h3>
 
-            {myPlan === "premium" ? (
+            {planLoading ? (
+              <div style={{ textAlign: "center", padding: "16px 0" }}>
+                <div style={{ fontSize: "2rem", marginBottom: 8 }}>⏳</div>
+                <p style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>جاري التحقق من حسابك...</p>
+              </div>
+            ) : myPlan === "premium" ? (
               <div style={{ textAlign: "center", padding: "16px 0" }}>
                 <div style={{ fontSize: "2rem", marginBottom: 8 }}>✅</div>
                 <p style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>حسابك Premium بالفعل — استمتعي! 🎉</p>
