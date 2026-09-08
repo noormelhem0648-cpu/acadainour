@@ -1795,6 +1795,20 @@ function isExplicitNoErrors(text) {
   return text.toUpperCase().includes(NO_ERRORS_MARK)
 }
 
+// Client-side safety net, independent of the AI: catches obvious keyboard-mash
+// gibberish ("htjfdnxhndhnn asvgaz sb s") before even calling the model, so a
+// bad/uncooperative AI reply can never claim gibberish is "perfect English."
+function looksLikeGibberish(text) {
+  const words = text.trim().split(/\s+/).filter(Boolean)
+  if (words.length === 0) return false
+  const implausible = words.filter(w => {
+    const letters = w.replace(/[^a-zA-Z']/g, '')
+    if (letters.length <= 2) return false // short real words (a, I, to, is...) are fine
+    return !/[aeiouAEIOU]/.test(letters) || letters.length > 14
+  })
+  return implausible.length / words.length > 0.3
+}
+
 /* ─── Inline Correction Display ─── */
 function CorrectionDisplay({ corrections, originalText }) {
   if (!corrections.length) return null
@@ -1866,17 +1880,30 @@ function WritingComp({ day, levelId, dayId, navigate, setBuddyMessages, setBuddy
 
   const checkLive = async (text, idx) => {
     if (!text.trim() || checking[idx] || anyCheckingRef.current) return
+    if (looksLikeGibberish(text)) {
+      setCorrections(c => ({
+        ...c,
+        [idx]: {
+          raw: `CORRECTION: ${text} → [اكتب جملة إنجليزية حقيقية] | Reason: هذا مش كلام إنجليزي مفهوم`,
+          parsed: [{ original: text, fixed: '[اكتب جملة إنجليزية حقيقية]', reason: 'هذا مش كلام إنجليزي مفهوم — أعيدي كتابة الجملة' }],
+        },
+      }))
+      return
+    }
     anyCheckingRef.current = true
     setChecking(c => ({ ...c, [idx]: true }))
     setAvatarState('correcting')
     try {
       const systemPrompt = `أنت مُصحِّح لغوي دقيق صارم. اقرأ نص الطالب بعناية وابحث عن كل خطأ نحوي أو إملائي أو في اختيار الكلمة، مهما كان بسيطاً (تصريف الفعل، أدوات التعريف، حروف الجر، تركيب الجملة، الإملاء). لا تتساهل أبداً — أي جملة غير صحيحة نحوياً بالإنجليزية القياسية تُعتبر خطأ ويجب تصحيحه.
 
+إذا كان النص عبارة عن حروف عشوائية أو طرق لوحة مفاتيح عشوائية أو ليس كلمات إنجليزية حقيقية على الإطلاق (مثل "htjfdnxhndhnn asvgaz sb s")، فهذا بحد ذاته خطأ فادح — لا تقل أبداً إنه لا يوجد أخطاء. بدلاً من ذلك اكتب سطر تصحيح واحد يغطي النص كاملاً:
+CORRECTION: [النص كاملاً] → [اطلب من الطالب إعادة الكتابة بجمل إنجليزية حقيقية] | Reason: هذا مش كلام إنجليزي مفهوم، لازم تكتب جملة حقيقية
+
 أعد الرد بهذا التنسيق الصارم فقط، بدون أي مقدمة أو نص إضافي:
 
 CORRECTION: [الكلمة/العبارة الخاطئة] → [الصواب] | Reason: [شرح قصير بالعربي]
 
-اكتب سطراً واحداً لكل خطأ. إذا وفقط إذا كان النص خالياً تماماً من أي خطأ، اكتب هذا السطر فقط: ${NO_ERRORS_MARK}`
+اكتب سطراً واحداً لكل خطأ. إذا وفقط إذا كان النص جملة إنجليزية حقيقية ومفهومة وخالية تماماً من أي خطأ، اكتب هذا السطر فقط: ${NO_ERRORS_MARK}`
       const reply = await aiAsk(text, systemPrompt)
       const parsed = parseCorrectionResponse(reply)
       setCorrections(c => ({ ...c, [idx]: { raw: reply, parsed } }))
