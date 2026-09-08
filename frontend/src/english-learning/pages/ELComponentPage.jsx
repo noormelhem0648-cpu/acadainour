@@ -1763,17 +1763,29 @@ function ShadowingComp({ day, levelId }) {
 }
 
 /* ─── Live Correction Parser ─── */
+const NO_ERRORS_MARK = '✅'
+
 function parseCorrectionResponse(text) {
   // Parse lines like: CORRECTION: [original] → [fixed] | Reason: [why]
+  // Tolerant of numbering/bullets, "->" instead of "→", and ":"/"-" instead of "|".
   const lines = text.split('\n')
   const corrections = []
   for (const line of lines) {
-    const match = line.match(/CORRECTION:\s*(.+?)\s*→\s*(.+?)(?:\s*\|\s*Reason:\s*(.+))?$/i)
+    const cleaned = line.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, '')
+    const match = cleaned.match(/CORRECTION:\s*(.+?)\s*(?:→|->)\s*(.+?)(?:\s*(?:\||-)\s*Reason:\s*(.+))?$/i)
     if (match) {
       corrections.push({ original: match[1].trim(), fixed: match[2].trim(), reason: match[3]?.trim() || '' })
     }
   }
   return corrections
+}
+
+// True only when the model explicitly said there are no errors (the ✅ sentinel
+// from the system prompt) — never inferred just from a parse miss, since a
+// reply that doesn't match our strict CORRECTION: format is NOT proof the
+// text was error-free.
+function isExplicitNoErrors(text) {
+  return text.includes(NO_ERRORS_MARK)
 }
 
 /* ─── Inline Correction Display ─── */
@@ -1908,7 +1920,9 @@ CORRECTION: [الكلمة/العبارة الخاطئة] → [الصواب] | Re
           {corrections[i] && (
             corrections[i].parsed.length > 0
               ? <CorrectionDisplay corrections={corrections[i].parsed} originalText={responses[i] || ''} />
-              : <div className="el-correction-ok">✅ ممتاز! لا أخطاء في هذه الفقرة.</div>
+              : isExplicitNoErrors(corrections[i].raw)
+                ? <div className="el-correction-ok">✅ ممتاز! لا أخطاء في هذه الفقرة.</div>
+                : <div className="el-correction-display"><div className="el-correction-text">{corrections[i].raw}</div></div>
           )}
           {corrections[i] && <WritingUpgrade text={responses[i] || ''} />}
         </div>
