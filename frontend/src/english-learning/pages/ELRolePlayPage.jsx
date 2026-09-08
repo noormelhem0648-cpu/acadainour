@@ -71,7 +71,15 @@ export default function ELRolePlayPage({ darkMode, setDarkMode }) {
       setTtsPlaying(true)
       speakText(aiOpener, () => setTtsPlaying(false))
     }
-    progress.addXP?.('debateRound')
+  }
+
+  // XP is earned by actually completing an exchange, not by opening the
+  // screen — awarding it on start let a user farm unlimited XP by clicking
+  // Start then immediately ending/retrying in a loop with zero real practice.
+  const finishRolePlay = () => {
+    stopTTS()
+    if (roundCount > 0) progress.addXP?.('debateRound')
+    setPhase('review')
   }
 
   const rpAbortRef = useRef(null)
@@ -175,7 +183,7 @@ WHY: [جملة عربية قصيرة تشرح السبب]`
 
       if (roundCount >= 7) {
         clearTimeout(reviewTimerRef.current)
-        reviewTimerRef.current = setTimeout(() => setPhase('review'), 2000)
+        reviewTimerRef.current = setTimeout(finishRolePlay, 2000)
       }
 
     } catch (e) {
@@ -379,7 +387,7 @@ WHY: [جملة عربية قصيرة تشرح السبب]`
             </div>
 
             <div className="el-rp-end-row">
-              <button className="el-rp-end-btn" onClick={() => { stopTTS(); setPhase('review') }}>
+              <button className="el-rp-end-btn" onClick={finishRolePlay}>
                 إنهاء الجلسة والمراجعة →
               </button>
             </div>

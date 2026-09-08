@@ -760,9 +760,14 @@ function DragSentence({ question, answer }) {
     setResult(null)
   }
   const check = () => {
-    const sentence = placed.join(' ')
-    const correct = answer.replace(/[.!?,]$/, '').trim().toLowerCase()
-    setResult(sentence.toLowerCase() === correct ? 'correct' : 'wrong')
+    // Strip ALL punctuation (not just trailing) before comparing — the word
+    // bank only contains bare words/phrases, so an answer with internal
+    // punctuation (e.g. "I'd like a coffee, please.") would otherwise never
+    // match any arrangement of the placed chips.
+    const normalize = s => s.replace(/[.!?,]/g, '').trim().toLowerCase().replace(/\s+/g, ' ')
+    const sentence = normalize(placed.join(' '))
+    const correct = normalize(answer)
+    setResult(sentence === correct ? 'correct' : 'wrong')
   }
   const reset = () => { setBank([...words].sort(() => Math.random() - .5)); setPlaced([]); setResult(null) }
 
