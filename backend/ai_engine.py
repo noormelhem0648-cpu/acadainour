@@ -167,9 +167,15 @@ def _is_rate_limit_error(error_str):
     return any(kw in error_str for kw in ["429", "rate", "quota", "resource_exhausted", "resource has been exhausted"])
 
 
-def _build_contents(user_query, chat_history, context_from_books, image_data, image_mime_type, subject_info="", file_data=None, file_data_mime=None):
+def _build_contents(user_query, chat_history, context_from_books, image_data, image_mime_type, subject_info="", file_data=None, file_data_mime=None, raw_system_prompt=False):
     subject_line = ""
-    if subject_info:
+    if subject_info and raw_system_prompt:
+        # Caller (e.g. the English-tutor companion) is passing a literal system
+        # instruction, not an academic subject code — use it verbatim instead of
+        # wrapping it in the subject-redirect rules below, which would bury and
+        # override the caller's actual instructions.
+        subject_line = f"[SYSTEM INSTRUCTIONS — follow these exactly:]\n{subject_info}\n\n"
+    elif subject_info:
         try:
             from subjects_meta import get_all_subjects_map
             all_map = get_all_subjects_map()
@@ -243,9 +249,10 @@ def generate_academic_response_stream(
     subject_info: str = "",
     file_data: bytes = None,
     file_data_mime: str = None,
+    raw_system_prompt: bool = False,
 ):
     """Yield response text chunks as they are generated (for streaming)."""
-    contents = _build_contents(user_query, chat_history, context_from_books, image_data, image_mime_type, subject_info, file_data, file_data_mime)
+    contents = _build_contents(user_query, chat_history, context_from_books, image_data, image_mime_type, subject_info, file_data, file_data_mime, raw_system_prompt)
     num_keys = max(len(_clients), 1)
 
     for attempt in range(num_keys * 2):
@@ -314,8 +321,9 @@ def generate_academic_response(
     subject_info: str = "",
     file_data: bytes = None,
     file_data_mime: str = None,
+    raw_system_prompt: bool = False,
 ) -> str:
-    contents = _build_contents(user_query, chat_history, context_from_books, image_data, image_mime_type, subject_info, file_data, file_data_mime)
+    contents = _build_contents(user_query, chat_history, context_from_books, image_data, image_mime_type, subject_info, file_data, file_data_mime, raw_system_prompt)
 
     # Try every key at least once, then do a second round with short backoff
     num_keys = max(len(_clients), 1)

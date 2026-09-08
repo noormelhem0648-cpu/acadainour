@@ -820,6 +820,7 @@ async def english_tutor_stream(request: Request, req: EnglishChatRequest):
                 chat_history=req.history,
                 context_from_books="",
                 subject_info=req.subject_info,
+                raw_system_prompt=True,
             ):
                 # SSE only recognizes lines starting with "data: " — any literal
                 # newline inside the chunk (Gemini streams whole markdown lines,
@@ -1064,10 +1065,15 @@ async def ask_assistant(request: Request, body: ChatRequest, user: User = Depend
                 convo = db.query(Conversation).filter(Conversation.id == convo_id, Conversation.user_id == user.id).first()
                 if convo:
                     convo.updated_at = datetime.datetime.utcnow()
+                else:
+                    # Requested conversation doesn't belong to this user (stale id,
+                    # copy-pasted from another session, etc). Never write into it.
+                    convo_id = None
 
-            db.add(Message(conversation_id=convo_id, role="user", content=request.message))
-            db.add(Message(conversation_id=convo_id, role="assistant", content=answer))
-            db.commit()
+            if convo_id:
+                db.add(Message(conversation_id=convo_id, role="user", content=request.message))
+                db.add(Message(conversation_id=convo_id, role="assistant", content=answer))
+                db.commit()
 
         return {
             "answer": answer,
@@ -1120,6 +1126,9 @@ async def ask_assistant_stream(request: Request, body: ChatRequest, user: User =
             if convo:
                 convo.updated_at = datetime.datetime.utcnow()
                 db.commit()
+            else:
+                # Requested conversation doesn't belong to this user — never write into it.
+                convo_id = None
 
     def event_stream():
         # Send conversation id first
@@ -1318,6 +1327,9 @@ async def upload_and_ask_stream(
         if convo:
             convo.updated_at = datetime.datetime.utcnow()
             db.commit()
+        else:
+            # Requested conversation doesn't belong to this user — never write into it.
+            convo_id = None
 
     try:
         chat_history = json.loads(history)
@@ -1351,12 +1363,13 @@ async def upload_and_ask_stream(
                 full_answer += chunk
                 yield f"data: {json.dumps({'type': 'chunk', 'text': chunk})}\n\n"
             # Save messages to DB after stream completes
-            try:
-                db.add(Message(conversation_id=convo_id, role="user", content=message))
-                db.add(Message(conversation_id=convo_id, role="assistant", content=full_answer))
-                db.commit()
-            except Exception:
-                pass
+            if convo_id:
+                try:
+                    db.add(Message(conversation_id=convo_id, role="user", content=message))
+                    db.add(Message(conversation_id=convo_id, role="assistant", content=full_answer))
+                    db.commit()
+                except Exception:
+                    pass
         except Exception as e:
             print(f"[/upload-and-ask/stream Error] {e}")
             yield f"data: {json.dumps({'type': 'chunk', 'text': 'صار خطأ — حاول مرة ثانية 🔄'})}\n\n"

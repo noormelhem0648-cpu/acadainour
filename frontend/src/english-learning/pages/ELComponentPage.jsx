@@ -1763,7 +1763,7 @@ function ShadowingComp({ day, levelId }) {
 }
 
 /* ─── Live Correction Parser ─── */
-const NO_ERRORS_MARK = '✅'
+const NO_ERRORS_MARK = 'NO_ERRORS_FOUND'
 
 function parseCorrectionResponse(text) {
   // Parse lines like: CORRECTION: [original] → [fixed] | Reason: [why]
@@ -1780,12 +1780,14 @@ function parseCorrectionResponse(text) {
   return corrections
 }
 
-// True only when the model explicitly said there are no errors (the ✅ sentinel
-// from the system prompt) — never inferred just from a parse miss, since a
+// True only when the model explicitly emitted the NO_ERRORS_FOUND sentinel
+// from the system prompt — never inferred just from a parse miss, since a
 // reply that doesn't match our strict CORRECTION: format is NOT proof the
-// text was error-free.
+// text was error-free. A plain-language token (not an emoji) is used because
+// emoji/checkmarks can appear incidentally in a friendly reply unrelated to
+// whether the text was actually error-free.
 function isExplicitNoErrors(text) {
-  return text.includes(NO_ERRORS_MARK)
+  return text.toUpperCase().includes(NO_ERRORS_MARK)
 }
 
 /* ─── Inline Correction Display ─── */
@@ -1863,11 +1865,13 @@ function WritingComp({ day, levelId, dayId, navigate, setBuddyMessages, setBuddy
     setChecking(c => ({ ...c, [idx]: true }))
     setAvatarState('correcting')
     try {
-      const systemPrompt = `أنت مُصحِّح لغوي دقيق. عندما يرسل الطالب جملة أو فقرة إنجليزية، أعد الرد بهذا التنسيق الصارم فقط:
+      const systemPrompt = `أنت مُصحِّح لغوي دقيق صارم. اقرأ نص الطالب بعناية وابحث عن كل خطأ نحوي أو إملائي أو في اختيار الكلمة، مهما كان بسيطاً (تصريف الفعل، أدوات التعريف، حروف الجر، تركيب الجملة، الإملاء). لا تتساهل أبداً — أي جملة غير صحيحة نحوياً بالإنجليزية القياسية تُعتبر خطأ ويجب تصحيحه.
+
+أعد الرد بهذا التنسيق الصارم فقط، بدون أي مقدمة أو نص إضافي:
 
 CORRECTION: [الكلمة/العبارة الخاطئة] → [الصواب] | Reason: [شرح قصير بالعربي]
 
-اكتب سطراً واحداً لكل خطأ. إذا لم يوجد خطأ، اكتب: ✅ ممتاز! لا أخطاء في هذه الفقرة.`
+اكتب سطراً واحداً لكل خطأ. إذا وفقط إذا كان النص خالياً تماماً من أي خطأ، اكتب هذا السطر فقط: ${NO_ERRORS_MARK}`
       const reply = await aiAsk(text, systemPrompt)
       const parsed = parseCorrectionResponse(reply)
       setCorrections(c => ({ ...c, [idx]: { raw: reply, parsed } }))
