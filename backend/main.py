@@ -283,7 +283,8 @@ def reset_password(request: Request, req: ResetPasswordRequest, db: Session = De
     return {"ok": True, "message": "تم تغيير كلمة السر بنجاح! سجّل دخول بكلمتك الجديدة."}
 
 @app.get("/auth/make-instructor")
-def make_instructor(email: str, secret: str, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def make_instructor(request: Request, email: str, secret: str, db: Session = Depends(get_db)):
     """Promote a user to instructor. Requires ADMIN_SECRET env var."""
     admin_secret = os.getenv("ADMIN_SECRET", "")
     if not admin_secret or secret != admin_secret:
@@ -296,7 +297,8 @@ def make_instructor(email: str, secret: str, db: Session = Depends(get_db)):
     return {"ok": True, "message": f"{user.name} is now an instructor."}
 
 @app.get("/auth/remove-instructor")
-def remove_instructor(email: str, secret: str, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def remove_instructor(request: Request, email: str, secret: str, db: Session = Depends(get_db)):
     admin_secret = os.getenv("ADMIN_SECRET", "")
     if not admin_secret or secret != admin_secret:
         raise HTTPException(status_code=403, detail="Invalid secret.")
@@ -1246,7 +1248,9 @@ def _parse_upload(file_bytes: bytes, filename: str, mime_type: str):
 
 
 @app.post("/upload-and-ask")
+@limiter.limit("15/minute")
 async def upload_and_ask(
+    request: Request,
     subject_code: str = Form(...),
     message: str = Form(...),
     history: str = Form(default="[]"),
@@ -1290,7 +1294,9 @@ async def upload_and_ask(
 
 
 @app.post("/upload-and-ask/stream")
+@limiter.limit("15/minute")
 async def upload_and_ask_stream(
+    request: Request,
     subject_code: str = Form(...),
     message: str = Form(...),
     history: str = Form(default="[]"),

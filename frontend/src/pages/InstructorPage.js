@@ -29,7 +29,10 @@ export default function InstructorPage({ darkMode, setDarkMode, user, token, onL
     try {
       const res = await fetch(`${API_URL}/restrictions`, { headers });
       if (res.ok) setRestrictions(await res.json());
-    } catch {}
+      else setMsg({ type: "error", text: "تعذّر تحميل قائمة الحجب — حاول تحديث الصفحة" });
+    } catch {
+      setMsg({ type: "error", text: "خطأ بالاتصال — تعذّر تحميل قائمة الحجب" });
+    }
   };
 
   const fetchAnalytics = async (days = analyticsDays) => {
@@ -69,8 +72,15 @@ export default function InstructorPage({ darkMode, setDarkMode, user, token, onL
     setPaymentsLoading(true);
     try {
       const res = await fetch(`${API_URL}/admin/payments?status=pending`, { headers });
-      if (res.ok) setPayments(await res.json());
-    } catch {}
+      if (res.ok) {
+        setPayments(await res.json());
+        setPaymentsMsg(null);
+      } else {
+        setPaymentsMsg({ type: "error", text: "تعذّر تحميل طلبات الدفع — حاول تحديث الصفحة" });
+      }
+    } catch {
+      setPaymentsMsg({ type: "error", text: "خطأ بالاتصال — تعذّر تحميل طلبات الدفع" });
+    }
     setPaymentsLoading(false);
   };
 
@@ -124,9 +134,13 @@ export default function InstructorPage({ darkMode, setDarkMode, user, token, onL
   const unblock = async (id, code) => {
     if (!window.confirm(`إلغاء حجب مادة ${code}؟`)) return;
     try {
-      await fetch(`${API_URL}/restrictions/${id}`, { method: "DELETE", headers });
-      setMsg({ type: "success", text: `✅ تم إلغاء حجب ${code}` });
-      fetchRestrictions();
+      const res = await fetch(`${API_URL}/restrictions/${id}`, { method: "DELETE", headers });
+      if (res.ok) {
+        setMsg({ type: "success", text: `✅ تم إلغاء حجب ${code}` });
+        fetchRestrictions();
+      } else {
+        setMsg({ type: "error", text: `تعذّر إلغاء حجب ${code} — حاول مرة ثانية` });
+      }
     } catch {
       setMsg({ type: "error", text: "خطأ بالاتصال" });
     }
