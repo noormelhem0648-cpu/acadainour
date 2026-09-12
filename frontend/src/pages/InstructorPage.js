@@ -22,6 +22,9 @@ export default function InstructorPage({ darkMode, setDarkMode, user, token, onL
   const [payments, setPayments] = useState([]);
   const [paymentsLoading, setPaymentsLoading] = useState(false);
   const [paymentsMsg, setPaymentsMsg] = useState(null);
+  const [unmatched, setUnmatched] = useState([]);
+  const [unmatchedMsg, setUnmatchedMsg] = useState(null);
+  const [resolveIdInput, setResolveIdInput] = useState({});
 
   const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
 
@@ -99,7 +102,32 @@ export default function InstructorPage({ darkMode, setDarkMode, user, token, onL
     } catch { setPaymentsMsg({ type: "error", text: "خطأ بالاتصال" }); }
   };
 
-  useEffect(() => { fetchRestrictions(); fetchAnalytics(); searchUsers(""); fetchPayments(); }, []); // eslint-disable-line
+  const fetchUnmatched = async () => {
+    try {
+      const res = await fetch(`${API_URL}/admin/unmatched-payments`, { headers });
+      if (res.ok) setUnmatched(await res.json());
+    } catch {}
+  };
+
+  const resolveUnmatched = async (id) => {
+    const uid = Number(resolveIdInput[id]);
+    if (!uid) { setUnmatchedMsg({ type: "error", text: "اكتب رقم المستخدم (user id) الصحيح أولاً" }); return; }
+    setUnmatchedMsg(null);
+    try {
+      const res = await fetch(`${API_URL}/admin/unmatched-payments/${id}`, {
+        method: "PATCH", headers, body: JSON.stringify({ user_id: uid }),
+      });
+      const d = await res.json();
+      if (res.ok) {
+        setUnmatched(rows => rows.filter(r => r.id !== id));
+        setUnmatchedMsg({ type: "success", text: `✅ تمت الترقية لليوزر #${uid}` });
+      } else {
+        setUnmatchedMsg({ type: "error", text: d.detail || "خطأ بالمطابقة" });
+      }
+    } catch { setUnmatchedMsg({ type: "error", text: "خطأ بالاتصال" }); }
+  };
+
+  useEffect(() => { fetchRestrictions(); fetchAnalytics(); searchUsers(""); fetchPayments(); fetchUnmatched(); }, []); // eslint-disable-line
 
   const blockSubject = async () => {
     if (!subjectInput.trim()) return;
@@ -282,6 +310,42 @@ export default function InstructorPage({ darkMode, setDarkMode, user, token, onL
                   <div style={{ display: "flex", gap: 8 }}>
                     <button className="inst-block-btn" style={{ flex: 1 }} onClick={() => reviewPayment(p.id, "approve")}>✅ موافقة وترقية</button>
                     <button className="inst-unblock-btn" style={{ flex: 1 }} onClick={() => reviewPayment(p.id, "reject")}>❌ رفض</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Unmatched Lemon Squeezy payments — real payments the webhook couldn't auto-match to an account */}
+        <div className="inst-card">
+          <h2 className="inst-card-title">
+            ⚠️ دفعات ما انربطت بحساب
+            <span className="inst-badge">{unmatched.length}</span>
+          </h2>
+          {unmatchedMsg && <div className={`inst-msg ${unmatchedMsg.type}`}>{unmatchedMsg.text}</div>}
+          {unmatched.length === 0 ? (
+            <p className="inst-empty">لا يوجد دفعات معلّقة — كل شي متطابق 👍</p>
+          ) : (
+            <div className="inst-list">
+              {unmatched.map(u => (
+                <div key={u.id} className="inst-row active" style={{ flexDirection: "column", alignItems: "stretch", gap: 8 }}>
+                  <div style={{ fontSize: ".85rem" }}>
+                    دفعة Lemon Squeezy ({u.event_name}) — إيميل: <strong>{u.email_hint || "غير معروف"}</strong>
+                    {u.user_id_hint && <span> — user_id مرسَل: {u.user_id_hint}</span>}
+                  </div>
+                  <div style={{ fontSize: ".75rem", color: "var(--text-muted)" }}>
+                    ابحثي عن الحساب المطابق بقسم "البحث عن مستخدم" تحت، وانسخي رقم اليوزر (id) هون:
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <input
+                      type="number"
+                      placeholder="user id"
+                      value={resolveIdInput[u.id] || ""}
+                      onChange={e => setResolveIdInput(m => ({ ...m, [u.id]: e.target.value }))}
+                      style={{ flex: 1, padding: "6px 10px", borderRadius: 8, border: "1px solid var(--border)" }}
+                    />
+                    <button className="inst-block-btn" onClick={() => resolveUnmatched(u.id)}>✅ ترقية هذا اليوزر</button>
                   </div>
                 </div>
               ))}
