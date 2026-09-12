@@ -18,7 +18,7 @@ from slowapi.errors import RateLimitExceeded
 from ai_engine import generate_academic_response, generate_academic_response_stream, _add_keys, transcribe_audio
 from subjects_meta import get_subject_info
 from faiss_engine import search
-from db import init_db, get_db, SessionLocal, User, Conversation, Message, Restriction, ContributedKey, StudentProgress, AnalyticsEvent, PaymentProof
+from db import init_db, get_db, SessionLocal, User, Conversation, Message, Restriction, ContributedKey, StudentProgress, AnalyticsEvent, PaymentProof, UnmatchedPayment
 from auth import (
     hash_password, verify_password, create_access_token,
     get_current_user, require_user, require_instructor
@@ -654,6 +654,18 @@ async def lemonsqueezy_webhook(request: Request, db: Session = Depends(get_db)):
         student = db.query(User).filter(User.email == email).first()
     if not student:
         print(f"[LemonSqueezy] webhook {event_name}: no matching user (user_id={user_id}, email={email})")
+        # A real payment that can't be matched to an account used to just be
+        # a print() line, invisible unless someone was watching server logs
+        # at that exact moment — meaning a genuine paying customer could be
+        # stuck unupgraded with zero trace. Persist it so the admin panel can
+        # show it and someone can manually reconcile it.
+        db.add(UnmatchedPayment(
+            event_name=event_name,
+            user_id_hint=str(user_id) if user_id else None,
+            email_hint=email or None,
+            raw_payload=raw_body.decode("utf-8", errors="replace")[:5000],
+        ))
+        db.commit()
         return {"ok": True}
 
     if event_name in ("subscription_created", "subscription_payment_success", "subscription_updated", "subscription_resumed"):
@@ -798,6 +810,46 @@ def admin_review_payment(payment_id: int, body: ReviewPaymentRequest, user: User
             _grant_premium_indefinite(student)
     db.commit()
     return {"ok": True, "id": proof.id, "status": proof.status}
+
+
+@app.get("/admin/unmatched-payments")
+def admin_list_unmatched_payments(user: User = Depends(require_instructor), db: Session = Depends(get_db)):
+    """Lemon Squeezy payments that came in but couldn't be auto-matched to any
+    account (stale user_id, or an email that doesn't match any registered
+    user) — a real payment that would otherwise have vanished with no trace."""
+    rows = db.query(UnmatchedPayment).filter(UnmatchedPayment.resolved == False).order_by(UnmatchedPayment.created_at.desc()).limit(50).all()  # noqa: E712
+    return [
+        {
+            "id": r.id,
+            "event_name": r.event_name,
+            "user_id_hint": r.user_id_hint,
+            "email_hint": r.email_hint,
+            "created_at": r.created_at.isoformat() if r.created_at else None,
+        }
+        for r in rows
+    ]
+
+class ResolveUnmatchedPaymentRequest(BaseModel):
+    user_id: int
+
+@app.patch("/admin/unmatched-payments/{unmatched_id}")
+def admin_resolve_unmatched_payment(unmatched_id: int, body: ResolveUnmatchedPaymentRequest, user: User = Depends(require_instructor), db: Session = Depends(get_db)):
+    """Admin manually points an unmatched Lemon Squeezy event at the correct
+    account (found via /admin/users search) and grants premium — recovers a
+    payment the webhook's automatic matching couldn't place."""
+    row = db.query(UnmatchedPayment).filter(UnmatchedPayment.id == unmatched_id).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Unmatched payment not found.")
+    if row.resolved:
+        raise HTTPException(status_code=400, detail="Already resolved.")
+    student = db.query(User).filter(User.id == body.user_id).first()
+    if not student:
+        raise HTTPException(status_code=404, detail="User not found.")
+    _grant_premium(student)
+    row.resolved = True
+    row.resolved_user_id = student.id
+    db.commit()
+    return {"ok": True, "id": row.id, "granted_to": student.id}
 
 
 # ──────────────────────────────────────────────

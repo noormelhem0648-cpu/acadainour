@@ -23,7 +23,7 @@ else:
     print("⚠️  Set JWT_SECRET_KEY to a long random string in your env to persist logins.")
     print("=" * 60)
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_DAYS = 7
+ACCESS_TOKEN_EXPIRE_DAYS = 30
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer(auto_error=False)

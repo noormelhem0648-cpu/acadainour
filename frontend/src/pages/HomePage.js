@@ -53,19 +53,35 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
   const [cardCheckoutLoading, setCardCheckoutLoading] = useState(false);
   const [upgradeBanner, setUpgradeBanner] = useState(null); // "success" | "failed" | null
 
+  // A 401 here means the token itself is dead (expired/invalid) — the account's
+  // real plan is unknowable until the user logs back in. Silently falling back
+  // to "free" in that case is exactly what made premium accounts look locked
+  // after their session merely expired, with no indication of why. So a 401
+  // always forces a clean re-login instead of ever being treated as "free".
+  const handleAuthExpired = () => {
+    alert("انتهت جلستك — سجّل دخول من جديد للتأكد من حالة اشتراكك 🔑\nYour session expired — please log in again to see your real plan status.");
+    if (onLogout) onLogout();
+    else window.location.reload();
+  };
+
   useEffect(() => {
     if (!token) { setPlanLoading(false); return; }
     fetch(`${API_URL}/keys/my`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json()).then(d => setHasKey(!!d.has_key)).catch(() => setHasKey(false));
     const fetchPlan = (attempt) => {
       fetch(`${API_URL}/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
-        .then(r => { if (!r.ok) throw new Error(String(r.status)); return r.json() })
+        .then(r => {
+          if (r.status === 401) { const e = new Error("auth expired"); e.authExpired = true; throw e; }
+          if (!r.ok) throw new Error(String(r.status));
+          return r.json()
+        })
         .then(d => {
           setMyPlan(d.plan || "free");
           setPremiumExpiresAt(d.premium_expires_at || null);
           setPlanLoading(false);
         })
-        .catch(() => {
+        .catch(e => {
+          if (e?.authExpired) { handleAuthExpired(); return }
           // Retry once — a stale "free" flash from a flaky first request is
           // worse than a brief extra wait (same fix as usePlan()'s hook).
           if (attempt === 0) setTimeout(() => fetchPlan(1), 1500);
@@ -73,6 +89,7 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
         });
     };
     fetchPlan(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   // Handle the redirect back from MyFatoorah's hosted checkout page
@@ -169,6 +186,7 @@ export default function HomePage({ darkMode, setDarkMode, user, token, onLogout 
           image_data: proofImage.data,
         }),
       });
+      if (res.status === 401) { handleAuthExpired(); return; }
       const d = await res.json();
       if (res.ok) {
         setSubmitStatus({ type: "success", text: "✅ تم إرسال الإثبات! راح تتم مراجعته وترقية حسابك خلال وقت قصير." });

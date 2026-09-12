@@ -172,6 +172,22 @@ class PaymentProof(Base):
     reviewed_at = Column(DateTime, nullable=True)
 
 
+class UnmatchedPayment(Base):
+    """A Lemon Squeezy webhook event that couldn't be matched to any user
+    account (stale/missing custom_data.user_id, or an email that doesn't
+    match any registered account). Surfaced in the admin panel so a real
+    payment never silently fails to grant premium with no trace."""
+    __tablename__ = "unmatched_payments"
+    id = Column(Integer, primary_key=True, index=True)
+    event_name = Column(String(50), nullable=False)
+    user_id_hint = Column(String(50), nullable=True)
+    email_hint = Column(String(200), nullable=True)
+    raw_payload = Column(Text, nullable=True)
+    resolved = Column(Boolean, default=False)
+    resolved_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+
+
 class AnalyticsEvent(Base):
     __tablename__ = "analytics_events"
     id = Column(Integer, primary_key=True, index=True)
