@@ -1254,9 +1254,31 @@ function ListeningComp({ day, levelId, dayId }) {
 
     const questions = []
 
-    // Words clearly NOT in the passage — used for both T/F and MCQ
+    // Words clearly NOT in the passage — used only for T/F "false sentence" swaps
     const notInPassage = ['volcano','satellite','cathedral','microscope','asteroid','parliament']
       .filter(w => !text.toLowerCase().includes(w))
+
+    // MCQ where the blank word AND all 3 distractors are real words that
+    // appear somewhere in the passage — a student can't spot the answer by
+    // "which word looks foreign," they have to actually remember which word
+    // filled that specific blank while listening.
+    const usedTargets = new Set()
+    const makeFillMCQ = (sent) => {
+      const words = sent.split(' ').filter(w => /^[a-zA-Z]{4,}$/.test(w.replace(/[^a-zA-Z]/g, '')))
+      if (!words.length) return null
+      const rawTarget = words[Math.floor(words.length * 0.4)] || words[0]
+      const target = rawTarget.replace(/[^a-zA-Z]/g, '')
+      if (!target || usedTargets.has(target.toLowerCase())) return null
+      const distractorPool = uniqueWords.filter(w => w !== target.toLowerCase())
+      if (distractorPool.length < 3) return null
+      const distractors = [...distractorPool].sort(() => Math.random() - .5).slice(0, 3)
+      const escaped = rawTarget.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const q = sent.replace(new RegExp(`\\b${escaped}\\b`, 'i'), '___')
+      if (!q.includes('___')) return null
+      usedTargets.add(target.toLowerCase())
+      const options = [target, ...distractors].sort(() => Math.random() - .5)
+      return { type: 'MCQ', q: `Complete: "${q.trim()}"`, options, correct: options.indexOf(target) }
+    }
 
     // T/F: one TRUE (exact sentence from passage) + one FALSE (sentence with a key word swapped)
     if (sentences[0]) {
@@ -1283,20 +1305,19 @@ function ListeningComp({ day, levelId, dayId }) {
       if (q) questions.push(q)
     }
 
-    // MCQ: which word appears in the passage
-    const realWord = uniqueWords[0] || 'language'
-    const fakeWords = notInPassage.slice(0, 3)
-    if (fakeWords.length === 3) {
-      const opts = [realWord, ...fakeWords]
-      questions.push({ type: 'MCQ', q: 'Which of these words appears in the passage?', options: opts, correct: 0 })
+    // MCQ: fill the blank — all 4 options are real words from the passage,
+    // so guessing requires actually remembering what was said, not just
+    // spotting the one option that "looks foreign."
+    for (const sent of sentences.slice(5)) {
+      if (questions.filter(q => q.type === 'MCQ').length >= 2) break
+      const q = makeFillMCQ(sent)
+      if (q) questions.push(q)
     }
-
-    // MCQ: second real word vs fakes
-    if (uniqueWords[2]) {
-      const realWord2 = uniqueWords[2]
-      const fakes2 = ['algorithm','combustion','longitude','meridian'].filter(w => !text.toLowerCase().includes(w)).slice(0, 3)
-      if (fakes2.length === 3) {
-        questions.push({ type: 'MCQ', q: 'Which of these words also appears in the passage?', options: [realWord2, ...fakes2], correct: 0 })
+    if (questions.filter(q => q.type === 'MCQ').length < 2) {
+      for (const sent of sentences) {
+        if (questions.filter(q => q.type === 'MCQ').length >= 2) break
+        const q = makeFillMCQ(sent)
+        if (q) questions.push(q)
       }
     }
 
