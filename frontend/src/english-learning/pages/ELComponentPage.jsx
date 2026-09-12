@@ -1679,7 +1679,15 @@ function ShadowingComp({ day, levelId }) {
       mediaRecorderRef.current = mr
       setRecording(idx)
       mr.start()
-    } catch { alert('لم يُمنح إذن الميكروفون') }
+    } catch (err) {
+      if (err?.name === 'NotAllowedError' || err?.name === 'SecurityError') {
+        alert('لم يُمنح إذن الميكروفون — اسمحي للموقع باستخدام الميكروفون من إعدادات المتصفح/الجهاز 🎤')
+      } else if (err?.name === 'NotFoundError') {
+        alert('ما لقينا ميكروفون على هذا الجهاز')
+      } else {
+        alert('تعذّر تشغيل التسجيل — جرّبي مرة ثانية')
+      }
+    }
   }
 
   return (
@@ -2841,7 +2849,17 @@ function PronunciationRecorder({ words, allLearnedWords = [] }) {
       else { setResult('try'); setDiffFeedback(analyzeDiff(best, target)) }
       setListening(false)
     }
-    r.onerror=()=>setListening(false); r.onend=()=>setListening(false)
+    r.onerror = (e) => {
+      setListening(false)
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+        alert('لم يُمنح إذن الميكروفون — تأكدي من السماح للموقع باستخدام الميكروفون من إعدادات المتصفح/الجهاز 🎤')
+      } else if (e.error === 'no-speech') {
+        alert('ما سمعنا صوت — جرّبي تحكي أقرب للميكروفون')
+      } else if (e.error === 'network') {
+        alert('التعرف على الصوت يحتاج اتصال إنترنت — تأكدي من الشبكة')
+      }
+    }
+    r.onend = () => setListening(false)
     r.start()
   }
 

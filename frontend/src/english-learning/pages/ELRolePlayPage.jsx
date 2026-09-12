@@ -218,14 +218,29 @@ WHY: [جملة عربية قصيرة تشرح السبب]`
           const d = await res.json()
           if (res.ok && d.transcript && d.transcript !== '[inaudible]') {
             setInput(d.transcript)
+          } else {
+            // Recording worked but nothing usable came back — say so instead
+            // of leaving the input silently empty, which looks identical to
+            // the mic never having worked at all.
+            alert('ما سمعنا كلام واضح 🎤 — جرّبي تحكي أقرب للميكروفون أو اكتبي إجابتك')
           }
-        } catch { /* transcription failed — student can just type instead */ }
+        } catch {
+          alert('صار خطأ بالاتصال أثناء تحويل الصوت لنص — جرّبي مرة ثانية أو اكتبي إجابتك')
+        }
         setTranscribing(false)
       }
       mediaRecorderRef.current = mr
       setRecording(true)
       mr.start()
-    } catch { alert('لم يُمنح إذن الميكروفون') }
+    } catch (err) {
+      if (err?.name === 'NotAllowedError' || err?.name === 'SecurityError') {
+        alert('لم يُمنح إذن الميكروفون — اسمحي للموقع باستخدام الميكروفون من إعدادات المتصفح/الجهاز 🎤')
+      } else if (err?.name === 'NotFoundError') {
+        alert('ما لقينا ميكروفون على هذا الجهاز')
+      } else {
+        alert('تعذّر تشغيل التسجيل — جرّبي مرة ثانية')
+      }
+    }
   }
 
   if (!day) return <div className={`el-app${darkMode ? ' el-dark' : ''}`}><div className="el-page"><p style={{ padding: 32 }}>Not found.</p></div></div>

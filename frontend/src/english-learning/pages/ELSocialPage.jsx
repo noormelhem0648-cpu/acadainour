@@ -378,7 +378,8 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
       mr.onstop = async () => {
         stream.getTracks().forEach(t => t.stop())
         const blob = new Blob(recordedChunksRef.current, { type: 'audio/webm' })
-        if (blob.size < 100 || !activeChat) return
+        if (!activeChat) return
+        if (blob.size < 100) { toast('التسجيل قصير جداً — حاول مرة ثانية', false); return }
         const reader = new FileReader()
         reader.onloadend = async () => {
           const base64 = reader.result
@@ -397,8 +398,14 @@ export default function ELSocialPage({ darkMode, setDarkMode }) {
       mr.start()
       mediaRecorderRef.current = mr
       setIsRecording(true)
-    } catch {
-      toast('تعذّر الوصول للميكروفون', false)
+    } catch (err) {
+      if (err?.name === 'NotAllowedError' || err?.name === 'SecurityError') {
+        toast('لم يُمنح إذن الميكروفون — اسمحي للموقع من إعدادات المتصفح/الجهاز', false)
+      } else if (err?.name === 'NotFoundError') {
+        toast('ما لقينا ميكروفون على هذا الجهاز', false)
+      } else {
+        toast('تعذّر الوصول للميكروفون', false)
+      }
     }
   }
 
