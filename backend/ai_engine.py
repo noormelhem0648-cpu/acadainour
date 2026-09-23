@@ -10,9 +10,9 @@ except Exception:
     _THINKING_SUPPORTED = False
 
 
-def _build_config():
+def _build_config(system_override=None):
     kwargs = dict(
-        system_instruction=SYSTEM_PROMPT,
+        system_instruction=system_override or SYSTEM_PROMPT,
         temperature=0.3,
         max_output_tokens=4096,
     )
@@ -171,10 +171,10 @@ def _build_contents(user_query, chat_history, context_from_books, image_data, im
     subject_line = ""
     if subject_info and raw_system_prompt:
         # Caller (e.g. the English-tutor companion) is passing a literal system
-        # instruction, not an academic subject code — use it verbatim instead of
-        # wrapping it in the subject-redirect rules below, which would bury and
-        # override the caller's actual instructions.
-        subject_line = f"[SYSTEM INSTRUCTIONS — follow these exactly:]\n{subject_info}\n\n"
+        # instruction, not an academic subject code. It is installed as the
+        # model's real system_instruction (see _build_config), so nothing is
+        # added to the user turn here.
+        subject_line = ""
     elif subject_info:
         try:
             from subjects_meta import get_all_subjects_map
@@ -211,6 +211,8 @@ def _build_contents(user_query, chat_history, context_from_books, image_data, im
             f"---\n"
             f"Student's question: {user_query}"
         )
+    elif raw_system_prompt:
+        full_prompt = user_query
     else:
         full_prompt = f"{subject_line}Student's question: {user_query}"
 
@@ -261,7 +263,7 @@ def generate_academic_response_stream(
             stream = client.models.generate_content_stream(
                 model="gemini-2.5-flash-lite",
                 contents=contents,
-                config=_build_config(),
+                config=_build_config(subject_info if raw_system_prompt and subject_info else None),
             )
             for chunk in stream:
                 if chunk.text:
@@ -336,7 +338,7 @@ def generate_academic_response(
             response = client.models.generate_content(
                 model="gemini-2.5-flash-lite",
                 contents=contents,
-                config=_build_config(),
+                config=_build_config(subject_info if raw_system_prompt and subject_info else None),
             )
             return response.text
 
