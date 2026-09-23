@@ -4044,3 +4044,13 @@ export const VOCAB_ORDER = {
   ]
  }
 }
+
+/* C1 days 7-10 exist twice in the source data (same ids, different topics), so the first copies are keyed by "id|title". */
+export const VOCAB_ORDER_BY_TITLE = {
+  C1: {
+    "7|Postcolonialism and Decolonisation": ["settler colonialism","néocolonialism","coloniality","hegemony","cultural imperialism","epistemic violence","Orientalism","subaltern","alterity","mimicry","hybridity","third space","assimilation","diaspora","negritude","decolonisation","indigenous epistemology","reparations","intersectionality","postcolonial melancholia"],
+    "8|Gender, Feminism, and Intersectionality": ["patriarchy","misogyny","the male gaze","glass ceiling","wage gap","maternal penalty","structural inequality","reproductive rights","reproductive labour","gender binary","essentialism","performativity","queer theory","intersectionality","agency","second-wave feminism","third-wave feminism","the personal is political","solidarity"],
+    "9|History, Memory, and Collective Narrative": ["historiography","epistemology of history","historical consciousness","teleology","contingency","anachronism","counterfactual history","long durée","historical revisionism","collective memory","the politics of memory","amnesia","trauma","testimony","commemorative practices","sites of memory","heritage","archive","palimpsest","narrative"],
+    "10|Law, Justice, and Human Rights": ["jurisprudence","legal positivism","natural law","rule of law","due process","habeas corpus","presumption of innocence","judicial review","tort","mens rea","proportionality","derogation","distributive justice","restorative justice","inalienable rights","universal jurisdiction","jus cogens","erga omnes","sovereignty","amicus curiae"],
+  },
+}

@@ -2,7 +2,7 @@ import { DAYS_1_10 } from './curriculum_1_10.js'
 import { DAYS_11_20 } from './curriculum_11_20.js'
 import { DAYS_21_30 } from './curriculum_21_30.js'
 import { VOCAB_EXTRA } from './vocab_extra.js'
-import { VOCAB_ORDER } from './vocabOrder.js'
+import { VOCAB_ORDER, VOCAB_ORDER_BY_TITLE } from './vocabOrder.js'
 import { A2_DAYS_1_10 } from './curriculum_a2_1_10.js'
 import { A2_DAYS_11_20 } from './curriculum_a2_11_20.js'
 import { A2_DAYS_21_30 } from './curriculum_a2_21_30.js'
@@ -22,7 +22,7 @@ import { C2_DAYS_21_30 } from './curriculum_c2_21_30.js'
 
 const baseDays = [...DAYS_1_10, ...DAYS_11_20, ...DAYS_21_30]
 
-const _norm = w => w.toLowerCase().replace(/[^a-z' ]/g, '').trim()
+const _norm = w => w.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z' ]/g, '').trim()
 
 // Removes repeated words within a day (keeps the first) and combined entries
 // like "Morning / Evening" when each part already has its own entry.
@@ -42,8 +42,8 @@ function dedupeWords(words) {
 
 const WORD_ORDER = VOCAB_ORDER
 
-function orderWords(words, levelId, dayId) {
-  const order = WORD_ORDER[levelId]?.[dayId]
+function orderWords(words, levelId, dayId, title) {
+  const order = VOCAB_ORDER_BY_TITLE[levelId]?.[`${dayId}|${title}`] || WORD_ORDER[levelId]?.[dayId]
   if (!order) return words
   const rank = w => { const i = order.findIndex(o => _norm(o) === _norm(w.word)); return i === -1 ? order.length : i }
   return [...words].sort((a, b) => rank(a) - rank(b))
@@ -52,7 +52,7 @@ function orderWords(words, levelId, dayId) {
 function tidyDays(days, levelId) {
   return days.map(day => {
     if (!day.vocabulary?.words) return day
-    return { ...day, vocabulary: { ...day.vocabulary, words: orderWords(dedupeWords(day.vocabulary.words), levelId, day.id) } }
+    return { ...day, vocabulary: { ...day.vocabulary, words: orderWords(dedupeWords(day.vocabulary.words), levelId, day.id, day.title) } }
   })
 }
 

@@ -1812,7 +1812,9 @@ function parseCorrectionResponse(text) {
     const cleaned = line.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, '')
     const match = cleaned.match(/CORRECTION:\s*(.+?)\s*(?:→|->)\s*(.+?)(?:\s*(?:\||-)\s*Reason:\s*(.+))?$/i)
     if (match) {
-      corrections.push({ original: match[1].trim(), fixed: match[2].trim(), reason: match[3]?.trim() || '' })
+      const original = match[1].trim(), fixed = match[2].trim()
+      if (original === fixed) continue // model sometimes lists a word it did not change
+      corrections.push({ original, fixed, reason: match[3]?.trim() || '' })
     }
   }
   return corrections
@@ -1845,28 +1847,46 @@ function looksLikeGibberish(text) {
 /* ─── Inline Correction Display ─── */
 function CorrectionDisplay({ corrections, originalText }) {
   if (!corrections.length) return null
-  let highlighted = originalText
+  // Find each correction once in the student's text (whole words only, no
+  // overlaps) instead of replacing every occurrence — replacing "i" everywhere
+  // used to hit the "i" inside "is" and even inside the markup itself.
+  const isWordCh = ch => ch !== undefined && /[a-z0-9']/i.test(ch)
+  const lower = originalText.toLowerCase()
+  const ranges = []
   for (const c of corrections) {
-    const escaped = c.original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    highlighted = highlighted.replace(
-      new RegExp(escaped, 'g'),
-      `%%DEL%%${c.original}%%/DEL%%%%INS%%${c.fixed}%%/INS%%`
-    )
+    const needle = c.original.toLowerCase()
+    if (!needle) continue
+    const startsW = isWordCh(needle[0]), endsW = isWordCh(needle[needle.length - 1])
+    let from = 0, idx
+    while ((idx = lower.indexOf(needle, from)) !== -1) {
+      const end = idx + needle.length
+      const clashes = ranges.some(r => idx < r.end && end > r.start)
+      if (!clashes && !(startsW && isWordCh(lower[idx - 1])) && !(endsW && isWordCh(lower[end]))) {
+        ranges.push({ start: idx, end, c })
+        break
+      }
+      from = idx + 1
+    }
   }
-  const parts = highlighted.split(/(%%DEL%%.*?%%\/DEL%%|%%INS%%.*?%%\/INS%%)/g)
+  ranges.sort((x, y) => x.start - y.start)
+  const parts = []
+  let pos = 0
+  ranges.forEach((r, i) => {
+    if (r.start > pos) parts.push(<span key={`t${i}`}>{originalText.slice(pos, r.start)}</span>)
+    parts.push(<del key={`d${i}`} className="el-correction-del">{originalText.slice(r.start, r.end)}</del>)
+    parts.push(<span key={`s${i}`}> </span>)
+    parts.push(<ins key={`i${i}`} className="el-correction-ins">{r.c.fixed}</ins>)
+    pos = r.end
+  })
+  if (pos < originalText.length) parts.push(<span key="tail">{originalText.slice(pos)}</span>)
   return (
     <div className="el-correction-display">
       <div className="el-correction-label">✏️ التصحيح بالخط الأحمر</div>
-      <div className="el-correction-text">
-        {parts.map((p, i) => {
-          if (p.startsWith('%%DEL%%')) return <del key={i} className="el-correction-del">{p.replace(/%%DEL%%|%%\/DEL%%/g, '')}</del>
-          if (p.startsWith('%%INS%%')) return <ins key={i} className="el-correction-ins">{p.replace(/%%INS%%|%%\/INS%%/g, '')}</ins>
-          return <span key={i}>{p}</span>
-        })}
-      </div>
+      <div className="el-correction-text" dir="ltr">{parts}</div>
       {corrections.map((c, i) => (
         <div key={i} className="el-correction-note">
-          <span className="el-correction-why">💡 لماذا؟</span> {c.reason}
+          <span dir="ltr" style={{ fontWeight: 600 }}>{c.original} → {c.fixed}</span>
+          <div><span className="el-correction-why">💡 لماذا؟</span> {c.reason}</div>
         </div>
       ))}
     </div>
@@ -1944,7 +1964,18 @@ CORRECTION: [النص كاملاً] → [اطلب من الطالب إعادة �
 CORRECTION: [الكلمة/العبارة الخاطئة] → [الصواب] | Reason: [شرح قصير بالعربي]
 
 اكتب سطراً واحداً لكل خطأ — راجع الجملة مرتين قبل أن تقرر أنها خالية من الأخطاء. إذا وفقط إذا كان النص جملة إنجليزية حقيقية ومفهومة وخالية تماماً من أي خطأ (بما فيها تطابق الفاعل والفعل)، اكتب هذا السطر فقط: ${NO_ERRORS_MARK}`
-      const reply = await aiAsk(text, systemPrompt)
+      // The tutor endpoint treats the message as chat unless the task is explicit,
+      // so wrap the student's text in a clear correction request.
+      const task = `صحّح نص الطالب التالي فقط، ولا تجب عليه ولا تحادثه. أعد الرد بأسطر CORRECTION: فقط، أو ${NO_ERRORS_MARK} إذا لا أخطاء.
+
+مثال على الشكل المطلوب:
+CORRECTION: She go → She goes | Reason: مع she نضيف es للفعل
+
+نص الطالب:
+"""
+${text}
+"""`
+      const reply = await aiAsk(task, systemPrompt)
       const parsed = parseCorrectionResponse(reply)
       setCorrections(c => ({ ...c, [idx]: { raw: reply, parsed } }))
       setAvatarState(parsed.length ? 'correcting' : 'happy')
