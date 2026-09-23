@@ -955,7 +955,7 @@ function HighlightedText({ text, highlights }) {
 function WordLookupPopup({ word, rect, vocabWords, onClose }) {
   const [playingKey, trigger] = useTTS()
   const clean = word.replace(/[^a-zA-Z'-]/g, '').toLowerCase()
-  const match = vocabWords?.find(w => w.word.toLowerCase().includes(clean) || clean.includes(w.word.toLowerCase().split(' ')[0]))
+  const match = vocabWords?.find(w => w.word.toLowerCase() === clean) || vocabWords?.find(w => w.word.toLowerCase().split(/[\s/]+/).includes(clean))
 
   useEffect(() => {
     const close = e => { if (e.key === 'Escape') onClose() }
@@ -1080,6 +1080,9 @@ function ReadingComp({ day, levelId, dayId }) {
   const [highlights, setHighlights] = useState(() => {
     try { return JSON.parse(localStorage.getItem(hlKey) || '[]') } catch { return [] }
   })
+  useEffect(() => {
+    try { setHighlights(JSON.parse(localStorage.getItem(hlKey) || '[]')) } catch { setHighlights([]) }
+  }, [hlKey])
   const saveHL = (arr) => { setHighlights(arr); localStorage.setItem(hlKey, JSON.stringify(arr)) }
 
   // reading progress bar — the section itself doesn't scroll; the window does
@@ -1629,7 +1632,8 @@ function ShadowingComp({ day, levelId }) {
     const t = target.toLowerCase().replace(/[^a-z ]/g, '').trim()
     if (!h) return null
     const tWords = t.split(' ')
-    const matched = tWords.filter(w => h.includes(w)).length
+    const heardWords = h.split(/\s+/)
+    const matched = tWords.filter(w => heardWords.includes(w)).length
     const pct = Math.round((matched / tWords.length) * 100)
     if (pct === 100) return { heard, pct, label: '✅ ممتاز! النطق مثالي', color: '#22c55e' }
     if (pct >= 70)   return { heard, pct, label: `👍 جيد جداً — ${pct}%`, color: '#84cc16' }

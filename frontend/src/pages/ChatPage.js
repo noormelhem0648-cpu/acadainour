@@ -295,7 +295,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
           headers,
           body: JSON.stringify({ subject_code: subjectCode, message: userMessage, history, conversation_id: convoId || null }),
         });
-        if (res.status === 401) { handleAuthExpired(); throw new Error("auth expired"); }
+        if (res.status === 401) { handleAuthExpired(); const e = new Error("auth expired"); e.authExpired = true; throw e; }
         if (res.status === 404 && attempt < 2) {
           await new Promise(r => setTimeout(r, 800));
           continue;
@@ -303,6 +303,7 @@ export default function ChatPage({ darkMode, setDarkMode, user, token, onLogout 
         const data = await res.json();
         return { answer: data.answer || data.detail || "No response received.", conversation_id: data.conversation_id };
       } catch (err) {
+        if (err.authExpired) throw err;
         if (attempt < 2) { await new Promise(r => setTimeout(r, 500)); continue; }
         throw err;
       }

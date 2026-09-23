@@ -61,8 +61,12 @@ export default function AuthPage({ onLogin }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
-      const data = await res.json();
-      setInfo(data.message || "إذا كان الإيميل مسجّل، رح توصلك رسالة.");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(res.status === 429 ? "طلبات كثيرة — استني شوي وجرّب مرة ثانية." : (data.detail || "صار خطأ — جرّب مرة ثانية."));
+      } else {
+        setInfo(data.message || "إذا كان الإيميل مسجّل، رح توصلك رسالة.");
+      }
     } catch {
       setError("Connection error. Please try again.");
     }
