@@ -21,7 +21,49 @@ import { C2_DAYS_21_30 } from './curriculum_c2_21_30.js'
 
 const baseDays = [...DAYS_1_10, ...DAYS_11_20, ...DAYS_21_30]
 
-export const ALL_DAYS = baseDays.map(day => {
+const _norm = w => w.toLowerCase().replace(/[^a-z' ]/g, '').trim()
+
+// Removes repeated words within a day (keeps the first) and combined entries
+// like "Morning / Evening" when each part already has its own entry.
+function dedupeWords(words) {
+  const seen = new Set(words.filter(w => !/\s\/\s/.test(w.word)).map(w => _norm(w.word)))
+  const out = []
+  const used = new Set()
+  for (const w of words) {
+    if (/\s\/\s/.test(w.word) && w.word.split('/').every(p => seen.has(_norm(p)))) continue
+    const k = _norm(w.word)
+    if (used.has(k)) continue
+    used.add(k)
+    out.push(w)
+  }
+  return out
+}
+
+// Explicit teaching order for days where words fall into clear groups
+// (e.g. weekdays first, then parts of the day, then clock words).
+const WORD_ORDER = {
+  A1: {
+    7: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Weekend',
+        'Today', 'Tomorrow', 'Morning', 'Afternoon', 'Evening', 'Night',
+        'Hour', 'Minute', "O'clock", 'What time', 'Early', 'Late'],
+  },
+}
+
+function orderWords(words, levelId, dayId) {
+  const order = WORD_ORDER[levelId]?.[dayId]
+  if (!order) return words
+  const rank = w => { const i = order.findIndex(o => _norm(o) === _norm(w.word)); return i === -1 ? order.length : i }
+  return [...words].sort((a, b) => rank(a) - rank(b))
+}
+
+function tidyDays(days, levelId) {
+  return days.map(day => {
+    if (!day.vocabulary?.words) return day
+    return { ...day, vocabulary: { ...day.vocabulary, words: orderWords(dedupeWords(day.vocabulary.words), levelId, day.id) } }
+  })
+}
+
+export const ALL_DAYS = tidyDays(baseDays.map(day => {
   const extra = VOCAB_EXTRA[day.id]
   if (!extra) return day
   return {
@@ -31,13 +73,13 @@ export const ALL_DAYS = baseDays.map(day => {
       words: [...day.vocabulary.words, ...extra],
     }
   }
-})
+}), 'A1')
 
-export const A2_ALL_DAYS = [...A2_DAYS_1_10, ...A2_DAYS_11_20, ...A2_DAYS_21_30]
-export const B1_ALL_DAYS = [...B1_DAYS_1_10, ...B1_DAYS_11_20, ...B1_DAYS_21_30]
-export const B2_ALL_DAYS = [...B2_DAYS_1_10, ...B2_DAYS_11_20, ...B2_DAYS_21_30]
-export const C1_ALL_DAYS = [...C1_DAYS_1_10, ...C1_DAYS_11_20, ...C1_DAYS_21_30, ...C1_DAYS_31_35]
-export const C2_ALL_DAYS = [...C2_DAYS_1_10, ...C2_DAYS_11_20, ...C2_DAYS_21_30]
+export const A2_ALL_DAYS = tidyDays([...A2_DAYS_1_10, ...A2_DAYS_11_20, ...A2_DAYS_21_30], 'A2')
+export const B1_ALL_DAYS = tidyDays([...B1_DAYS_1_10, ...B1_DAYS_11_20, ...B1_DAYS_21_30], 'B1')
+export const B2_ALL_DAYS = tidyDays([...B2_DAYS_1_10, ...B2_DAYS_11_20, ...B2_DAYS_21_30], 'B2')
+export const C1_ALL_DAYS = tidyDays([...C1_DAYS_1_10, ...C1_DAYS_11_20, ...C1_DAYS_21_30, ...C1_DAYS_31_35], 'C1')
+export const C2_ALL_DAYS = tidyDays([...C2_DAYS_1_10, ...C2_DAYS_11_20, ...C2_DAYS_21_30], 'C2')
 
 export const LEVELS = [
   { id: 'A1', name: 'A1 — Beginner',          nameAr: 'مبتدئ',         description: 'من الصفر إلى التواصل الأساسي',        totalDays: 30, available: true },

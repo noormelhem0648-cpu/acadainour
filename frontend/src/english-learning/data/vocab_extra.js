@@ -111,6 +111,10 @@ export const VOCAB_EXTRA = {
     { word: "Minute", ipa: "/ˈmɪnɪt/", arabic: "دقيقة", phonetic: "مينِت", example: "Wait five minutes, please.", exampleAr: "انتظر خمس دقائق من فضلك." },
     { word: "Early", ipa: "/ˈɜːrli/", arabic: "مبكر", phonetic: "إيرلي", example: "I wake up early.", exampleAr: "أستيقظ مبكراً." },
     { word: "Late", ipa: "/leɪt/", arabic: "متأخر", phonetic: "لِيت", example: "Don't be late!", exampleAr: "لا تتأخر!" },
+    { word: "Saturday", ipa: "/ˈsætərdeɪ/", arabic: "السبت", phonetic: "ساترداي", example: "We visit my grandmother on Saturday.", exampleAr: "نزور جدتي يوم السبت." },
+    { word: "Sunday", ipa: "/ˈsʌndeɪ/", arabic: "الأحد", phonetic: "سانداي", example: "Sunday is the first day of the week.", exampleAr: "الأحد هو أول أيام الأسبوع." },
+    { word: "Today", ipa: "/təˈdeɪ/", arabic: "اليوم", phonetic: "تُديه", example: "Today is a good day.", exampleAr: "اليوم يوم جميل." },
+    { word: "Tomorrow", ipa: "/təˈmɒroʊ/", arabic: "غداً", phonetic: "تُمورو", example: "I have an exam tomorrow.", exampleAr: "عندي امتحان غداً." },
   ],
   8: [
     { word: "Pen", ipa: "/pen/", arabic: "قلم", phonetic: "بِن", example: "I need a pen to write.", exampleAr: "أحتاج قلماً للكتابة." },
