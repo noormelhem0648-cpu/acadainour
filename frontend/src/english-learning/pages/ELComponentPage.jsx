@@ -326,7 +326,7 @@ export default function ELComponentPage({ darkMode, setDarkMode }) {
   const [avatarState, setAvatarState] = useState('idle')
   const [showXP, setShowXP] = useState(false)
   const [donePending, setDonePending] = useState(false)
-  const [showVoicePicker, setShowVoicePicker] = useState(() => !localStorage.getItem('noura_voice_setup'))
+  const [showVoicePicker, setShowVoicePicker] = useState(false)
 
   const doneNavRef = useRef(null)
 
