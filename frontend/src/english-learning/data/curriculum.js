@@ -2,6 +2,7 @@ import { DAYS_1_10 } from './curriculum_1_10.js'
 import { DAYS_11_20 } from './curriculum_11_20.js'
 import { DAYS_21_30 } from './curriculum_21_30.js'
 import { VOCAB_EXTRA } from './vocab_extra.js'
+import { VOCAB_ORDER } from './vocabOrder.js'
 import { A2_DAYS_1_10 } from './curriculum_a2_1_10.js'
 import { A2_DAYS_11_20 } from './curriculum_a2_11_20.js'
 import { A2_DAYS_21_30 } from './curriculum_a2_21_30.js'
@@ -39,15 +40,7 @@ function dedupeWords(words) {
   return out
 }
 
-// Explicit teaching order for days where words fall into clear groups
-// (e.g. weekdays first, then parts of the day, then clock words).
-const WORD_ORDER = {
-  A1: {
-    7: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Weekend',
-        'Today', 'Tomorrow', 'Morning', 'Afternoon', 'Evening', 'Night',
-        'Hour', 'Minute', "O'clock", 'What time', 'Early', 'Late'],
-  },
-}
+const WORD_ORDER = VOCAB_ORDER
 
 function orderWords(words, levelId, dayId) {
   const order = WORD_ORDER[levelId]?.[dayId]

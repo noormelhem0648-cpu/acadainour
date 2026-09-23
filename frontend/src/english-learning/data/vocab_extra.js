@@ -179,6 +179,7 @@ export const VOCAB_EXTRA = {
     { word: "Queue", ipa: "/kjuː/", arabic: "طابور", phonetic: "كيو", example: "Please wait in the queue.", exampleAr: "من فضلك انتظر في الطابور." },
     { word: "Trolley", ipa: "/ˈtrɒli/", arabic: "عربة التسوق", phonetic: "ترولي", example: "I need a trolley.", exampleAr: "أحتاج عربة تسوق." },
     { word: "Brand", ipa: "/brænd/", arabic: "ماركة / علامة تجارية", phonetic: "براند", example: "What brand is this?", exampleAr: "ما هي ماركة هذا؟" },
+    { word: "Jacket", ipa: "/ˈdʒækɪt/", arabic: "جاكيت", phonetic: "جاكِت", example: "I need a warm jacket for winter.", exampleAr: "أحتاج جاكيت دافئ للشتاء." },
   ],
   12: [
     { word: "Doctor", ipa: "/ˈdɒktər/", arabic: "طبيب", phonetic: "دوكتِر", example: "I want to be a doctor.", exampleAr: "أريد أن أكون طبيباً." },
@@ -339,6 +340,7 @@ export const VOCAB_EXTRA = {
     { word: "Pharmacy", ipa: "/ˈfɑːrməsi/", arabic: "صيدلية", phonetic: "فارماسي", example: "Go to the pharmacy for medicine.", exampleAr: "اذهب إلى الصيدلية للدواء." },
     { word: "Insurance card", ipa: "/ɪnˈʃʊərəns kɑːrd/", arabic: "بطاقة التأمين الصحي", phonetic: "إنشورِنس كارد", example: "Show your insurance card.", exampleAr: "أرِ بطاقة التأمين الصحي." },
     { word: "Side effects", ipa: "/saɪd ɪˈfekts/", arabic: "آثار جانبية", phonetic: "سايد إفيكتس", example: "This medicine has side effects.", exampleAr: "هذا الدواء له آثار جانبية." },
+    { word: "Fever", ipa: "/ˈfiːvər/", arabic: "حرارة / حمّى", phonetic: "فيڤر", example: "I have a fever and a headache.", exampleAr: "عندي حرارة وصداع." },
   ],
   22: [
     { word: "Cooking show", ipa: "/ˈkʊkɪŋ ʃoʊ/", arabic: "برنامج طبخ", phonetic: "كوكينغ شو", example: "I love watching cooking shows.", exampleAr: "أحب مشاهدة برامج الطبخ." },
