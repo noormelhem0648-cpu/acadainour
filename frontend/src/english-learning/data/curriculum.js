@@ -3,6 +3,7 @@ import { DAYS_11_20 } from './curriculum_11_20.js'
 import { DAYS_21_30 } from './curriculum_21_30.js'
 import { VOCAB_EXTRA } from './vocab_extra.js'
 import { VOCAB_ORDER, VOCAB_ORDER_BY_TITLE } from './vocabOrder.js'
+import { VOCAB_MORE } from './vocabMore.js'
 import { A2_DAYS_1_10 } from './curriculum_a2_1_10.js'
 import { A2_DAYS_11_20 } from './curriculum_a2_11_20.js'
 import { A2_DAYS_21_30 } from './curriculum_a2_21_30.js'
@@ -52,7 +53,9 @@ function orderWords(words, levelId, dayId, title) {
 function tidyDays(days, levelId) {
   return days.map(day => {
     if (!day.vocabulary?.words) return day
-    return { ...day, vocabulary: { ...day.vocabulary, words: orderWords(dedupeWords(day.vocabulary.words), levelId, day.id, day.title) } }
+    const base = dedupeWords(day.vocabulary.words)
+    const more = (VOCAB_MORE[levelId]?.[`${day.id}|${day.title}`] || []).slice(0, Math.max(0, 20 - base.length))
+    return { ...day, vocabulary: { ...day.vocabulary, words: orderWords(dedupeWords([...base, ...more]), levelId, day.id, day.title) } }
   })
 }
 
